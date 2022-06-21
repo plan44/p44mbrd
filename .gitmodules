@@ -1,0 +1,4 @@
+[submodule "linux/third_party/connectedhomeip"]
+	path = linux/third_party/connectedhomeip
+	url = /Users/luz/Code/looking_at_external_stuff/connectedhomeip
+	branch = luz
