@@ -30,5 +30,9 @@
 // overrides CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT in CHIPProjectConfig
 #define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 16
 
+// FIXME: luz temp debug, remove again to reduce FOOTPRINT
+// we want verbose error code display
+#define CHIP_CONFIG_IM_STATUS_CODE_VERBOSE_FORMAT 1
+
 // include the CHIPProjectConfig from config/standalone
 #include <CHIPProjectConfig.h>
