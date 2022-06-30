@@ -1,3 +1,4 @@
 zap-tests/
 p44mbrd.bbprojectd/
 .cache
+*.xcuserstate
