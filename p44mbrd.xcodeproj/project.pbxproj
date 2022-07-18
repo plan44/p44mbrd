@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -140,7 +141,6 @@
 		ED36DA63286DCFC600CA28EC /* EmptyDataModelHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA06286DCFC500CA28EC /* EmptyDataModelHandler.cpp */; };
 		ED36DA64286DCFC600CA28EC /* SetUpCodePairer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA09286DCFC500CA28EC /* SetUpCodePairer.cpp */; };
 		ED36DA65286DCFC600CA28EC /* CommissionerDiscoveryController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA0A286DCFC500CA28EC /* CommissionerDiscoveryController.cpp */; };
-		ED36DA66286DCFC600CA28EC /* CHIPCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA0C286DCFC500CA28EC /* CHIPCluster.cpp */; };
 		ED36DA6F286DD04300CA28EC /* DeviceAttestationVerifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA69286DD04300CA28EC /* DeviceAttestationVerifier.cpp */; };
 		ED36DA70286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA6A286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp */; };
 		ED36DA71286DD04300CA28EC /* FileAttestationTrustStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA6D286DD04300CA28EC /* FileAttestationTrustStore.cpp */; };
@@ -254,7 +254,6 @@
 		ED36DC9E286DD7F200CA28EC /* Logging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC76286DD7F100CA28EC /* Logging.cpp */; };
 		ED36DC9F286DD7F200CA28EC /* UUIDHelperImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC7A286DD7F100CA28EC /* UUIDHelperImpl.mm */; };
 		ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */; };
-		ED36DCA2286DD7F200CA28EC /* CHIPP256KeypairNativeBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC80286DD7F100CA28EC /* CHIPP256KeypairNativeBridge.cpp */; };
 		ED36DCA3286DD7F200CA28EC /* DeviceInstanceInfoProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC85286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.cpp */; };
 		ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */; };
 		ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */; };
@@ -379,6 +378,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -682,7 +682,6 @@
 		ED36DA09286DCFC500CA28EC /* SetUpCodePairer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SetUpCodePairer.cpp; sourceTree = "<group>"; };
 		ED36DA0A286DCFC500CA28EC /* CommissionerDiscoveryController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CommissionerDiscoveryController.cpp; sourceTree = "<group>"; };
 		ED36DA0B286DCFC500CA28EC /* CommissioneeDeviceProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommissioneeDeviceProxy.h; sourceTree = "<group>"; };
-		ED36DA0C286DCFC500CA28EC /* CHIPCluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPCluster.cpp; sourceTree = "<group>"; };
 		ED36DA68286DD04300CA28EC /* DefaultDeviceAttestationVerifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultDeviceAttestationVerifier.h; sourceTree = "<group>"; };
 		ED36DA69286DD04300CA28EC /* DeviceAttestationVerifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceAttestationVerifier.cpp; sourceTree = "<group>"; };
 		ED36DA6A286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DefaultDeviceAttestationVerifier.cpp; sourceTree = "<group>"; };
@@ -988,7 +987,6 @@
 		ED36DC7D286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInstanceInfoProviderImpl.h; sourceTree = "<group>"; };
 		ED36DC7E286DD7F100CA28EC /* BleConnectionDelegateImpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BleConnectionDelegateImpl.mm; sourceTree = "<group>"; };
 		ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformManagerImpl.cpp; sourceTree = "<group>"; };
-		ED36DC80286DD7F100CA28EC /* CHIPP256KeypairNativeBridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPP256KeypairNativeBridge.cpp; sourceTree = "<group>"; };
 		ED36DC81286DD7F100CA28EC /* SystemPlatformConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemPlatformConfig.h; sourceTree = "<group>"; };
 		ED36DC82286DD7F100CA28EC /* BleApplicationDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BleApplicationDelegate.h; sourceTree = "<group>"; };
 		ED36DC83286DD7F100CA28EC /* PosixConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixConfig.h; sourceTree = "<group>"; };
@@ -996,7 +994,6 @@
 		ED36DC85286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceInstanceInfoProviderImpl.cpp; sourceTree = "<group>"; };
 		ED36DC86286DD7F100CA28EC /* BlePlatformDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlePlatformDelegate.h; sourceTree = "<group>"; };
 		ED36DC87286DD7F100CA28EC /* BLEManagerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BLEManagerImpl.cpp; sourceTree = "<group>"; };
-		ED36DC88286DD7F100CA28EC /* CHIPP256KeypairNativeBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPP256KeypairNativeBridge.h; sourceTree = "<group>"; };
 		ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DiagnosticDataProviderImpl.cpp; sourceTree = "<group>"; };
 		ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConnectivityManagerImpl.cpp; sourceTree = "<group>"; };
 		ED36DC8B286DD7F100CA28EC /* DnssdImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DnssdImpl.h; sourceTree = "<group>"; };
@@ -1289,6 +1286,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */,
 				ED36DEA8286E04A100CA28EC /* CoreData.framework in Frameworks */,
 				ED36DE4E286E01E700CA28EC /* IOKit.framework in Frameworks */,
 				ED36DE4C286E002000CA28EC /* Foundation.framework in Frameworks */,
@@ -1928,7 +1926,6 @@
 				ED36D9FD286DCFC500CA28EC /* AbstractDnssdDiscoveryController.h */,
 				ED36D919286DCFC500CA28EC /* AutoCommissioner.cpp */,
 				ED36DA05286DCFC500CA28EC /* AutoCommissioner.h */,
-				ED36DA0C286DCFC500CA28EC /* CHIPCluster.cpp */,
 				ED36D914286DCFC500CA28EC /* CHIPCluster.h */,
 				ED36D9FF286DCFC500CA28EC /* CHIPCommissionableNodeController.cpp */,
 				ED36D99D286DCFC500CA28EC /* CHIPCommissionableNodeController.h */,
@@ -2464,8 +2461,6 @@
 				ED36DC94286DD7F200CA28EC /* BlePlatformDelegateImpl.mm */,
 				ED36DC84286DD7F100CA28EC /* CHIPDevicePlatformConfig.h */,
 				ED36DC97286DD7F200CA28EC /* CHIPDevicePlatformEvent.h */,
-				ED36DC80286DD7F100CA28EC /* CHIPP256KeypairNativeBridge.cpp */,
-				ED36DC88286DD7F100CA28EC /* CHIPP256KeypairNativeBridge.h */,
 				ED36DC93286DD7F200CA28EC /* CHIPPlatformConfig.h */,
 				ED36DC96286DD7F200CA28EC /* ConfigurationManagerImpl.cpp */,
 				ED36DC9A286DD7F200CA28EC /* ConfigurationManagerImpl.h */,
@@ -2962,6 +2957,7 @@
 		ED36DE40286DFE6100CA28EC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */,
 				ED36DEA7286E04A100CA28EC /* CoreData.framework */,
 				ED36DE4D286E01E700CA28EC /* IOKit.framework */,
 				ED36DE4B286E002000CA28EC /* Foundation.framework */,
@@ -3172,7 +3168,6 @@
 				ED36DDE7286DDAF300CA28EC /* json_value.cpp in Sources */,
 				ED36D88F286DCDED00CA28EC /* EventFilterIBs.cpp in Sources */,
 				ED36D87D286DCDED00CA28EC /* AttributePathIB.cpp in Sources */,
-				ED36DCA2286DD7F200CA28EC /* CHIPP256KeypairNativeBridge.cpp in Sources */,
 				ED36DB8F286DD2CE00CA28EC /* ASN1Reader.cpp in Sources */,
 				ED36DC03286DD57B00CA28EC /* BufferReader.cpp in Sources */,
 				ED36DAD1286DD27200CA28EC /* TCPEndPoint.cpp in Sources */,
@@ -3450,7 +3445,6 @@
 				ED36DC13286DD57B00CA28EC /* Verhoeff36.cpp in Sources */,
 				ED36DD74286DD9A400CA28EC /* SystemTimer.cpp in Sources */,
 				ED36DB9D286DD42300CA28EC /* streamer_stdio.cpp in Sources */,
-				ED36DA66286DCFC600CA28EC /* CHIPCluster.cpp in Sources */,
 				ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */,
 				ED36D802286DCDA300CA28EC /* on-off-server.cpp in Sources */,
 				ED36D888286DCDED00CA28EC /* SubscribeRequestMessage.cpp in Sources */,

@@ -2,3 +2,4 @@ zap-tests/
 p44mbrd.bbprojectd/
 .cache
 *.xcuserstate
+chip_kvs_xcode_working

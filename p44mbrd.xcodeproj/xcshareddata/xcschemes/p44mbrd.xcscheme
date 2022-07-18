@@ -55,6 +55,14 @@
             argument = "--vendor 0xFFF1 --product-id 0x8002 --capabilities 4  --interface-id eth0 "
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--trace_log 1 --trace_decode 1"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--help"
+            isEnabled = "NO">
+         </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
