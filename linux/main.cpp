@@ -45,6 +45,10 @@
 #include "CommissionableInit.h"
 #include "Device.h"
 #include "main.h"
+
+// plan44
+#include "bridgeapi.hpp"
+
 #include <app/server/Server.h>
 
 #include <cassert>
@@ -754,131 +758,189 @@ void * bridge_polling_thread(void * context)
     return nullptr;
 }
 
+
+
+
+BridgeApi bridgeApi;
+
+void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
+{
+  LOG(LOG_NOTICE, "method call status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  // wait for incoming notifications
+  bridgeApi.setTimeout(Infinite);
+  bridgeApi.handleSocketEvents();
+}
+
+
+void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
+{
+  LOG(LOG_NOTICE, "notification status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  // continue waiting
+  if (aJsonMsg && aJsonMsg->stringValue()=="quit") {
+    return;
+  }
+  bridgeApi.handleSocketEvents();
+}
+
+
+
+void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
+{
+  if (Error::isOK(aError)) {
+    // successful connection
+    bridgeApi.notify("gugus", JsonObjectPtr());
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("data", JsonObject::newInt32(42));
+    bridgeApi.notify("dada", params);
+    bridgeApi.call("hopp", JsonObjectPtr(), answerreceived);
+  }
+  else {
+    LOG(LOG_ERR, "error connecting bridge API: %s", aError->text());
+  }
+}
+
+
 int main(int argc, char * argv[])
 {
-    // Clear out the device database
-    memset(gDevices, 0, sizeof(gDevices));
 
-    // Setup Mock Devices
-    Light1.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
-    Light2.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  // try bridge API
+  bridgeApi.setConnectionParams("127.0.0.1", 4444, 10*Second);
+  bridgeApi.setIncomingMessageCallback(apinotification);
+  bridgeApi.connect(apiconnected);
+  // we'll never return if everything goes well
+  return 0;
+}
 
-    Light1.SetReachable(true);
-    Light2.SetReachable(true);
 
-    Switch1.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
-    Switch2.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
 
-    Switch1.SetReachable(true);
-    Switch2.SetReachable(true);
 
-    // Setup devices for action cluster tests
-    ActionLight1.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
-    ActionLight2.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
-    ActionLight3.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
-    ActionLight4.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
 
-    ActionLight1.SetReachable(true);
-    ActionLight2.SetReachable(true);
-    ActionLight3.SetReachable(true);
-    ActionLight4.SetReachable(true);
 
-    // Define composed device with two switches
-    ComposedDevice ComposedDevice("Composed Switcher", "Bedroom");
-    DeviceSwitch ComposedSwitch1("Composed Switch 1", "Bedroom", EMBER_AF_SWITCH_FEATURE_LATCHING_SWITCH);
-    DeviceSwitch ComposedSwitch2("Composed Switch 2", "Bedroom",
-                                 EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH | EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_RELEASE |
-                                     EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_LONG_PRESS |
-                                     EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_MULTI_PRESS);
-    DevicePowerSource ComposedPowerSource("Composed Power Source", "Bedroom", EMBER_AF_POWER_SOURCE_FEATURE_BATTERY);
+int chipmain(int argc, char * argv[])
+{
+  // Clear out the device database
+  memset(gDevices, 0, sizeof(gDevices));
 
-    ComposedSwitch1.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
-    ComposedSwitch2.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
-    ComposedPowerSource.SetChangeCallback(&HandleDevicePowerSourceStatusChanged);
+  // Setup Mock Devices
+  Light1.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  Light2.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
 
-    ComposedDevice.SetReachable(true);
-    ComposedSwitch1.SetReachable(true);
-    ComposedSwitch2.SetReachable(true);
-    ComposedPowerSource.SetReachable(true);
-    ComposedPowerSource.SetBatChargeLevel(58);
+  Light1.SetReachable(true);
+  Light2.SetReachable(true);
 
-    if (ChipLinuxAppInit(argc, argv) != 0)
-    {
-        return -1;
-    }
+  Switch1.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
+  Switch2.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
 
-    // Init Data Model and CHIP App Server
-    static chip::CommonCaseDeviceServerInitParams initParams;
-    (void) initParams.InitializeStaticResourcesBeforeServerInit();
+  Switch1.SetReachable(true);
+  Switch2.SetReachable(true);
+
+  // Setup devices for action cluster tests
+  ActionLight1.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  ActionLight2.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  ActionLight3.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  ActionLight4.SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+
+  ActionLight1.SetReachable(true);
+  ActionLight2.SetReachable(true);
+  ActionLight3.SetReachable(true);
+  ActionLight4.SetReachable(true);
+
+  // Define composed device with two switches
+  ComposedDevice ComposedDevice("Composed Switcher", "Bedroom");
+  DeviceSwitch ComposedSwitch1("Composed Switch 1", "Bedroom", EMBER_AF_SWITCH_FEATURE_LATCHING_SWITCH);
+  DeviceSwitch ComposedSwitch2("Composed Switch 2", "Bedroom",
+                               EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH | EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_RELEASE |
+                                   EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_LONG_PRESS |
+                                   EMBER_AF_SWITCH_FEATURE_MOMENTARY_SWITCH_MULTI_PRESS);
+  DevicePowerSource ComposedPowerSource("Composed Power Source", "Bedroom", EMBER_AF_POWER_SOURCE_FEATURE_BATTERY);
+
+  ComposedSwitch1.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
+  ComposedSwitch2.SetChangeCallback(&HandleDeviceSwitchStatusChanged);
+  ComposedPowerSource.SetChangeCallback(&HandleDevicePowerSourceStatusChanged);
+
+  ComposedDevice.SetReachable(true);
+  ComposedSwitch1.SetReachable(true);
+  ComposedSwitch2.SetReachable(true);
+  ComposedPowerSource.SetReachable(true);
+  ComposedPowerSource.SetBatChargeLevel(58);
+
+  if (ChipLinuxAppInit(argc, argv) != 0)
+  {
+      return -1;
+  }
+
+  // Init Data Model and CHIP App Server
+  static chip::CommonCaseDeviceServerInitParams initParams;
+  (void) initParams.InitializeStaticResourcesBeforeServerInit();
 
 #if CHIP_DEVICE_ENABLE_PORT_PARAMS
-    // use a different service port to make testing possible with other sample devices running on same host
-    initParams.operationalServicePort = LinuxDeviceOptions::GetInstance().securedDevicePort;
+  // use a different service port to make testing possible with other sample devices running on same host
+  initParams.operationalServicePort = LinuxDeviceOptions::GetInstance().securedDevicePort;
 #endif
 
-    initParams.interfaceId = LinuxDeviceOptions::GetInstance().interfaceId;
-    chip::Server::GetInstance().Init(initParams);
+  initParams.interfaceId = LinuxDeviceOptions::GetInstance().interfaceId;
+  chip::Server::GetInstance().Init(initParams);
 
-    // Initialize device attestation config
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+  // Initialize device attestation config
+  SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 
-    // Set starting endpoint id where dynamic endpoints will be assigned, which
-    // will be the next consecutive endpoint id after the last fixed endpoint.
-    gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
-        static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
-    gCurrentEndpointId = gFirstDynamicEndpointId;
+  // Set starting endpoint id where dynamic endpoints will be assigned, which
+  // will be the next consecutive endpoint id after the last fixed endpoint.
+  gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
+      static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
+  gCurrentEndpointId = gFirstDynamicEndpointId;
 
-    // Disable last fixed endpoint, which is used as a placeholder for all of the
-    // supported clusters so that ZAP will generated the requisite code.
-    emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
+  // Disable last fixed endpoint, which is used as a placeholder for all of the
+  // supported clusters so that ZAP will generated the requisite code.
+  emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
 
-    // Add light 1 -> will be mapped to ZCL endpoints 3
-    AddDeviceEndpoint(&Light1, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
-                      Span<DataVersion>(gLight1DataVersions), 1);
+  // Add light 1 -> will be mapped to ZCL endpoints 3
+  AddDeviceEndpoint(&Light1, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                    Span<DataVersion>(gLight1DataVersions), 1);
 
-    // Add switch 1..2 --> will be mapped to ZCL endpoints 4,5
-    AddDeviceEndpoint(&Switch1, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gBridgedSwitchDeviceTypes),
-                      Span<DataVersion>(gSwitch1DataVersions), 1);
-    AddDeviceEndpoint(&Switch2, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gBridgedSwitchDeviceTypes),
-                      Span<DataVersion>(gSwitch2DataVersions), 1);
+  // Add switch 1..2 --> will be mapped to ZCL endpoints 4,5
+  AddDeviceEndpoint(&Switch1, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gBridgedSwitchDeviceTypes),
+                    Span<DataVersion>(gSwitch1DataVersions), 1);
+  AddDeviceEndpoint(&Switch2, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gBridgedSwitchDeviceTypes),
+                    Span<DataVersion>(gSwitch2DataVersions), 1);
 
-    // Add composed Device with two buttons and a power source
-    AddDeviceEndpoint(&ComposedDevice, &bridgedComposedDeviceEndpoint, Span<const EmberAfDeviceType>(gBridgedComposedDeviceTypes),
-                      Span<DataVersion>(gComposedDeviceDataVersions), 1);
-    AddDeviceEndpoint(&ComposedSwitch1, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gComposedSwitchDeviceTypes),
-                      Span<DataVersion>(gComposedSwitch1DataVersions), ComposedDevice.GetEndpointId());
-    AddDeviceEndpoint(&ComposedSwitch2, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gComposedSwitchDeviceTypes),
-                      Span<DataVersion>(gComposedSwitch2DataVersions), ComposedDevice.GetEndpointId());
-    AddDeviceEndpoint(&ComposedPowerSource, &bridgedPowerSourceEndpoint,
-                      Span<const EmberAfDeviceType>(gComposedPowerSourceDeviceTypes),
-                      Span<DataVersion>(gComposedPowerSourceDataVersions), ComposedDevice.GetEndpointId());
+  // Add composed Device with two buttons and a power source
+  AddDeviceEndpoint(&ComposedDevice, &bridgedComposedDeviceEndpoint, Span<const EmberAfDeviceType>(gBridgedComposedDeviceTypes),
+                    Span<DataVersion>(gComposedDeviceDataVersions), 1);
+  AddDeviceEndpoint(&ComposedSwitch1, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gComposedSwitchDeviceTypes),
+                    Span<DataVersion>(gComposedSwitch1DataVersions), ComposedDevice.GetEndpointId());
+  AddDeviceEndpoint(&ComposedSwitch2, &bridgedSwitchEndpoint, Span<const EmberAfDeviceType>(gComposedSwitchDeviceTypes),
+                    Span<DataVersion>(gComposedSwitch2DataVersions), ComposedDevice.GetEndpointId());
+  AddDeviceEndpoint(&ComposedPowerSource, &bridgedPowerSourceEndpoint,
+                    Span<const EmberAfDeviceType>(gComposedPowerSourceDeviceTypes),
+                    Span<DataVersion>(gComposedPowerSourceDataVersions), ComposedDevice.GetEndpointId());
 
-    // Add 4 lights for the Action Clusters tests
-    AddDeviceEndpoint(&ActionLight1, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
-                      Span<DataVersion>(gActionLight1DataVersions), 1);
-    AddDeviceEndpoint(&ActionLight2, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
-                      Span<DataVersion>(gActionLight2DataVersions), 1);
-    AddDeviceEndpoint(&ActionLight3, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
-                      Span<DataVersion>(gActionLight3DataVersions), 1);
-    AddDeviceEndpoint(&ActionLight4, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
-                      Span<DataVersion>(gActionLight4DataVersions), 1);
-    gRooms.push_back(&room1);
-    gRooms.push_back(&room2);
-    gRooms.push_back(&room3);
+  // Add 4 lights for the Action Clusters tests
+  AddDeviceEndpoint(&ActionLight1, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                    Span<DataVersion>(gActionLight1DataVersions), 1);
+  AddDeviceEndpoint(&ActionLight2, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                    Span<DataVersion>(gActionLight2DataVersions), 1);
+  AddDeviceEndpoint(&ActionLight3, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                    Span<DataVersion>(gActionLight3DataVersions), 1);
+  AddDeviceEndpoint(&ActionLight4, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                    Span<DataVersion>(gActionLight4DataVersions), 1);
+  gRooms.push_back(&room1);
+  gRooms.push_back(&room2);
+  gRooms.push_back(&room3);
 
-    {
-        pthread_t poll_thread;
-        int res = pthread_create(&poll_thread, nullptr, bridge_polling_thread, nullptr);
-        if (res)
-        {
-            printf("Error creating polling thread: %d\n", res);
-            exit(1);
-        }
-    }
+  {
+      pthread_t poll_thread;
+      int res = pthread_create(&poll_thread, nullptr, bridge_polling_thread, nullptr);
+      if (res)
+      {
+          printf("Error creating polling thread: %d\n", res);
+          exit(1);
+      }
+  }
 
-    // Run CHIP
+  // Run CHIP
 
-    chip::DeviceLayer::PlatformMgr().RunEventLoop();
+  chip::DeviceLayer::PlatformMgr().RunEventLoop();
 
-    return 0;
+  return 0;
 }

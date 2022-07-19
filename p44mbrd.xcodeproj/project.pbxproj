@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
+		ED23300B288698AF00D934D7 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED233009288698AF00D934D7 /* bridgeapi.cpp */; };
+		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
+		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
+		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
+		ED2330232886A69700D934D7 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301B2886A69700D934D7 /* logger.cpp */; };
+		ED2330242886A69700D934D7 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301D2886A69700D934D7 /* utils.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -379,6 +385,19 @@
 
 /* Begin PBXFileReference section */
 		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		ED233009288698AF00D934D7 /* bridgeapi.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = bridgeapi.cpp; path = linux/bridgeapi.cpp; sourceTree = "<group>"; };
+		ED23300A288698AF00D934D7 /* bridgeapi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = bridgeapi.hpp; path = linux/bridgeapi.hpp; sourceTree = "<group>"; };
+		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
+		ED2330112886A1C500D934D7 /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
+		ED2330122886A1C500D934D7 /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
+		ED2330132886A1C500D934D7 /* jsonobject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsonobject.cpp; sourceTree = "<group>"; };
+		ED2330162886A1FB00D934D7 /* p44utils_config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_config.hpp; sourceTree = "<group>"; };
+		ED2330182886A69600D934D7 /* logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger.hpp; sourceTree = "<group>"; };
+		ED2330192886A69600D934D7 /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
+		ED23301A2886A69700D934D7 /* error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = error.cpp; sourceTree = "<group>"; };
+		ED23301B2886A69700D934D7 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
+		ED23301D2886A69700D934D7 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		ED23301F2886A69700D934D7 /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -1300,6 +1319,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED23300F2886A18300D934D7 /* p44utils */ = {
+			isa = PBXGroup;
+			children = (
+				ED23301A2886A69700D934D7 /* error.cpp */,
+				ED23301F2886A69700D934D7 /* error.hpp */,
+				ED23301B2886A69700D934D7 /* logger.cpp */,
+				ED2330182886A69600D934D7 /* logger.hpp */,
+				ED23301D2886A69700D934D7 /* utils.cpp */,
+				ED2330192886A69600D934D7 /* utils.hpp */,
+				ED2330132886A1C500D934D7 /* jsonobject.cpp */,
+				ED2330102886A1C500D934D7 /* jsonobject.hpp */,
+				ED2330112886A1C500D934D7 /* p44obj.cpp */,
+				ED2330122886A1C500D934D7 /* p44obj.hpp */,
+			);
+			path = p44utils;
+			sourceTree = "<group>";
+		};
 		ED36D75C286DCAF700CA28EC /* examples */ = {
 			isa = PBXGroup;
 			children = (
@@ -3038,10 +3074,14 @@
 			children = (
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
+				ED23300F2886A18300D934D7 /* p44utils */,
+				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				ED690B65286DC80800069215 /* connectedhomeip */,
 				ED690B5D286DC7F600069215 /* include */,
 				ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */,
 				ED690B61286DC7F600069215 /* Device.cpp */,
+				ED233009288698AF00D934D7 /* bridgeapi.cpp */,
+				ED23300A288698AF00D934D7 /* bridgeapi.hpp */,
 				ED690B5C286DC7F600069215 /* main.cpp */,
 				ED690B53286DC79500069215 /* Products */,
 				ED36DE40286DFE6100CA28EC /* Frameworks */,
@@ -3182,6 +3222,7 @@
 				ED36D86A286DCDED00CA28EC /* EventDataIB.cpp in Sources */,
 				ED36D86D286DCDED00CA28EC /* InvokeRequestMessage.cpp in Sources */,
 				ED36D7FB286DCDA300CA28EC /* access-control-server.cpp in Sources */,
+				ED2330242886A69700D934D7 /* utils.cpp in Sources */,
 				ED36DDC4286DDA0300CA28EC /* SecureMessageCodec.cpp in Sources */,
 				ED36D7A1286DCC4100CA28EC /* CommissioneeShellCommands.cpp in Sources */,
 				ED36DCFB286DD8A000CA28EC /* CASEServer.cpp in Sources */,
@@ -3247,6 +3288,7 @@
 				ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */,
 				ED36DA61286DCFC600CA28EC /* CHIPDeviceController.cpp in Sources */,
 				ED36D79E286DCC4100CA28EC /* CommissionerMain.cpp in Sources */,
+				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
 				ED36DC09286DD57B00CA28EC /* UnitTestUtils.cpp in Sources */,
 				ED36DB6E286DD2CE00CA28EC /* IP.cpp in Sources */,
 				ED36D8F5286DCF0B00CA28EC /* OperationalDeviceProxy.cpp in Sources */,
@@ -3260,6 +3302,7 @@
 				ED36DDD0286DDA0300CA28EC /* Session.cpp in Sources */,
 				ED36DBFF286DD57B00CA28EC /* BytesToHex.cpp in Sources */,
 				ED36D908286DCF5100CA28EC /* AclStorage.cpp in Sources */,
+				ED2330222886A69700D934D7 /* error.cpp in Sources */,
 				ED36D7FA286DCDA300CA28EC /* level-control.cpp in Sources */,
 				ED36DC60286DD6A400CA28EC /* ErrorCategory.cpp in Sources */,
 				ED36D78B286DCB8A00CA28EC /* Decoder.cpp in Sources */,
@@ -3286,6 +3329,7 @@
 				ED36DA62286DCFC600CA28EC /* CHIPCommissionableNodeController.cpp in Sources */,
 				ED36DA0E286DCFC600CA28EC /* ExampleOperationalCredentialsIssuer.cpp in Sources */,
 				ED36DC65286DD6A400CA28EC /* ExchangeMgr.cpp in Sources */,
+				ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */,
 				ED36D78D286DCB8A00CA28EC /* ToCertificateString.cpp in Sources */,
 				ED36D88D286DCDED00CA28EC /* EventReportIBs.cpp in Sources */,
 				ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */,
@@ -3399,6 +3443,7 @@
 				ED36D7FD286DCDA300CA28EC /* descriptor.cpp in Sources */,
 				ED36DDD1286DDA0300CA28EC /* SecureSessionTable.cpp in Sources */,
 				ED36D886286DCDED00CA28EC /* MessageBuilder.cpp in Sources */,
+				ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */,
 				ED36DEA1286E043500CA28EC /* Entropy.cpp in Sources */,
 				ED36D7F1286DCDA300CA28EC /* thread-network-diagnostics-server.cpp in Sources */,
 				ED36DDDE286DDA0300CA28EC /* UDP.cpp in Sources */,
@@ -3443,6 +3488,7 @@
 				ED36DD47286DD91500CA28EC /* Base38Decode.cpp in Sources */,
 				ED690B64286DC7F600069215 /* Device.cpp in Sources */,
 				ED36DC13286DD57B00CA28EC /* Verhoeff36.cpp in Sources */,
+				ED23300B288698AF00D934D7 /* bridgeapi.cpp in Sources */,
 				ED36DD74286DD9A400CA28EC /* SystemTimer.cpp in Sources */,
 				ED36DB9D286DD42300CA28EC /* streamer_stdio.cpp in Sources */,
 				ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */,
@@ -3541,11 +3587,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ljson-c";
 				SDKROOT = macosx;
+				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include;
 			};
 			name = Debug;
 		};
@@ -3594,10 +3643,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "-ljson-c";
 				SDKROOT = macosx;
+				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include;
 			};
 			name = Release;
 		};
@@ -3616,7 +3668,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/lib,
 					"/usr/local/opt/openssl@1.1/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
@@ -3638,6 +3689,7 @@
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/providers",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/common/tracing",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);
 			};
@@ -3658,7 +3710,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/lib,
 					"/usr/local/opt/openssl@1.1/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
@@ -3680,6 +3731,7 @@
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/providers",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/common/tracing",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);
 			};
