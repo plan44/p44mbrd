@@ -788,11 +788,9 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
   if (Error::isOK(aError)) {
     // successful connection
-    bridgeApi.notify("gugus", JsonObjectPtr());
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("data", JsonObject::newInt32(42));
-    bridgeApi.notify("dada", params);
-    bridgeApi.call("hopp", JsonObjectPtr(), answerreceived);
+    // - get list of devices
+    JsonObjectPtr params = JsonObject::objFromText("{\"dSUID\":\"root\",\"query\":{\"x-p44-vdcs\":{\"*\":{\"x-p44-devices\":{\"*\":{\"dSUID\":null,\"name\":null,\"outputDescription\":null}}}}}}");
+    bridgeApi.call("getProperty", params, answerreceived);
   }
   else {
     LOG(LOG_ERR, "error connecting bridge API: %s", aError->text());

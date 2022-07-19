@@ -201,6 +201,7 @@ bool BridgeApi::handleSocketEvent(short aEvent)
   }
   if (aEvent & POLLHUP) {
     // connection broken
+    disconnect();
     nextStep(JsonObjectPtr(), TextError::err("connection reported HUP"));
     return true;
   }
@@ -241,10 +242,18 @@ bool BridgeApi::handleIncomingData()
   int numBytes = 0; // must be int!! FIONREAD defines parameter as *int
   ssize_t res = ioctl(mApiSocketFd, FIONREAD, &numBytes);
   if (res<0) {
+    err = SysError::errNo("handleIncomingData: FIONREAD: ");
     nextStep(msg, err);
     return true;
   }
-  if (numBytes>0) {
+  if (numBytes==0) {
+    err = TextError::err("connection reported POLLIN+0 bytes");
+    disconnect();
+    nextStep(msg, err);
+    return true;
+  }
+  else {
+    // got some data
     uint8_t *buf = new uint8_t[numBytes];
     res = read(mApiSocketFd, buf, numBytes); // read
     if (res<0) {
