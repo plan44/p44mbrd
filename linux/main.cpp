@@ -766,11 +766,88 @@ BridgeApi bridgeApi;
 void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
   LOG(LOG_NOTICE, "method call status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  JsonObjectPtr o;
+  if (aJsonMsg && aJsonMsg->get("result", o)) {
+    // process device list
+    JsonObjectPtr vdcs;
+    if (o->get("x-p44-vdcs", vdcs)) {
+      vdcs->resetKeyIteration();
+      string vn;
+      JsonObjectPtr vdc;
+      while(vdcs->nextKeyValue(vn, vdc)) {
+        JsonObjectPtr devices;
+        if (vdc->get("x-p44-devices", devices)) {
+          devices->resetKeyIteration();
+          string dn;
+          JsonObjectPtr device;
+          while(devices->nextKeyValue(dn, device)) {
+            // examine device
+            if (device->get("x-p44-bridgeable", o)) {
+              if (o->boolValue()) {
+                // bridgeable device
+                if (device->get("dSUID", o)) {
+                  string dsuid = o->stringValue();
+                  string name;
+                  if (device->get("name", o)) name = o->stringValue(); // optional
+                  // determine device type
+                  JsonObjectPtr outputdesc;
+                  if (device->get("outputDescription", outputdesc)) {
+                    // output device
+                    if (outputdesc->get("x-p44-behaviourType", o)) {
+                      if (o->stringValue()=="light") {
+                        // this is a light device
+                        LOG(LOG_NOTICE, "found light device '%s': %s", name.c_str(), dsuid.c_str());
+                        // enable it for bridging
+                        JsonObjectPtr params = JsonObject::newObj();
+                        params->add("dSUID", JsonObject::newString(dsuid));
+                        JsonObjectPtr props = JsonObject::newObj();
+                        props->add("x-p44-bridged", JsonObject::newBool(true));
+                        params->add("properties", props);
+                        bridgeApi.call("setProperty", params, NULL);
+                        // no callback, but will wait when bridgeapi is in standalone mode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // devices collected
   // wait for incoming notifications
   bridgeApi.setTimeout(Infinite);
   bridgeApi.handleSocketEvents();
+  LOG(LOG_NOTICE, "End of standalone mode");
 }
 
+/*
+ {
+   "x-p44-vdcs": {
+     "0": {
+       "x-p44-devices": {
+         "0": {
+           "dSUID": "A8711674525254B3C050A1BDB8D56D4500",
+           "name": "Torch",
+           "outputDescription": {
+             "name": "brightness",
+             "type": "output",
+             "dsIndex": 0,
+             "x-p44-behaviourType": "light",
+             "function": 4,
+             "outputUsage": 0,
+             "variableRamp": true,
+             "maxPower": -1
+           },
+           "x-p44-bridgeable": true,
+           "x-p44-bridged": false
+         },
+         "1": {
+           "dSUID": "5D15905777AC561DC0A9BC8A69586AFD00",
+
+ */
 
 void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
@@ -789,7 +866,7 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   if (Error::isOK(aError)) {
     // successful connection
     // - get list of devices
-    JsonObjectPtr params = JsonObject::objFromText("{\"dSUID\":\"root\",\"query\":{\"x-p44-vdcs\":{\"*\":{\"x-p44-devices\":{\"*\":{\"dSUID\":null,\"name\":null,\"outputDescription\":null}}}}}}");
+    JsonObjectPtr params = JsonObject::objFromText("{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ \"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": {\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}");
     bridgeApi.call("getProperty", params, answerreceived);
   }
   else {
@@ -798,20 +875,34 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 }
 
 
+const bool standalone = false;
+int chipmain(int argc, char * argv[]);
+
 int main(int argc, char * argv[])
 {
 
   // try bridge API
   bridgeApi.setConnectionParams("127.0.0.1", 4444, 10*Second);
   bridgeApi.setIncomingMessageCallback(apinotification);
-  bridgeApi.connect(apiconnected);
-  // we'll never return if everything goes well
-  return 0;
+  if (standalone) {
+    bridgeApi.connect(apiconnected);
+    // we'll never return if everything goes well
+    return 0;
+  }
+  else {
+    chipmain(argc, argv);
+  }
 }
 
 
-
-
+void initializeP44(chip::System::Layer * aLayer, void * aAppState)
+{
+  if (!standalone) {
+    // run it in parallel
+    bridgeApi.endStandalone();
+    bridgeApi.connect(apiconnected);
+  }
+}
 
 
 int chipmain(int argc, char * argv[])
@@ -926,18 +1017,10 @@ int chipmain(int argc, char * argv[])
   gRooms.push_back(&room2);
   gRooms.push_back(&room3);
 
-  {
-      pthread_t poll_thread;
-      int res = pthread_create(&poll_thread, nullptr, bridge_polling_thread, nullptr);
-      if (res)
-      {
-          printf("Error creating polling thread: %d\n", res);
-          exit(1);
-      }
-  }
-
   // Run CHIP
 
+  chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
+  //initializeP44(NULL, NULL);
   chip::DeviceLayer::PlatformMgr().RunEventLoop();
 
   return 0;

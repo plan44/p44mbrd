@@ -17,8 +17,42 @@
 #include <sys/poll.h>
 
 
+// MARK: - CHIP error
+
+
+const char *ChipError::domain()
+{
+  return "CHIP";
+}
+
+
+const char *ChipError::getErrorDomain() const
+{
+  return ChipError::domain();
+}
+
+
+ChipError::ChipError(CHIP_ERROR aChipErr, const char *aContextMessage) :
+  Error(aChipErr.AsInteger(), string(nonNullCStr(aContextMessage)).append(nonNullCStr(aChipErr.AsString())))
+{
+}
+
+
+ErrorPtr ChipError::err(CHIP_ERROR aChipErr, const char *aContextMessage)
+{
+  if (aChipErr==CHIP_NO_ERROR)
+    return ErrorPtr(); // empty, no error
+  return ErrorPtr(new ChipError(aChipErr, aContextMessage));
+}
+
+
+// MARK: - bridge API
+
+
 BridgeApi::BridgeApi() :
   mApiSocketFd(-1),
+  mApiSocketWatchToken(0),
+  mApiSocketEventMask(POLLERR),
   mStandalone(true),
   state(disconnected)
 {
@@ -110,6 +144,8 @@ void BridgeApi::connect(BridgeApiCB aConnectedCB)
         flags = 0;
       fcntl(mApiSocketFd, F_SETFL, flags | O_NONBLOCK);
       // Now we have a socket
+      // - need to watch for POLLOUT to detect connection
+      setEventWatchingMask(POLLOUT|POLLIN);
       // - initiate connection
       LOG(LOG_DEBUG, "- Attempting connection with address family = %d, protocol = %d, addrlen=%d/sizeof=%zu", addressInfoList->ai_family, addressInfoList->ai_protocol, addressInfoList->ai_addrlen, sizeof(*(addressInfoList->ai_addr)));
       res = ::connect(mApiSocketFd, addressInfoList->ai_addr, addressInfoList->ai_addrlen);
@@ -147,16 +183,30 @@ done:
 }
 
 
+static void apiSocketEventCallback(chip::System::SocketEvents aEvents, intptr_t aData)
+{
+  BridgeApi* api = static_cast<BridgeApi *>((void *)aData);
+  int pollev =
+    (aEvents.Has(chip::System::SocketEventFlags::kRead) ? POLLIN : 0) |
+    (aEvents.Has(chip::System::SocketEventFlags::kWrite) ? POLLOUT : 0) |
+    (aEvents.Has(chip::System::SocketEventFlags::kError) ? POLLERR : 0);
+  api->handleSocketEvent(pollev);
+}
+
+
 bool BridgeApi::handleSocketEvents()
 {
+//  // calculate needed event mask
+//  int neededevents = POLLIN;
+//  if (!mTransmitBuffer.empty()) neededevents |= POLLOUT;
+//  setEventWatchingMask(neededevents);
   bool done = false;
   if (mStandalone) {
     while (!done) {
       // poll
       struct pollfd polledFd;
       polledFd.fd = mApiSocketFd;
-      polledFd.events = POLLIN|POLLHUP;
-      if (state==connecting || !mTransmitBuffer.empty()) polledFd.events |= POLLOUT;
+      polledFd.events = mApiSocketEventMask;
       polledFd.revents = 0; // no event returned so far
       // actual FDs to test. Note: while in Linux timeout<0 means block forever, ONLY exactly -1 means block in macOS!
       int numReadyFDs = poll(&polledFd, (int)1, mTimeout==Infinite ? -1 : (int)(mTimeout/MilliSecond));
@@ -183,6 +233,44 @@ bool BridgeApi::handleSocketEvents()
 }
 
 
+void BridgeApi::setEventWatchingMask(short aEventMask)
+{
+  if (!mStandalone) {
+    // may be we need to setup socket watching
+    if (mApiSocketWatchToken==0) {
+      ErrorPtr err = ChipError::err(chip::DeviceLayer::SystemLayerSockets().StartWatchingSocket(mApiSocketFd, &mApiSocketWatchToken));
+      if (Error::isOK(err)) {
+        err = ChipError::err(chip::DeviceLayer::SystemLayerSockets().SetCallback(mApiSocketWatchToken, apiSocketEventCallback, (intptr_t)this));
+        if (Error::isOK(err)) {
+          mApiSocketEventMask = 0; // nothing watching yet in chip mode, force re-apply
+        }
+      }
+      if (Error::notOK(err)) {
+        LOG(LOG_ERR, "Cannot leave standalone mode: %s", err->text());
+        mStandalone = true;
+      }
+    }
+    // watching something
+    if ((aEventMask ^ mApiSocketEventMask) & POLLIN) {
+      if (aEventMask & POLLIN) chip::DeviceLayer::SystemLayerSockets().RequestCallbackOnPendingRead(mApiSocketWatchToken);
+      else chip::DeviceLayer::SystemLayerSockets().ClearCallbackOnPendingRead(mApiSocketWatchToken);
+    }
+    if ((aEventMask ^ mApiSocketEventMask) & POLLOUT) {
+      if (aEventMask & POLLOUT) chip::DeviceLayer::SystemLayerSockets().RequestCallbackOnPendingWrite(mApiSocketWatchToken);
+      else chip::DeviceLayer::SystemLayerSockets().ClearCallbackOnPendingWrite(mApiSocketWatchToken);
+    }
+  }
+  mApiSocketEventMask = aEventMask;
+}
+
+
+void BridgeApi::endStandalone()
+{
+  mStandalone = false;
+}
+
+
+
 bool BridgeApi::handleSocketEvent(short aEvent)
 {
   // socket event found
@@ -190,6 +278,7 @@ bool BridgeApi::handleSocketEvent(short aEvent)
     if (state==connecting) {
       // we were waiting for connection (signalled by POLLOUT)
       state = connected;
+      setEventWatchingMask(POLLIN);
       nextStep(JsonObjectPtr(), ErrorPtr());
       return true;
     }
@@ -304,7 +393,11 @@ ErrorPtr BridgeApi::sendmsg(JsonObjectPtr aMessage)
   if (startSend) {
     if (!handleOutgoingData()) {
       // not sent everything, wait for more events
+      setEventWatchingMask(POLLIN|POLLOUT);
       handleSocketEvents();
+    }
+    else {
+      setEventWatchingMask(POLLIN);
     }
   }
   return ErrorPtr();
