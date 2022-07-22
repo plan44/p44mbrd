@@ -823,31 +823,6 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   LOG(LOG_NOTICE, "End of standalone mode");
 }
 
-/*
- {
-   "x-p44-vdcs": {
-     "0": {
-       "x-p44-devices": {
-         "0": {
-           "dSUID": "A8711674525254B3C050A1BDB8D56D4500",
-           "name": "Torch",
-           "outputDescription": {
-             "name": "brightness",
-             "type": "output",
-             "dsIndex": 0,
-             "x-p44-behaviourType": "light",
-             "function": 4,
-             "outputUsage": 0,
-             "variableRamp": true,
-             "maxPower": -1
-           },
-           "x-p44-bridgeable": true,
-           "x-p44-bridged": false
-         },
-         "1": {
-           "dSUID": "5D15905777AC561DC0A9BC8A69586AFD00",
-
- */
 
 void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
@@ -1019,8 +994,8 @@ int chipmain(int argc, char * argv[])
 
   // Run CHIP
 
-  chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
-  //initializeP44(NULL, NULL);
+  //chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
+  initializeP44(NULL, NULL);
   chip::DeviceLayer::PlatformMgr().RunEventLoop();
 
   return 0;

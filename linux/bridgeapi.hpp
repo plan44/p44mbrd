@@ -52,12 +52,14 @@ class BridgeApi
     connected, ///< connected, ready
     waiting, ///< waiting for specific answer
   } ConnectionState;
-  ConnectionState state;
+  ConnectionState mState;
   BridgeApiCB mIncomingDataCB; ///< called when a notification arrives
   BridgeApiCB mNextStepCB; ///< called and cleared when next pending step (connection, response) happens
+  string mNextStepId; ///< expected Id of next incoming message
   string mTransmitBuffer; ///< transmit buffer
   string mReceiveBuffer; ///< receive buffer
   MLMicroSeconds mTimeout; ///< timeout for connect and API calls
+  long mCallCounter;
 
 public:
 

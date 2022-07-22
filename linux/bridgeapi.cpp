@@ -54,7 +54,8 @@ BridgeApi::BridgeApi() :
   mApiSocketWatchToken(0),
   mApiSocketEventMask(POLLERR),
   mStandalone(true),
-  state(disconnected)
+  mState(disconnected),
+  mCallCounter(0)
 {
 }
 
@@ -88,8 +89,8 @@ BridgeApi::~BridgeApi()
 
 void BridgeApi::disconnect()
 {
-  if (state!=disconnected) {
-    state = disconnected;
+  if (mState!=disconnected) {
+    mState = disconnected;
     if (mApiSocketFd>=0) {
       close(mApiSocketFd);
     }
@@ -151,7 +152,7 @@ void BridgeApi::connect(BridgeApiCB aConnectedCB)
       res = ::connect(mApiSocketFd, addressInfoList->ai_addr, addressInfoList->ai_addrlen);
       if (res==0 || errno==EINPROGRESS) {
         // connection initiated (or already open, but connectionMonitorHandler will take care in both cases)
-        state = connecting;
+        mState = connecting;
         break;
       }
       else {
@@ -162,7 +163,7 @@ void BridgeApi::connect(BridgeApiCB aConnectedCB)
     // advance to next address
     addressInfoList = addressInfoList->ai_next;
   }
-  if (state!=connecting) {
+  if (mState!=connecting) {
     // exhausted addresses without starting to connect
     if (!err) err = TextError::err("No connection could be established");
     LOG(LOG_DEBUG, "Cannot initiate connection to %s:%d - %s", mApiHost.c_str(), mApiPort, err->text());
@@ -215,8 +216,8 @@ bool BridgeApi::handleSocketEvents()
       }
       else {
         // timeout
-        if (state==connecting) state = disconnected;
-        else if (state==waiting) state = connected;
+        if (mState==connecting) mState = disconnected;
+        else if (mState==waiting) mState = connected;
         nextStep(JsonObjectPtr(), TextError::err("handleSocketEvents: timeout"));
         return true;
       }
@@ -275,9 +276,9 @@ bool BridgeApi::handleSocketEvent(short aEvent)
 {
   // socket event found
   if (aEvent & POLLOUT) {
-    if (state==connecting) {
+    if (mState==connecting) {
       // we were waiting for connection (signalled by POLLOUT)
-      state = connected;
+      mState = connected;
       setEventWatchingMask(POLLIN);
       nextStep(JsonObjectPtr(), ErrorPtr());
       return true;
@@ -310,7 +311,7 @@ void BridgeApi::nextStep(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 
 bool BridgeApi::handleOutgoingData()
 {
-  if (state>=connected && mTransmitBuffer.size()>0) {
+  if (mState>=connected && mTransmitBuffer.size()>0) {
     // write as much as possible, nonblocking
     ssize_t res = write(mApiSocketFd, mTransmitBuffer.c_str(), mTransmitBuffer.size());
     if (res>0) {
@@ -343,8 +344,8 @@ bool BridgeApi::handleIncomingData()
   }
   else {
     // got some data
-    uint8_t *buf = new uint8_t[numBytes];
-    res = read(mApiSocketFd, buf, numBytes); // read
+    uint8_t *buffer = new uint8_t[numBytes];
+    res = read(mApiSocketFd, buffer, numBytes); // read
     if (res<0) {
       if (errno==EWOULDBLOCK)
         return false; // nothing read
@@ -354,31 +355,47 @@ bool BridgeApi::handleIncomingData()
       }
     }
     else if (res>0) {
-      // process incoming data
-      void* lineend = memchr(buf, '\n', res);
-      size_t linebytes = lineend ? (uint8_t *)lineend-buf : res;
-      mReceiveBuffer.append((const char *)buf, linebytes);
-      if (lineend) {
+      // process incoming data (could be multiple messages!)
+      uint8_t *buf = buffer;
+      //LOG(LOG_DEBUG, "data received = %.*s", (int)res, (const char*)buffer);
+      while (res>0) {
+        void* lineend = memchr(buf, '\n', res);
+        size_t linebytes = lineend ? (uint8_t *)lineend-buf : res;
+        mReceiveBuffer.append((const char *)buf, linebytes);
+        //LOG(LOG_DEBUG, "receive buffer = %s", mReceiveBuffer.c_str());
+        if (!lineend) break; // not yet at least one full line in the buffer
         // complete message, decode
+        buf += linebytes+1; res -= linebytes+1; // reduce to unprocessed rest (+1 for line end)
+        // convert to json
         msg = JsonObject::objFromText(mReceiveBuffer.c_str(), mReceiveBuffer.size(), &err, false);
-        // put rest into receive buffer for next message
-        if (lineend) {
-          mReceiveBuffer.assign((const char *)buf+linebytes+1, res-linebytes-1);
-        }
-        else {
-          mReceiveBuffer.clear();
-        }
-        // report it
-        if (state==waiting) {
-          state = connected;
-          nextStep(msg, err);
-          return true;
+        // receive buffer now parsed, clear
+        mReceiveBuffer.clear();
+        // process
+        //LOG(LOG_DEBUG, "msg = %s", msg->json_c_str());
+        JsonObjectPtr o;
+        if (msg && msg->get("id", o)) {
+          // this IS a method answer...
+          if (mState==waiting) {
+            mState = connected;
+            // ..and we are waiting for one: check ID, but only if we have a callback, otherwise just ignore the msg
+            if (!mNextStepCB || o->stringValue()==mNextStepId) {
+              // correct answer id, report to callback
+              nextStep(msg, err);
+            }
+            else {
+              // wrong answer id, report error callback (if any)
+              nextStep(JsonObjectPtr(), TextError::err("method response has wrong id '%s', expected '%s'", o->c_strValue(), mNextStepId.c_str()));
+            }
+          }
         }
         else if (mIncomingDataCB) {
+          // notification, report
           mIncomingDataCB(msg, err);
-          return true;
         }
-      }
+      } // while lines in the buffer
+      // put rest (can be zero) into receive buffer for next message
+      mReceiveBuffer.assign((const char *)buf, res);
+      return true; // message processed, data handled (or ignored)
     }
   }
   return false;
@@ -415,13 +432,15 @@ ErrorPtr BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
 void BridgeApi::call(const string aMethod, JsonObjectPtr aParams, BridgeApiCB aResponseCB)
 {
   mNextStepCB = aResponseCB;
-  if (state!=connected) {
+  if (mState!=connected) {
     // can only send when connected but not waiting for response
     nextStep(JsonObjectPtr(), TextError::err("busy: cannot call method now"));
   }
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("method", JsonObject::newString(aMethod));
-  state = waiting;
+  mNextStepId = string_format("%ld", ++mCallCounter);
+  aParams->add("id", JsonObject::newString(mNextStepId));
+  mState = waiting;
   ErrorPtr err = sendmsg(aParams);
   if (Error::notOK(err)) {
     nextStep(JsonObjectPtr(), err);
