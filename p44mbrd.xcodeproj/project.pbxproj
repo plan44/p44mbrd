@@ -369,6 +369,7 @@
 		ED690B62286DC7F600069215 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* main.cpp */; };
 		ED690B63286DC7F600069215 /* bridged-actions-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */; };
 		ED690B64286DC7F600069215 /* Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B61286DC7F600069215 /* Device.cpp */; };
+		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1298,6 +1299,8 @@
 		ED690B5F286DC7F600069215 /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
 		ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "bridged-actions-stub.cpp"; path = "linux/bridged-actions-stub.cpp"; sourceTree = "<group>"; };
 		ED690B61286DC7F600069215 /* Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Device.cpp; path = linux/Device.cpp; sourceTree = "<group>"; };
+		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
+		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2223,6 +2226,8 @@
 		ED36DB25286DD2CE00CA28EC /* core */ = {
 			isa = PBXGroup;
 			children = (
+				EDF3F4A0288B4C6500A82418 /* QNameString.cpp */,
+				EDF3F4A1288B4C6500A82418 /* QNameString.h */,
 				ED36DB26286DD2CE00CA28EC /* DnsHeader.h */,
 				ED36DB27286DD2CE00CA28EC /* RecordWriter.h */,
 				ED36DB28286DD2CE00CA28EC /* QName.h */,
@@ -3193,6 +3198,7 @@
 				ED36D8F4286DCF0B00CA28EC /* WriteClient.cpp in Sources */,
 				ED36DBAB286DD48C00CA28EC /* Meta.cpp in Sources */,
 				ED36D866286DCDED00CA28EC /* MessageParser.cpp in Sources */,
+				EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */,
 				ED36DA70286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp in Sources */,
 				ED36D86F286DCDED00CA28EC /* ClusterPathIB.cpp in Sources */,
 				ED36DC02286DD57B00CA28EC /* ErrorStr.cpp in Sources */,
