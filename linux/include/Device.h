@@ -65,6 +65,9 @@ protected:
     chip::EndpointId mEndpointId;
     chip::EndpointId mParentEndpointId;
     std::string mZone;
+
+    // P44
+    std::string mBridgedDSUID;
 };
 
 class DeviceOnOff : public Device
