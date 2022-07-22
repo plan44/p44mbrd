@@ -24,6 +24,7 @@
 
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/cluster-id.h>
+#include <app/EventLogging.h>
 #include <app/chip-zcl-zpro-codec.h>
 #include <app/reporting/reporting.h>
 #include <app/util/af-types.h>
@@ -72,6 +73,7 @@ EndpointId gCurrentEndpointId;
 EndpointId gFirstDynamicEndpointId;
 Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 std::vector<Room *> gRooms;
+std::vector<Action *> gActions;
 
 // ENDPOINT DEFINITIONS:
 // =================================================================================
@@ -122,6 +124,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(bridgedDeviceBasicAttrs)
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kNodeLabelSize, 0), /* NodeLabel */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Reachable */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare Cluster List for Bridged Light endpoint
@@ -172,6 +175,13 @@ Room room1("Room 1", 0xE001, BridgedActions::EndpointListTypeEnum::kRoom, true);
 Room room2("Room 2", 0xE002, BridgedActions::EndpointListTypeEnum::kRoom, true);
 Room room3("Zone 3", 0xE003, BridgedActions::EndpointListTypeEnum::kZone, false);
 
+Action action1(0x1001, "Room 1 On", BridgedActions::ActionTypeEnum::kAutomation, 0xE001, 0x1,
+               BridgedActions::ActionStateEnum::kInactive, true);
+Action action2(0x1002, "Turn On Room 2", BridgedActions::ActionTypeEnum::kAutomation, 0xE002, 0x01,
+               BridgedActions::ActionStateEnum::kInactive, true);
+Action action3(0x1003, "Turn Off Room 1", BridgedActions::ActionTypeEnum::kAutomation, 0xE003, 0x01,
+               BridgedActions::ActionStateEnum::kInactive, false);
+
 // ---------------------------------------------------------------------------
 //
 // SWITCH ENDPOINT: contains the following clusters:
@@ -199,6 +209,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(switchBridgedDeviceBasicAttrs)
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kNodeLabelSize, 0), /* NodeLabel */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Reachable */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare Cluster List for Bridged Switch endpoint
@@ -260,6 +271,7 @@ DataVersion gComposedPowerSourceDataVersions[ArraySize(bridgedPowerSourceCluster
 
 #define ZCL_DESCRIPTOR_CLUSTER_REVISION (1u)
 #define ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION (1u)
+#define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
 #define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
 #define ZCL_ON_OFF_CLUSTER_REVISION (4u)
 #define ZCL_SWITCH_CLUSTER_REVISION (1u)
@@ -366,6 +378,11 @@ std::vector<EndpointListInfo> GetEndpointListInfo(chip::EndpointId parentId)
     return infoList;
 }
 
+std::vector<Action *> GetActionListInfo(chip::EndpointId parentId)
+{
+    return gActions;
+}
+
 void HandleDeviceStatusChanged(Device * dev, Device::Changed_t itemChangedMask)
 {
     if (itemChangedMask & Device::kChanged_Reachable)
@@ -468,6 +485,10 @@ EmberAfStatus HandleReadBridgedDeviceBasicAttribute(Device * dev, chip::Attribut
     else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2))
     {
         *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
+    }
+    else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4))
+    {
+        *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
     }
     else
     {
@@ -646,6 +667,82 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
     return ret;
 }
 
+void runOnOffRoomAction(Room * room, bool actionOn, EndpointId endpointId, uint16_t actionID, uint32_t invokeID, bool hasInvokeID)
+{
+    if (hasInvokeID)
+    {
+        BridgedActions::Events::StateChanged::Type event{ actionID, invokeID, BridgedActions::ActionStateEnum::kActive };
+        EventNumber eventNumber;
+        chip::app::LogEvent(event, endpointId, eventNumber);
+    }
+
+    // Check and run the action for ActionLight1 - ActionLight4
+    if (room->getName().compare(ActionLight1.GetLocation()) == 0)
+    {
+        ActionLight1.SetOnOff(actionOn);
+    }
+    if (room->getName().compare(ActionLight2.GetLocation()) == 0)
+    {
+        ActionLight2.SetOnOff(actionOn);
+    }
+    if (room->getName().compare(ActionLight3.GetLocation()) == 0)
+    {
+        ActionLight3.SetOnOff(actionOn);
+    }
+    if (room->getName().compare(ActionLight4.GetLocation()) == 0)
+    {
+        ActionLight4.SetOnOff(actionOn);
+    }
+
+    if (hasInvokeID)
+    {
+        BridgedActions::Events::StateChanged::Type event{ actionID, invokeID, BridgedActions::ActionStateEnum::kInactive };
+        EventNumber eventNumber;
+        chip::app::LogEvent(event, endpointId, eventNumber);
+    }
+}
+
+bool emberAfBridgedActionsClusterInstantActionCallback(app::CommandHandler * commandObj,
+                                                       const app::ConcreteCommandPath & commandPath,
+                                                       const BridgedActions::Commands::InstantAction::DecodableType & commandData)
+{
+    bool hasInvokeID      = false;
+    uint32_t invokeID     = 0;
+    EndpointId endpointID = commandPath.mEndpointId;
+    auto & actionID       = commandData.actionID;
+
+    if (commandData.invokeID.HasValue())
+    {
+        hasInvokeID = true;
+        invokeID    = commandData.invokeID.Value();
+    }
+
+    if (actionID == action1.getActionId() && action1.getIsVisible())
+    {
+        // Turn On Lights in Room 1
+        runOnOffRoomAction(&room1, true, endpointID, actionID, invokeID, hasInvokeID);
+        commandObj->AddStatus(commandPath, Protocols::InteractionModel::Status::Success);
+        return true;
+    }
+    if (actionID == action2.getActionId() && action2.getIsVisible())
+    {
+        // Turn On Lights in Room 2
+        runOnOffRoomAction(&room2, true, endpointID, actionID, invokeID, hasInvokeID);
+        commandObj->AddStatus(commandPath, Protocols::InteractionModel::Status::Success);
+        return true;
+    }
+    if (actionID == action3.getActionId() && action3.getIsVisible())
+    {
+        // Turn Off Lights in Room 1
+        runOnOffRoomAction(&room1, false, endpointID, actionID, invokeID, hasInvokeID);
+        commandObj->AddStatus(commandPath, Protocols::InteractionModel::Status::Success);
+        return true;
+    }
+
+    commandObj->AddStatus(commandPath, Protocols::InteractionModel::Status::NotFound);
+    return true;
+}
+
 void ApplicationInit() {}
 
 const EmberAfDeviceType gBridgedOnOffDeviceTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
@@ -749,6 +846,21 @@ void * bridge_polling_thread(void * context)
                 // TC-ACT-2.2 step 2l, add a new "Zone 3" and add "Action Light 2" to the new zone
                 room3.setIsVisible(true);
                 ActionLight2.SetZone("Zone 3");
+            }
+            if (ch == 'm')
+            {
+                // TC-ACT-2.2 step 3c, rename "Turn on Room 1 lights"
+                action1.setName("Turn On Room 1");
+            }
+            if (ch == 'n')
+            {
+                // TC-ACT-2.2 step 3f, remove "Turn on Room 2 lights"
+                action2.setIsVisible(false);
+            }
+            if (ch == 'o')
+            {
+                // TC-ACT-2.2 step 3i, add "Turn off Room 1 renamed lights"
+                action3.setIsVisible(true);
             }
             continue;
         }
@@ -1007,6 +1119,22 @@ int chipmain(int argc, char * argv[])
   gRooms.push_back(&room1);
   gRooms.push_back(&room2);
   gRooms.push_back(&room3);
+
+  // Add actions
+  gActions.push_back(&action1);
+  gActions.push_back(&action2);
+  gActions.push_back(&action3);
+
+  // start testing loop
+  if (false) {
+      pthread_t poll_thread;
+      int res = pthread_create(&poll_thread, nullptr, bridge_polling_thread, nullptr);
+      if (res)
+      {
+          printf("Error creating polling thread: %d\n", res);
+          exit(1);
+      }
+  }
 
   // Run CHIP
 
