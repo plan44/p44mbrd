@@ -26,12 +26,14 @@ using namespace chip::app::Clusters::BridgedActions;
 
 // LightingManager LightingManager::sLight;
 
-Device::Device(const char * szDeviceName, std::string szLocation)
+Device::Device(const char * szDeviceName, std::string szLocation, std::string aDSUID)
 {
     strncpy(mName, szDeviceName, sizeof(mName));
     mLocation   = szLocation;
     mReachable  = false;
     mEndpointId = 0;
+    // p44
+    mBridgedDSUID = aDSUID;
 }
 
 bool Device::IsReachable()
@@ -88,7 +90,7 @@ void Device::SetLocation(std::string szLocation)
     }
 }
 
-DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation) : Device(szDeviceName, szLocation)
+DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) : Device(szDeviceName, szLocation, aDSUID)
 {
     mOn = false;
 }
@@ -131,6 +133,7 @@ void DeviceOnOff::HandleDeviceChange(Device * device, Device::Changed_t changeMa
     }
 }
 
+/*
 DeviceSwitch::DeviceSwitch(const char * szDeviceName, std::string szLocation, uint32_t aFeatureMap) :
     Device(szDeviceName, szLocation)
 {
@@ -233,6 +236,7 @@ void DevicePowerSource::SetDescription(std::string aDescription)
         mChanged_CB(this, kChanged_Description);
     }
 }
+*/
 
 EndpointListInfo::EndpointListInfo(uint16_t endpointListId, std::string name, EndpointListTypeEnum type)
 {

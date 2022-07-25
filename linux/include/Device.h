@@ -26,7 +26,9 @@
 #include <functional>
 #include <vector>
 
-class Device
+#include "p44obj.hpp"
+
+class Device : public p44::P44Obj
 {
 public:
     static const int kDeviceNameSize = 32;
@@ -39,7 +41,10 @@ public:
         kChanged_Last      = kChanged_Name,
     } Changed;
 
-    Device(const char * szDeviceName, std::string szLocation);
+    // P44
+    std::string mBridgedDSUID;
+
+    Device(const char * szDeviceName, std::string szLocation, std::string aDSUID);
     virtual ~Device() {}
 
     bool IsReachable();
@@ -66,9 +71,9 @@ protected:
     chip::EndpointId mParentEndpointId;
     std::string mZone;
 
-    // P44
-    std::string mBridgedDSUID;
 };
+typedef boost::intrusive_ptr<Device> DevicePtr;
+
 
 class DeviceOnOff : public Device
 {

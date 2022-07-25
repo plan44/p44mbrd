@@ -71,7 +71,13 @@ const int kDescriptorAttributeArraySize = 254;
 
 EndpointId gCurrentEndpointId;
 EndpointId gFirstDynamicEndpointId;
-Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
+
+//Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
+typedef std::map<chip::EndpointId, DevicePtr> DeviceEndpointMap;
+DeviceEndpointMap gDeviceEndpointMap;
+typedef std::map<string, DevicePtr> DeviceDSUIDMap;
+DeviceDSUIDMap gDeviceDSUIDMap;
+
 std::vector<Room *> gRooms;
 std::vector<Action *> gActions;
 
@@ -909,7 +915,9 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                 if (device->get("dSUID", o)) {
                   string dsuid = o->stringValue();
                   string name;
+                  string zone;
                   if (device->get("name", o)) name = o->stringValue(); // optional
+                  if (device->get("x-p44-zonename", o)) zone = o->stringValue(); // optional
                   // determine device type
                   JsonObjectPtr outputdesc;
                   if (device->get("outputDescription", outputdesc)) {
@@ -917,15 +925,37 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                     if (outputdesc->get("x-p44-behaviourType", o)) {
                       if (o->stringValue()=="light") {
                         // this is a light device
-                        LOG(LOG_NOTICE, "found light device '%s': %s", name.c_str(), dsuid.c_str());
-                        // enable it for bridging
-                        JsonObjectPtr params = JsonObject::newObj();
-                        params->add("dSUID", JsonObject::newString(dsuid));
-                        JsonObjectPtr props = JsonObject::newObj();
-                        props->add("x-p44-bridged", JsonObject::newBool(true));
-                        params->add("properties", props);
-                        bridgeApi.call("setProperty", params, NULL);
-                        // no callback, but will wait when bridgeapi is in standalone mode
+                        if (outputdesc->get("function", o)) {
+                          int outputfunction = (int)o->int32Value();
+                          LOG(LOG_NOTICE, "found light device '%s' in zone='%s': %s, outputfunction=%d", name.c_str(), zone.c_str(), dsuid.c_str(), outputfunction);
+                          // enable it for bridging
+                          JsonObjectPtr params = JsonObject::newObj();
+                          params->add("dSUID", JsonObject::newString(dsuid));
+                          JsonObjectPtr props = JsonObject::newObj();
+                          props->add("x-p44-bridged", JsonObject::newBool(true));
+                          params->add("properties", props);
+                          // no callback, but will wait when bridgeapi is in standalone mode
+                          bridgeApi.call("setProperty", params, NULL);
+                          // create to-be-bridged device
+                          DevicePtr dev = nullptr;
+                          // outputFunction_switch = 0, ///< switch output - single channel 0..100
+                          // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
+                          // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
+                          // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
+                          switch(outputfunction) {
+                            case 0: // switch output - single channel 0..100
+                            case 1: // effective value dimmer - single channel 0..100
+                            case 3: // dimmer with color temperature - channels 1 and 4
+                            case 4: // full color dimmer - channels 1..6
+                              // TODO: separate into different light types
+                              // for now, all just on/off
+                              dev = new DeviceOnOff(name.c_str(), zone, dsuid);
+                              break;
+                          }
+                          if (dev) {
+                            gDeviceDSUIDMap[dsuid] = dev;
+                          }
+                        }
                       }
                     }
                   }
@@ -963,7 +993,11 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   if (Error::isOK(aError)) {
     // successful connection
     // - get list of devices
-    JsonObjectPtr params = JsonObject::objFromText("{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ \"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": {\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}");
+    JsonObjectPtr params = JsonObject::objFromText(
+      "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ \"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
+      "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
+      "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
+    );
     bridgeApi.call("getProperty", params, answerreceived);
   }
   else {
@@ -1004,10 +1038,51 @@ int main(int argc, char * argv[])
 }
 
 
-// MARK: - mostly original code
+// MARK: - chipmain
+
+
+#define kP44mbrNamespace "/ch.plan44.p44mbrd/"
 
 int chipmain(int argc, char * argv[])
 {
+  // MARK: p44 code
+
+  chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreManager();
+  // get list of endpoints known in use
+  char endPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
+  size_t numEndPoints;
+  kvs.Get(kP44mbrNamespace "endPointMap", endPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numEp);
+  endPointMap[numEp]=0; // null terminate for easy debug printing as string
+  // process list of to-be-bridged devices
+  for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
+    DevicePtr dev = pos->second;
+    // look up previous endpoint mapping
+    string key = kP44mbrNamespace + "devices/" + dev->mBridgedDSUID;
+    EndpointId endpointId = 0;
+    CHIP_ERROR cerr = kvs.Get(key.c_str(), &endpointId);
+    if (cerr==CHIP_NO_ERROR) {
+      // try to re-use the endpoint ID for this dSUID
+      dev->SetEndpointId(endpointId);
+      
+    }
+    else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+      // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
+    }
+    else {
+      LOG(LOG_ERR, "Error accessing KVS: %s", ChipError::err(cerr).text());
+    }
+    // install callbacks
+    // FIXME: for now: only onoff -> add other device types later
+    DeviceOnOff* ood = dynamic_cast<DeviceOnOff *>(dev.get());
+    if (ood) ood->SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+  }
+  //
+
+
+
+  // MARK: mostly original code
+
+  /* keep these here for seeing diffs with official example
   // Clear out the device database
   memset(gDevices, 0, sizeof(gDevices));
 
@@ -1053,6 +1128,7 @@ int chipmain(int argc, char * argv[])
   ComposedSwitch2.SetReachable(true);
   ComposedPowerSource.SetReachable(true);
   ComposedPowerSource.SetBatChargeLevel(58);
+  */
 
   if (ChipLinuxAppInit(argc, argv) != 0)
   {
