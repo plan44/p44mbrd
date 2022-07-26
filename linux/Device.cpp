@@ -18,6 +18,7 @@
  */
 
 #include "Device.h"
+#include "bridgeapi.hpp"
 
 #include <cstdio>
 #include <platform/CHIPDeviceLayer.h>
@@ -84,11 +85,17 @@ void Device::SetName(const char * szName)
     bool changed = (strncmp(mName, szName, sizeof(mName)) != 0);
 
     ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName, szName);
-
     strncpy(mName, szName, sizeof(mName));
 
     if (changed)
     {
+        JsonObjectPtr params = JsonObject::newObj();
+        params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+        JsonObjectPtr props = JsonObject::newObj();
+        props->add("name", JsonObject::newString(mName));
+        params->add("properties", props);
+        BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
+
         HandleDeviceChange(this, kChanged_Name);
     }
 }
@@ -173,9 +180,19 @@ void DeviceOnOff::SetOnOff(bool aOn)
     mOn     = aOn;
     ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
 
-    if ((changed) && (mChanged_CB))
+    if (changed)
     {
-        mChanged_CB(this, kChanged_OnOff);
+        // call preset1 or off on the bridged device
+        JsonObjectPtr params = JsonObject::newObj();
+        params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+        params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
+        params->add("force", JsonObject::newBool(true));
+        BridgeApi::sharedBridgeApi().notify("callScene", params);
+
+        if (mChanged_CB)
+        {
+            mChanged_CB(this, kChanged_OnOff);
+        }
     }
 }
 

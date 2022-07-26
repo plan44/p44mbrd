@@ -61,9 +61,12 @@ class BridgeApi
   MLMicroSeconds mTimeout; ///< timeout for connect and API calls
   long mCallCounter;
 
+  BridgeApi(); // private constructor
+
 public:
 
-  BridgeApi();
+  static BridgeApi& sharedBridgeApi();
+
   virtual ~BridgeApi();
 
   /// set connection params

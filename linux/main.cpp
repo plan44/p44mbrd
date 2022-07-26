@@ -908,8 +908,6 @@ void * bridge_polling_thread(void * context)
 
 // MARK: - P44 additions
 
-BridgeApi bridgeApi; ///< the bridge API connector
-
 // TODO: clean up once we don't need the pre-running bridge query (aka standalone mode)
 const bool standalone = true;
 int chipmain(int argc, char * argv[]);
@@ -962,7 +960,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                           props->add("x-p44-bridged", JsonObject::newBool(true));
                           params->add("properties", props);
                           // no callback, but will wait when bridgeapi is in standalone mode
-                          bridgeApi.call("setProperty", params, NULL);
+                          BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
                           // create to-be-bridged device
                           DevicePtr dev = nullptr;
                           // outputFunction_switch = 0, ///< switch output - single channel 0..100
@@ -1003,7 +1001,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   // devices collected
   if (standalone) {
     // start chip only now
-    bridgeApi.endStandalone();
+    BridgeApi::sharedBridgeApi().endStandalone();
     LOG(LOG_NOTICE, "End of standalone mode, starting CHIP now");
     chipmain(gArgc, gArgv);
   }
@@ -1017,7 +1015,7 @@ void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   if (aJsonMsg && aJsonMsg->stringValue()=="quit") {
     return;
   }
-  bridgeApi.handleSocketEvents();
+  BridgeApi::sharedBridgeApi().handleSocketEvents();
 }
 
 
@@ -1031,7 +1029,7 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
       "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
       "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
     );
-    bridgeApi.call("getProperty", params, answerreceived);
+    BridgeApi::sharedBridgeApi().call("getProperty", params, answerreceived);
   }
   else {
     LOG(LOG_ERR, "error connecting bridge API: %s", aError->text());
@@ -1043,9 +1041,9 @@ void initializeP44(chip::System::Layer * aLayer, void * aAppState)
 {
   if (!standalone) {
     // run it in parallel
-    bridgeApi.endStandalone();
+    BridgeApi::sharedBridgeApi().endStandalone();
     LOG(LOG_NOTICE, "Running bridge API in parallel mode from beginning");
-    bridgeApi.connect(apiconnected);
+    BridgeApi::sharedBridgeApi().connect(apiconnected);
   }
 }
 
@@ -1058,10 +1056,10 @@ int main(int argc, char * argv[])
   gArgv = argv;
 
   // try bridge API
-  bridgeApi.setConnectionParams("127.0.0.1", 4444, 10*Second);
-  bridgeApi.setIncomingMessageCallback(apinotification);
+  BridgeApi::sharedBridgeApi().setConnectionParams("127.0.0.1", 4444, 10*Second);
+  BridgeApi::sharedBridgeApi().setIncomingMessageCallback(apinotification);
   if (standalone) {
-    bridgeApi.connect(apiconnected);
+    BridgeApi::sharedBridgeApi().connect(apiconnected);
     // we'll never return if everything goes well
     return 0;
   }

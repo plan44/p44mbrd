@@ -48,6 +48,16 @@ ErrorPtr ChipError::err(CHIP_ERROR aChipErr, const char *aContextMessage)
 
 // MARK: - bridge API
 
+BridgeApi* gSharedBridgeApiP = nullptr;
+
+BridgeApi& BridgeApi::sharedBridgeApi()
+{
+  if (!gSharedBridgeApiP) {
+    gSharedBridgeApiP = new BridgeApi;
+  }
+  return *gSharedBridgeApiP;
+}
+
 
 BridgeApi::BridgeApi() :
   mApiSocketFd(-1),
