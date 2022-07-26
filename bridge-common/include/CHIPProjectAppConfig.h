@@ -28,7 +28,7 @@
 #pragma once
 
 // overrides CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT in CHIPProjectConfig
-#define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 16
+#define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 42
 
 // FIXME: luz temp debug, remove again to reduce FOOTPRINT
 // we want verbose error code display

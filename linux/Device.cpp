@@ -126,7 +126,7 @@ void Device::setUpClusterInfo(
 }
 
 
-int Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
+bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
 {
   // allocate data versions
   mDynamicEndpointBase = aDynamicEndpointBase;
@@ -146,9 +146,9 @@ int Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
   }
   else {
     ChipLogError(DeviceLayer, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
-    return -1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 

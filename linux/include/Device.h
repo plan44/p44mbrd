@@ -78,7 +78,7 @@ public:
 
     // add the device using the previously set cluster info
     // @param aDynamicEndpointBase the ID of the first dynamic endpoint
-    int AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
+    bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
 
 private:
     virtual void HandleDeviceChange(Device * device, Device::Changed_t changeMask) = 0;
