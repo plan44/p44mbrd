@@ -24,17 +24,34 @@
 
 using namespace chip::app::Clusters::BridgedActions;
 
-// LightingManager LightingManager::sLight;
+// MARK: - Device
 
 Device::Device(const char * szDeviceName, std::string szLocation, std::string aDSUID)
 {
     strncpy(mName, szDeviceName, sizeof(mName));
     mLocation   = szLocation;
     mReachable  = false;
-    mEndpointId = 0;
+    mDynamicEndpointIdx = kInvalidEndpointId;
+    mDynamicEndpointBase = 0;
     // p44
     mBridgedDSUID = aDSUID;
+    // - instantiation info
+    mNumClusterVersions = 0;
+    mClusterDataVersionsP = nullptr;
+    mEndpointTypeP = nullptr;
+    mDeviceTypeListP = nullptr;
+    mParentEndpointId = kInvalidEndpointId;
 }
+
+
+Device::~Device()
+{
+  if (mClusterDataVersionsP) {
+    delete mClusterDataVersionsP;
+    mClusterDataVersionsP = nullptr;
+  }
+}
+
 
 bool Device::IsReachable()
 {
@@ -89,6 +106,54 @@ void Device::SetLocation(std::string szLocation)
         HandleDeviceChange(this, kChanged_Location);
     }
 }
+
+
+void Device::setUpClusterInfo(
+  size_t aNumClusterVersions,
+  EmberAfEndpointType* aEndpointTypeP,
+  const Span<const EmberAfDeviceType>& aDeviceTypeList,
+  EndpointId aParentEndpointId
+)
+{
+  // save number of clusters and create storage for cluster data versions
+  mNumClusterVersions = aNumClusterVersions;
+  if (mClusterDataVersionsP) delete mClusterDataVersionsP;
+  mClusterDataVersionsP = new DataVersion[mNumClusterVersions];
+  // save other params
+  mEndpointTypeP = aEndpointTypeP;
+  mDeviceTypeListP = &aDeviceTypeList;
+  mParentEndpointId = aParentEndpointId;
+}
+
+
+int Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
+{
+  // allocate data versions
+  mDynamicEndpointBase = aDynamicEndpointBase;
+  EmberAfStatus ret = emberAfSetDynamicEndpoint(
+    mDynamicEndpointIdx,
+    GetEndpointId(),
+    mEndpointTypeP,
+    Span<DataVersion>(mClusterDataVersionsP, mNumClusterVersions),
+    *mDeviceTypeListP,
+    mParentEndpointId
+  );
+  if (ret==EMBER_ZCL_STATUS_SUCCESS) {
+    ChipLogProgress(
+      DeviceLayer, "Added device %s to dynamic endpoint %d (index=%d)",
+      GetName(), GetEndpointId(), mDynamicEndpointIdx
+    );
+  }
+  else {
+    ChipLogError(DeviceLayer, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
+    return -1;
+  }
+  return 0;
+}
+
+
+
+// MARK: - DeviceOnOff
 
 DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) : Device(szDeviceName, szLocation, aDSUID)
 {

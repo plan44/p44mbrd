@@ -69,12 +69,10 @@ const int kNodeLabelSize = 32;
 // Current ZCL implementation of Struct uses a max-size array of 254 bytes
 const int kDescriptorAttributeArraySize = 254;
 
-EndpointId gCurrentEndpointId;
+//EndpointId gCurrentEndpointId;
 EndpointId gFirstDynamicEndpointId;
 
-//Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
-typedef std::map<chip::EndpointId, DevicePtr> DeviceEndpointMap;
-DeviceEndpointMap gDeviceEndpointMap;
+Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 typedef std::map<string, DevicePtr> DeviceDSUIDMap;
 DeviceDSUIDMap gDeviceDSUIDMap;
 
@@ -154,6 +152,8 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // Declare Bridged Light endpoint
 DECLARE_DYNAMIC_ENDPOINT(bridgedLightEndpoint, bridgedLightClusters);
+
+/*
 DataVersion gLight1DataVersions[ArraySize(bridgedLightClusters)];
 DataVersion gLight2DataVersions[ArraySize(bridgedLightClusters)];
 
@@ -176,6 +176,7 @@ DeviceOnOff ActionLight1("Action Light 1", "Room 1");
 DeviceOnOff ActionLight2("Action Light 2", "Room 1");
 DeviceOnOff ActionLight3("Action Light 3", "Room 2");
 DeviceOnOff ActionLight4("Action Light 4", "Room 2");
+*/
 
 Room room1("Room 1", 0xE001, BridgedActions::EndpointListTypeEnum::kRoom, true);
 Room room2("Room 2", 0xE002, BridgedActions::EndpointListTypeEnum::kRoom, true);
@@ -265,10 +266,13 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(bridgedComposedDeviceClusters)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(bridgedComposedDeviceEndpoint, bridgedComposedDeviceClusters);
+
+/*
 DataVersion gComposedDeviceDataVersions[ArraySize(bridgedComposedDeviceClusters)];
 DataVersion gComposedSwitch1DataVersions[ArraySize(bridgedSwitchClusters)];
 DataVersion gComposedSwitch2DataVersions[ArraySize(bridgedSwitchClusters)];
 DataVersion gComposedPowerSourceDataVersions[ArraySize(bridgedPowerSourceClusters)];
+*/
 
 } // namespace
 
@@ -285,6 +289,7 @@ DataVersion gComposedPowerSourceDataVersions[ArraySize(bridgedPowerSourceCluster
 
 // ---------------------------------------------------------------------------
 
+/*
 int AddDeviceEndpoint(Device * dev, EmberAfEndpointType * ep, const Span<const EmberAfDeviceType> & deviceTypeList,
                       const Span<DataVersion> & dataVersionStorage, chip::EndpointId parentEndpointId = chip::kInvalidEndpointId)
 {
@@ -343,6 +348,7 @@ int RemoveDeviceEndpoint(Device * dev)
     }
     return -1;
 }
+*/
 
 std::vector<EndpointListInfo> GetEndpointListInfo(chip::EndpointId parentId)
 {
@@ -423,6 +429,7 @@ void HandleDeviceOnOffStatusChanged(DeviceOnOff * dev, DeviceOnOff::Changed_t it
     }
 }
 
+/*
 void HandleDeviceSwitchStatusChanged(DeviceSwitch * dev, DeviceSwitch::Changed_t itemChangedMask)
 {
     if (itemChangedMask & (DeviceSwitch::kChanged_Reachable | DeviceSwitch::kChanged_Name | DeviceSwitch::kChanged_Location))
@@ -473,6 +480,7 @@ void HandleDevicePowerSourceStatusChanged(DevicePowerSource * dev, DevicePowerSo
         MatterReportingAttributeChangeCallback(dev->GetEndpointId(), PowerSource::Id, PowerSource::Attributes::Description::Id);
     }
 }
+*/
 
 EmberAfStatus HandleReadBridgedDeviceBasicAttribute(Device * dev, chip::AttributeId attributeId, uint8_t * buffer,
                                                     uint16_t maxReadLength)
@@ -547,6 +555,7 @@ EmberAfStatus HandleWriteOnOffAttribute(DeviceOnOff * dev, chip::AttributeId att
     return EMBER_ZCL_STATUS_SUCCESS;
 }
 
+/*
 EmberAfStatus HandleReadSwitchAttribute(DeviceSwitch * dev, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
     if ((attributeId == ZCL_NUMBER_OF_POSITIONS_ATTRIBUTE_ID) && (maxReadLength == 1))
@@ -615,6 +624,7 @@ EmberAfStatus HandleReadPowerSourceAttribute(DevicePowerSource * dev, chip::Attr
 
     return EMBER_ZCL_STATUS_SUCCESS;
 }
+*/
 
 EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId,
                                                    const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer,
@@ -636,6 +646,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
         {
             ret = HandleReadOnOffAttribute(static_cast<DeviceOnOff *>(dev), attributeMetadata->attributeId, buffer, maxReadLength);
         }
+        /*
         else if (clusterId == ZCL_SWITCH_CLUSTER_ID)
         {
             ret =
@@ -646,6 +657,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
             ret = HandleReadPowerSourceAttribute(static_cast<DevicePowerSource *>(dev), attributeMetadata->attributeId, buffer,
                                                  maxReadLength);
         }
+        */
     }
 
     return ret;
@@ -683,6 +695,14 @@ void runOnOffRoomAction(Room * room, bool actionOn, EndpointId endpointId, uint1
     }
 
     // Check and run the action for ActionLight1 - ActionLight4
+    for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
+      DeviceOnOff* ood = dynamic_cast<DeviceOnOff*>(pos->second.get());
+      if (ood && ood->GetLocation()==room->getName()) {
+        ood->SetOnOff(actionOn);
+      }
+    }
+
+    /*
     if (room->getName().compare(ActionLight1.GetLocation()) == 0)
     {
         ActionLight1.SetOnOff(actionOn);
@@ -699,6 +719,7 @@ void runOnOffRoomAction(Room * room, bool actionOn, EndpointId endpointId, uint1
     {
         ActionLight4.SetOnOff(actionOn);
     }
+    */
 
     if (hasInvokeID)
     {
@@ -754,6 +775,7 @@ void ApplicationInit() {}
 const EmberAfDeviceType gBridgedOnOffDeviceTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
                                                        { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
 
+/*
 const EmberAfDeviceType gBridgedSwitchDeviceTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT_SWITCH, DEVICE_VERSION_DEFAULT },
                                                         { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
 
@@ -762,6 +784,7 @@ const EmberAfDeviceType gBridgedComposedDeviceTypes[] = { { DEVICE_TYPE_BRIDGED_
 const EmberAfDeviceType gComposedSwitchDeviceTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT_SWITCH, DEVICE_VERSION_DEFAULT } };
 
 const EmberAfDeviceType gComposedPowerSourceDeviceTypes[] = { { DEVICE_TYPE_POWER_SOURCE, DEVICE_VERSION_DEFAULT } };
+*/
 
 #define POLL_INTERVAL_MS (100)
 uint8_t poll_prescale = 0;
@@ -773,6 +796,7 @@ bool kbhit()
     return byteswaiting > 0;
 }
 
+/*
 void * bridge_polling_thread(void * context)
 {
     bool light1_added = true;
@@ -877,7 +901,7 @@ void * bridge_polling_thread(void * context)
 
     return nullptr;
 }
-
+*/
 
 // MARK: - P44 additions
 
@@ -950,6 +974,12 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                               // TODO: separate into different light types
                               // for now, all just on/off
                               dev = new DeviceOnOff(name.c_str(), zone, dsuid);
+                              dev->setUpClusterInfo(
+                                ArraySize(bridgedLightClusters),
+                                &bridgedLightEndpoint,
+                                Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                                1
+                              );
                               break;
                           }
                           if (dev) {
@@ -1045,39 +1075,101 @@ int main(int argc, char * argv[])
 
 int chipmain(int argc, char * argv[])
 {
-  // MARK: p44 code
+  // Clear out the array of dynamic endpoints
+  memset(gDevices, 0, sizeof(gDevices));
 
-  chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreManager();
+  // MARK: p44 code
+  CHIP_ERROR cerr;
+  chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
   // get list of endpoints known in use
-  char endPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
-  size_t numEndPoints;
-  kvs.Get(kP44mbrNamespace "endPointMap", endPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numEp);
-  endPointMap[numEp]=0; // null terminate for easy debug printing as string
+  char dynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
+  size_t numDynamicEndPoints = 0;
+  cerr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numDynamicEndPoints);
+  if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+    // no endpoint map yet
+  }
+  else {
+    LogErrorOnFailure(cerr);
+  }
+  dynamicEndPointMap[numDynamicEndPoints]=0; // null terminate for easy debug printing as string
+  // revert all endpoint map markers to "unconfimed"
+  for (size_t i=0; i<numDynamicEndPoints; i++) {
+    if (dynamicEndPointMap[i]=='D') dynamicEndPointMap[i]='d'; // unconfirmed device
+  }
   // process list of to-be-bridged devices
   for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
     DevicePtr dev = pos->second;
     // look up previous endpoint mapping
-    string key = kP44mbrNamespace + "devices/" + dev->mBridgedDSUID;
-    EndpointId endpointId = 0;
-    CHIP_ERROR cerr = kvs.Get(key.c_str(), &endpointId);
+    string key = kP44mbrNamespace "devices/"; key += dev->mBridgedDSUID;
+    EndpointId dynamicEndpointIdx = kInvalidEndpointId;
+    cerr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (cerr==CHIP_NO_ERROR) {
       // try to re-use the endpoint ID for this dSUID
-      dev->SetEndpointId(endpointId);
-      
+      dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
+      // sanity check
+      if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
+        LOG(LOG_WARNING, "inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->mBridgedDSUID.c_str());
+      }
+      if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+        LOG(LOG_ERR, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->mBridgedDSUID.c_str());
+        dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
+      }
+      else {
+        // add to map
+        if (dynamicEndpointIdx<numDynamicEndPoints) {
+          dynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
+        }
+        else {
+          for (size_t i = numDynamicEndPoints; i<dynamicEndpointIdx; i++) dynamicEndPointMap[i]=' ';
+          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
+          dynamicEndPointMap[dynamicEndpointIdx+1] = 0;
+        }
+      }
     }
     else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
+      LOG(LOG_NOTICE, "new device %s, adding to bridge", dev->mBridgedDSUID.c_str());
     }
     else {
-      LOG(LOG_ERR, "Error accessing KVS: %s", ChipError::err(cerr).text());
+      LogErrorOnFailure(cerr);
+    }
+    // update and possibly extend endpoint map
+    if (dynamicEndpointIdx==kInvalidEndpointId) {
+      // this device needs a new endpoint
+      for (size_t i=0; i<numDynamicEndPoints; i++) {
+        if (dynamicEndPointMap[i]==' ') {
+          // use the gap
+          dynamicEndpointIdx = i;
+          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+        }
+      }
+      if (dynamicEndpointIdx==kInvalidEndpointId) {
+        if (numDynamicEndPoints<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+          LOG(LOG_ERR, "max number of dynamic endpoints exhausted -> cannot add new device %s", dev->mBridgedDSUID.c_str());
+        }
+        else {
+          dynamicEndpointIdx = numDynamicEndPoints++;
+          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+          // save in KVS
+          cerr = kvs.Put(key.c_str(), &dynamicEndpointIdx, numDynamicEndPoints);
+          LogErrorOnFailure(cerr);
+        }
+      }
+    }
+    // assign to dynamic endpoint array
+    if (dynamicEndpointIdx!=kInvalidEndpointId) {
+      gDevices[dynamicEndpointIdx] = dev.get();
     }
     // install callbacks
     // FIXME: for now: only onoff -> add other device types later
     DeviceOnOff* ood = dynamic_cast<DeviceOnOff *>(dev.get());
     if (ood) ood->SetChangeCallback(&HandleDeviceOnOffStatusChanged);
+    // default reachable to true
+    dev->SetReachable(true);
   }
-  //
-
+  // save updated endpoint map
+  cerr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
+  LogErrorOnFailure(cerr);
 
 
   // MARK: mostly original code
@@ -1154,12 +1246,21 @@ int chipmain(int argc, char * argv[])
   // will be the next consecutive endpoint id after the last fixed endpoint.
   gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
       static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
-  gCurrentEndpointId = gFirstDynamicEndpointId;
+  //gCurrentEndpointId = gFirstDynamicEndpointId;
 
   // Disable last fixed endpoint, which is used as a placeholder for all of the
   // supported clusters so that ZAP will generated the requisite code.
   emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
 
+  // Add the devices as dynamic endpoints
+  for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
+    if (gDevices[i]) {
+      // there is a device at this dynamic endpoint
+      gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId);
+    }
+  }
+
+  /*
   // Add light 1 -> will be mapped to ZCL endpoints 3
   AddDeviceEndpoint(&Light1, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
                     Span<DataVersion>(gLight1DataVersions), 1);
@@ -1190,6 +1291,7 @@ int chipmain(int argc, char * argv[])
                     Span<DataVersion>(gActionLight3DataVersions), 1);
   AddDeviceEndpoint(&ActionLight4, &bridgedLightEndpoint, Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
                     Span<DataVersion>(gActionLight4DataVersions), 1);
+  */
 
   // Add rooms
   gRooms.push_back(&room1);
@@ -1202,6 +1304,7 @@ int chipmain(int argc, char * argv[])
   gActions.push_back(&action3);
 
   // start testing loop
+  /*
   if (false) {
       pthread_t poll_thread;
       int res = pthread_create(&poll_thread, nullptr, bridge_polling_thread, nullptr);
@@ -1211,6 +1314,7 @@ int chipmain(int argc, char * argv[])
           exit(1);
       }
   }
+  */
 
   // Run CHIP
 
