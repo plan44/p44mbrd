@@ -23,25 +23,43 @@
 #include <cstdio>
 #include <platform/CHIPDeviceLayer.h>
 
+#include <app-common/zap-generated/attribute-id.h>
+#include <app-common/zap-generated/cluster-id.h>
+#include "ZclString.h"
+#include <app/reporting/reporting.h>
+
+// REVISION DEFINITIONS:
+// TODO: move these to a better place, probably into the devices that actually handle them, or
+//   try to extract them from ZAP-generated defs
+// =================================================================================
+
+#define ZCL_DESCRIPTOR_CLUSTER_REVISION (1u)
+#define ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION (1u)
+#define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
+#define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
+#define ZCL_ON_OFF_CLUSTER_REVISION (4u)
+
+
+
 using namespace chip::app::Clusters::BridgedActions;
 
 // MARK: - Device
 
 Device::Device(const char * szDeviceName, std::string szLocation, std::string aDSUID)
 {
-    strncpy(mName, szDeviceName, sizeof(mName));
-    mLocation   = szLocation;
-    mReachable  = false;
-    mDynamicEndpointIdx = kInvalidEndpointId;
-    mDynamicEndpointBase = 0;
-    // p44
-    mBridgedDSUID = aDSUID;
-    // - instantiation info
-    mNumClusterVersions = 0;
-    mClusterDataVersionsP = nullptr;
-    mEndpointTypeP = nullptr;
-    mDeviceTypeListP = nullptr;
-    mParentEndpointId = kInvalidEndpointId;
+  strncpy(mName, szDeviceName, sizeof(mName));
+  mLocation   = szLocation;
+  mReachable  = false;
+  mDynamicEndpointIdx = kInvalidEndpointId;
+  mDynamicEndpointBase = 0;
+  // p44
+  mBridgedDSUID = aDSUID;
+  // - instantiation info
+  mNumClusterVersions = 0;
+  mClusterDataVersionsP = nullptr;
+  mEndpointTypeP = nullptr;
+  mDeviceTypeListP = nullptr;
+  mParentEndpointId = kInvalidEndpointId;
 }
 
 
@@ -56,62 +74,41 @@ Device::~Device()
 
 bool Device::IsReachable()
 {
-    return mReachable;
+  return mReachable;
 }
 
 void Device::SetReachable(bool aReachable)
 {
-    bool changed = (mReachable != aReachable);
-
-    mReachable = aReachable;
-
-    if (aReachable)
-    {
-        ChipLogProgress(DeviceLayer, "Device[%s]: ONLINE", mName);
-    }
-    else
-    {
-        ChipLogProgress(DeviceLayer, "Device[%s]: OFFLINE", mName);
-    }
-
-    if (changed)
-    {
-        HandleDeviceChange(this, kChanged_Reachable);
-    }
+  bool changed = (mReachable != aReachable);
+  mReachable = aReachable;
+  if (aReachable) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: ONLINE", mName);
+  }
+  else {
+    ChipLogProgress(DeviceLayer, "Device[%s]: OFFLINE", mName);
+  }
+  if (changed) {
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
+  }
 }
 
 void Device::SetName(const char * szName)
 {
-    bool changed = (strncmp(mName, szName, sizeof(mName)) != 0);
+  bool changed = (strncmp(mName, szName, sizeof(mName)) != 0);
 
-    ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName, szName);
-    strncpy(mName, szName, sizeof(mName));
+  ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName, szName);
+  strncpy(mName, szName, sizeof(mName));
 
-    if (changed)
-    {
-        JsonObjectPtr params = JsonObject::newObj();
-        params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-        JsonObjectPtr props = JsonObject::newObj();
-        props->add("name", JsonObject::newString(mName));
-        params->add("properties", props);
-        BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
+  if (changed) {
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    JsonObjectPtr props = JsonObject::newObj();
+    props->add("name", JsonObject::newString(mName));
+    params->add("properties", props);
+    BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
 
-        HandleDeviceChange(this, kChanged_Name);
-    }
-}
-
-void Device::SetLocation(std::string szLocation)
-{
-    bool changed = (mLocation.compare(szLocation) != 0);
-
-    mLocation = szLocation;
-
-    ChipLogProgress(DeviceLayer, "Device[%s]: Location=\"%s\"", mName, mLocation.c_str());
-
-    if (changed)
-    {
-        HandleDeviceChange(this, kChanged_Location);
-    }
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+  }
 }
 
 
@@ -159,41 +156,71 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
 }
 
 
+EmberAfStatus Device::HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+    *buffer = IsReachable() ? 1 : 0;
+  }
+  else if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
+    MutableByteSpan zclNameSpan(buffer, maxReadLength);
+    MakeZclCharString(zclNameSpan, GetName());
+  }
+  else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+    *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
+  }
+  else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+    *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
+  }
+  else {
+    return EMBER_ZCL_STATUS_FAILURE;
+  }
+
+  return EMBER_ZCL_STATUS_SUCCESS;
+}
+
+
+EmberAfStatus Device::HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer)
+{
+  // handle common device attributes
+  // FIXME: No writeable common attributes at this time
+  return EMBER_ZCL_STATUS_FAILURE;
+}
+
+
+
 
 // MARK: - DeviceOnOff
 
 DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) : Device(szDeviceName, szLocation, aDSUID)
 {
-    mOn = false;
+  mOn = false;
 }
 
 bool DeviceOnOff::IsOn()
 {
-    return mOn;
+  return mOn;
 }
 
 void DeviceOnOff::SetOnOff(bool aOn)
 {
-    bool changed;
+  bool changed;
 
-    changed = aOn ^ mOn;
-    mOn     = aOn;
-    ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
+  changed = aOn ^ mOn;
+  mOn     = aOn;
+  ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
 
-    if (changed)
-    {
-        // call preset1 or off on the bridged device
-        JsonObjectPtr params = JsonObject::newObj();
-        params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-        params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
-        params->add("force", JsonObject::newBool(true));
-        BridgeApi::sharedBridgeApi().notify("callScene", params);
+  if (changed)
+  {
+    // call preset1 or off on the bridged device
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
+    params->add("force", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("callScene", params);
 
-        if (mChanged_CB)
-        {
-            mChanged_CB(this, kChanged_OnOff);
-        }
-    }
+    // report back to matter
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+  }
 }
 
 void DeviceOnOff::Toggle()
@@ -202,15 +229,38 @@ void DeviceOnOff::Toggle()
     SetOnOff(aOn);
 }
 
-void DeviceOnOff::SetChangeCallback(DeviceCallback_fn aChanged_CB)
+
+EmberAfStatus DeviceOnOff::HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-    mChanged_CB = aChanged_CB;
+  if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+    *buffer = IsOn() ? 1 : 0;
+  }
+  else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+    *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
+  }
+  else {
+    // let base class try
+    return inherited::HandleReadAttribute(attributeId, buffer, maxReadLength);
+  }
+
+  return EMBER_ZCL_STATUS_SUCCESS;
 }
 
-void DeviceOnOff::HandleDeviceChange(Device * device, Device::Changed_t changeMask)
+
+EmberAfStatus DeviceOnOff::HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer)
 {
-    if (mChanged_CB)
-    {
-        mChanged_CB(this, (DeviceOnOff::Changed_t) changeMask);
+  if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (IsReachable())) {
+    if (*buffer) {
+      SetOnOff(true);
     }
+    else {
+      SetOnOff(false);
+    }
+  }
+  else {
+    // let base class try
+    return inherited::HandleWriteAttribute(attributeId, buffer);
+  }
+
+  return EMBER_ZCL_STATUS_SUCCESS;
 }

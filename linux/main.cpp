@@ -93,19 +93,21 @@ DeviceDSUIDMap gDeviceDSUIDMap;
 #define DEVICE_TYPE_BRIDGED_NODE 0x0013
 // (taken from lo-devices.xml)
 #define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
+// (taken from matter-devices.xml)
+#define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
+// (taken from matter-devices.xml)
+#define DEVICE_TYPE_MA_COLOR_LIGHT 0x010C
 
 // Device Version for dynamic endpoints:
 #define DEVICE_VERSION_DEFAULT 1
 
 
-// Declare On/Off cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+// MARK: bridged device common declarations
 
 // Declare Descriptor cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(descriptorAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEVICE_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0),     /* device list */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEVICE_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* device list */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_SERVER_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* server list */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CLIENT_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* client list */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PARTS_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0),  /* parts list */
@@ -116,6 +118,13 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(bridgedDeviceBasicAttrs)
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kNodeLabelSize, 0), /* NodeLabel */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Reachable */
     DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+
+// MARK: onOff cluster declarations
+
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare Cluster List for Bridged Light endpoint
@@ -131,140 +140,103 @@ constexpr CommandId onOffIncomingCommands[] = {
     kInvalidCommandId,
 };
 
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(bridgedLightClusters)
+
+// MARK: level control cluster declarations
+
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* current level */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+constexpr CommandId levelControlIncomingCommands[] = {
+    app::Clusters::LevelControl::Commands::MoveToLevel::Id,
+    app::Clusters::LevelControl::Commands::Move::Id,
+    app::Clusters::LevelControl::Commands::Step::Id,
+    app::Clusters::LevelControl::Commands::Stop::Id,
+    app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::Id,
+    app::Clusters::LevelControl::Commands::MoveWithOnOff::Id,
+    app::Clusters::LevelControl::Commands::StepWithOnOff::Id,
+    app::Clusters::LevelControl::Commands::StopWithOnOff::Id,
+//    app::Clusters::LevelControl::Commands::MoveToClosestFrequency::Id,
+    kInvalidCommandId,
+};
+
+
+// MARK: color control cluster declarations
+
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, INT8U, 1, 0), /* current saturation */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 1, 0), /* current color temperature */
+    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+//    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+// TODO: other important capabilities
+// ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID type MAP16 (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp)
+
+constexpr CommandId colorControlIncomingCommands[] = {
+    app::Clusters::ColorControl::Commands::MoveToHue::Id,
+    app::Clusters::ColorControl::Commands::MoveHue::Id,
+    app::Clusters::ColorControl::Commands::StepHue::Id,
+    app::Clusters::ColorControl::Commands::MoveToSaturation::Id,
+    app::Clusters::ColorControl::Commands::MoveSaturation::Id,
+    app::Clusters::ColorControl::Commands::StepSaturation::Id,
+    app::Clusters::ColorControl::Commands::MoveToHueAndSaturation::Id,
+    app::Clusters::ColorControl::Commands::MoveToColorTemperature::Id,
+    app::Clusters::ColorControl::Commands::MoveColorTemperature::Id,
+    app::Clusters::ColorControl::Commands::StepColorTemperature::Id,
+    kInvalidCommandId,
+};
+
+
+// MARK: - actual endpoints
+
+// MARK: on/off light
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
     DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
     DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
     DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
-// Declare Bridged Light endpoint
-DECLARE_DYNAMIC_ENDPOINT(bridgedLightEndpoint, bridgedLightClusters);
+DECLARE_DYNAMIC_ENDPOINT(onOffLightEndpoint, onOffLightClusters);
+
+const EmberAfDeviceType gOnOffLightTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
+                                               { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
 
 
+
+// MARK: dimmable light
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
+    DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+DECLARE_DYNAMIC_ENDPOINT(dimmableLightEndpoint, dimmableLightClusters);
+
+const EmberAfDeviceType gDimmmableLightTypes[] = { { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
+                                                   { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
+
+// MARK: ct/color light
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
+    DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_COLOR_CONTROL_CLUSTER_ID, colorControlAttrs, colorControlIncomingCommands, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
+    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+DECLARE_DYNAMIC_ENDPOINT(colorLightEndpoint, colorLightClusters);
+
+const EmberAfDeviceType gColorLightTypes[] = { { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
+                                               { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
 
 
 } // namespace
 
-// REVISION DEFINITIONS:
-// =================================================================================
 
-#define ZCL_DESCRIPTOR_CLUSTER_REVISION (1u)
-#define ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION (1u)
-#define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
-#define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
-#define ZCL_ON_OFF_CLUSTER_REVISION (4u)
-
-// ---------------------------------------------------------------------------
-
-
-void HandleDeviceStatusChanged(Device * dev, Device::Changed_t itemChangedMask)
-{
-    if (itemChangedMask & Device::kChanged_Reachable)
-    {
-        uint8_t reachable = dev->IsReachable() ? 1 : 0;
-        MatterReportingAttributeChangeCallback(dev->GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID,
-                                               ZCL_REACHABLE_ATTRIBUTE_ID, ZCL_BOOLEAN_ATTRIBUTE_TYPE, &reachable);
-    }
-
-    if (itemChangedMask & Device::kChanged_Name)
-    {
-        uint8_t zclName[kNodeLabelSize];
-        MutableByteSpan zclNameSpan(zclName);
-        MakeZclCharString(zclNameSpan, dev->GetName());
-        MatterReportingAttributeChangeCallback(dev->GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID,
-                                               ZCL_NODE_LABEL_ATTRIBUTE_ID, ZCL_CHAR_STRING_ATTRIBUTE_TYPE, zclNameSpan.data());
-    }
-}
-
-void HandleDeviceOnOffStatusChanged(DeviceOnOff * dev, DeviceOnOff::Changed_t itemChangedMask)
-{
-    if (itemChangedMask & (DeviceOnOff::kChanged_Reachable | DeviceOnOff::kChanged_Name | DeviceOnOff::kChanged_Location))
-    {
-        HandleDeviceStatusChanged(static_cast<Device *>(dev), (Device::Changed_t) itemChangedMask);
-    }
-
-    if (itemChangedMask & DeviceOnOff::kChanged_OnOff)
-    {
-        uint8_t isOn = dev->IsOn() ? 1 : 0;
-        MatterReportingAttributeChangeCallback(dev->GetEndpointId(), ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID,
-                                               ZCL_BOOLEAN_ATTRIBUTE_TYPE, &isOn);
-    }
-}
-
-
-EmberAfStatus HandleReadBridgedDeviceBasicAttribute(Device * dev, chip::AttributeId attributeId, uint8_t * buffer,
-                                                    uint16_t maxReadLength)
-{
-    ChipLogProgress(DeviceLayer, "HandleReadBridgedDeviceBasicAttribute: attrId=%d, maxReadLength=%d", attributeId, maxReadLength);
-
-    if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1))
-    {
-        *buffer = dev->IsReachable() ? 1 : 0;
-    }
-    else if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32))
-    {
-        MutableByteSpan zclNameSpan(buffer, maxReadLength);
-        MakeZclCharString(zclNameSpan, dev->GetName());
-    }
-    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2))
-    {
-        *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
-    }
-    else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4))
-    {
-        *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
-    }
-    else
-    {
-        return EMBER_ZCL_STATUS_FAILURE;
-    }
-
-    return EMBER_ZCL_STATUS_SUCCESS;
-}
-
-EmberAfStatus HandleReadOnOffAttribute(DeviceOnOff * dev, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-    ChipLogProgress(DeviceLayer, "HandleReadOnOffAttribute: attrId=%d, maxReadLength=%d", attributeId, maxReadLength);
-
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1))
-    {
-        *buffer = dev->IsOn() ? 1 : 0;
-    }
-    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2))
-    {
-        *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
-    }
-    else
-    {
-        return EMBER_ZCL_STATUS_FAILURE;
-    }
-
-    return EMBER_ZCL_STATUS_SUCCESS;
-}
-
-EmberAfStatus HandleWriteOnOffAttribute(DeviceOnOff * dev, chip::AttributeId attributeId, uint8_t * buffer)
-{
-    ChipLogProgress(DeviceLayer, "HandleWriteOnOffAttribute: attrId=%d", attributeId);
-
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (dev->IsReachable()))
-    {
-        if (*buffer)
-        {
-            dev->SetOnOff(true);
-        }
-        else
-        {
-            dev->SetOnOff(false);
-        }
-    }
-    else
-    {
-        return EMBER_ZCL_STATUS_FAILURE;
-    }
-
-    return EMBER_ZCL_STATUS_SUCCESS;
-}
-
+// MARK: - attribute access handlers
 
 EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId,
                                                    const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer,
@@ -277,19 +249,12 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
     if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != nullptr))
     {
         Device * dev = gDevices[endpointIndex];
-
-        if (clusterId == ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID)
-        {
-            ret = HandleReadBridgedDeviceBasicAttribute(dev, attributeMetadata->attributeId, buffer, maxReadLength);
-        }
-        else if (clusterId == ZCL_ON_OFF_CLUSTER_ID)
-        {
-            ret = HandleReadOnOffAttribute(static_cast<DeviceOnOff *>(dev), attributeMetadata->attributeId, buffer, maxReadLength);
-        }
+        if (dev) ret = dev->HandleReadAttribute(attributeMetadata->attributeId, buffer, maxReadLength);
     }
 
     return ret;
 }
+
 
 EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, ClusterId clusterId,
                                                     const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer)
@@ -298,16 +263,10 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
 
     EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
 
-    // ChipLogProgress(DeviceLayer, "emberAfExternalAttributeWriteCallback: ep=%d", endpoint);
-
     if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
         Device * dev = gDevices[endpointIndex];
-
-        if ((dev->IsReachable()) && (clusterId == ZCL_ON_OFF_CLUSTER_ID))
-        {
-            ret = HandleWriteOnOffAttribute(static_cast<DeviceOnOff *>(dev), attributeMetadata->attributeId, buffer);
-        }
+        if (dev) ret = dev->HandleWriteAttribute(attributeMetadata->attributeId, buffer);
     }
 
     return ret;
@@ -410,20 +369,35 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                           // | Flow Sensor        | 774     | 0306 |
 
                           switch(outputfunction) {
+                            default:
                             case 0: // switch output - single channel 0..100
-                            case 1: // effective value dimmer - single channel 0..100
-                            case 3: // dimmer with color temperature - channels 1 and 4
-                            case 4: // full color dimmer - channels 1..6
-                              // TODO: separate into different light types
-                              // for now, all just on/off
                               dev = new DeviceOnOff(name.c_str(), zone, dsuid);
                               dev->setUpClusterInfo(
-                                ArraySize(bridgedLightClusters),
-                                &bridgedLightEndpoint,
-                                Span<const EmberAfDeviceType>(gBridgedOnOffDeviceTypes),
+                                ArraySize(onOffLightClusters),
+                                &onOffLightEndpoint,
+                                Span<const EmberAfDeviceType>(gOnOffLightTypes),
                                 1
                               );
                               break;
+//                            case 1: // effective value dimmer - single channel 0..100
+//                              dev = new DeviceDimmable(name.c_str(), zone, dsuid);
+//                              dev->setUpClusterInfo(
+//                                ArraySize(dimmableLightClusters),
+//                                &dimmableLightEndpoint,
+//                                Span<const EmberAfDeviceType>(gDimmableLightTypes),
+//                                1
+//                              );
+//                              break;
+//                            case 3: // dimmer with color temperature - channels 1 and 4
+//                            case 4: // full color dimmer - channels 1..6
+//                              dev = new DeviceColor(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
+//                              dev->setUpClusterInfo(
+//                                ArraySize(colorLightClusters),
+//                                &colorLightEndpoint,
+//                                Span<const EmberAfDeviceType>(gColorLightTypes),
+//                                1
+//                              );
+//                              break;
                           }
                           if (dev) {
                             gDeviceDSUIDMap[dsuid] = dev;
@@ -635,11 +609,6 @@ int chipmain(int argc, char * argv[])
       dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
       gDevices[dynamicEndpointIdx] = dev.get();
     }
-    // install callbacks
-    // FIXME: for now: only onoff -> add other device types later
-    DeviceOnOff* ood = dynamic_cast<DeviceOnOff *>(dev.get());
-    if (ood) ood->SetChangeCallback(&HandleDeviceOnOffStatusChanged);
-    // default reachable to true
     // FIXME: probably wrong time to do that, creates error
     dev->SetReachable(true);
   }
@@ -653,8 +622,9 @@ int chipmain(int argc, char * argv[])
       // there is a device at this dynamic endpoint
       if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId)) {
         // make sure reachable and name get reported
-        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Reachable);
-        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Name);
+        // FIXME: do we need this??
+//        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Reachable);
+//        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Name);
       }
     }
   }

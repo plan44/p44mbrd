@@ -93,8 +93,8 @@ CHIP_ERROR BridgedActionsAttrAccess::ReadEndpointListAttribute(EndpointId endpoi
 //            ReturnErrorOnFailure(encoder.Encode(endpointListStruct));
 //        }
         return CHIP_NO_ERROR;
-    });
-    return err;
+//    });
+//    return err;
 }
 
 CHIP_ERROR BridgedActionsAttrAccess::ReadSetupUrlAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
