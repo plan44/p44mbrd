@@ -1301,6 +1301,69 @@
 		ED690B61286DC7F600069215 /* Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Device.cpp; path = linux/Device.cpp; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
+		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
+		EDF3F4BE2893EC9700A82418 /* DeviceInfoProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInfoProvider.h; sourceTree = "<group>"; };
+		EDF3F4BF2893EC9700A82418 /* ConnectivityManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectivityManager.h; sourceTree = "<group>"; };
+		EDF3F4C02893EC9700A82418 /* GeneralUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralUtils.h; sourceTree = "<group>"; };
+		EDF3F4C12893EC9700A82418 /* AttributeList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AttributeList.h; sourceTree = "<group>"; };
+		EDF3F4C22893EC9700A82418 /* DiagnosticDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiagnosticDataProvider.h; sourceTree = "<group>"; };
+		EDF3F4C32893EC9700A82418 /* PlatformManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformManager.h; sourceTree = "<group>"; };
+		EDF3F4C42893EC9700A82418 /* KeyValueStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyValueStoreManager.h; sourceTree = "<group>"; };
+		EDF3F4C52893EC9700A82418 /* OTAImageProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAImageProcessor.h; sourceTree = "<group>"; };
+		EDF3F4C62893EC9700A82418 /* PersistedStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistedStorage.h; sourceTree = "<group>"; };
+		EDF3F4C72893EC9700A82418 /* KvsPersistentStorageDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KvsPersistentStorageDelegate.h; sourceTree = "<group>"; };
+		EDF3F4C82893EC9700A82418 /* LockTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LockTracker.h; sourceTree = "<group>"; };
+		EDF3F4CA2893EC9700A82418 /* GenericPlatformManagerImpl.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericPlatformManagerImpl.ipp; sourceTree = "<group>"; };
+		EDF3F4CB2893EC9700A82418 /* GenericConnectivityManagerImpl_UDP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_UDP.h; sourceTree = "<group>"; };
+		EDF3F4CC2893EC9700A82418 /* GenericPlatformManagerImpl_POSIX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericPlatformManagerImpl_POSIX.h; sourceTree = "<group>"; };
+		EDF3F4CD2893EC9700A82418 /* GenericConnectivityManagerImpl_NoThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_NoThread.h; sourceTree = "<group>"; };
+		EDF3F4CE2893EC9700A82418 /* GenericConnectivityManagerImpl_WiFi.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConnectivityManagerImpl_WiFi.ipp; sourceTree = "<group>"; };
+		EDF3F4CF2893EC9700A82418 /* GenericPlatformManagerImpl_POSIX.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericPlatformManagerImpl_POSIX.ipp; sourceTree = "<group>"; };
+		EDF3F4D02893EC9700A82418 /* GenericPlatformManagerImpl_Zephyr.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericPlatformManagerImpl_Zephyr.ipp; sourceTree = "<group>"; };
+		EDF3F4D12893EC9700A82418 /* GenericConfigurationManagerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConfigurationManagerImpl.h; sourceTree = "<group>"; };
+		EDF3F4D22893EC9700A82418 /* DeviceNetworkProvisioning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceNetworkProvisioning.h; sourceTree = "<group>"; };
+		EDF3F4D32893EC9700A82418 /* GenericPlatformManagerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericPlatformManagerImpl.h; sourceTree = "<group>"; };
+		EDF3F4D42893EC9700A82418 /* GenericConnectivityManagerImpl_Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_Thread.h; sourceTree = "<group>"; };
+		EDF3F4D52893EC9700A82418 /* GenericPlatformManagerImpl_FreeRTOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericPlatformManagerImpl_FreeRTOS.h; sourceTree = "<group>"; };
+		EDF3F4D62893EC9700A82418 /* BLEManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEManager.h; sourceTree = "<group>"; };
+		EDF3F4D72893EC9700A82418 /* CHIPDeviceLayerInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceLayerInternal.h; sourceTree = "<group>"; };
+		EDF3F4D82893EC9700A82418 /* GenericConnectivityManagerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl.h; sourceTree = "<group>"; };
+		EDF3F4D92893EC9700A82418 /* GenericConnectivityManagerImpl_Thread.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConnectivityManagerImpl_Thread.ipp; sourceTree = "<group>"; };
+		EDF3F4DA2893EC9700A82418 /* EventLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventLogging.h; sourceTree = "<group>"; };
+		EDF3F4DC2893EC9700A82418 /* ConfigUnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigUnitTest.h; sourceTree = "<group>"; };
+		EDF3F4DD2893EC9700A82418 /* GenericConnectivityManagerImpl_NoBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_NoBLE.h; sourceTree = "<group>"; };
+		EDF3F4DE2893EC9700A82418 /* GenericDeviceInstanceInfoProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericDeviceInstanceInfoProvider.h; sourceTree = "<group>"; };
+		EDF3F4DF2893EC9700A82418 /* DeviceNetworkInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceNetworkInfo.h; sourceTree = "<group>"; };
+		EDF3F4E02893EC9700A82418 /* GenericPlatformManagerImpl_Zephyr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericPlatformManagerImpl_Zephyr.h; sourceTree = "<group>"; };
+		EDF3F4E12893EC9700A82418 /* GenericConnectivityManagerImpl_BLE.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConnectivityManagerImpl_BLE.ipp; sourceTree = "<group>"; };
+		EDF3F4E22893EC9700A82418 /* GenericDeviceNetworkProvisioningDelegateImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericDeviceNetworkProvisioningDelegateImpl.h; sourceTree = "<group>"; };
+		EDF3F4E32893EC9700A82418 /* GenericConnectivityManagerImpl_UDP.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConnectivityManagerImpl_UDP.ipp; sourceTree = "<group>"; };
+		EDF3F4E42893EC9700A82418 /* GenericDeviceInstanceInfoProvider.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericDeviceInstanceInfoProvider.ipp; sourceTree = "<group>"; };
+		EDF3F4E52893EC9700A82418 /* GenericConfigurationManagerImpl.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConfigurationManagerImpl.ipp; sourceTree = "<group>"; };
+		EDF3F4E62893EC9700A82418 /* GenericConnectivityManagerImpl_NoWiFi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_NoWiFi.h; sourceTree = "<group>"; };
+		EDF3F4E72893EC9700A82418 /* GenericPlatformManagerImpl_FreeRTOS.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericPlatformManagerImpl_FreeRTOS.ipp; sourceTree = "<group>"; };
+		EDF3F4E82893EC9700A82418 /* GenericConnectivityManagerImpl_BLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_BLE.h; sourceTree = "<group>"; };
+		EDF3F4E92893EC9700A82418 /* GenericConnectivityManagerImpl_TCP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_TCP.h; sourceTree = "<group>"; };
+		EDF3F4EA2893EC9700A82418 /* GenericConnectivityManagerImpl_WiFi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericConnectivityManagerImpl_WiFi.h; sourceTree = "<group>"; };
+		EDF3F4EB2893EC9700A82418 /* GenericConnectivityManagerImpl_TCP.ipp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenericConnectivityManagerImpl_TCP.ipp; sourceTree = "<group>"; };
+		EDF3F4EC2893EC9700A82418 /* CommissionableDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommissionableDataProvider.h; sourceTree = "<group>"; };
+		EDF3F4ED2893EC9700A82418 /* NetworkCommissioning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioning.h; sourceTree = "<group>"; };
+		EDF3F4EE2893EC9700A82418 /* CHIPDeviceConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceConfig.h; sourceTree = "<group>"; };
+		EDF3F4EF2893EC9700A82418 /* DeviceControlServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceControlServer.h; sourceTree = "<group>"; };
+		EDF3F4F02893EC9700A82418 /* DeviceInstanceInfoProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInstanceInfoProvider.h; sourceTree = "<group>"; };
+		EDF3F4F12893EC9700A82418 /* CHIPDeviceLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceLayer.h; sourceTree = "<group>"; };
+		EDF3F4F22893EC9700A82418 /* ConfigurationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigurationManager.h; sourceTree = "<group>"; };
+		EDF3F4F32893EC9700A82418 /* GeneralFaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralFaults.h; sourceTree = "<group>"; };
+		EDF3F4F42893EC9700A82418 /* CHIPDeviceEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceEvent.h; sourceTree = "<group>"; };
+		EDF3F4F52893EC9700A82418 /* BuildTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BuildTime.h; sourceTree = "<group>"; };
+		EDF3F4F62893EC9700A82418 /* NFCManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFCManager.h; sourceTree = "<group>"; };
+		EDF3F4F72893EC9700A82418 /* ThreadStackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadStackManager.h; sourceTree = "<group>"; };
+		EDF3F4F82893EC9700A82418 /* TestOnlyCommissionableDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestOnlyCommissionableDataProvider.h; sourceTree = "<group>"; };
+		EDF3F4F92893EC9700A82418 /* CHIPDeviceError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceError.h; sourceTree = "<group>"; };
+		EDF3F4FB2893ED9500A82418 /* BUILD.gn */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
+		EDF3F4FD2893ED9500A82418 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
+		EDF3F4FE2893ED9500A82418 /* bridge-app.zap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.zap"; sourceTree = "<group>"; };
+		EDF3F4FF2893ED9500A82418 /* bridge-app.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.matter"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2090,6 +2153,7 @@
 		ED36DAB7286DD21200CA28EC /* inet */ = {
 			isa = PBXGroup;
 			children = (
+				EDF3F4A328916F9A00A82418 /* InetLayer.h */,
 				ED36DABC286DD27100CA28EC /* arpa-inet-compatibility.h */,
 				ED36DAC0286DD27100CA28EC /* IANAConstants.h */,
 				ED36DABA286DD27100CA28EC /* Inet.h */,
@@ -2846,6 +2910,7 @@
 		ED36DE10286DDC4900CA28EC /* include */ = {
 			isa = PBXGroup;
 			children = (
+				EDF3F4BD2893EC9700A82418 /* platform */,
 				ED36DE11286DDC9500CA28EC /* README.md */,
 			);
 			path = include;
@@ -3080,6 +3145,7 @@
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
 				ED23300F2886A18300D934D7 /* p44utils */,
+				EDF3F4FA2893ED9500A82418 /* bridge-common */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				ED690B5D286DC7F600069215 /* include */,
 				ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */,
@@ -3122,6 +3188,106 @@
 			);
 			name = connectedhomeip;
 			path = linux/third_party/connectedhomeip;
+			sourceTree = "<group>";
+		};
+		EDF3F4BD2893EC9700A82418 /* platform */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F4BE2893EC9700A82418 /* DeviceInfoProvider.h */,
+				EDF3F4BF2893EC9700A82418 /* ConnectivityManager.h */,
+				EDF3F4C02893EC9700A82418 /* GeneralUtils.h */,
+				EDF3F4C12893EC9700A82418 /* AttributeList.h */,
+				EDF3F4C22893EC9700A82418 /* DiagnosticDataProvider.h */,
+				EDF3F4C32893EC9700A82418 /* PlatformManager.h */,
+				EDF3F4C42893EC9700A82418 /* KeyValueStoreManager.h */,
+				EDF3F4C52893EC9700A82418 /* OTAImageProcessor.h */,
+				EDF3F4C62893EC9700A82418 /* PersistedStorage.h */,
+				EDF3F4C72893EC9700A82418 /* KvsPersistentStorageDelegate.h */,
+				EDF3F4C82893EC9700A82418 /* LockTracker.h */,
+				EDF3F4C92893EC9700A82418 /* internal */,
+				EDF3F4EC2893EC9700A82418 /* CommissionableDataProvider.h */,
+				EDF3F4ED2893EC9700A82418 /* NetworkCommissioning.h */,
+				EDF3F4EE2893EC9700A82418 /* CHIPDeviceConfig.h */,
+				EDF3F4EF2893EC9700A82418 /* DeviceControlServer.h */,
+				EDF3F4F02893EC9700A82418 /* DeviceInstanceInfoProvider.h */,
+				EDF3F4F12893EC9700A82418 /* CHIPDeviceLayer.h */,
+				EDF3F4F22893EC9700A82418 /* ConfigurationManager.h */,
+				EDF3F4F32893EC9700A82418 /* GeneralFaults.h */,
+				EDF3F4F42893EC9700A82418 /* CHIPDeviceEvent.h */,
+				EDF3F4F52893EC9700A82418 /* BuildTime.h */,
+				EDF3F4F62893EC9700A82418 /* NFCManager.h */,
+				EDF3F4F72893EC9700A82418 /* ThreadStackManager.h */,
+				EDF3F4F82893EC9700A82418 /* TestOnlyCommissionableDataProvider.h */,
+				EDF3F4F92893EC9700A82418 /* CHIPDeviceError.h */,
+			);
+			path = platform;
+			sourceTree = "<group>";
+		};
+		EDF3F4C92893EC9700A82418 /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F4CA2893EC9700A82418 /* GenericPlatformManagerImpl.ipp */,
+				EDF3F4CB2893EC9700A82418 /* GenericConnectivityManagerImpl_UDP.h */,
+				EDF3F4CC2893EC9700A82418 /* GenericPlatformManagerImpl_POSIX.h */,
+				EDF3F4CD2893EC9700A82418 /* GenericConnectivityManagerImpl_NoThread.h */,
+				EDF3F4CE2893EC9700A82418 /* GenericConnectivityManagerImpl_WiFi.ipp */,
+				EDF3F4CF2893EC9700A82418 /* GenericPlatformManagerImpl_POSIX.ipp */,
+				EDF3F4D02893EC9700A82418 /* GenericPlatformManagerImpl_Zephyr.ipp */,
+				EDF3F4D12893EC9700A82418 /* GenericConfigurationManagerImpl.h */,
+				EDF3F4D22893EC9700A82418 /* DeviceNetworkProvisioning.h */,
+				EDF3F4D32893EC9700A82418 /* GenericPlatformManagerImpl.h */,
+				EDF3F4D42893EC9700A82418 /* GenericConnectivityManagerImpl_Thread.h */,
+				EDF3F4D52893EC9700A82418 /* GenericPlatformManagerImpl_FreeRTOS.h */,
+				EDF3F4D62893EC9700A82418 /* BLEManager.h */,
+				EDF3F4D72893EC9700A82418 /* CHIPDeviceLayerInternal.h */,
+				EDF3F4D82893EC9700A82418 /* GenericConnectivityManagerImpl.h */,
+				EDF3F4D92893EC9700A82418 /* GenericConnectivityManagerImpl_Thread.ipp */,
+				EDF3F4DA2893EC9700A82418 /* EventLogging.h */,
+				EDF3F4DB2893EC9700A82418 /* testing */,
+				EDF3F4DD2893EC9700A82418 /* GenericConnectivityManagerImpl_NoBLE.h */,
+				EDF3F4DE2893EC9700A82418 /* GenericDeviceInstanceInfoProvider.h */,
+				EDF3F4DF2893EC9700A82418 /* DeviceNetworkInfo.h */,
+				EDF3F4E02893EC9700A82418 /* GenericPlatformManagerImpl_Zephyr.h */,
+				EDF3F4E12893EC9700A82418 /* GenericConnectivityManagerImpl_BLE.ipp */,
+				EDF3F4E22893EC9700A82418 /* GenericDeviceNetworkProvisioningDelegateImpl.h */,
+				EDF3F4E32893EC9700A82418 /* GenericConnectivityManagerImpl_UDP.ipp */,
+				EDF3F4E42893EC9700A82418 /* GenericDeviceInstanceInfoProvider.ipp */,
+				EDF3F4E52893EC9700A82418 /* GenericConfigurationManagerImpl.ipp */,
+				EDF3F4E62893EC9700A82418 /* GenericConnectivityManagerImpl_NoWiFi.h */,
+				EDF3F4E72893EC9700A82418 /* GenericPlatformManagerImpl_FreeRTOS.ipp */,
+				EDF3F4E82893EC9700A82418 /* GenericConnectivityManagerImpl_BLE.h */,
+				EDF3F4E92893EC9700A82418 /* GenericConnectivityManagerImpl_TCP.h */,
+				EDF3F4EA2893EC9700A82418 /* GenericConnectivityManagerImpl_WiFi.h */,
+				EDF3F4EB2893EC9700A82418 /* GenericConnectivityManagerImpl_TCP.ipp */,
+			);
+			path = internal;
+			sourceTree = "<group>";
+		};
+		EDF3F4DB2893EC9700A82418 /* testing */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F4DC2893EC9700A82418 /* ConfigUnitTest.h */,
+			);
+			path = testing;
+			sourceTree = "<group>";
+		};
+		EDF3F4FA2893ED9500A82418 /* bridge-common */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F4FB2893ED9500A82418 /* BUILD.gn */,
+				EDF3F4FC2893ED9500A82418 /* include */,
+				EDF3F4FE2893ED9500A82418 /* bridge-app.zap */,
+				EDF3F4FF2893ED9500A82418 /* bridge-app.matter */,
+			);
+			path = "bridge-common";
+			sourceTree = "<group>";
+		};
+		EDF3F4FC2893ED9500A82418 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F4FD2893ED9500A82418 /* CHIPProjectAppConfig.h */,
+			);
+			path = include;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

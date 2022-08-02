@@ -30,6 +30,9 @@
 // overrides CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT in CHIPProjectConfig
 #define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 42
 
+// FIXME: hard-code this because of hard-coded certs included through this
+#define CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID 0x8002
+
 // FIXME: luz temp debug, remove again to reduce FOOTPRINT
 // we want verbose error code display
 #define CHIP_CONFIG_IM_STATUS_CODE_VERBOSE_FORMAT 1

@@ -967,6 +967,26 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                           // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
                           // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
                           // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
+
+                          // From: docs/guides/darwin.md
+                          // -   Supported device types are (not exhaustive):
+                          //
+                          // | Type               | Decimal | HEX  |
+                          // | ------------------ | ------- | ---- |
+                          // | Lightbulb          | 256     | 0100 |
+                          // | Lightbulb + Dimmer | 257     | 0101 |
+                          // | Switch             | 259     | 0103 |
+                          // | Contact Sensor     | 21      | 0015 |
+                          // | Door Lock          | 10      | 000A |
+                          // | Light Sensor       | 262     | 0106 |
+                          // | Occupancy Sensor   | 263     | 0107 |
+                          // | Outlet             | 266     | 010A |
+                          // | Color Bulb         | 268     | 010C |
+                          // | Window Covering    | 514     | 0202 |
+                          // | Thermostat         | 769     | 0301 |
+                          // | Temperature Sensor | 770     | 0302 |
+                          // | Flow Sensor        | 774     | 0306 |
+
                           switch(outputfunction) {
                             case 0: // switch output - single channel 0..100
                             case 1: // effective value dimmer - single channel 0..100
