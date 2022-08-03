@@ -81,10 +81,10 @@ public:
   bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
 
   /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
+  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
 
   /// handler for external attribute write access
-  virtual EmberAfStatus HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer);
+  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
 
 protected:
 
@@ -118,10 +118,10 @@ public:
   void Toggle();
 
   /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 
   /// handler for external attribute write access
-  virtual EmberAfStatus HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 private:
   bool mOn;

@@ -156,30 +156,32 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
 }
 
 
-EmberAfStatus Device::HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-    *buffer = IsReachable() ? 1 : 0;
+  if (clusterId==ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID) {
+    if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = IsReachable() ? 1 : 0;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    else if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, GetName());
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+      *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
   }
-  else if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
-    MutableByteSpan zclNameSpan(buffer, maxReadLength);
-    MakeZclCharString(zclNameSpan, GetName());
-  }
-  else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-    *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
-  }
-  else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-    *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
-  }
-  else {
-    return EMBER_ZCL_STATUS_FAILURE;
-  }
-
-  return EMBER_ZCL_STATUS_SUCCESS;
+  return EMBER_ZCL_STATUS_FAILURE;
 }
 
 
-EmberAfStatus Device::HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   // handle common device attributes
   // FIXME: No writeable common attributes at this time
@@ -230,37 +232,36 @@ void DeviceOnOff::Toggle()
 }
 
 
-EmberAfStatus DeviceOnOff::HandleReadAttribute(chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-    *buffer = IsOn() ? 1 : 0;
+  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = IsOn() ? 1 : 0;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
   }
-  else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-    *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
-  }
-  else {
-    // let base class try
-    return inherited::HandleReadAttribute(attributeId, buffer, maxReadLength);
-  }
-
-  return EMBER_ZCL_STATUS_SUCCESS;
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
-EmberAfStatus DeviceOnOff::HandleWriteAttribute(chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
-  if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (IsReachable())) {
-    if (*buffer) {
-      SetOnOff(true);
-    }
-    else {
-      SetOnOff(false);
+  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (IsReachable())) {
+      if (*buffer) {
+        SetOnOff(true);
+      }
+      else {
+        SetOnOff(false);
+      }
+      return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
-  else {
-    // let base class try
-    return inherited::HandleWriteAttribute(attributeId, buffer);
-  }
-
-  return EMBER_ZCL_STATUS_SUCCESS;
+  // let base class try
+  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }

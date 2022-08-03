@@ -249,7 +249,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
     if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != nullptr))
     {
         Device * dev = gDevices[endpointIndex];
-        if (dev) ret = dev->HandleReadAttribute(attributeMetadata->attributeId, buffer, maxReadLength);
+        if (dev) ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
     }
 
     return ret;
@@ -266,7 +266,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
     if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
         Device * dev = gDevices[endpointIndex];
-        if (dev) ret = dev->HandleWriteAttribute(attributeMetadata->attributeId, buffer);
+        if (dev) ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     }
 
     return ret;
