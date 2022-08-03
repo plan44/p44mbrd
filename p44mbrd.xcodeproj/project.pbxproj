@@ -368,8 +368,11 @@
 		ED690B63286DC7F600069215 /* bridged-actions-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */; };
 		ED690B64286DC7F600069215 /* Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B61286DC7F600069215 /* Device.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
-		EDF3F5192899859E00A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F5112899859E00A82418 /* callback-stub.cpp */; };
-		EDF3F51A2899859E00A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F5162899859E00A82418 /* IMClusterCommandHandler.cpp */; };
+		EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F520289A84B600A82418 /* callback-stub.cpp */; };
+		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
+		EDF3F52A289AA8B100A82418 /* color-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CA286DCDA200CA28EC /* color-control-server.cpp */; };
+		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
+		EDF3F533289AA96000A82418 /* scenes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F531289AA96000A82418 /* scenes.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1354,16 +1357,21 @@
 		EDF3F4FD2893ED9500A82418 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
 		EDF3F4FE2893ED9500A82418 /* bridge-app.zap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.zap"; sourceTree = "<group>"; };
 		EDF3F4FF2893ED9500A82418 /* bridge-app.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.matter"; sourceTree = "<group>"; };
-		EDF3F50F2899859E00A82418 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
-		EDF3F5102899859E00A82418 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
-		EDF3F5112899859E00A82418 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
-		EDF3F5122899859E00A82418 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
-		EDF3F5132899859E00A82418 /* gen_tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_tokens.h; sourceTree = "<group>"; };
-		EDF3F5142899859E00A82418 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
-		EDF3F5152899859E00A82418 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
-		EDF3F5162899859E00A82418 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
-		EDF3F5172899859E00A82418 /* af-gen-event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "af-gen-event.h"; sourceTree = "<group>"; };
-		EDF3F5182899859E00A82418 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
+		EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
+		EDF3F51E289A84B600A82418 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
+		EDF3F51F289A84B600A82418 /* Clusters.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Clusters.matter; sourceTree = "<group>"; };
+		EDF3F520289A84B600A82418 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
+		EDF3F521289A84B600A82418 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
+		EDF3F522289A84B600A82418 /* gen_tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_tokens.h; sourceTree = "<group>"; };
+		EDF3F523289A84B600A82418 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
+		EDF3F524289A84B600A82418 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
+		EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
+		EDF3F527289A84B600A82418 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
+		EDF3F52C289AA96000A82418 /* groups-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "groups-server.h"; sourceTree = "<group>"; };
+		EDF3F52D289AA96000A82418 /* groups-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "groups-server.cpp"; sourceTree = "<group>"; };
+		EDF3F52F289AA96000A82418 /* scenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scenes.h; sourceTree = "<group>"; };
+		EDF3F530289AA96000A82418 /* scenes-tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "scenes-tokens.h"; sourceTree = "<group>"; };
+		EDF3F531289AA96000A82418 /* scenes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scenes.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1684,12 +1692,14 @@
 				ED36D7C0286DCDA200CA28EC /* general-commissioning-server */,
 				ED36D7D0286DCDA200CA28EC /* general-diagnostics-server */,
 				ED36D7E7286DCDA300CA28EC /* group-key-mgmt-server */,
+				EDF3F52B289AA96000A82418 /* groups-server */,
 				ED36D7CB286DCDA200CA28EC /* identify-server */,
 				ED36D7D5286DCDA300CA28EC /* level-control */,
 				ED36D7B7286DCDA200CA28EC /* localization-configuration-server */,
 				ED36D7DA286DCDA300CA28EC /* network-commissioning */,
 				ED36D7E9286DCDA300CA28EC /* on-off-server */,
 				ED36D7B9286DCDA200CA28EC /* operational-credentials-server */,
+				EDF3F52E289AA96000A82418 /* scenes */,
 				ED36D7C3286DCDA200CA28EC /* software-diagnostics-server */,
 				ED36D7BB286DCDA200CA28EC /* switch-server */,
 				ED36D7BE286DCDA200CA28EC /* thread-network-diagnostics-server */,
@@ -3123,7 +3133,7 @@
 		ED690B49286DC79500069215 = {
 			isa = PBXGroup;
 			children = (
-				EDF3F50E2899859E00A82418 /* zap-generated */,
+				EDF3F51C289A84B600A82418 /* zap-generated */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
 				ED23300F2886A18300D934D7 /* p44utils */,
@@ -3272,22 +3282,41 @@
 			path = include;
 			sourceTree = "<group>";
 		};
-		EDF3F50E2899859E00A82418 /* zap-generated */ = {
+		EDF3F51C289A84B600A82418 /* zap-generated */ = {
 			isa = PBXGroup;
 			children = (
-				EDF3F50F2899859E00A82418 /* CHIPClientCallbacks.h */,
-				EDF3F5102899859E00A82418 /* endpoint_config.h */,
-				EDF3F5112899859E00A82418 /* callback-stub.cpp */,
-				EDF3F5122899859E00A82418 /* CHIPClusters.h */,
-				EDF3F5132899859E00A82418 /* gen_tokens.h */,
-				EDF3F5142899859E00A82418 /* access.h */,
-				EDF3F5152899859E00A82418 /* PluginApplicationCallbacks.h */,
-				EDF3F5162899859E00A82418 /* IMClusterCommandHandler.cpp */,
-				EDF3F5172899859E00A82418 /* af-gen-event.h */,
-				EDF3F5182899859E00A82418 /* gen_config.h */,
+				EDF3F523289A84B600A82418 /* access.h */,
+				EDF3F520289A84B600A82418 /* callback-stub.cpp */,
+				EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */,
+				EDF3F521289A84B600A82418 /* CHIPClusters.h */,
+				EDF3F51F289A84B600A82418 /* Clusters.matter */,
+				EDF3F51E289A84B600A82418 /* endpoint_config.h */,
+				EDF3F527289A84B600A82418 /* gen_config.h */,
+				EDF3F522289A84B600A82418 /* gen_tokens.h */,
+				EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */,
+				EDF3F524289A84B600A82418 /* PluginApplicationCallbacks.h */,
 			);
 			name = "zap-generated";
 			path = "linux/zap-generated";
+			sourceTree = "<group>";
+		};
+		EDF3F52B289AA96000A82418 /* groups-server */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F52C289AA96000A82418 /* groups-server.h */,
+				EDF3F52D289AA96000A82418 /* groups-server.cpp */,
+			);
+			path = "groups-server";
+			sourceTree = "<group>";
+		};
+		EDF3F52E289AA96000A82418 /* scenes */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F52F289AA96000A82418 /* scenes.h */,
+				EDF3F530289AA96000A82418 /* scenes-tokens.h */,
+				EDF3F531289AA96000A82418 /* scenes.cpp */,
+			);
+			path = scenes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3399,7 +3428,7 @@
 				ED36D7A1286DCC4100CA28EC /* CommissioneeShellCommands.cpp in Sources */,
 				ED36DCFB286DD8A000CA28EC /* CASEServer.cpp in Sources */,
 				ED36DC64286DD6A400CA28EC /* ApplicationExchangeDispatch.cpp in Sources */,
-				EDF3F51A2899859E00A82418 /* IMClusterCommandHandler.cpp in Sources */,
+				EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D7A3286DCC4100CA28EC /* Options.cpp in Sources */,
 				ED36D7FE286DCDA300CA28EC /* diagnostic-logs-server.cpp in Sources */,
 				ED36D8F0286DCF0B00CA28EC /* ChunkedWriteCallback.cpp in Sources */,
@@ -3410,6 +3439,7 @@
 				ED36D87F286DCDED00CA28EC /* WriteRequestMessage.cpp in Sources */,
 				ED36D79F286DCC4100CA28EC /* ControllerShellCommands.cpp in Sources */,
 				ED36DC9F286DD7F200CA28EC /* UUIDHelperImpl.mm in Sources */,
+				EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */,
 				ED36DA8D286DD14F00CA28EC /* FabricTable.cpp in Sources */,
 				ED36D8E8286DCF0B00CA28EC /* RequiredPrivilege.cpp in Sources */,
 				ED36D8F6286DCF0B00CA28EC /* ReadClient.cpp in Sources */,
@@ -3458,6 +3488,7 @@
 				ED36D870286DCDED00CA28EC /* AttributeStatusIBs.cpp in Sources */,
 				ED36D880286DCDED00CA28EC /* ListParser.cpp in Sources */,
 				ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */,
+				EDF3F533289AA96000A82418 /* scenes.cpp in Sources */,
 				ED36DA61286DCFC600CA28EC /* CHIPDeviceController.cpp in Sources */,
 				ED36D79E286DCC4100CA28EC /* CommissionerMain.cpp in Sources */,
 				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
@@ -3596,7 +3627,7 @@
 				ED36DB74286DD2CE00CA28EC /* IP.cpp in Sources */,
 				ED36D7F2286DCDA300CA28EC /* general-commissioning-server.cpp in Sources */,
 				ED36DD3F286DD91500CA28EC /* Base38Encode.cpp in Sources */,
-				EDF3F5192899859E00A82418 /* callback-stub.cpp in Sources */,
+				EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */,
 				ED36DB73286DD2CE00CA28EC /* ResourceRecord.cpp in Sources */,
 				ED36DC12286DD57B00CA28EC /* Verhoeff32.cpp in Sources */,
 				ED36DB86286DD2CE00CA28EC /* ResponseSender.cpp in Sources */,
@@ -3637,6 +3668,7 @@
 				ED36DC49286DD65900CA28EC /* CHIPTLVUpdater.cpp in Sources */,
 				ED36D884286DCDED00CA28EC /* ListBuilder.cpp in Sources */,
 				ED36DC0B286DD57B00CA28EC /* BytesCircularBuffer.cpp in Sources */,
+				EDF3F52A289AA8B100A82418 /* color-control-server.cpp in Sources */,
 				ED36DB72286DD2CE00CA28EC /* QueryResponder.cpp in Sources */,
 				ED36DD72286DD9A400CA28EC /* SystemLayerImplSelect.cpp in Sources */,
 				ED36DDE9286DDAF300CA28EC /* json_reader.cpp in Sources */,
@@ -3846,7 +3878,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/linux/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated/bridge-app",
+					"$(PROJECT_DIR)/linux",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src/include",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
@@ -3888,7 +3920,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/linux/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated/bridge-app",
+					"$(PROJECT_DIR)/linux",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src/include",
 					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
