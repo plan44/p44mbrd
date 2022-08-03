@@ -41,14 +41,6 @@ class Device : public p44::P44Obj
 public:
   static const int kDeviceNameSize = 32;
 
-  enum Changed_t
-  {
-      kChanged_Reachable = 1u << 0,
-      kChanged_Location  = 1u << 1,
-      kChanged_Name      = 1u << 2,
-      kChanged_Last      = kChanged_Name,
-  } Changed;
-
   // P44
   std::string mBridgedDSUID;
 
@@ -105,21 +97,14 @@ class DeviceOnOff : public Device
 {
   typedef Device inherited;
 public:
-  enum Changed_t
-  {
-      kChanged_OnOff = kChanged_Last << 1,
-      kChanged_OnOff_last = kChanged_OnOff
-  } Changed;
 
   DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID);
 
-  bool IsOn();
-  void SetOnOff(bool aOn);
-  void Toggle();
+  bool IsOn() { return mOn; }
+  bool SetOnOff(bool aOn);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
@@ -132,15 +117,16 @@ class DeviceDimmable : public DeviceOnOff
 {
   typedef DeviceOnOff inherited;
 public:
-  enum Changed_t
-  {
-      kChanged_Level = kChanged_OnOff_last << 1,
-      kChanged_Level_last = kChanged_Level
-  } Changed;
 
   DeviceDimmable(const char * szDeviceName, std::string szLocation, std::string aDSUID);
 
-  uint8_t currentLevel();
+  uint8_t currentLevel() { return mLevel; };
+  bool setCurrentLevel(uint8_t aNewLevel);
+
+  /// handler for external attribute read access
+  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  /// handler for external attribute write access
+  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 private:
   uint8_t mLevel;
@@ -151,21 +137,25 @@ class DeviceColor : public DeviceDimmable
 {
   typedef DeviceDimmable inherited;
 public:
-  enum Changed_t
-  {
-      kChanged_hue = kChanged_Level << 1,
-      kChanged_saturation = kChanged_Level << 2,
-      kChanged_colortemp = kChanged_Level << 3,
-      kChanged_Color_last = kChanged_colortemp
-  } Changed;
 
   DeviceColor(const char * szDeviceName, std::string szLocation, std::string aDSUID, bool aCTOnly);
 
-  uint8_t currentHue();
-  uint8_t currentSaturation();
-  uint16_t currentColortemp();
+  uint8_t currentHue() { return mHue; };
+  uint8_t currentSaturation() { return mSaturation; };
+  uint16_t currentColortemp() { return mColorTemp; };
+
+  bool setCurrentHue(uint8_t aHue);
+  bool setCurrentSaturation(uint8_t aSaturation);
+  bool setCurrentColortemp(uint8_t aColortemp);
+
+  /// handler for external attribute read access
+  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  /// handler for external attribute write access
+  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 private:
+  bool mCtOnly;
+  uint8_t mColorMode; // 0=HS, 1=XY, 2=Colortemp
   uint8_t mHue;
   uint8_t mSaturation;
   uint16_t mColorTemp;

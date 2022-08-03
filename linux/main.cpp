@@ -95,7 +95,7 @@ DeviceDSUIDMap gDeviceDSUIDMap;
 #define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
 // (taken from matter-devices.xml)
 #define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
-// (taken from matter-devices.xml)
+// (taken from matter-devices.xml) FIXME: is it only "color temperature"? or just not extended (0x010D) color?
 #define DEVICE_TYPE_MA_COLOR_LIGHT 0x010C
 
 // Device Version for dynamic endpoints:
@@ -215,8 +215,8 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(dimmableLightEndpoint, dimmableLightClusters);
 
-const EmberAfDeviceType gDimmmableLightTypes[] = { { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
-                                                   { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
+const EmberAfDeviceType gDimmableLightTypes[] = { { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
+                                                  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
 
 // MARK: ct/color light
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
@@ -248,8 +248,12 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
 
     if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != nullptr))
     {
-        Device * dev = gDevices[endpointIndex];
-        if (dev) ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
+      Device * dev = gDevices[endpointIndex];
+      if (dev) {
+        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId);
+        ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
+        if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
+      }
     }
 
     return ret;
@@ -265,8 +269,12 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
 
     if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
-        Device * dev = gDevices[endpointIndex];
-        if (dev) ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
+      Device * dev = gDevices[endpointIndex];
+      if (dev) {
+        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId);
+        ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
+        if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute write not handled!");
+      }
     }
 
     return ret;
@@ -379,25 +387,25 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                                 1
                               );
                               break;
-//                            case 1: // effective value dimmer - single channel 0..100
-//                              dev = new DeviceDimmable(name.c_str(), zone, dsuid);
-//                              dev->setUpClusterInfo(
-//                                ArraySize(dimmableLightClusters),
-//                                &dimmableLightEndpoint,
-//                                Span<const EmberAfDeviceType>(gDimmableLightTypes),
-//                                1
-//                              );
-//                              break;
-//                            case 3: // dimmer with color temperature - channels 1 and 4
-//                            case 4: // full color dimmer - channels 1..6
-//                              dev = new DeviceColor(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
-//                              dev->setUpClusterInfo(
-//                                ArraySize(colorLightClusters),
-//                                &colorLightEndpoint,
-//                                Span<const EmberAfDeviceType>(gColorLightTypes),
-//                                1
-//                              );
-//                              break;
+                            case 1: // effective value dimmer - single channel 0..100
+                              dev = new DeviceDimmable(name.c_str(), zone, dsuid);
+                              dev->setUpClusterInfo(
+                                ArraySize(dimmableLightClusters),
+                                &dimmableLightEndpoint,
+                                Span<const EmberAfDeviceType>(gDimmableLightTypes),
+                                1
+                              );
+                              break;
+                            case 3: // dimmer with color temperature - channels 1 and 4
+                            case 4: // full color dimmer - channels 1..6
+                              dev = new DeviceColor(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
+                              dev->setUpClusterInfo(
+                                ArraySize(colorLightClusters),
+                                &colorLightEndpoint,
+                                Span<const EmberAfDeviceType>(gColorLightTypes),
+                                1
+                              );
+                              break;
                           }
                           if (dev) {
                             gDeviceDSUIDMap[dsuid] = dev;

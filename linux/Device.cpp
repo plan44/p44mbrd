@@ -163,16 +163,16 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       *buffer = IsReachable() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    else if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
+    if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, GetName());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    else if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
       *buffer = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -193,42 +193,10 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) : Device(szDeviceName, szLocation, aDSUID)
+DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) :
+  inherited(szDeviceName, szLocation, aDSUID)
 {
   mOn = false;
-}
-
-bool DeviceOnOff::IsOn()
-{
-  return mOn;
-}
-
-void DeviceOnOff::SetOnOff(bool aOn)
-{
-  bool changed;
-
-  changed = aOn ^ mOn;
-  mOn     = aOn;
-  ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
-
-  if (changed)
-  {
-    // call preset1 or off on the bridged device
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
-    params->add("force", JsonObject::newBool(true));
-    BridgeApi::sharedBridgeApi().notify("callScene", params);
-
-    // report back to matter
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
-  }
-}
-
-void DeviceOnOff::Toggle()
-{
-    bool aOn = !IsOn();
-    SetOnOff(aOn);
 }
 
 
@@ -239,8 +207,8 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
       *buffer = IsOn() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    else if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = ZCL_ON_OFF_CLUSTER_REVISION;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -249,19 +217,216 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
 }
 
 
+bool DeviceOnOff::SetOnOff(bool aOn)
+{
+  ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
+  if (aOn!=mOn) {
+    mOn  = aOn;
+    // call preset1 or off on the bridged device
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
+    params->add("force", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("callScene", params);
+    // report back to matter
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
 EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (IsReachable())) {
-      if (*buffer) {
-        SetOnOff(true);
-      }
-      else {
-        SetOnOff(false);
-      }
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && IsReachable()) {
+      SetOnOff(*buffer);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }
+
+
+// MARK: - DeviceDimmable
+
+DeviceDimmable::DeviceDimmable(const char * szDeviceName, std::string szLocation, std::string aDSUID) :
+  inherited(szDeviceName, szLocation, aDSUID),
+  mLevel(0)
+{
+}
+
+
+EmberAfStatus DeviceDimmable::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentLevel();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+}
+
+
+bool DeviceDimmable::setCurrentLevel(uint8_t aNewLevel)
+{
+  ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d", mName, aNewLevel);
+  if (aNewLevel!=mLevel) {
+    mLevel = aNewLevel;
+    // adjust default channel
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("channel", JsonObject::newInt32(0)); // default channel
+    params->add("value", JsonObject::newDouble((double)mLevel*100/0xFE));
+    params->add("apply_now", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    // report back to matter
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+EmberAfStatus DeviceDimmable::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+{
+  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && IsReachable()) {
+      setCurrentLevel(*buffer);
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+}
+
+
+// MARK: - DeviceColor
+
+DeviceColor::DeviceColor(const char * szDeviceName, std::string szLocation, std::string aDSUID, bool aCTOnly) :
+  inherited(szDeviceName, szLocation, aDSUID),
+  mCtOnly(aCTOnly),
+  mColorMode(aCTOnly ? 2 : 0),
+  mHue(0),
+  mSaturation(0),
+  mColorTemp(0)
+{
+}
+
+
+EmberAfStatus DeviceColor::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      // color capabilities: Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp
+      *buffer = (1<<4) | (mCtOnly ? 0 : (1<<0));
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      // color mode: 0=HS, 1=XY, 2=Colortemp
+      *buffer = mColorMode;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentHue();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentSaturation();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = currentColortemp();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+}
+
+
+bool DeviceColor::setCurrentHue(uint8_t aHue)
+{
+  ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", mName, aHue);
+  if (aHue!=mHue) {
+    mHue = aHue;
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("channelId", JsonObject::newString("hue"));
+    params->add("value", JsonObject::newDouble((double)mHue*360/0xFE));
+    params->add("apply_now", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    if (mColorMode!=0) {
+      mColorMode = 0; // switch to HS
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    }
+    // report back to matter
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID);
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+bool DeviceColor::setCurrentSaturation(uint8_t aSaturation)
+{
+  ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", mName, aSaturation);
+  if (aSaturation!=mSaturation) {
+    mSaturation = aSaturation;
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("channelId", JsonObject::newString("saturation"));
+    params->add("value", JsonObject::newDouble((double)mSaturation*100/0xFE));
+    params->add("apply_now", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    // report back to matter
+    if (mColorMode!=0) {
+      mColorMode = 0; // switch to HS
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    }
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID);
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+bool DeviceColor::setCurrentColortemp(uint8_t aColortemp)
+{
+  ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", mName, aColortemp);
+  if (aColortemp!=mColorTemp) {
+    mColorTemp = aColortemp;
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+    params->add("channelId", JsonObject::newString("colortemp"));
+    params->add("value", JsonObject::newDouble(mColorTemp)); // is in mireds
+    params->add("apply_now", JsonObject::newBool(true));
+    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    // report back to matter
+    if (mColorMode!=2) {
+      mColorMode = 2; // switch to CT
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    }
+    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID);
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+EmberAfStatus DeviceColor::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+{
+  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && IsReachable()) {
+      setCurrentLevel(*buffer);
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+}
+
+
