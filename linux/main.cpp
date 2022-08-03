@@ -250,7 +250,10 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
     {
       Device * dev = gDevices[endpointIndex];
       if (dev) {
-        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId);
+        ChipLogProgress(DeviceLayer,
+          "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
+          (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
+        );
         ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
         if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
       }

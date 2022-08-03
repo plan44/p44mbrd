@@ -38,6 +38,8 @@
 #define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
 #define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
 #define ZCL_ON_OFF_CLUSTER_REVISION (4u)
+#define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
+#define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
 
 
 
@@ -203,12 +205,12 @@ DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std:
 EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = IsOn() ? 1 : 0;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *((uint16_t *)buffer) = ZCL_ON_OFF_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = IsOn() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -261,6 +263,10 @@ DeviceDimmable::DeviceDimmable(const char * szDeviceName, std::string szLocation
 EmberAfStatus DeviceDimmable::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = ZCL_LEVEL_CONTROL_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
     if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
       *buffer = currentLevel();
       return EMBER_ZCL_STATUS_SUCCESS;
@@ -320,6 +326,10 @@ DeviceColor::DeviceColor(const char * szDeviceName, std::string szLocation, std:
 EmberAfStatus DeviceColor::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = ZCL_COLOR_CONTROL_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
     if ((attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
       // color capabilities: Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp
       *buffer = (1<<4) | (mCtOnly ? 0 : (1<<0));
@@ -338,8 +348,13 @@ EmberAfStatus DeviceColor::HandleReadAttribute(ClusterId clusterId, chip::Attrib
       *buffer = currentSaturation();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t *)buffer) = currentColortemp();
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)) {
+      if (maxReadLength == 2) {
+        *((uint16_t *)buffer) = currentColortemp();
+      }
+      else if (maxReadLength == 1) {
+        *((uint8_t *)buffer) = (uint8_t)currentColortemp();
+      }
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
