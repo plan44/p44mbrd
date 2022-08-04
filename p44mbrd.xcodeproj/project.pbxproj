@@ -47,7 +47,6 @@
 		ED36D7F7286DCDA300CA28EC /* user-label-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CF286DCDA200CA28EC /* user-label-server.cpp */; };
 		ED36D7F8286DCDA300CA28EC /* general-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D2286DCDA200CA28EC /* general-diagnostics-server.cpp */; };
 		ED36D7F9286DCDA300CA28EC /* wifi-network-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D4286DCDA200CA28EC /* wifi-network-diagnostics-server.cpp */; };
-		ED36D7FA286DCDA300CA28EC /* level-control.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D7286DCDA300CA28EC /* level-control.cpp */; };
 		ED36D7FB286DCDA300CA28EC /* access-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D9286DCDA300CA28EC /* access-control-server.cpp */; };
 		ED36D7FC286DCDA300CA28EC /* network-commissioning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7DB286DCDA300CA28EC /* network-commissioning.cpp */; };
 		ED36D7FD286DCDA300CA28EC /* descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7DE286DCDA300CA28EC /* descriptor.cpp */; };
@@ -55,7 +54,6 @@
 		ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7E3286DCDA300CA28EC /* administrator-commissioning-server.cpp */; };
 		ED36D800286DCDA300CA28EC /* basic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7E5286DCDA300CA28EC /* basic.cpp */; };
 		ED36D801286DCDA300CA28EC /* group-key-mgmt-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7E8286DCDA300CA28EC /* group-key-mgmt-server.cpp */; };
-		ED36D802286DCDA300CA28EC /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
 		ED36D803286DCDA300CA28EC /* ethernet-network-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7ED286DCDA300CA28EC /* ethernet-network-diagnostics-server.cpp */; };
 		ED36D863286DCDED00CA28EC /* CommandPathIB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D806286DCDEC00CA28EC /* CommandPathIB.cpp */; };
 		ED36D864286DCDED00CA28EC /* ArrayBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D807286DCDEC00CA28EC /* ArrayBuilder.cpp */; };
@@ -365,14 +363,18 @@
 		ED36DF22286E0D6400CA28EC /* CustomCSRResponseOperationalKeyStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */; };
 		ED36DF23286E0D6400CA28EC /* CustomCSRResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DF20286E0D4800CA28EC /* CustomCSRResponse.cpp */; };
 		ED690B62286DC7F600069215 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* main.cpp */; };
-		ED690B63286DC7F600069215 /* bridged-actions-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */; };
-		ED690B64286DC7F600069215 /* Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B61286DC7F600069215 /* Device.cpp */; };
+		ED690B64286DC7F600069215 /* device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B61286DC7F600069215 /* device.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F520289A84B600A82418 /* callback-stub.cpp */; };
 		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
-		EDF3F52A289AA8B100A82418 /* color-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CA286DCDA200CA28EC /* color-control-server.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
 		EDF3F533289AA96000A82418 /* scenes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F531289AA96000A82418 /* scenes.cpp */; };
+		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
+		EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CA286DCDA200CA28EC /* color-control-server.cpp */; };
+		EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F536289BF35E00A82418 /* deviceonoff.cpp */; };
+		EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */; };
+		EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */; };
+		EDF3F541289BF4F800A82418 /* level-control.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D7286DCDA300CA28EC /* level-control.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -390,7 +392,7 @@
 /* Begin PBXFileReference section */
 		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED233009288698AF00D934D7 /* bridgeapi.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = bridgeapi.cpp; path = linux/bridgeapi.cpp; sourceTree = "<group>"; };
-		ED23300A288698AF00D934D7 /* bridgeapi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = bridgeapi.hpp; path = linux/bridgeapi.hpp; sourceTree = "<group>"; };
+		ED23300A288698AF00D934D7 /* bridgeapi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bridgeapi.h; path = linux/bridgeapi.h; sourceTree = "<group>"; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
 		ED2330112886A1C500D934D7 /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
 		ED2330122886A1C500D934D7 /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
@@ -1288,10 +1290,9 @@
 		ED36DF24286E354400CA28EC /* p44mbrd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = p44mbrd.entitlements; sourceTree = "<group>"; };
 		ED690B52286DC79500069215 /* p44mbrd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = p44mbrd; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED690B5C286DC7F600069215 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = linux/main.cpp; sourceTree = "<group>"; };
-		ED690B5E286DC7F600069215 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		ED690B5F286DC7F600069215 /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
-		ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "bridged-actions-stub.cpp"; path = "linux/bridged-actions-stub.cpp"; sourceTree = "<group>"; };
-		ED690B61286DC7F600069215 /* Device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Device.cpp; path = linux/Device.cpp; sourceTree = "<group>"; };
+		ED690B5E286DC7F600069215 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = linux/main.h; sourceTree = "<group>"; };
+		ED690B5F286DC7F600069215 /* device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = device.h; path = linux/device.h; sourceTree = "<group>"; };
+		ED690B61286DC7F600069215 /* device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = device.cpp; path = linux/device.cpp; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -1372,6 +1373,15 @@
 		EDF3F52F289AA96000A82418 /* scenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scenes.h; sourceTree = "<group>"; };
 		EDF3F530289AA96000A82418 /* scenes-tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "scenes-tokens.h"; sourceTree = "<group>"; };
 		EDF3F531289AA96000A82418 /* scenes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scenes.cpp; sourceTree = "<group>"; };
+		EDF3F536289BF35E00A82418 /* deviceonoff.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = deviceonoff.cpp; path = linux/deviceonoff.cpp; sourceTree = "<group>"; };
+		EDF3F537289BF35E00A82418 /* deviceonoff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = deviceonoff.h; path = linux/deviceonoff.h; sourceTree = "<group>"; };
+		EDF3F539289BF3C100A82418 /* args.gni */ = {isa = PBXFileReference; lastKnownFileType = text; name = args.gni; path = linux/args.gni; sourceTree = "<group>"; };
+		EDF3F53A289BF3C100A82418 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; name = BUILD.gn; path = linux/BUILD.gn; sourceTree = "<group>"; };
+		EDF3F53B289BF46100A82418 /* devicecolorcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = devicecolorcontrol.h; path = linux/devicecolorcontrol.h; sourceTree = "<group>"; };
+		EDF3F53C289BF46100A82418 /* devicelevelcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = devicelevelcontrol.h; path = linux/devicelevelcontrol.h; sourceTree = "<group>"; };
+		EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicelevelcontrol.cpp; path = linux/devicelevelcontrol.cpp; sourceTree = "<group>"; };
+		EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicecolorcontrol.cpp; path = linux/devicecolorcontrol.cpp; sourceTree = "<group>"; };
+		EDF3F542289BFC3E00A82418 /* device_impl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = device_impl.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3133,18 +3143,27 @@
 		ED690B49286DC79500069215 = {
 			isa = PBXGroup;
 			children = (
+				EDF3F539289BF3C100A82418 /* args.gni */,
+				EDF3F53A289BF3C100A82418 /* BUILD.gn */,
 				EDF3F51C289A84B600A82418 /* zap-generated */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
 				ED23300F2886A18300D934D7 /* p44utils */,
 				EDF3F4FA2893ED9500A82418 /* bridge-common */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
-				ED690B5D286DC7F600069215 /* include */,
-				ED690B60286DC7F600069215 /* bridged-actions-stub.cpp */,
-				ED690B61286DC7F600069215 /* Device.cpp */,
+				EDF3F542289BFC3E00A82418 /* device_impl.h */,
+				ED690B61286DC7F600069215 /* device.cpp */,
+				ED690B5F286DC7F600069215 /* device.h */,
+				EDF3F536289BF35E00A82418 /* deviceonoff.cpp */,
+				EDF3F537289BF35E00A82418 /* deviceonoff.h */,
+				EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */,
+				EDF3F53C289BF46100A82418 /* devicelevelcontrol.h */,
+				EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */,
+				EDF3F53B289BF46100A82418 /* devicecolorcontrol.h */,
 				ED233009288698AF00D934D7 /* bridgeapi.cpp */,
-				ED23300A288698AF00D934D7 /* bridgeapi.hpp */,
+				ED23300A288698AF00D934D7 /* bridgeapi.h */,
 				ED690B5C286DC7F600069215 /* main.cpp */,
+				ED690B5E286DC7F600069215 /* main.h */,
 				ED690B65286DC80800069215 /* connectedhomeip */,
 				ED690B53286DC79500069215 /* Products */,
 				ED36DE40286DFE6100CA28EC /* Frameworks */,
@@ -3157,16 +3176,6 @@
 				ED690B52286DC79500069215 /* p44mbrd */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		ED690B5D286DC7F600069215 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				ED690B5E286DC7F600069215 /* main.h */,
-				ED690B5F286DC7F600069215 /* Device.h */,
-			);
-			name = include;
-			path = linux/include;
 			sourceTree = "<group>";
 		};
 		ED690B65286DC80800069215 /* connectedhomeip */ = {
@@ -3435,6 +3444,7 @@
 				ED36DDC9286DDA0300CA28EC /* SessionHandle.cpp in Sources */,
 				ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */,
 				ED36DB88286DD2CE00CA28EC /* Parser.cpp in Sources */,
+				EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */,
 				ED36DE9B286E043500CA28EC /* PersistedStorage.cpp in Sources */,
 				ED36D87F286DCDED00CA28EC /* WriteRequestMessage.cpp in Sources */,
 				ED36D79F286DCC4100CA28EC /* ControllerShellCommands.cpp in Sources */,
@@ -3452,6 +3462,7 @@
 				ED36D863286DCDED00CA28EC /* CommandPathIB.cpp in Sources */,
 				ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */,
 				ED36DE8A286E02CD00CA28EC /* af-event.cpp in Sources */,
+				EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */,
 				ED36DE9C286E043500CA28EC /* DeviceInstanceInfoProvider.cpp in Sources */,
 				ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */,
 				ED36DA60286DCFC600CA28EC /* AbstractDnssdDiscoveryController.cpp in Sources */,
@@ -3506,7 +3517,6 @@
 				ED36DBFF286DD57B00CA28EC /* BytesToHex.cpp in Sources */,
 				ED36D908286DCF5100CA28EC /* AclStorage.cpp in Sources */,
 				ED2330222886A69700D934D7 /* error.cpp in Sources */,
-				ED36D7FA286DCDA300CA28EC /* level-control.cpp in Sources */,
 				ED36DC60286DD6A400CA28EC /* ErrorCategory.cpp in Sources */,
 				ED36D78B286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36DA63286DCFC600CA28EC /* EmptyDataModelHandler.cpp in Sources */,
@@ -3538,6 +3548,7 @@
 				ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */,
 				ED36DBAC286DD48C00CA28EC /* OnboardingCodes.cpp in Sources */,
 				ED36DE02286DDBCA00CA28EC /* cluster-objects.cpp in Sources */,
+				EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */,
 				ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */,
 				ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
@@ -3566,6 +3577,7 @@
 				ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */,
 				ED36D874286DCDED00CA28EC /* AttributeStatusIB.cpp in Sources */,
 				ED36DDE8286DDAF300CA28EC /* json_writer.cpp in Sources */,
+				EDF3F541289BF4F800A82418 /* level-control.cpp in Sources */,
 				ED36D871286DCDED00CA28EC /* EventPathIBs.cpp in Sources */,
 				ED36DD10286DD8A000CA28EC /* BdxMessages.cpp in Sources */,
 				ED36DD08286DD8A000CA28EC /* SimpleSessionResumptionStorage.cpp in Sources */,
@@ -3660,6 +3672,7 @@
 				ED36D801286DCDA300CA28EC /* group-key-mgmt-server.cpp in Sources */,
 				ED36DC61286DD6A400CA28EC /* ExchangeContext.cpp in Sources */,
 				ED36DBAE286DD48C00CA28EC /* Dns.cpp in Sources */,
+				EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */,
 				ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */,
 				ED36DAD9286DD27200CA28EC /* InetArgParser.cpp in Sources */,
 				ED36DC11286DD57B00CA28EC /* Verhoeff.cpp in Sources */,
@@ -3668,7 +3681,6 @@
 				ED36DC49286DD65900CA28EC /* CHIPTLVUpdater.cpp in Sources */,
 				ED36D884286DCDED00CA28EC /* ListBuilder.cpp in Sources */,
 				ED36DC0B286DD57B00CA28EC /* BytesCircularBuffer.cpp in Sources */,
-				EDF3F52A289AA8B100A82418 /* color-control-server.cpp in Sources */,
 				ED36DB72286DD2CE00CA28EC /* QueryResponder.cpp in Sources */,
 				ED36DD72286DD9A400CA28EC /* SystemLayerImplSelect.cpp in Sources */,
 				ED36DDE9286DDAF300CA28EC /* json_reader.cpp in Sources */,
@@ -3690,22 +3702,21 @@
 				ED36DD50286DD91500CA28EC /* ManualSetupPayloadParser.cpp in Sources */,
 				ED36D7FC286DCDA300CA28EC /* network-commissioning.cpp in Sources */,
 				ED36DD47286DD91500CA28EC /* Base38Decode.cpp in Sources */,
-				ED690B64286DC7F600069215 /* Device.cpp in Sources */,
+				ED690B64286DC7F600069215 /* device.cpp in Sources */,
 				ED36DC13286DD57B00CA28EC /* Verhoeff36.cpp in Sources */,
 				ED23300B288698AF00D934D7 /* bridgeapi.cpp in Sources */,
 				ED36DD74286DD9A400CA28EC /* SystemTimer.cpp in Sources */,
 				ED36DB9D286DD42300CA28EC /* streamer_stdio.cpp in Sources */,
 				ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */,
-				ED36D802286DCDA300CA28EC /* on-off-server.cpp in Sources */,
 				ED36D888286DCDED00CA28EC /* SubscribeRequestMessage.cpp in Sources */,
 				ED36D7F8286DCDA300CA28EC /* general-diagnostics-server.cpp in Sources */,
 				ED36DD4F286DD91500CA28EC /* SetupPayloadHelper.cpp in Sources */,
-				ED690B63286DC7F600069215 /* bridged-actions-stub.cpp in Sources */,
 				ED36DDDF286DDA0300CA28EC /* MessageHeader.cpp in Sources */,
 				ED36D87B286DCDED00CA28EC /* EventPathIB.cpp in Sources */,
 				ED36DCAE286DD7F200CA28EC /* DnssdImpl.cpp in Sources */,
 				ED36D87C286DCDED00CA28EC /* InvokeResponseIBs.cpp in Sources */,
 				ED36DD75286DD9A400CA28EC /* SystemMutex.cpp in Sources */,
+				EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */,
 				ED36DAE5286DD29600CA28EC /* AddressResolve_DefaultImpl.cpp in Sources */,
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
 				ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */,

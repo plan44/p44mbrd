@@ -1,20 +1,27 @@
-/*
- *
- *    Copyright (c) 2021 Project CHIP Authors
- *    All rights reserved.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
+//  Copyright (c) 2022 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  based on Apache v2 licensed bridge-app example code (c) 2021 Project CHIP Authors
+//
+//  Author: Lukas Zeller <luz@plan44.ch>
+//
+//  This file is part of p44mbrd.
+//
+//  p44mbrd is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  p44mbrd is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
+//
+
+
 
 #include <AppMain.h>
 #include <platform/CHIPDeviceLayer.h>
@@ -44,11 +51,14 @@
 #include <sys/ioctl.h>
 
 #include "CommissionableInit.h"
-#include "Device.h"
 #include "main.h"
 
 // plan44
-#include "bridgeapi.hpp"
+#include "bridgeapi.h"
+#include "device.h"
+#include "deviceonoff.h"
+#include "devicelevelcontrol.h"
+#include "devicecolorcontrol.h"
 
 #include <app/server/Server.h>
 
@@ -391,7 +401,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                               );
                               break;
                             case 1: // effective value dimmer - single channel 0..100
-                              dev = new DeviceDimmable(name.c_str(), zone, dsuid);
+                              dev = new DeviceLevelControl(name.c_str(), zone, dsuid);
                               dev->setUpClusterInfo(
                                 ArraySize(dimmableLightClusters),
                                 &dimmableLightEndpoint,
@@ -401,7 +411,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                               break;
                             case 3: // dimmer with color temperature - channels 1 and 4
                             case 4: // full color dimmer - channels 1..6
-                              dev = new DeviceColor(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
+                              dev = new DeviceColorControl(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
                               dev->setUpClusterInfo(
                                 ArraySize(colorLightClusters),
                                 &colorLightEndpoint,
