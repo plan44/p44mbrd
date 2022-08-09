@@ -30,7 +30,12 @@
 #include <app-common/zap-generated/cluster-id.h>
 #include "ZclString.h"
 #include <app/reporting/reporting.h>
+#include <controller/chipcluster.h>
+
+#include <app/util/util.h>
+#include "Accessors.h"
 
 #include "device.h"
-
 #include "bridgeapi.h"
+
+#include "main.h"

@@ -35,13 +35,29 @@ public:
   DeviceLevelControl(const char * szDeviceName, std::string szLocation, std::string aDSUID);
 
   uint8_t currentLevel() { return mLevel; };
-  bool setCurrentLevel(uint8_t aNewLevel);
+  bool setCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
+  /// @name handlers for command implementations
+  /// @{
+  void moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void move(uint8_t aMode, uint8_t aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void stop(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void effect(bool aNewValue);
+
+  /// @}
+
+protected:
+  virtual void changeOnOff_impl(bool aOn) override;
+
 private:
   uint8_t mLevel;
+
+  bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  uint8_t getOptions(uint8_t aOptionMask, uint8_t aOptionOverride);
+  void dim(uint8_t aDirection, uint8_t aRate);
 };

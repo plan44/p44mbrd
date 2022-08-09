@@ -34,13 +34,16 @@ public:
 
   DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID);
 
-  bool IsOn() { return mOn; }
-  bool SetOnOff(bool aOn);
+  bool isOn() { return mOn; }
+  bool setOnOff(bool aOn);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+
+protected:
+  virtual void changeOnOff_impl(bool aOn);
 
 private:
   bool mOn;

@@ -294,6 +294,17 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
 }
 
 
+DevicePtr deviceForEndPointId(EndpointId aEndpointId)
+{
+  uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(aEndpointId);
+  if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+    return gDevices[endpointIndex];
+  }
+  return DevicePtr();
+}
+
+
+
 void ApplicationInit() {}
 
 

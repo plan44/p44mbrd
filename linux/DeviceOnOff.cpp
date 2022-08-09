@@ -48,7 +48,7 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = IsOn() ? 1 : 0;
+      *buffer = isOn() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -57,17 +57,24 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
 }
 
 
-bool DeviceOnOff::SetOnOff(bool aOn)
+void DeviceOnOff::changeOnOff_impl(bool aOn)
+{
+  // call preset1 or off on the bridged device
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("channel", JsonObject::newInt32(0)); // default channel
+  params->add("value", JsonObject::newDouble(aOn ? 100 : 0));
+  params->add("transitionTime", JsonObject::newDouble(0));
+  params->add("apply_now", JsonObject::newBool(true));
+  notify("setOutputChannelValue", params);
+}
+
+
+bool DeviceOnOff::setOnOff(bool aOn)
 {
   ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
   if (aOn!=mOn) {
     mOn  = aOn;
-    // call preset1 or off on the bridged device
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    params->add("scene", JsonObject::newInt32(mOn ? 5 : 0));
-    params->add("force", JsonObject::newBool(true));
-    BridgeApi::sharedBridgeApi().notify("callScene", params);
+    changeOnOff_impl(mOn);
     // report back to matter
     MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
     return true; // changed
@@ -80,7 +87,7 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
     if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && IsReachable()) {
-      SetOnOff(*buffer);
+      setOnOff(*buffer);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }

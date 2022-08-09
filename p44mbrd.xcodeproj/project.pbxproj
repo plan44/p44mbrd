@@ -374,7 +374,6 @@
 		EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F536289BF35E00A82418 /* deviceonoff.cpp */; };
 		EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */; };
 		EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */; };
-		EDF3F541289BF4F800A82418 /* level-control.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D7286DCDA300CA28EC /* level-control.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -3577,7 +3576,6 @@
 				ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */,
 				ED36D874286DCDED00CA28EC /* AttributeStatusIB.cpp in Sources */,
 				ED36DDE8286DDAF300CA28EC /* json_writer.cpp in Sources */,
-				EDF3F541289BF4F800A82418 /* level-control.cpp in Sources */,
 				ED36D871286DCDED00CA28EC /* EventPathIBs.cpp in Sources */,
 				ED36DD10286DD8A000CA28EC /* BdxMessages.cpp in Sources */,
 				ED36DD08286DD8A000CA28EC /* SimpleSessionResumptionStorage.cpp in Sources */,

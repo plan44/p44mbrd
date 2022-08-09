@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "moveToLevelHandler(unsigned short, unsigned int, unsigned char, unsigned short, unsigned char, unsigned char, unsigned short):level-control.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emberAfGetServerAttributeIndexByAttributeId(unsigned short, unsigned int, unsigned int):attribute-storage.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "chip::app::Clusters::LevelControl::Attributes::CurrentLevel::Get(unsigned short, unsigned char*):Accessors.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "DeviceLevelControl::effect(bool):devicelevelcontrol.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "DeviceDimmable::HandleReadAttribute(unsigned int, unsigned int, unsigned char*, unsigned short):Device.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emberAfLevelControlClusterMoveToLevelWithOnOffCallback(chip::app::CommandHandler*, chip::app::ConcreteCommandPath const&amp;, chip::app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::DecodableType const&amp;):level-control.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "DeviceColor::HandleReadAttribute(unsigned int, unsigned int, unsigned char*, unsigned short):Device.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord*, EmberAfAttributeMetadata const**, unsigned char*, unsigned short, bool):attribute-storage.cpp">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

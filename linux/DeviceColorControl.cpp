@@ -154,12 +154,7 @@ bool DeviceColorControl::setCurrentColortemp(uint8_t aColortemp)
 
 EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
-  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && IsReachable()) {
-      setCurrentLevel(*buffer);
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
+  // TODO: implement
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }

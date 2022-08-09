@@ -38,6 +38,7 @@
 
 using namespace chip::app::Clusters::BridgedActions;
 
+
 // MARK: - Device
 
 Device::Device(const char * szDeviceName, std::string szLocation, std::string aDSUID)
@@ -104,6 +105,21 @@ void Device::SetName(const char * szName)
 
     MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
   }
+}
+
+
+void Device::notify(const string aNotification, JsonObjectPtr aParams)
+{
+  if (!aParams) aParams = JsonObject::newObj();
+  aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
+  BridgeApi::sharedBridgeApi().notify(aNotification, aParams);
+}
+
+void Device::call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB aResponseCB)
+{
+  if (!aParams) aParams = JsonObject::newObj();
+  aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
+  BridgeApi::sharedBridgeApi().call(aNotification, aParams, aResponseCB);
 }
 
 

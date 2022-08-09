@@ -31,9 +31,42 @@
 #include <functional>
 #include <vector>
 
+#include <controller/chipcluster.h>
+
 #include "p44obj.hpp"
 
+#include "bridgeapi.h"
+#include "main.h"
+
 using namespace chip;
+using namespace p44;
+
+typedef const chip::app::Clusters::LevelControl::Commands::MoveToLevel::DecodableType& CommandData;
+
+class Device;
+typedef boost::intrusive_ptr<Device> DevicePtr;
+
+DevicePtr deviceForEndPointId(EndpointId aEndpointId);
+
+class DeviceEndpoints
+{
+public:
+
+//  template<typename DevType> static bool handleCallback(
+//    chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
+//    const chip::app::Clusters::LevelControl::Commands::MoveToLevel::DecodableType & commandData,
+//    void (DevType::*)(
+//      CommandId aCommandId,
+//      CommandData aCommandData
+//    )
+//  );
+  template<typename DevType> static boost::intrusive_ptr<DevType> getDevice(EndpointId aEndpointId) {
+    return dynamic_pointer_cast<DevType>(deviceForEndPointId(aEndpointId));
+  };
+
+};
+
+
 
 class Device : public p44::P44Obj
 {
@@ -83,6 +116,15 @@ public:
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
 
+  /// @name bridge API helpers
+  /// @{
+
+  void notify(const string aNotification, JsonObjectPtr aParams);
+  void call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB aResponseCB);
+
+  /// @}
+
+
 protected:
 
   bool mReachable;
@@ -94,4 +136,3 @@ protected:
   EndpointId mDynamicEndpointIdx;
 
 };
-typedef boost::intrusive_ptr<Device> DevicePtr;
