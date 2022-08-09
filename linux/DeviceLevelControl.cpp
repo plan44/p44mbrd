@@ -23,6 +23,11 @@
 #include "devicelevelcontrol.h"
 #include "device_impl.h"
 
+using namespace app;
+using namespace Clusters;
+
+// MARK: - LevelControl Device specific declarations
+
 // REVISION DEFINITIONS:
 // TODO: move these to a better place, probably into the devices that actually handle them, or
 //   try to extract them from ZAP-generated defs
@@ -30,16 +35,49 @@
 
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
 
-using namespace app;
-using namespace Clusters;
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
+  // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 2, 0), /* current level */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID, INT16U, 1, 0), /* onoff transition time */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+constexpr CommandId levelControlIncomingCommands[] = {
+  app::Clusters::LevelControl::Commands::MoveToLevel::Id,
+  app::Clusters::LevelControl::Commands::Move::Id,
+  app::Clusters::LevelControl::Commands::Step::Id,
+  app::Clusters::LevelControl::Commands::Stop::Id,
+  app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::Id,
+  app::Clusters::LevelControl::Commands::MoveWithOnOff::Id,
+  app::Clusters::LevelControl::Commands::StepWithOnOff::Id,
+  app::Clusters::LevelControl::Commands::StopWithOnOff::Id,
+//  app::Clusters::LevelControl::Commands::MoveToClosestFrequency::Id,
+  kInvalidCommandId,
+};
+
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
+  DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+const EmberAfDeviceType gDimmableLightTypes[] = {
+  { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+};
 
 
 // MARK: - DeviceLevelControl
 
-DeviceLevelControl::DeviceLevelControl(const char * szDeviceName, std::string szLocation, std::string aDSUID) :
-  inherited(szDeviceName, szLocation, aDSUID),
+DeviceLevelControl::DeviceLevelControl(const std::string aDSUID) :
+  inherited(aDSUID),
   mLevel(0)
 {
+  // - declare specific clusters
+  addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
+}
+
+
+void DeviceLevelControl::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
 }
 
 
@@ -74,7 +112,7 @@ bool DeviceLevelControl::setCurrentLevel(uint8_t aAmount, int8_t aDirection, uin
   if (level>0xFE) level = 0xFE;
   if (level<0) level = 0;
   // now move to given or calculated level
-  ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d in %d00mS", mName, aAmount, aTransitionTimeDs);
+  ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d in %d00mS", GetName().c_str(), aAmount, aTransitionTimeDs);
   if (level!=mLevel) {
     if (mLevel==0) {
       // level is zero and becomes non-null: also set OnOff when enabled

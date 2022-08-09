@@ -23,6 +23,8 @@
 #include "devicecolorcontrol.h"
 #include "device_impl.h"
 
+// MARK: - LevelControl Device specific declarations
+
 // REVISION DEFINITIONS:
 // TODO: move these to a better place, probably into the devices that actually handle them, or
 //   try to extract them from ZAP-generated defs
@@ -30,16 +32,58 @@
 
 #define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
 
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, INT8U, 1, 0), /* current saturation */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 1, 0), /* current color temperature */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+//    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+// TODO: other important capabilities
+// ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID type MAP16 (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp)
+
+constexpr CommandId colorControlIncomingCommands[] = {
+  app::Clusters::ColorControl::Commands::MoveToHue::Id,
+  app::Clusters::ColorControl::Commands::MoveHue::Id,
+  app::Clusters::ColorControl::Commands::StepHue::Id,
+  app::Clusters::ColorControl::Commands::MoveToSaturation::Id,
+  app::Clusters::ColorControl::Commands::MoveSaturation::Id,
+  app::Clusters::ColorControl::Commands::StepSaturation::Id,
+  app::Clusters::ColorControl::Commands::MoveToHueAndSaturation::Id,
+  app::Clusters::ColorControl::Commands::MoveToColorTemperature::Id,
+  app::Clusters::ColorControl::Commands::MoveColorTemperature::Id,
+  app::Clusters::ColorControl::Commands::StepColorTemperature::Id,
+  kInvalidCommandId,
+};
+
+// MARK: ct/color light
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
+  DECLARE_DYNAMIC_CLUSTER(ZCL_COLOR_CONTROL_CLUSTER_ID, colorControlAttrs, colorControlIncomingCommands, nullptr),
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+const EmberAfDeviceType gColorLightTypes[] = {
+  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+};
+
+
 // MARK: - DeviceColorControl
 
-DeviceColorControl::DeviceColorControl(const char * szDeviceName, std::string szLocation, std::string aDSUID, bool aCTOnly) :
-  inherited(szDeviceName, szLocation, aDSUID),
+DeviceColorControl::DeviceColorControl(const std::string aDSUID, bool aCTOnly) :
+  inherited(aDSUID),
   mCtOnly(aCTOnly),
   mColorMode(aCTOnly ? 2 : 0),
   mHue(0),
   mSaturation(0),
   mColorTemp(0)
 {
+  // - declare specific clusters
+  addClusterDeclarations(Span<EmberAfCluster>(colorLightClusters));
+}
+
+void DeviceColorControl::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
 }
 
 
@@ -85,7 +129,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
 
 bool DeviceColorControl::setCurrentHue(uint8_t aHue)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", mName, aHue);
+  ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", GetName().c_str(), aHue);
   if (aHue!=mHue) {
     mHue = aHue;
     JsonObjectPtr params = JsonObject::newObj();
@@ -108,7 +152,7 @@ bool DeviceColorControl::setCurrentHue(uint8_t aHue)
 
 bool DeviceColorControl::setCurrentSaturation(uint8_t aSaturation)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", mName, aSaturation);
+  ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", GetName().c_str(), aSaturation);
   if (aSaturation!=mSaturation) {
     mSaturation = aSaturation;
     JsonObjectPtr params = JsonObject::newObj();
@@ -131,7 +175,7 @@ bool DeviceColorControl::setCurrentSaturation(uint8_t aSaturation)
 
 bool DeviceColorControl::setCurrentColortemp(uint8_t aColortemp)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", mName, aColortemp);
+  ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", GetName().c_str(), aColortemp);
   if (aColortemp!=mColorTemp) {
     mColorTemp = aColortemp;
     JsonObjectPtr params = JsonObject::newObj();

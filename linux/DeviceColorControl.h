@@ -31,7 +31,7 @@ class DeviceColorControl : public DeviceLevelControl
   typedef DeviceLevelControl inherited;
 public:
 
-  DeviceColorControl(const char * szDeviceName, std::string szLocation, std::string aDSUID, bool aCTOnly);
+  DeviceColorControl(const std::string aDSUID, bool aCTOnly);
 
   uint8_t currentHue() { return mHue; };
   uint8_t currentSaturation() { return mSaturation; };
@@ -47,6 +47,10 @@ public:
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 private:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
   bool mCtOnly;
   uint8_t mColorMode; // 0=HS, 1=XY, 2=Colortemp
   uint8_t mHue;

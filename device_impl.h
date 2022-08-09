@@ -39,3 +39,19 @@
 #include "bridgeapi.h"
 
 #include "main.h"
+
+// Current ZCL implementation of Struct uses a max-size array of 254 bytes
+const int kDescriptorAttributeArraySize = 254;
+
+// Device types for dynamic endpoints: TODO Need a generated file from ZAP to define these!
+// (taken from chip-devices.xml)
+#define DEVICE_TYPE_BRIDGED_NODE 0x0013
+// (taken from lo-devices.xml)
+#define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
+// (taken from matter-devices.xml)
+#define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
+// (taken from matter-devices.xml) FIXME: is it only "color temperature"? or just not extended (0x010D) color?
+#define DEVICE_TYPE_MA_COLOR_LIGHT 0x010C
+
+// Device Version for dynamic endpoints:
+#define DEVICE_VERSION_DEFAULT 1

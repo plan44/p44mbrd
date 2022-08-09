@@ -23,6 +23,8 @@
 #include "deviceonoff.h"
 #include "device_impl.h"
 
+// MARK: - OnOff Device specific declarations
+
 // REVISION DEFINITIONS:
 // TODO: move these to a better place, probably into the devices that actually handle them, or
 //   try to extract them from ZAP-generated defs
@@ -30,13 +32,48 @@
 
 #define ZCL_ON_OFF_CLUSTER_REVISION (4u)
 
+// MARK: onOff cluster declarations
+
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+// Declare Cluster List for Bridged Light endpoint
+// TODO: It's not clear whether it would be better to get the command lists from
+// the ZAP config on our last fixed endpoint instead.
+constexpr CommandId onOffIncomingCommands[] = {
+  app::Clusters::OnOff::Commands::Off::Id,
+  app::Clusters::OnOff::Commands::On::Id,
+  app::Clusters::OnOff::Commands::Toggle::Id,
+  app::Clusters::OnOff::Commands::OffWithEffect::Id,
+  app::Clusters::OnOff::Commands::OnWithRecallGlobalScene::Id,
+  app::Clusters::OnOff::Commands::OnWithTimedOff::Id,
+  kInvalidCommandId,
+};
+
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
+  DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+const EmberAfDeviceType gOnOffLightTypes[] = {
+  { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+};
+
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID) :
-  inherited(szDeviceName, szLocation, aDSUID)
+DeviceOnOff::DeviceOnOff(const std::string aDSUID) :
+  inherited(aDSUID)
 {
   mOn = false;
+  // - declare onoff device specific clusters
+  addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
+}
+
+void DeviceOnOff::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
 }
 
 
@@ -71,7 +108,7 @@ void DeviceOnOff::changeOnOff_impl(bool aOn)
 
 bool DeviceOnOff::setOnOff(bool aOn)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName, aOn ? "ON" : "OFF");
+  ChipLogProgress(DeviceLayer, "Device[%s]: %s", GetName().c_str(), aOn ? "ON" : "OFF");
   if (aOn!=mOn) {
     mOn  = aOn;
     changeOnOff_impl(mOn);

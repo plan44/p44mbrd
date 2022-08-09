@@ -32,7 +32,7 @@ class DeviceLevelControl : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceLevelControl(const char * szDeviceName, std::string szLocation, std::string aDSUID);
+  DeviceLevelControl(const std::string aDSUID);
 
   uint8_t currentLevel() { return mLevel; };
   bool setCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff);
@@ -55,6 +55,10 @@ protected:
   virtual void changeOnOff_impl(bool aOn) override;
 
 private:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
   uint8_t mLevel;
 
   bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);

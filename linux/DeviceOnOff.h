@@ -32,7 +32,7 @@ class DeviceOnOff : public Device
   typedef Device inherited;
 public:
 
-  DeviceOnOff(const char * szDeviceName, std::string szLocation, std::string aDSUID);
+  DeviceOnOff(const std::string aDSUID);
 
   bool isOn() { return mOn; }
   bool setOnOff(bool aOn);
@@ -43,7 +43,12 @@ public:
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
   virtual void changeOnOff_impl(bool aOn);
+
 
 private:
   bool mOn;

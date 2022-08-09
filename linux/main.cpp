@@ -37,6 +37,7 @@
 #include <app/util/af-types.h>
 #include <app/util/af.h>
 #include <app/util/attribute-storage.h>
+//#include <app/util/attribute-table.h>
 #include <app/util/util.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
@@ -86,163 +87,6 @@ Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 typedef std::map<string, DevicePtr> DeviceDSUIDMap;
 DeviceDSUIDMap gDeviceDSUIDMap;
 
-// ENDPOINT DEFINITIONS:
-// =================================================================================
-//
-// Endpoint definitions will be reused across multiple endpoints for every instance of the
-// endpoint type.
-// There will be no intrinsic storage for the endpoint attributes declared here.
-// Instead, all attributes will be treated as EXTERNAL, and therefore all reads
-// or writes to the attributes must be handled within the emberAfExternalAttributeWriteCallback
-// and emberAfExternalAttributeReadCallback functions declared herein. This fits
-// the typical model of a bridge, since a bridge typically maintains its own
-// state database representing the devices connected to it.
-
-// Device types for dynamic endpoints: TODO Need a generated file from ZAP to define these!
-// (taken from chip-devices.xml)
-#define DEVICE_TYPE_BRIDGED_NODE 0x0013
-// (taken from lo-devices.xml)
-#define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
-// (taken from matter-devices.xml)
-#define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
-// (taken from matter-devices.xml) FIXME: is it only "color temperature"? or just not extended (0x010D) color?
-#define DEVICE_TYPE_MA_COLOR_LIGHT 0x010C
-
-// Device Version for dynamic endpoints:
-#define DEVICE_VERSION_DEFAULT 1
-
-
-
-// MARK: bridged device common declarations
-
-// Declare Descriptor cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(descriptorAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEVICE_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* device list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_SERVER_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* server list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CLIENT_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* client list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PARTS_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0),  /* parts list */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare Bridged Device Basic information cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(bridgedDeviceBasicAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kNodeLabelSize, 0), /* NodeLabel */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Reachable */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-
-// MARK: onOff cluster declarations
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare Cluster List for Bridged Light endpoint
-// TODO: It's not clear whether it would be better to get the command lists from
-// the ZAP config on our last fixed endpoint instead.
-constexpr CommandId onOffIncomingCommands[] = {
-    app::Clusters::OnOff::Commands::Off::Id,
-    app::Clusters::OnOff::Commands::On::Id,
-    app::Clusters::OnOff::Commands::Toggle::Id,
-    app::Clusters::OnOff::Commands::OffWithEffect::Id,
-    app::Clusters::OnOff::Commands::OnWithRecallGlobalScene::Id,
-    app::Clusters::OnOff::Commands::OnWithTimedOff::Id,
-    kInvalidCommandId,
-};
-
-
-// MARK: level control cluster declarations
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* current level */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-constexpr CommandId levelControlIncomingCommands[] = {
-    app::Clusters::LevelControl::Commands::MoveToLevel::Id,
-    app::Clusters::LevelControl::Commands::Move::Id,
-    app::Clusters::LevelControl::Commands::Step::Id,
-    app::Clusters::LevelControl::Commands::Stop::Id,
-    app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::Id,
-    app::Clusters::LevelControl::Commands::MoveWithOnOff::Id,
-    app::Clusters::LevelControl::Commands::StepWithOnOff::Id,
-    app::Clusters::LevelControl::Commands::StopWithOnOff::Id,
-//    app::Clusters::LevelControl::Commands::MoveToClosestFrequency::Id,
-    kInvalidCommandId,
-};
-
-
-// MARK: color control cluster declarations
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, INT8U, 1, 0), /* current saturation */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 1, 0), /* current color temperature */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
-//    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-// TODO: other important capabilities
-// ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID type MAP16 (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp)
-
-constexpr CommandId colorControlIncomingCommands[] = {
-    app::Clusters::ColorControl::Commands::MoveToHue::Id,
-    app::Clusters::ColorControl::Commands::MoveHue::Id,
-    app::Clusters::ColorControl::Commands::StepHue::Id,
-    app::Clusters::ColorControl::Commands::MoveToSaturation::Id,
-    app::Clusters::ColorControl::Commands::MoveSaturation::Id,
-    app::Clusters::ColorControl::Commands::StepSaturation::Id,
-    app::Clusters::ColorControl::Commands::MoveToHueAndSaturation::Id,
-    app::Clusters::ColorControl::Commands::MoveToColorTemperature::Id,
-    app::Clusters::ColorControl::Commands::MoveColorTemperature::Id,
-    app::Clusters::ColorControl::Commands::StepColorTemperature::Id,
-    kInvalidCommandId,
-};
-
-
-// MARK: - actual endpoints
-
-// MARK: on/off light
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
-    DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
-DECLARE_DYNAMIC_ENDPOINT(onOffLightEndpoint, onOffLightClusters);
-
-const EmberAfDeviceType gOnOffLightTypes[] = { { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
-                                               { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
-
-
-
-// MARK: dimmable light
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
-    DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
-DECLARE_DYNAMIC_ENDPOINT(dimmableLightEndpoint, dimmableLightClusters);
-
-const EmberAfDeviceType gDimmableLightTypes[] = { { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
-                                                  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
-
-// MARK: ct/color light
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
-    DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_COLOR_CONTROL_CLUSTER_ID, colorControlAttrs, colorControlIncomingCommands, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
-DECLARE_DYNAMIC_ENDPOINT(colorLightEndpoint, colorLightClusters);
-
-const EmberAfDeviceType gColorLightTypes[] = { { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
-                                               { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT } };
-
-
 } // namespace
 
 
@@ -262,7 +106,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
       if (dev) {
         ChipLogProgress(DeviceLayer,
           "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
-          (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
+          (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
         );
         ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
         if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
@@ -284,7 +128,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
     {
       Device * dev = gDevices[endpointIndex];
       if (dev) {
-        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName(), (int)attributeMetadata->attributeId, (int)clusterId);
+        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
         ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
         if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute write not handled!");
       }
@@ -403,36 +247,21 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                           switch(outputfunction) {
                             default:
                             case 0: // switch output - single channel 0..100
-                              dev = new DeviceOnOff(name.c_str(), zone, dsuid);
-                              dev->setUpClusterInfo(
-                                ArraySize(onOffLightClusters),
-                                &onOffLightEndpoint,
-                                Span<const EmberAfDeviceType>(gOnOffLightTypes),
-                                1
-                              );
+                              dev = new DeviceOnOff(dsuid);
                               break;
                             case 1: // effective value dimmer - single channel 0..100
-                              dev = new DeviceLevelControl(name.c_str(), zone, dsuid);
-                              dev->setUpClusterInfo(
-                                ArraySize(dimmableLightClusters),
-                                &dimmableLightEndpoint,
-                                Span<const EmberAfDeviceType>(gDimmableLightTypes),
-                                1
-                              );
+                              dev = new DeviceLevelControl(dsuid);
                               break;
                             case 3: // dimmer with color temperature - channels 1 and 4
                             case 4: // full color dimmer - channels 1..6
-                              dev = new DeviceColorControl(name.c_str(), zone, dsuid, outputfunction==3 /* ctOnly */);
-                              dev->setUpClusterInfo(
-                                ArraySize(colorLightClusters),
-                                &colorLightEndpoint,
-                                Span<const EmberAfDeviceType>(gColorLightTypes),
-                                1
-                              );
+                              dev = new DeviceColorControl(dsuid, outputfunction==3 /* ctOnly */);
                               break;
                           }
                           if (dev) {
                             gDeviceDSUIDMap[dsuid] = dev;
+                            // additional setup
+                            dev->initName(name);
+                            dev->initZone(zone);
                           }
                         }
                       }
@@ -641,8 +470,6 @@ int chipmain(int argc, char * argv[])
       dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
       gDevices[dynamicEndpointIdx] = dev.get();
     }
-    // FIXME: probably wrong time to do that, creates error
-    dev->SetReachable(true);
   }
   // save updated endpoint map
   cerr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
@@ -654,12 +481,13 @@ int chipmain(int argc, char * argv[])
       // there is a device at this dynamic endpoint
       if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId)) {
         // make sure reachable and name get reported
-        // FIXME: do we need this??
-//        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Reachable);
-//        HandleDeviceStatusChanged(gDevices[i], Device::kChanged_Name);
+        gDevices[i]->SetReachable(true);
       }
     }
   }
+
+  // FIXME: crashes, probably not safe with dynamic endpoints
+  //emberAfPrintAttributeTable();
 
   // Run CHIP
 

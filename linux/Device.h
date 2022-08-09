@@ -24,6 +24,7 @@
 #pragma once
 
 #include <app/util/attribute-storage.h>
+#include <app/util/af-types.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -71,40 +72,47 @@ public:
 class Device : public p44::P44Obj
 {
   // info for instantiating
-  size_t mNumClusterVersions;
-  DataVersion* mClusterDataVersionsP;
-  EmberAfEndpointType* mEndpointTypeP;
   const Span<const EmberAfDeviceType> *mDeviceTypeListP;
+  EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
+  DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
+  std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info
+
+  // constant after init
+  chip::EndpointId mParentEndpointId;
+  EndpointId mDynamicEndpointBase;
+  EndpointId mDynamicEndpointIdx;
+
+  // runtime variable attributes
+  bool mReachable;
+  std::string mName;
+  std::string mZone;
+  std::string mLocation;
 
 public:
-  static const int kDeviceNameSize = 32;
 
-  // P44
-  std::string mBridgedDSUID;
+  const std::string mBridgedDSUID;
 
-  Device(const char * szDeviceName, std::string szLocation, std::string aDSUID);
+  Device(const std::string aDSUID);
   virtual ~Device();
 
   bool IsReachable();
-  void SetReachable(bool aReachable);
-  void SetName(const char * szDeviceName);
-  void SetLocation(std::string szLocation);
-  inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
   inline chip::EndpointId GetEndpointId() { return mDynamicEndpointBase+mDynamicEndpointIdx; };
-  inline void SetParentEndpointId(chip::EndpointId id) { mParentEndpointId = id; };
   inline chip::EndpointId GetParentEndpointId() { return mParentEndpointId; };
-  inline char * GetName() { return mName; };
-  inline std::string GetLocation() { return mLocation; };
+  inline std::string GetName() { return mName; };
   inline std::string GetZone() { return mZone; };
-  inline void SetZone(std::string zone) { mZone = zone; };
+  // inline std::string GetLocation() { return mLocation; };
 
-  // FIXME: ugly Q&D cluster setup. Move cluster declaration into class itself, later
-  void setUpClusterInfo(
-    size_t aNumClusterVersions,
-    EmberAfEndpointType* aEndpointTypeP,
-    const Span<const EmberAfDeviceType>& aDeviceTypeList,
-    EndpointId aParentEndpointId = chip::kInvalidEndpointId
-  );
+  // propagating setters
+  void SetReachable(bool aReachable);
+  void SetName(const std::string aDeviceName);
+  // void SetLocation(std::string szLocation);
+
+  // setup setters
+  inline void SetParentEndpointId(chip::EndpointId aId) { mParentEndpointId = aId; };
+  inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
+  inline void initName(const std::string aName) { mName = aName; };
+  inline void initZone(std::string aZone) { mZone = aZone; };
+
 
   /// add the device using the previously set cluster info
   /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
@@ -127,12 +135,17 @@ public:
 
 protected:
 
-  bool mReachable;
-  char mName[kDeviceNameSize];
-  std::string mLocation;
-  chip::EndpointId mParentEndpointId;
-  std::string mZone;
-  EndpointId mDynamicEndpointBase;
-  EndpointId mDynamicEndpointIdx;
+  /// Add a cluster declaration during device setup
+  /// @note preferably this should be called from ctor, to have general cluster defs first
+  /// @note this replaces use of `DECLARE_DYNAMIC_CLUSTER_LIST_xxx` macros, to allow dynamically collecting needed
+  ///    clusters over the class hierachy.
+  /// @param aClusterDeclarationList the cluster declarations
+  void addClusterDeclarations(const Span<EmberAfCluster>& aClusterDeclarationList);
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() = 0;
+
+  /// utility for implementing finalizeDeviceDeclaration()
+  void finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList);
 
 };
