@@ -374,7 +374,7 @@
   { 0x00000000, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* current level */  \
   { 0x00000001, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(0x0000) }, /* remaining time */  \
   { 0x0000000F, ZAP_TYPE(BITMAP8), 1, ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_MIN_MAX_DEFAULTS_INDEX(3) }, /* options */  \
-  { 0x00000010, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_SIMPLE_DEFAULT(5) }, /* on off transition time */  \
+  { 0x00000010, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_EMPTY_DEFAULT() }, /* on off transition time */  \
   { 0x00000011, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_SIMPLE_DEFAULT(0xFE) }, /* on level */  \
   { 0x00004000, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* start up current level */  \
   { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */  \
@@ -941,7 +941,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
       .clusterId = 0x00000008,  \
       .attributes = ZAP_ATTRIBUTE_INDEX(227), \
       .attributeCount = 8, \
-      .clusterSize = 13, \
+      .clusterSize = 11, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
       .functions = chipFuncArrayLevelControlServer, \
       .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 94 ) ,\
@@ -1003,7 +1003,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
 #define GENERATED_ENDPOINT_TYPES { \
   { ZAP_CLUSTER_INDEX(0), 19, 230 }, \
   { ZAP_CLUSTER_INDEX(19), 3, 15 }, \
-  { ZAP_CLUSTER_INDEX(22), 9, 123 }, \
+  { ZAP_CLUSTER_INDEX(22), 9, 121 }, \
 }
 
 
@@ -1018,7 +1018,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (37)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (368)
+#define ATTRIBUTE_MAX_SIZE (366)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)

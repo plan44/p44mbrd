@@ -2129,7 +2129,7 @@ endpoint 2 {
     callback attribute currentLevel;
     ram      attribute remainingTime;
     ram      attribute options;
-    ram      attribute onOffTransitionTime default = 5;
+    callback attribute onOffTransitionTime default = 5;
     ram      attribute onLevel default = 0xFE;
     ram      attribute startUpCurrentLevel;
     callback attribute generatedCommandList;
