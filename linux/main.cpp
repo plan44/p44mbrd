@@ -76,7 +76,6 @@ using namespace chip::app::Clusters;
 
 namespace {
 
-const int kNodeLabelSize = 32;
 // Current ZCL implementation of Struct uses a max-size array of 254 bytes
 const int kDescriptorAttributeArraySize = 254;
 

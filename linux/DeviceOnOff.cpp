@@ -31,11 +31,13 @@
 // =================================================================================
 
 #define ZCL_ON_OFF_CLUSTER_REVISION (4u)
+#define ZCL_ON_OFF_CLUSTER_FEATURE_MAP (EMBER_AF_ON_OFF_FEATURE_LIGHTING)
 
 // MARK: onOff cluster declarations
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0), /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare Cluster List for Bridged Light endpoint
@@ -111,23 +113,6 @@ void DeviceOnOff::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aU
 }
 
 
-EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t *)buffer) = ZCL_ON_OFF_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = isOn() ? 1 : 0;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
 void DeviceOnOff::changeOnOff_impl(bool aOn)
 {
   // call preset1 or off on the bridged device
@@ -157,14 +142,35 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 }
 
 
-EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+// MARK: Attribute access
+
+EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && IsReachable()) {
-      updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = isOn() ? 1 : 0;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    // common attributes
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+      *buffer = (uint32_t) ZCL_ON_OFF_CLUSTER_FEATURE_MAP;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
   // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+}
+
+
+
+EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+{
+  // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }
+
+

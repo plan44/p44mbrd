@@ -272,6 +272,7 @@ void Device::call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB
   BridgeApi::sharedBridgeApi().call(aNotification, aParams, aResponseCB);
 }
 
+// MARK: Attribute access
 
 EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
@@ -307,7 +308,7 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       MakeZclCharString(zclNameSpan, mBridgedDSUID.c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    // other
+    // common attributes
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
       return EMBER_ZCL_STATUS_SUCCESS;

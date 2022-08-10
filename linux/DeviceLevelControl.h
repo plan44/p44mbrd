@@ -64,8 +64,12 @@ private:
   virtual void finalizeDeviceDeclaration() override;
 
   uint8_t mLevel;
+  uint8_t mOnLevel;
+  uint8_t mOptions;
+  uint16_t mOnOffTransitionTimeDS;
+
 
   bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
-  uint8_t getOptions(uint8_t aOptionMask, uint8_t aOptionOverride);
+  uint8_t finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride);
   void dim(uint8_t aDirection, uint8_t aRate);
 };

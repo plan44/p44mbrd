@@ -31,6 +31,8 @@
 // =================================================================================
 
 #define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
+#define ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP \
+  (EMBER_AF_COLOR_CONTROL_FEATURE_HUE_AND_SATURATION|EMBER_AF_COLOR_CONTROL_FEATURE_XY|EMBER_AF_COLOR_CONTROL_FEATURE_COLOR_TEMPERATURE)
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
@@ -40,6 +42,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID, INT16U, 2, 0), /* current Y */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: see ColorMode enum */
 //    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 // TODO: other important capabilities
 // ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID type MAP16 (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp)
@@ -143,46 +146,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   updateCurrentColorMode(colorMode, aUpdateMode);
 }
 
-
-
-EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t *)buffer) = ZCL_COLOR_CONTROL_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      // color capabilities: Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp
-      *buffer = (1<<4) | (mCtOnly ? 0 : (1<<0));
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      // color mode: 0=HS, 1=XY, 2=Colortemp
-      *buffer = mColorMode;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = currentHue();
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = currentSaturation();
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) {
-      if (maxReadLength == 2) {
-        *((uint16_t *)buffer) = currentColortemp();
-      }
-      else if (maxReadLength == 1) {
-        *((uint8_t *)buffer) = (uint8_t)currentColortemp();
-      }
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
 
 
 bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
@@ -327,6 +290,49 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
     return true; // changed
   }
   return false; // no change
+}
+
+
+// MARK: Attribute access
+
+EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer =
+      EMBER_AF_COLOR_CAPABILITIES_COLOR_TEMPERATURE_SUPPORTED |
+        (mCtOnly ? 0 : EMBER_AF_COLOR_CAPABILITIES_HUE_SATURATION_SUPPORTED|EMBER_AF_COLOR_CAPABILITIES_XY_ATTRIBUTES_SUPPORTED);
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      // color mode: 0=HS, 1=XY, 2=Colortemp
+      *buffer = mColorMode;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentHue();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentSaturation();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = currentColortemp();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    // common
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = ZCL_COLOR_CONTROL_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+      *buffer = (uint32_t) ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 

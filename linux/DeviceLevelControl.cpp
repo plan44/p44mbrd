@@ -34,11 +34,16 @@ using namespace Clusters;
 // =================================================================================
 
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
+#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP \
+  (EMBER_AF_LEVEL_CONTROL_FEATURE_ON_OFF|EMBER_AF_LEVEL_CONTROL_FEATURE_LIGHTING)
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 2, 0), /* current level */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID, INT16U, 1, 0), /* onoff transition time */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* level for fully on */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_OPTIONS_ATTRIBUTE_ID, INT8U, 1, 0), /* options */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 constexpr CommandId levelControlIncomingCommands[] = {
@@ -67,7 +72,9 @@ const EmberAfDeviceType gDimmableLightTypes[] = {
 // MARK: - DeviceLevelControl
 
 DeviceLevelControl::DeviceLevelControl() :
-  mLevel(0)
+  mLevel(0),
+  mOnLevel(0xFE), // FIXME: just assume full power for default on state
+  mOnOffTransitionTimeDS(5) // FIXME: this is just the dS default of 0.5 sec, report actual value later
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
@@ -98,23 +105,6 @@ void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       updateCurrentLevel(vo->doubleValue()/100*0xFE, 0, 0, false, aUpdateMode);
     }
   }
-}
-
-
-EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t *)buffer) = ZCL_LEVEL_CONTROL_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = currentLevel();
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
@@ -166,34 +156,14 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
 }
 
 
-EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
-{
-  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && IsReachable()) {
-      updateCurrentLevel(*buffer, 0, 0, false, UpdateMode(UpdateFlags::bridged)); // absolute, immediate
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-  // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
-}
-
-
 // MARK: levelControl cluster command implementation callbacks
 
 using namespace LevelControl;
 
 
-uint8_t DeviceLevelControl::getOptions(uint8_t aOptionMask, uint8_t aOptionOverride)
+uint8_t DeviceLevelControl::finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride)
 {
-  uint8_t options;
-  EmberAfStatus status = Attributes::Options::Get(GetEndpointId(), &options);
-  if (status!=EMBER_ZCL_STATUS_SUCCESS) {
-    // should not happen because options is mandatory, but if, assume default value
-    options = 0x00;
-  }
-  options = (options & ~aOptionMask) | (aOptionOverride & aOptionMask);
-  return options;
+  return (mOptions & ~aOptionMask) | (aOptionOverride & aOptionMask);
 }
 
 
@@ -217,7 +187,7 @@ bool DeviceLevelControl::shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uin
     return true;
   }
   // now the options bit decides about executing or not
-  return getOptions(aOptionMask, aOptionOverride) & EMBER_ZCL_LEVEL_CONTROL_OPTIONS_EXECUTE_IF_OFF;
+  return finalOptions(aOptionMask, aOptionOverride) & EMBER_ZCL_LEVEL_CONTROL_OPTIONS_EXECUTE_IF_OFF;
 }
 
 
@@ -232,11 +202,7 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_
     // OnOff status and options do allow executing
     if (aTransitionTimeDs==0xFFFF) {
       // default, use On/Off transition time attribute's value
-      EmberAfStatus status = Attributes::OnOffTransitionTime::Get(GetEndpointId(), &aTransitionTimeDs);
-      if (status!=EMBER_ZCL_STATUS_SUCCESS) {
-        // should not happen because options is mandatory, but if, assume default value
-        aTransitionTimeDs = 0; // just instantaneous
-      }
+      aTransitionTimeDs = mOnOffTransitionTimeDS;
     }
     updateCurrentLevel(aAmount, aDirection, aTransitionTimeDs, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
     // Support for global scene for last state before getting switched off
@@ -467,14 +433,64 @@ void emberAfOnOffClusterLevelControlEffectCallback(EndpointId endpoint, bool new
 
 void emberAfLevelControlClusterServerInitCallback(EndpointId endpoint)
 {
-  // Set attributes
-  // - p44 abstraction is always 1..100%
-  Attributes::MinLevel::Set(endpoint, 1);
-  Attributes::MaxLevel::Set(endpoint, 0xFE);
-  Attributes::OnOffTransitionTime::Set(endpoint, 5); // 0.5 seconds by default
-  // done
+  // NOP for now
 }
 
 void MatterLevelControlPluginServerInitCallback() {}
 
 
+// MARK: attribute access
+
+EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
+    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = currentLevel();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *((uint16_t *)buffer) = mOnOffTransitionTimeDS;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = mOnLevel;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = mOptions;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    // common attributes
+    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      *buffer = (uint16_t) ZCL_LEVEL_CONTROL_CLUSTER_REVISION;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+      *buffer = (uint32_t) ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+}
+
+
+EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+{
+  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
+    if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
+      mOnOffTransitionTimeDS = *((uint16_t *)buffer);
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
+      mOnLevel = *buffer;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
+      mOptions = *buffer;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
+  // let base class try
+  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+}
