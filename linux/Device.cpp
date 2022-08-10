@@ -36,26 +36,30 @@
 #define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
 #define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
 
-const int kNodeLabelSize = 32;
+const int kDefaultTextSize = 64;
 
 // Declare Descriptor cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(descriptorAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEVICE_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* device list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_SERVER_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* server list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CLIENT_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* client list */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PARTS_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0),  /* parts list */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEVICE_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* device list */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_SERVER_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* server list */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CLIENT_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0), /* client list */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PARTS_LIST_ATTRIBUTE_ID, ARRAY, kDescriptorAttributeArraySize, 0),  /* parts list */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare Bridged Device Basic information cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(bridgedDeviceBasicAttrs)
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kNodeLabelSize, 0), /* NodeLabel */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Reachable */
-    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_NODE_LABEL_ATTRIBUTE_ID, CHAR_STRING, kDefaultTextSize, 0), /* Optional NodeLabel */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_VENDOR_NAME_ATTRIBUTE_ID, CHAR_STRING, kDefaultTextSize, 0), /* Optional Vendor Name */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PRODUCT_NAME_ATTRIBUTE_ID, CHAR_STRING, kDefaultTextSize, 0), /* Optional NodeLabel */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_PRODUCT_URL_ATTRIBUTE_ID, CHAR_STRING, kDefaultTextSize, 0), /* Optional Product URL */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_SERIAL_NUMBER_ATTRIBUTE_ID, CHAR_STRING, kDefaultTextSize, 0), /* Optional Serial Number (dSUID) */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_REACHABLE_ATTRIBUTE_ID, BOOLEAN, 1, 0),               /* Mandatory Reachable */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(bridgedDeviceCommonClusters)
-    DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
-    DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
+  DECLARE_DYNAMIC_CLUSTER(ZCL_DESCRIPTOR_CLUSTER_ID, descriptorAttrs, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, bridgedDeviceBasicAttrs, nullptr, nullptr)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
@@ -64,15 +68,11 @@ using namespace chip::app::Clusters::BridgedActions;
 
 // MARK: - Device
 
-Device::Device(std::string aDSUID) :
-  mBridgedDSUID(aDSUID)
+Device::Device()
 {
-  // init
-  mName = string_format("unnamed@%p", this);
-  mReachable  = false;
+  // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;
   mDynamicEndpointBase = 0;
-
   // - endpoint declaration info
   mEndpointDefinition.clusterCount = 0;
   mEndpointDefinition.cluster = nullptr;
@@ -80,10 +80,67 @@ Device::Device(std::string aDSUID) :
   mClusterDataVersionsP = nullptr; // we'll need
   mDeviceTypeListP = nullptr;
   mParentEndpointId = kInvalidEndpointId;
-
   // - declare common bridged device clusters
   addClusterDeclarations(Span<EmberAfCluster>(bridgedDeviceCommonClusters));
 }
+
+
+void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  // parse common info from bridge
+  JsonObjectPtr o = aDeviceInfo->get("dSUID");
+  assert(o);
+  mBridgedDSUID = o->stringValue();
+  // - optionals
+  if (aDeviceInfo->get("vendorName", o)) {
+    mVendorName = o->stringValue();
+  }
+  if (aDeviceInfo->get("model", o)) {
+    mModelName = o->stringValue();
+  }
+  if (aDeviceInfo->get("configURL", o)) {
+    mConfigUrl = o->stringValue();
+  }
+  // - default name
+  if (aDeviceInfo->get("name", o)) {
+    mName = o->stringValue();
+  }
+  // - default zone name
+  if (aDeviceInfo->get("x-p44-zonename", o)) {
+    mZone = o->stringValue();
+  }
+  // - initial reachability
+  mReachable = false;
+  if (aDeviceInfo->get("active", o)) {
+    mReachable = o->boolValue();
+  }
+}
+
+
+bool Device::handleBridgeNotification(const string aNotification, JsonObjectPtr aParams)
+{
+  if (aNotification=="pushNotification") {
+    JsonObjectPtr props;
+    if (aParams->get("changedproperties", props, true)) {
+      handleBridgePushProperties(props);
+      return true;
+    }
+  }
+  return false; // not handled
+}
+
+
+void Device::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
+{
+  JsonObjectPtr o;
+  if (aChangedProperties->get("active", o)) {
+    updateReachable(o->boolValue(), UpdateMode(UpdateFlags::matter));
+  }
+  if (aChangedProperties->get("name", o)) {
+    updateName(o->stringValue(), UpdateMode(UpdateFlags::matter));
+  }
+}
+
 
 
 Device::~Device()
@@ -156,6 +213,12 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
 }
 
 
+void Device::matterAnnounce()
+{
+  /// TODO: properly define, now is called after device instantiation
+}
+
+
 // MARK: functionality
 
 bool Device::IsReachable()
@@ -163,35 +226,34 @@ bool Device::IsReachable()
   return mReachable;
 }
 
-void Device::SetReachable(bool aReachable)
+void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 {
-  bool changed = (mReachable != aReachable);
-  mReachable = aReachable;
-  if (aReachable) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: ONLINE", mName.c_str());
-  }
-  else {
-    ChipLogProgress(DeviceLayer, "Device[%s]: OFFLINE", mName.c_str());
-  }
-  if (changed) {
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
+  if (mReachable!=aReachable || aUpdateMode.Has(UpdateFlags::forced)) {
+    mReachable = aReachable;
+    ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName.c_str(), mReachable ? "REACHABLE" : "OFFLINE");
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
+    }
   }
 }
 
-void Device::SetName(const std::string aDeviceName)
+void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 {
   ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
-  if (mName!=aDeviceName) {
+  if (mName!=aDeviceName || aUpdateMode.Has(UpdateFlags::forced)) {
     mName = aDeviceName;
-    // propagate to native device
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    JsonObjectPtr props = JsonObject::newObj();
-    props->add("name", JsonObject::newString(mName));
-    params->add("properties", props);
-    BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
-    // report to matter
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+    if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      // propagate to native device
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add("dSUID", JsonObject::newString(mBridgedDSUID));
+      JsonObjectPtr props = JsonObject::newObj();
+      props->add("name", JsonObject::newString(mName));
+      params->add("properties", props);
+      BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+    }
   }
 }
 
@@ -218,11 +280,34 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       *buffer = IsReachable() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == 32)) {
+    // Writable Node Label
+    if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, GetName().c_str());
+      MakeZclCharString(zclNameSpan, mName.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
+    // Device Information attributes
+    if ((attributeId == ZCL_VENDOR_NAME_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, mVendorName.substr(0,maxReadLength-1).c_str());
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_PRODUCT_NAME_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, mModelName.substr(0,maxReadLength-1).c_str());
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_PRODUCT_URL_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, mConfigUrl.substr(0,maxReadLength-1).c_str());
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_SERIAL_NUMBER_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, mBridgedDSUID.c_str());
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    // other
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *buffer = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
       return EMBER_ZCL_STATUS_SUCCESS;
@@ -239,6 +324,13 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
 EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   // handle common device attributes
-  // FIXME: No writeable common attributes at this time
+  if (clusterId==ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID) {
+    // Writable Node Label
+    if (attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) {
+      string newName((const char*)buffer+1, (size_t)buffer[0]);
+      updateName(newName, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
   return EMBER_ZCL_STATUS_FAILURE;
 }

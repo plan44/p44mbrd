@@ -35,8 +35,10 @@
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, INT8U, 1, 0), /* current saturation */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 1, 0), /* current color temperature */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 2, 0), /* current color temperature */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID, INT16U, 2, 0), /* current X */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID, INT16U, 2, 0), /* current Y */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: see ColorMode enum */
 //    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 // TODO: other important capabilities
@@ -69,10 +71,9 @@ const EmberAfDeviceType gColorLightTypes[] = {
 
 // MARK: - DeviceColorControl
 
-DeviceColorControl::DeviceColorControl(const std::string aDSUID, bool aCTOnly) :
-  inherited(aDSUID),
+DeviceColorControl::DeviceColorControl(bool aCTOnly) :
   mCtOnly(aCTOnly),
-  mColorMode(aCTOnly ? 2 : 0),
+  mColorMode(aCTOnly ? colormode_ct : colormode_hs),
   mHue(0),
   mSaturation(0),
   mColorTemp(0)
@@ -85,6 +86,63 @@ void DeviceColorControl::finalizeDeviceDeclaration()
 {
   finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
 }
+
+void DeviceColorControl::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  inherited::initBridgedInfo(aDeviceInfo);
+  // no extra info at this level so far -> NOP
+}
+
+
+void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+{
+  inherited::DeviceOnOff::parseChannelStates(aChannelStates, aUpdateMode);
+  JsonObjectPtr o;
+  // need to determine color mode
+  ColorMode colorMode = colormode_unknown;
+  if (aChannelStates->get("colortemp", o)) {
+    JsonObjectPtr vo;
+    if (o->get("age", vo, true)) colorMode = colormode_ct; // age is non-null -> component detemines colormode
+    if (o->get("value", vo, true)) {
+      updateCurrentColortemp(vo->doubleValue()/100*0xFE, colorMode==colormode_ct ? aUpdateMode : UpdateMode());
+    }
+  }
+  if (!mCtOnly) {
+    if (aChannelStates->get("hue", o)) {
+      JsonObjectPtr vo;
+      if (o->get("age", vo, true)) colorMode = colormode_hs; // age is non-null -> component detemines colormode
+      if (o->get("value", vo, true)) {
+        // update only cache if not actually in hs mode
+        updateCurrentHue(vo->doubleValue()/360*0xFE, colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+      }
+    }
+    if (aChannelStates->get("saturation", o)) {
+      JsonObjectPtr vo;
+      if (o->get("value", vo, true)) {
+        // update only cache if not actually in hs mode
+        updateCurrentSaturation(vo->doubleValue()/100*0xFE, colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+      }
+    }
+    if (aChannelStates->get("x", o)) {
+      JsonObjectPtr vo;
+      if (o->get("age", vo, true)) colorMode = colormode_xy; // age is non-null -> component detemines colormode
+      if (o->get("value", vo, true)) {
+        // update only cache if not actually in hs mode
+        updateCurrentX(vo->doubleValue()*0xFFFE, colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+      }
+    }
+    if (aChannelStates->get("y", o)) {
+      JsonObjectPtr vo;
+      if (o->get("value", vo, true)) {
+        // update only cache if not actually in hs mode
+        updateCurrentY(vo->doubleValue()*0xFFFE, colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+      }
+    }
+  }
+  // now update color mode
+  updateCurrentColorMode(colorMode, aUpdateMode);
+}
+
 
 
 EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
@@ -112,7 +170,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       *buffer = currentSaturation();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)) {
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) {
       if (maxReadLength == 2) {
         *((uint16_t *)buffer) = currentColortemp();
       }
@@ -127,69 +185,145 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
 }
 
 
-bool DeviceColorControl::setCurrentHue(uint8_t aHue)
+bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", GetName().c_str(), aHue);
-  if (aHue!=mHue) {
+  if (aColorMode!=mColorMode || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: color mode set to %d", GetName().c_str(), (int)aColorMode);
+    mColorMode = aColorMode;
+    if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      JsonObjectPtr params = JsonObject::newObj();
+      switch (mColorMode) {
+        case colormode_hs:
+          updateCurrentHue(mHue, UpdateMode(UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
+          updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::forced, UpdateFlags::bridged));
+          break;
+        case colormode_xy:
+          updateCurrentX(mX, UpdateMode(UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
+          updateCurrentY(mY, UpdateMode(UpdateFlags::forced, UpdateFlags::bridged));
+          break;
+        default:
+        case colormode_ct:
+          updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::forced, UpdateFlags::bridged));
+          break;
+      }
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    }
+    return true;
+  }
+  return false;
+}
+
+
+bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
+{
+  if (aHue!=mHue || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", GetName().c_str(), aHue);
     mHue = aHue;
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    params->add("channelId", JsonObject::newString("hue"));
-    params->add("value", JsonObject::newDouble((double)mHue*360/0xFE));
-    params->add("apply_now", JsonObject::newBool(true));
-    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
-    if (mColorMode!=0) {
-      mColorMode = 0; // switch to HS
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
+      // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
+      if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        JsonObjectPtr params = JsonObject::newObj();
+        params->add("channelId", JsonObject::newString("hue"));
+        params->add("value", JsonObject::newDouble((double)mHue*360/0xFE));
+        params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
+        notify("setOutputChannelValue", params);
+      }
     }
-    // report back to matter
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID);
+    }
     return true; // changed
   }
   return false; // no change
 }
 
 
-bool DeviceColorControl::setCurrentSaturation(uint8_t aSaturation)
+bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", GetName().c_str(), aSaturation);
-  if (aSaturation!=mSaturation) {
+  if (aSaturation!=mSaturation || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", GetName().c_str(), aSaturation);
     mSaturation = aSaturation;
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    params->add("channelId", JsonObject::newString("saturation"));
-    params->add("value", JsonObject::newDouble((double)mSaturation*100/0xFE));
-    params->add("apply_now", JsonObject::newBool(true));
-    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
-    // report back to matter
-    if (mColorMode!=0) {
-      mColorMode = 0; // switch to HS
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
+      // color mode has not changed, must separately update saturation (otherwise, color mode change already sends H+S)
+      if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        JsonObjectPtr params = JsonObject::newObj();
+        params->add("channelId", JsonObject::newString("saturation"));
+        params->add("value", JsonObject::newDouble((double)mSaturation*100/0xFE));
+        params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
+        notify("setOutputChannelValue", params);
+      }
     }
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID);
+    }
     return true; // changed
   }
   return false; // no change
 }
 
 
-bool DeviceColorControl::setCurrentColortemp(uint8_t aColortemp)
+bool DeviceColorControl::updateCurrentColortemp(uint8_t aColortemp, UpdateMode aUpdateMode)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", GetName().c_str(), aColortemp);
-  if (aColortemp!=mColorTemp) {
+  if (aColortemp!=mColorTemp || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", GetName().c_str(), aColortemp);
     mColorTemp = aColortemp;
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-    params->add("channelId", JsonObject::newString("colortemp"));
-    params->add("value", JsonObject::newDouble(mColorTemp)); // is in mireds
-    params->add("apply_now", JsonObject::newBool(true));
-    BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
-    // report back to matter
-    if (mColorMode!=2) {
-      mColorMode = 2; // switch to CT
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+    if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
+      // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add("channelId", JsonObject::newString("colortemp"));
+      params->add("value", JsonObject::newDouble(mColorTemp)); // is in mireds
+      params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
+      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
     }
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID);
+    }
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
+{
+  if (aX!=mX || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set X to %d", GetName().c_str(), aX);
+    mX = aX;
+    if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
+      // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add("channelId", JsonObject::newString("x"));
+      params->add("value", JsonObject::newDouble((double)mX/0xFFFE));
+      params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
+      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID);
+    }
+    return true; // changed
+  }
+  return false; // no change
+}
+
+
+bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
+{
+  if (aY!=mY || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set Y to %d", GetName().c_str(), aY);
+    mY = aY;
+    if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
+      // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add("channelId", JsonObject::newString("y"));
+      params->add("value", JsonObject::newDouble((double)mY/0xFFFE));
+      params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
+      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID);
+    }
     return true; // changed
   }
   return false; // no change

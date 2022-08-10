@@ -165,8 +165,6 @@ bool kbhit()
 
 // MARK: - P44 additions
 
-// TODO: clean up once we don't need the pre-running bridge query (aka standalone mode)
-const bool standalone = true;
 int chipmain(int argc, char * argv[]);
 int gArgc;
 char ** gArgv;
@@ -197,9 +195,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                 if (device->get("dSUID", o)) {
                   string dsuid = o->stringValue();
                   string name;
-                  string zone;
                   if (device->get("name", o)) name = o->stringValue(); // optional
-                  if (device->get("x-p44-zonename", o)) zone = o->stringValue(); // optional
                   // determine device type
                   JsonObjectPtr outputdesc;
                   if (device->get("outputDescription", outputdesc)) {
@@ -209,7 +205,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                         // this is a light device
                         if (outputdesc->get("function", o)) {
                           int outputfunction = (int)o->int32Value();
-                          LOG(LOG_NOTICE, "found light device '%s' in zone='%s': %s, outputfunction=%d", name.c_str(), zone.c_str(), dsuid.c_str(), outputfunction);
+                          LOG(LOG_NOTICE, "found light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                           // enable it for bridging
                           JsonObjectPtr params = JsonObject::newObj();
                           params->add("dSUID", JsonObject::newString(dsuid));
@@ -247,21 +243,19 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
                           switch(outputfunction) {
                             default:
                             case 0: // switch output - single channel 0..100
-                              dev = new DeviceOnOff(dsuid);
+                              dev = new DeviceOnOff();
                               break;
                             case 1: // effective value dimmer - single channel 0..100
-                              dev = new DeviceLevelControl(dsuid);
+                              dev = new DeviceLevelControl();
                               break;
                             case 3: // dimmer with color temperature - channels 1 and 4
                             case 4: // full color dimmer - channels 1..6
-                              dev = new DeviceColorControl(dsuid, outputfunction==3 /* ctOnly */);
+                              dev = new DeviceColorControl(outputfunction==3 /* ctOnly */);
                               break;
                           }
                           if (dev) {
+                            dev->initBridgedInfo(device);
                             gDeviceDSUIDMap[dsuid] = dev;
-                            // additional setup
-                            dev->initName(name);
-                            dev->initZone(zone);
                           }
                         }
                       }
@@ -276,22 +270,40 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
     }
   }
   // devices collected
-  if (standalone) {
-    // start chip only now
-    BridgeApi::sharedBridgeApi().endStandalone();
-    LOG(LOG_NOTICE, "End of standalone mode, starting CHIP now");
-    chipmain(gArgc, gArgv);
-  }
+  // start chip only now
+  LOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
+  chipmain(gArgc, gArgv);
 }
 
 
 void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
-  LOG(LOG_NOTICE, "notification status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
-  // continue waiting
-  if (aJsonMsg && aJsonMsg->stringValue()=="quit") {
-    return;
+  // handle push notifications
+  JsonObjectPtr o;
+  string targetDSUID;
+  if (aJsonMsg && aJsonMsg->get("dSUID", o, true)) {
+    targetDSUID = o->stringValue();
+    // search for device
+    DeviceDSUIDMap::iterator devpos = gDeviceDSUIDMap.find(targetDSUID);
+    if (devpos!=gDeviceDSUIDMap.end()) {
+      // device exists, dispatch
+      if (aJsonMsg->get("notification", o, true)) {
+        string notification = o->stringValue();
+        ChipLogProgress(DeviceLayer, "Bridge sent notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+        bool handled = devpos->second->handleBridgeNotification(notification, aJsonMsg);
+        if (!handled) {
+          ChipLogError(DeviceLayer, "Could not handle bridge notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+        }
+      }
+      else {
+        ChipLogError(DeviceLayer, "Bridge sent unknown message type for device %s", targetDSUID.c_str());
+      }
+    }
+    else {
+      ChipLogError(DeviceLayer, "Bridge sent message for unknown device %s", targetDSUID.c_str());
+    }
   }
+  // continue waiting
   BridgeApi::sharedBridgeApi().handleSocketEvents();
 }
 
@@ -304,6 +316,8 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
     JsonObjectPtr params = JsonObject::objFromText(
       "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ \"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
       "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
+      "\"vendorName\":null, \"model\":null, \"configURL\":null, "
+      "\"channelStates\":null, "
       "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
     );
     BridgeApi::sharedBridgeApi().call("getProperty", params, answerreceived);
@@ -316,12 +330,8 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 
 void initializeP44(chip::System::Layer * aLayer, void * aAppState)
 {
-  if (!standalone) {
-    // run it in parallel
-    BridgeApi::sharedBridgeApi().endStandalone();
-    LOG(LOG_NOTICE, "Running bridge API in parallel mode from beginning");
-    BridgeApi::sharedBridgeApi().connect(apiconnected);
-  }
+  // enable API to run it in parallel with chip main loop
+  BridgeApi::sharedBridgeApi().endStandalone();
 }
 
 
@@ -335,14 +345,9 @@ int main(int argc, char * argv[])
   // try bridge API
   BridgeApi::sharedBridgeApi().setConnectionParams("127.0.0.1", 4444, 10*Second);
   BridgeApi::sharedBridgeApi().setIncomingMessageCallback(apinotification);
-  if (standalone) {
-    BridgeApi::sharedBridgeApi().connect(apiconnected);
-    // we'll never return if everything goes well
-    return 0;
-  }
-  else {
-    chipmain(gArgc, gArgv);
-  }
+  BridgeApi::sharedBridgeApi().connect(apiconnected);
+  // we'll never return if everything goes well
+  return 0;
 }
 
 
@@ -410,17 +415,17 @@ int chipmain(int argc, char * argv[])
   for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
     DevicePtr dev = pos->second;
     // look up previous endpoint mapping
-    string key = kP44mbrNamespace "devices/"; key += dev->mBridgedDSUID;
+    string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
     EndpointId dynamicEndpointIdx = kInvalidEndpointId;
     cerr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (cerr==CHIP_NO_ERROR) {
       // try to re-use the endpoint ID for this dSUID
       // - sanity check
       if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-        LOG(LOG_WARNING, "inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->mBridgedDSUID.c_str());
+        LOG(LOG_WARNING, "inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
       }
       if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-        LOG(LOG_ERR, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->mBridgedDSUID.c_str());
+        LOG(LOG_ERR, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
         dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
       }
       else {
@@ -437,7 +442,7 @@ int chipmain(int argc, char * argv[])
     }
     else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-      LOG(LOG_NOTICE, "new device %s, adding to bridge", dev->mBridgedDSUID.c_str());
+      LOG(LOG_NOTICE, "new device %s, adding to bridge", dev->bridgedDSUID().c_str());
     }
     else {
       LogErrorOnFailure(cerr);
@@ -454,7 +459,7 @@ int chipmain(int argc, char * argv[])
       }
       if (dynamicEndpointIdx==kInvalidEndpointId) {
         if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          LOG(LOG_ERR, "max number of dynamic endpoints exhausted -> cannot add new device %s", dev->mBridgedDSUID.c_str());
+          LOG(LOG_ERR, "max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
         }
         else {
           dynamicEndpointIdx = numDynamicEndPoints++;
@@ -481,7 +486,7 @@ int chipmain(int argc, char * argv[])
       // there is a device at this dynamic endpoint
       if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId)) {
         // make sure reachable and name get reported
-        gDevices[i]->SetReachable(true);
+        gDevices[i]->matterAnnounce();
       }
     }
   }
@@ -491,8 +496,7 @@ int chipmain(int argc, char * argv[])
 
   // Run CHIP
 
-  //chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
-  initializeP44(NULL, NULL);
+  chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
   chip::DeviceLayer::PlatformMgr().RunEventLoop();
 
   return 0;

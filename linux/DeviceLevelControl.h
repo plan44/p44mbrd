@@ -32,10 +32,14 @@ class DeviceLevelControl : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceLevelControl(const std::string aDSUID);
+  DeviceLevelControl();
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
   uint8_t currentLevel() { return mLevel; };
-  bool setCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff);
+  bool updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;

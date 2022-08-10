@@ -294,6 +294,8 @@ void BridgeApi::setEventWatchingMask(short aEventMask)
 void BridgeApi::endStandalone()
 {
   mStandalone = false;
+  // re-apply mask
+  setEventWatchingMask(mApiSocketEventMask);
 }
 
 

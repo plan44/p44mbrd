@@ -32,15 +32,22 @@ class DeviceOnOff : public Device
   typedef Device inherited;
 public:
 
-  DeviceOnOff(const std::string aDSUID);
+  DeviceOnOff();
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);
 
   bool isOn() { return mOn; }
-  bool setOnOff(bool aOn);
+  bool updateOnOff(bool aOn, UpdateMode aUpdateMode);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+
+  /// called to handle pushed properties coming from bridge
+  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 protected:
 
@@ -48,7 +55,6 @@ protected:
   virtual void finalizeDeviceDeclaration() override;
 
   virtual void changeOnOff_impl(bool aOn);
-
 
 private:
   bool mOn;

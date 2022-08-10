@@ -31,15 +31,33 @@ class DeviceColorControl : public DeviceLevelControl
   typedef DeviceLevelControl inherited;
 public:
 
-  DeviceColorControl(const std::string aDSUID, bool aCTOnly);
+  /// @note: enum values are from matter specs
+  typedef enum {
+    colormode_hs = 0,
+    colormode_xy = 1,
+    colormode_ct = 2,
+    colormode_unknown = 0xFF
+  } ColorMode;
 
+  DeviceColorControl(bool aCTOnly);
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
+
+  ColorMode currentColorMode() { return mColorMode; };
   uint8_t currentHue() { return mHue; };
   uint8_t currentSaturation() { return mSaturation; };
   uint16_t currentColortemp() { return mColorTemp; };
+  uint16_t currentX() { return mX; };
+  uint16_t currentY() { return mX; };
 
-  bool setCurrentHue(uint8_t aHue);
-  bool setCurrentSaturation(uint8_t aSaturation);
-  bool setCurrentColortemp(uint8_t aColortemp);
+  bool updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode);
+  bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode);
+  bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode);
+  bool updateCurrentColortemp(uint8_t aColortemp, UpdateMode aUpdateMode);
+  bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode);
+  bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode);
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
@@ -52,9 +70,12 @@ private:
   virtual void finalizeDeviceDeclaration() override;
 
   bool mCtOnly;
-  uint8_t mColorMode; // 0=HS, 1=XY, 2=Colortemp
+
+  ColorMode mColorMode;
   uint8_t mHue;
   uint8_t mSaturation;
   uint16_t mColorTemp;
+  uint16_t mX;
+  uint16_t mY;
 };
 

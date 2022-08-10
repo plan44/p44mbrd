@@ -77,46 +77,63 @@ class Device : public p44::P44Obj
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
   std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info
 
+  // device info for bridged device
+  string mVendorName;
+  string mModelName;
+  string mConfigUrl;
+
   // constant after init
+  string mBridgedDSUID;
   chip::EndpointId mParentEndpointId;
   EndpointId mDynamicEndpointBase;
   EndpointId mDynamicEndpointIdx;
 
   // runtime variable attributes
   bool mReachable;
-  std::string mName;
-  std::string mZone;
-  std::string mLocation;
+  string mName;
+  string mZone;
 
 public:
 
-  const std::string mBridgedDSUID;
-
-  Device(const std::string aDSUID);
+  Device();
   virtual ~Device();
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo);
+
+  const string bridgedDSUID() { return mBridgedDSUID; };
 
   bool IsReachable();
   inline chip::EndpointId GetEndpointId() { return mDynamicEndpointBase+mDynamicEndpointIdx; };
   inline chip::EndpointId GetParentEndpointId() { return mParentEndpointId; };
-  inline std::string GetName() { return mName; };
-  inline std::string GetZone() { return mZone; };
-  // inline std::string GetLocation() { return mLocation; };
+  inline string GetName() { return mName; };
+  inline string GetZone() { return mZone; };
+
+  enum class UpdateFlags : uint8_t
+  {
+    bridged = 0x01, ///< update state in bridge (send change notification/call)
+    matter = 0x02, ///< update state in matter (report attribute as changed)
+    noapply = 0x40, ///< do not apply right now when updating bridge (i.e. color components)
+    forced = 0x80 ///< perform updates even when cached state has not changed
+  };
+  using UpdateMode = BitFlags<UpdateFlags>;
 
   // propagating setters
-  void SetReachable(bool aReachable);
-  void SetName(const std::string aDeviceName);
-  // void SetLocation(std::string szLocation);
+  void updateReachable(bool aReachable, UpdateMode aUpdateMode);
+  void updateName(const string aDeviceName, UpdateMode aUpdateMode);
 
   // setup setters
   inline void SetParentEndpointId(chip::EndpointId aId) { mParentEndpointId = aId; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
-  inline void initName(const std::string aName) { mName = aName; };
-  inline void initZone(std::string aZone) { mZone = aZone; };
+  inline void initName(const string aName) { mName = aName; };
+  inline void initZone(string aZone) { mZone = aZone; };
 
 
   /// add the device using the previously set cluster info
   /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
   bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
+
+  /// TODO: properly define, now is called after device instantiation
+  void matterAnnounce();
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
@@ -129,6 +146,12 @@ public:
 
   void notify(const string aNotification, JsonObjectPtr aParams);
   void call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB aResponseCB);
+
+  /// called to handle notifications from bridge
+  bool handleBridgeNotification(const string aNotification, JsonObjectPtr aParams);
+
+  /// called to handle pushed properties coming from bridge
+  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties);
 
   /// @}
 

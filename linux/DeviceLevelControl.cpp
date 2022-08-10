@@ -66,18 +66,38 @@ const EmberAfDeviceType gDimmableLightTypes[] = {
 
 // MARK: - DeviceLevelControl
 
-DeviceLevelControl::DeviceLevelControl(const std::string aDSUID) :
-  inherited(aDSUID),
+DeviceLevelControl::DeviceLevelControl() :
   mLevel(0)
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
 }
 
-
 void DeviceLevelControl::finalizeDeviceDeclaration()
 {
   finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
+}
+
+
+void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  inherited::initBridgedInfo(aDeviceInfo);
+  // no extra info at this level so far -> NOP
+}
+
+
+void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+{
+  // OnOff just sets on/off state when brightness>0
+  inherited::parseChannelStates(aChannelStates, aUpdateMode);
+  // init level
+  JsonObjectPtr o;
+  if (aChannelStates->get("brightness", o)) {
+    JsonObjectPtr vo;
+    if (o->get("value", vo, true)) {
+      updateCurrentLevel(vo->doubleValue()/100*0xFE, 0, 0, false, aUpdateMode);
+    }
+  }
 }
 
 
@@ -104,7 +124,7 @@ void DeviceLevelControl::changeOnOff_impl(bool aOn)
 }
 
 
-bool DeviceLevelControl::setCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff)
+bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode)
 {
   // handle relative movement
   int level = aAmount;
@@ -112,32 +132,35 @@ bool DeviceLevelControl::setCurrentLevel(uint8_t aAmount, int8_t aDirection, uin
   if (level>0xFE) level = 0xFE;
   if (level<0) level = 0;
   // now move to given or calculated level
-  ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d in %d00mS", GetName().c_str(), aAmount, aTransitionTimeDs);
-  if (level!=mLevel) {
-    if (mLevel==0) {
+  if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d in %d00mS", GetName().c_str(), aAmount, aTransitionTimeDs);
+    if ((mLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
       // level is zero and becomes non-null: also set OnOff when enabled
-      if (aWithOnOff) setOnOff(true);
+      if (aWithOnOff) updateOnOff(true, aUpdateMode);
     }
     else if (level==0) {
       // level is not zero and should becomes zero: prevent or clear OnOff
-      if (aWithOnOff) setOnOff(false);
+      if (aWithOnOff) updateOnOff(false, aUpdateMode);
       else if (mLevel==1) return false; // already at minimum: no change
       else level = 1; // set to minimum, but not to off
     }
     mLevel = level;
-    // adjust default channel
-    // Note: transmit relative changes as such, although we already calculate the outcome above,
-    //   but non-standard channels might arrive at another value (e.g. wrap around)
-    JsonObjectPtr params = JsonObject::newObj();
-    params->add("channel", JsonObject::newInt32(0)); // default channel
-    params->add("relative", JsonObject::newBool(aDirection!=0));
-    params->add("value", JsonObject::newDouble((double)aAmount*100/0xFE*(aDirection<0 ? -1 : 1)));
-    if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble(aTransitionTimeDs/10));
-    params->add("apply_now", JsonObject::newBool(true));
-    notify("setOutputChannelValue", params);
-    // report back to matter
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
-    return true; // changed
+    if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      // adjust default channel
+      // Note: transmit relative changes as such, although we already calculate the outcome above,
+      //   but non-standard channels might arrive at another value (e.g. wrap around)
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add("channel", JsonObject::newInt32(0)); // default channel
+      params->add("relative", JsonObject::newBool(aDirection!=0));
+      params->add("value", JsonObject::newDouble((double)aAmount*100/0xFE*(aDirection<0 ? -1 : 1)));
+      if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble(aTransitionTimeDs/10));
+      params->add("apply_now", JsonObject::newBool(true));
+      notify("setOutputChannelValue", params);
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
+    }
+    return true; // changed or forced
   }
   return false; // no change
 }
@@ -147,7 +170,7 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
 {
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
     if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && IsReachable()) {
-      setCurrentLevel(*buffer, 0, 0, false); // absolute, immediate
+      updateCurrentLevel(*buffer, 0, 0, false, UpdateMode(UpdateFlags::bridged)); // absolute, immediate
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -215,7 +238,7 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_
         aTransitionTimeDs = 0; // just instantaneous
       }
     }
-    setCurrentLevel(aAmount, aDirection, aTransitionTimeDs, aWithOnOff);
+    updateCurrentLevel(aAmount, aDirection, aTransitionTimeDs, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
     // Support for global scene for last state before getting switched off
     // - The GlobalSceneControl attribute is defined in order to prevent a second off command storing the
     //   all-devices-off situation as a global scene, and to prevent a second on command destroying the current
@@ -324,7 +347,7 @@ void DeviceLevelControl::move(uint8_t aMode, uint8_t aRate, bool aWithOnOff, uin
       case EMBER_ZCL_MOVE_MODE_UP:
         if (currentLevel()==0) {
           // start dimming from off level into on levels -> set onoff
-          setOnOff(true);
+          updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
         dim(1, aRate);
         break;
@@ -425,10 +448,10 @@ void DeviceLevelControl::effect(bool aTurnOn)
       }
     }
     if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(0xFE);
-    setCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true);
+    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {
-    setCurrentLevel(0, 0, transitionTime, true);
+    updateCurrentLevel(0, 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
 }
 

@@ -63,17 +63,51 @@ const EmberAfDeviceType gOnOffLightTypes[] = {
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff(const std::string aDSUID) :
-  inherited(aDSUID)
+DeviceOnOff::DeviceOnOff() :
+  mOn(false)
 {
-  mOn = false;
   // - declare onoff device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
 }
 
+
 void DeviceOnOff::finalizeDeviceDeclaration()
 {
   finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
+}
+
+
+void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  inherited::initBridgedInfo(aDeviceInfo);
+  // output devices should examine the channel states
+  JsonObjectPtr o = aDeviceInfo->get("channelStates");
+  if (o) {
+    parseChannelStates(o, UpdateMode());
+  }
+}
+
+
+void DeviceOnOff::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
+{
+  inherited::handleBridgePushProperties(aChangedProperties);
+  JsonObjectPtr channelStates;
+  if (aChangedProperties->get("channelStates", channelStates, true)) {
+    parseChannelStates(channelStates, UpdateMode(UpdateFlags::matter));
+  }
+}
+
+
+
+void DeviceOnOff::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+{
+  JsonObjectPtr o;
+  if (aChannelStates->get("brightness", o)) {
+    JsonObjectPtr vo;
+    if (o->get("value", vo, true)) {
+      updateOnOff(vo->doubleValue()>0, aUpdateMode);
+    }
+  }
 }
 
 
@@ -106,14 +140,17 @@ void DeviceOnOff::changeOnOff_impl(bool aOn)
 }
 
 
-bool DeviceOnOff::setOnOff(bool aOn)
+bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: %s", GetName().c_str(), aOn ? "ON" : "OFF");
-  if (aOn!=mOn) {
+  if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: %s", GetName().c_str(), aOn ? "ON" : "OFF");
     mOn  = aOn;
-    changeOnOff_impl(mOn);
-    // report back to matter
-    MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+    if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      changeOnOff_impl(mOn);
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+    }
     return true; // changed
   }
   return false; // no change
@@ -124,7 +161,7 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
     if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && IsReachable()) {
-      setOnOff(*buffer);
+      updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
