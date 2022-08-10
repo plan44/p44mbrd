@@ -238,8 +238,8 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 
 void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 {
-  ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
   if (mName!=aDeviceName || aUpdateMode.Has(UpdateFlags::forced)) {
+    ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
     mName = aDeviceName;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       // propagate to native device

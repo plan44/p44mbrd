@@ -169,6 +169,13 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
 
 EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
+  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
+    // Non-writable from outside, but written by standard OnOff cluster implementation  
+    if (attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) {
+      updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }
