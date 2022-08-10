@@ -89,54 +89,9 @@ DeviceDSUIDMap gDeviceDSUIDMap;
 } // namespace
 
 
-// MARK: - attribute access handlers
+// MARK: - global callback handlers
 
-EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId,
-                                                   const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer,
-                                                   uint16_t maxReadLength)
-{
-    uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
-
-    EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
-
-    if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != nullptr))
-    {
-      Device * dev = gDevices[endpointIndex];
-      if (dev) {
-        ChipLogProgress(DeviceLayer,
-          "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
-          (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
-        );
-        ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
-        if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
-      }
-    }
-
-    return ret;
-}
-
-
-EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, ClusterId clusterId,
-                                                    const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer)
-{
-    uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
-
-    EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
-
-    if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
-    {
-      Device * dev = gDevices[endpointIndex];
-      if (dev) {
-        ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
-        ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
-        if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute write not handled!");
-      }
-    }
-
-    return ret;
-}
-
-
+// helper for getting device object by endpointId
 DevicePtr deviceForEndPointId(EndpointId aEndpointId)
 {
   uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(aEndpointId);
@@ -147,6 +102,56 @@ DevicePtr deviceForEndPointId(EndpointId aEndpointId)
 }
 
 
+
+EmberAfStatus emberAfExternalAttributeReadCallback(
+  EndpointId endpoint, ClusterId clusterId,
+  const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer,
+  uint16_t maxReadLength
+)
+{
+  EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
+  uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
+  if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != nullptr))
+  {
+    Device * dev = gDevices[endpointIndex];
+    if (dev) {
+      ChipLogProgress(DeviceLayer,
+        "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
+        (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
+      );
+      ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
+      if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
+    }
+  }
+  return ret;
+}
+
+
+EmberAfStatus emberAfExternalAttributeWriteCallback(
+  EndpointId endpoint, ClusterId clusterId,
+  const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer
+)
+{
+  EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
+  uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
+  if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+    Device * dev = gDevices[endpointIndex];
+    if (dev) {
+      ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
+      ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
+      if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute write not handled!");
+    }
+  }
+  return ret;
+}
+
+
+void MatterBridgedDeviceBasicClusterServerAttributeChangedCallback(const chip::app::ConcreteAttributePath & attributePath)
+{
+  ChipLogProgress(DeviceLayer, "Endpoint %d, attributeId 0x%04x in BridgedDeviceBasicCluster has changed", (int)attributePath.mEndpointId, (int)attributePath.mAttributeId);
+}
+
+// MARK: - Main program
 
 void ApplicationInit() {}
 
@@ -161,8 +166,6 @@ bool kbhit()
     return byteswaiting > 0;
 }
 
-
-// MARK: - P44 additions
 
 int chipmain(int argc, char * argv[]);
 int gArgc;
