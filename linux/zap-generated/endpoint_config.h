@@ -92,7 +92,7 @@
 
 #define ZAP_ATTRIBUTE_MASK(mask) ATTRIBUTE_MASK_ ## mask
 // This is an array of EmberAfAttributeMetadata structures.
-#define GENERATED_ATTRIBUTE_COUNT 285
+#define GENERATED_ATTRIBUTE_COUNT 270
 #define GENERATED_ATTRIBUTES { \
 \
   /* Endpoint: 0, Cluster: Descriptor (server) */ \
@@ -388,8 +388,13 @@
   { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */  \
   { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) }, /* ClusterRevision */  \
 \
-  /* Endpoint: 2, Cluster: User Label (server) */ \
-  { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_EMPTY_DEFAULT() }, /* label list */  \
+  /* Endpoint: 2, Cluster: Bridged Device Basic (server) */ \
+  { 0x00000001, ZAP_TYPE(CHAR_STRING), 33, 0, ZAP_EMPTY_DEFAULT() }, /* VendorName */  \
+  { 0x00000003, ZAP_TYPE(CHAR_STRING), 33, 0, ZAP_EMPTY_DEFAULT() }, /* ProductName */  \
+  { 0x00000005, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_EMPTY_DEFAULT() }, /* NodeLabel */  \
+  { 0x0000000D, ZAP_TYPE(LONG_CHAR_STRING), 258, 0, ZAP_EMPTY_DEFAULT() }, /* ProductURL */  \
+  { 0x0000000F, ZAP_TYPE(CHAR_STRING), 33, 0, ZAP_EMPTY_DEFAULT() }, /* SerialNumber */  \
+  { 0x00000011, ZAP_TYPE(BOOLEAN), 1, 0, ZAP_SIMPLE_DEFAULT(1) }, /* Reachable */  \
   { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */  \
   { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) }, /* ClusterRevision */  \
 \
@@ -401,26 +406,6 @@
   { 0x00000004, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(0x607D) }, /* CurrentY */  \
   { 0x00000007, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ColorTemperature */  \
   { 0x00000008, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ColorMode */  \
-  { 0x0000000F, ZAP_TYPE(BITMAP8), 1, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_SIMPLE_DEFAULT(0x00) }, /* Options */  \
-  { 0x00000010, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* NumberOfPrimaries */  \
-  { 0x00000011, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary1X */  \
-  { 0x00000012, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary1Y */  \
-  { 0x00000013, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary1Intensity */  \
-  { 0x00000015, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary2X */  \
-  { 0x00000016, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary2Y */  \
-  { 0x00000017, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary2Intensity */  \
-  { 0x00000019, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary3X */  \
-  { 0x0000001A, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary3Y */  \
-  { 0x0000001B, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary3Intensity */  \
-  { 0x00000020, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary4X */  \
-  { 0x00000021, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary4Y */  \
-  { 0x00000022, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary4Intensity */  \
-  { 0x00000024, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary5X */  \
-  { 0x00000025, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary5Y */  \
-  { 0x00000026, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary5Intensity */  \
-  { 0x00000028, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary6X */  \
-  { 0x00000029, ZAP_TYPE(INT16U), 2, 0, ZAP_EMPTY_DEFAULT() }, /* Primary6Y */  \
-  { 0x0000002A, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(NULLABLE), ZAP_EMPTY_DEFAULT() }, /* Primary6Intensity */  \
   { 0x00004000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* EnhancedCurrentHue */  \
   { 0x00004001, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* EnhancedColorMode */  \
   { 0x00004002, ZAP_TYPE(INT8U), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) }, /* ColorLoopActive */  \
@@ -471,6 +456,9 @@ const EmberAfGenericClusterFunction chipFuncArrayOnOffServer[] = {\
 };\
 const EmberAfGenericClusterFunction chipFuncArrayLevelControlServer[] = {\
   (EmberAfGenericClusterFunction) emberAfLevelControlClusterServerInitCallback,\
+};\
+const EmberAfGenericClusterFunction chipFuncArrayBridgedDeviceBasicServer[] = {\
+  (EmberAfGenericClusterFunction) MatterBridgedDeviceBasicClusterServerAttributeChangedCallback,\
 };\
 const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
   (EmberAfGenericClusterFunction) emberAfColorControlClusterServerInitCallback,\
@@ -970,22 +958,22 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
       .generatedCommandList = nullptr ,\
     },\
   { \
-      /* Endpoint: 2, Cluster: User Label (server) */ \
-      .clusterId = 0x00000041,  \
+      /* Endpoint: 2, Cluster: Bridged Device Basic (server) */ \
+      .clusterId = 0x00000039,  \
       .attributes = ZAP_ATTRIBUTE_INDEX(241), \
-      .attributeCount = 3, \
-      .clusterSize = 6, \
-      .mask = ZAP_CLUSTER_MASK(SERVER), \
-      .functions = NULL, \
+      .attributeCount = 8, \
+      .clusterSize = 397, \
+      .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
+      .functions = chipFuncArrayBridgedDeviceBasicServer, \
       .acceptedCommandList = nullptr ,\
       .generatedCommandList = nullptr ,\
     },\
   { \
       /* Endpoint: 2, Cluster: Color Control (server) */ \
       .clusterId = 0x00000300,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(244), \
-      .attributeCount = 41, \
-      .clusterSize = 58, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(249), \
+      .attributeCount = 21, \
+      .clusterSize = 26, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
       .functions = chipFuncArrayColorControlServer, \
       .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 103 ) ,\
@@ -1003,7 +991,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
 #define GENERATED_ENDPOINT_TYPES { \
   { ZAP_CLUSTER_INDEX(0), 19, 230 }, \
   { ZAP_CLUSTER_INDEX(19), 3, 15 }, \
-  { ZAP_CLUSTER_INDEX(22), 9, 121 }, \
+  { ZAP_CLUSTER_INDEX(22), 9, 480 }, \
 }
 
 
@@ -1018,7 +1006,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (37)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (366)
+#define ATTRIBUTE_MAX_SIZE (725)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)
