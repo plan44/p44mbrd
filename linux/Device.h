@@ -72,7 +72,7 @@ public:
 class Device : public p44::P44Obj
 {
   // info for instantiating
-  const Span<const EmberAfDeviceType> *mDeviceTypeListP;
+  Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
   EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
   std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info

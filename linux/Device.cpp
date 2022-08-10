@@ -78,7 +78,6 @@ Device::Device()
   mEndpointDefinition.cluster = nullptr;
   mEndpointDefinition.endpointSize = 0; // dynamic endpoints do not have any non-external attributes
   mClusterDataVersionsP = nullptr; // we'll need
-  mDeviceTypeListP = nullptr;
   mParentEndpointId = kInvalidEndpointId;
   // - declare common bridged device clusters
   addClusterDeclarations(Span<EmberAfCluster>(bridgedDeviceCommonClusters));
@@ -162,7 +161,7 @@ void Device::addClusterDeclarations(const Span<EmberAfCluster>& aClusterDeclarat
 void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
 {
   // save the device type list
-  mDeviceTypeListP = &aDeviceTypeList;
+  mDeviceTypeList = aDeviceTypeList;
   // now finally populate the endpoint definition
   // - count the clusters
   mEndpointDefinition.clusterCount = 0;
@@ -196,7 +195,7 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
     GetEndpointId(),
     &mEndpointDefinition,
     Span<DataVersion>(mClusterDataVersionsP, mEndpointDefinition.clusterCount),
-    *mDeviceTypeListP,
+    mDeviceTypeList,
     mParentEndpointId
   );
   if (ret==EMBER_ZCL_STATUS_SUCCESS) {
