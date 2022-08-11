@@ -56,6 +56,8 @@
 
 // plan44
 #include "bridgeapi.h"
+#include "deviceinfoprovider.hpp"
+
 #include "device.h"
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
@@ -84,6 +86,10 @@ EndpointId gFirstDynamicEndpointId;
 Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 typedef std::map<string, DevicePtr> DeviceDSUIDMap;
 DeviceDSUIDMap gDeviceDSUIDMap;
+
+// device instance info provider
+BridgeInfoProvider gP44dbrDeviceInstanceInfoProvider;
+
 
 // TODO: take this somehow out of generated ZAP
 // For now: Endpoint 1 must be the Matter Bridge (Endpoint 0 is the Root node)
@@ -189,10 +195,25 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 {
   LOG(LOG_NOTICE, "method call status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
   JsonObjectPtr o;
-  if (aJsonMsg && aJsonMsg->get("result", o)) {
+  JsonObjectPtr result;
+  if (aJsonMsg && aJsonMsg->get("result", result)) {
+    // global infos
+    if (result->get("dSUID", o)) {
+      gP44dbrDeviceInstanceInfoProvider.mDSUID = o->stringValue();
+    }
+    if (result->get("name", o)) {
+      gP44dbrDeviceInstanceInfoProvider.mLabel = o->stringValue();
+    }
+    if (result->get("model", o)) {
+      gP44dbrDeviceInstanceInfoProvider.mProductName = o->stringValue();
+    }
+    if (result->get("x-p44-deviceHardwareId", o)) {
+      gP44dbrDeviceInstanceInfoProvider.mSerial = o->stringValue();
+    }
     // process device list
     JsonObjectPtr vdcs;
-    if (o->get("x-p44-vdcs", vdcs)) {
+    // devices
+    if (result->get("x-p44-vdcs", vdcs)) {
       vdcs->resetKeyIteration();
       string vn;
       JsonObjectPtr vdc;
@@ -332,7 +353,9 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
     // successful connection
     // - get list of devices
     JsonObjectPtr params = JsonObject::objFromText(
-      "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ \"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
+      "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
+      "\"dSUID\":null, \"model\":null, \"x-p44-deviceHardwareId\":null, "
+      "\"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
       "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
       "\"vendorName\":null, \"model\":null, \"configURL\":null, "
       "\"channelStates\":null, "
@@ -388,6 +411,8 @@ int chipmain(int argc, char * argv[])
   {
       return -1;
   }
+  // override the generic device instance info provider with our own
+  SetDeviceInstanceInfoProvider(&gP44dbrDeviceInstanceInfoProvider);
 
   // Init Data Model and CHIP App Server
   static chip::CommonCaseDeviceServerInitParams initParams;

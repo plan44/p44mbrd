@@ -14,6 +14,7 @@
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
 		ED2330232886A69700D934D7 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301B2886A69700D934D7 /* logger.cpp */; };
 		ED2330242886A69700D934D7 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301D2886A69700D934D7 /* utils.cpp */; };
+		ED24BDB428A58CC90025CC14 /* deviceinfoprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -404,6 +405,8 @@
 		ED23301B2886A69700D934D7 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
 		ED23301D2886A69700D934D7 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
 		ED23301F2886A69700D934D7 /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
+		ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = deviceinfoprovider.cpp; path = linux/deviceinfoprovider.cpp; sourceTree = "<group>"; };
+		ED24BDB328A589FD0025CC14 /* deviceinfoprovider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = deviceinfoprovider.hpp; path = linux/deviceinfoprovider.hpp; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -3157,6 +3160,8 @@
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				EDF3F542289BFC3E00A82418 /* device_impl.h */,
 				ED690B61286DC7F600069215 /* device.cpp */,
+				ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */,
+				ED24BDB328A589FD0025CC14 /* deviceinfoprovider.hpp */,
 				ED690B5F286DC7F600069215 /* device.h */,
 				EDF3F536289BF35E00A82418 /* deviceonoff.cpp */,
 				EDF3F537289BF35E00A82418 /* deviceonoff.h */,
@@ -3737,6 +3742,7 @@
 				ED36DB9C286DD42300CA28EC /* Engine.cpp in Sources */,
 				ED36DD6E286DD9A400CA28EC /* WakeEvent.cpp in Sources */,
 				ED36D8F1286DCF0B00CA28EC /* CASESessionManager.cpp in Sources */,
+				ED24BDB428A58CC90025CC14 /* deviceinfoprovider.cpp in Sources */,
 				ED36DADB286DD27200CA28EC /* TCPEndPointImplSockets.cpp in Sources */,
 				ED36DADA286DD27200CA28EC /* IPAddress-StringFuncts.cpp in Sources */,
 				ED36DA64286DCFC600CA28EC /* SetUpCodePairer.cpp in Sources */,
