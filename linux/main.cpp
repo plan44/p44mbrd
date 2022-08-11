@@ -407,13 +407,11 @@ int chipmain(int argc, char * argv[])
   // Set starting endpoint id where dynamic endpoints will be assigned, which
   // will be the next consecutive endpoint id after the last fixed endpoint.
   gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
-      static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
-  //gCurrentEndpointId = gFirstDynamicEndpointId;
+    static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
 
   // Disable last fixed endpoint, which is used as a placeholder for all of the
   // supported clusters so that ZAP will generated the requisite code.
   emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
-
 
   // MARK: p44 code for generating dynamic endpoints
 

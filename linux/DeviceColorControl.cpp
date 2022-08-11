@@ -327,7 +327,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *buffer = (uint32_t) ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP;
+      *((uint32_t*)buffer) = (uint32_t) ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }

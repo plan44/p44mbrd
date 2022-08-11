@@ -153,11 +153,11 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
     }
     // common attributes
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *buffer = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
+      *((uint16_t*)buffer) = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *buffer = (uint32_t) ZCL_ON_OFF_CLUSTER_FEATURE_MAP;
+      *((uint32_t*)buffer) = (uint32_t) ZCL_ON_OFF_CLUSTER_FEATURE_MAP;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
