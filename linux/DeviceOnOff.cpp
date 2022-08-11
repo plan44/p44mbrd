@@ -128,7 +128,7 @@ void DeviceOnOff::changeOnOff_impl(bool aOn)
 bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 {
   if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: %s", GetName().c_str(), aOn ? "ON" : "OFF");
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: updating onOff to %s - updatemode=%d", GetName().c_str(), aOn ? "ON" : "OFF", aUpdateMode.Raw());
     mOn  = aOn;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       changeOnOff_impl(mOn);
@@ -181,3 +181,8 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
 }
 
 
+void DeviceOnOff::logStatus(const char *aReason)
+{
+  inherited::logStatus(aReason);
+  ChipLogDetail(DeviceLayer, "- OnOff: %d", mOn);
+}

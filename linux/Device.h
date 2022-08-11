@@ -84,7 +84,7 @@ class Device : public p44::P44Obj
 
   // constant after init
   string mBridgedDSUID;
-  chip::EndpointId mParentEndpointId;
+  EndpointId mParentEndpointId;
   EndpointId mDynamicEndpointBase;
   EndpointId mDynamicEndpointIdx;
 
@@ -97,6 +97,8 @@ public:
 
   Device();
   virtual ~Device();
+
+  virtual void logStatus(const char *aReason = NULL);
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo);
 
@@ -122,7 +124,6 @@ public:
   void updateName(const string aDeviceName, UpdateMode aUpdateMode);
 
   // setup setters
-  inline void SetParentEndpointId(chip::EndpointId aId) { mParentEndpointId = aId; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
   inline void initName(const string aName) { mName = aName; };
   inline void initZone(string aZone) { mZone = aZone; };
@@ -130,10 +131,13 @@ public:
 
   /// add the device using the previously set cluster info
   /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
-  bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
+  bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aParentEndpoint);
 
-  /// TODO: properly define, now is called after device instantiation
-  void matterAnnounce();
+  /// called after instantiating device as dynamic endpoint, but before chip mainloop starts
+  virtual void beforeChipMainloopPrep();
+
+  /// called as a chip mainloop scheduled work just after mainloop starts
+  virtual void inChipMainloopInit();
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);

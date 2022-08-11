@@ -34,6 +34,8 @@ public:
 
   DeviceOnOff();
 
+  virtual void logStatus(const char *aReason = NULL) override;
+
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
 
   virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);

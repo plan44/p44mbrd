@@ -151,7 +151,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
 bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
 {
   if (aColorMode!=mColorMode || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: color mode set to %d", GetName().c_str(), (int)aColorMode);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: color mode set to %d", GetName().c_str(), (int)aColorMode);
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       JsonObjectPtr params = JsonObject::newObj();
@@ -182,7 +182,7 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
 bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
 {
   if (aHue!=mHue || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set hue to %d", GetName().c_str(), aHue);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set hue to %d - updatemode=%d", GetName().c_str(), aHue, aUpdateMode.Raw());
     mHue = aHue;
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
@@ -206,7 +206,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
 bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode)
 {
   if (aSaturation!=mSaturation || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set saturation to %d", GetName().c_str(), aSaturation);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set saturation to %d - updatemode=%d", GetName().c_str(), aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update saturation (otherwise, color mode change already sends H+S)
@@ -230,7 +230,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 bool DeviceColorControl::updateCurrentColortemp(uint8_t aColortemp, UpdateMode aUpdateMode)
 {
   if (aColortemp!=mColorTemp || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set colortemp to %d", GetName().c_str(), aColortemp);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set colortemp to %d - updatemode=%d", GetName().c_str(), aColortemp, aUpdateMode.Raw());
     mColorTemp = aColortemp;
     if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
@@ -252,7 +252,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint8_t aColortemp, UpdateMode a
 bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
 {
   if (aX!=mX || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set X to %d", GetName().c_str(), aX);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set X to %d - updatemode=%d", GetName().c_str(), aX, aUpdateMode.Raw());
     mX = aX;
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
@@ -274,7 +274,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
 bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
 {
   if (aY!=mY || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set Y to %d", GetName().c_str(), aY);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set Y to %d - updatemode=%d", GetName().c_str(), aY, aUpdateMode.Raw());
     mY = aY;
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
@@ -344,3 +344,13 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 }
 
 
+void DeviceColorControl::logStatus(const char *aReason)
+{
+  inherited::logStatus(aReason);
+  ChipLogDetail(DeviceLayer, "- colormode: %d", mColorMode);
+  ChipLogDetail(DeviceLayer, "- hue: %d", mHue);
+  ChipLogDetail(DeviceLayer, "- saturation: %d", mSaturation);
+  ChipLogDetail(DeviceLayer, "- ct: %d", mColorTemp);
+  ChipLogDetail(DeviceLayer, "- X: %d", mX);
+  ChipLogDetail(DeviceLayer, "- Y: %d", mY);
+}

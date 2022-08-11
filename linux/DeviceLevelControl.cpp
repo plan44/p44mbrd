@@ -43,6 +43,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID, INT16U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* onoff transition time */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_LEVEL_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* level for fully on */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_OPTIONS_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* default move/dim rate */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
@@ -73,8 +74,11 @@ const EmberAfDeviceType gDimmableLightTypes[] = {
 
 DeviceLevelControl::DeviceLevelControl() :
   mLevel(0),
+  // Attribute defaults
+  mOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
   mOnLevel(0xFE), // FIXME: just assume full power for default on state
-  mOnOffTransitionTimeDS(5) // FIXME: this is just the dS default of 0.5 sec, report actual value later
+  mOnOffTransitionTimeDS(5), // FIXME: this is just the dS default of 0.5 sec, report actual value later
+  mDefaultMoveRateUnitsPerS(0xFE/7) // FIXME: just dS default of full range in 7 seconds
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
@@ -123,7 +127,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   if (level<0) level = 0;
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: set level to %d in %d00mS", GetName().c_str(), aAmount, aTransitionTimeDs);
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set level to %d in %d00mS - updatemode=%d", GetName().c_str(), aAmount, aTransitionTimeDs, aUpdateMode.Raw());
     if ((mLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
       // level is zero and becomes non-null: also set OnOff when enabled
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
@@ -191,7 +195,7 @@ bool DeviceLevelControl::shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uin
 }
 
 
-void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
@@ -200,11 +204,15 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_
   }
   else if (shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
     // OnOff status and options do allow executing
-    if (aTransitionTimeDs==0xFFFF) {
+    uint16_t transitionTime;
+    if (aTransitionTime.IsNull()) {
       // default, use On/Off transition time attribute's value
-      aTransitionTimeDs = mOnOffTransitionTimeDS;
+      transitionTime = mOnOffTransitionTimeDS;
     }
-    updateCurrentLevel(aAmount, aDirection, aTransitionTimeDs, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    else {
+      transitionTime = aTransitionTime.Value();
+    }
+    updateCurrentLevel(aAmount, aDirection, transitionTime, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
     // Support for global scene for last state before getting switched off
     // - The GlobalSceneControl attribute is defined in order to prevent a second off command storing the
     //   all-devices-off situation as a global scene, and to prevent a second on command destroying the current
@@ -234,7 +242,7 @@ bool emberAfLevelControlClusterMoveToLevelCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->moveToLevel(commandData.level, 0, commandData.transitionTime, false, commandData.optionMask, commandData.optionOverride);
+  dev->moveToLevel(commandData.level, 0, commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride);
   return true;
 }
 
@@ -260,7 +268,7 @@ bool emberAfLevelControlClusterStepCallback(
   dev->moveToLevel(
     commandData.stepSize,
     commandData.stepMode==EMBER_ZCL_STEP_MODE_UP ? 1 : -1,
-    commandData.transitionTime, false, commandData.optionMask, commandData.optionOverride
+    commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride
   );
   return true;
 }
@@ -295,29 +303,29 @@ void DeviceLevelControl::dim(uint8_t aDirection, uint8_t aRate)
 }
 
 
-void DeviceLevelControl::move(uint8_t aMode, uint8_t aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
-  if (aRate!=0 || shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
-    // determine rate
-    if (aRate==0xFF) {
-      // use default rate
-      app::DataModel::Nullable<uint8_t> defaultMoveRate;
-      status = Attributes::DefaultMoveRate::Get(GetEndpointId(), defaultMoveRate);
-      if (status==EMBER_ZCL_STATUS_SUCCESS && !defaultMoveRate.IsNull()) {
-        aRate = defaultMoveRate.Value();
-      }
-    }
+  uint8_t rate;
+  if (aRate.IsNull()) {
+    // use default rate
+    rate = mDefaultMoveRateUnitsPerS;
+  }
+  else {
+    rate = aRate.Value();
+  }
+  if (rate!=0 || shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
       case EMBER_ZCL_MOVE_MODE_UP:
         if (currentLevel()==0) {
           // start dimming from off level into on levels -> set onoff
           updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
-        dim(1, aRate);
+        dim(1, rate);
         break;
-      case EMBER_ZCL_MOVE_MODE_DOWN: dim(-1, aRate);
+      case EMBER_ZCL_MOVE_MODE_DOWN:
+        dim(-1, rate);
         break;
       default:
         status = EMBER_ZCL_STATUS_INVALID_FIELD;
@@ -336,7 +344,7 @@ bool emberAfLevelControlClusterMoveCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->move(commandData.moveMode, commandData.rate, false, commandData.optionMask, commandData.optionOverride);
+  dev->move(commandData.moveMode, commandData.rate, false, commandData.optionsMask, commandData.optionsOverride);
   return true;
 }
 
@@ -372,7 +380,7 @@ bool emberAfLevelControlClusterStopCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->stop(false, commandData.optionMask, commandData.optionOverride);
+  dev->stop(false, commandData.optionsMask, commandData.optionsOverride);
   return true;
 }
 
@@ -460,6 +468,10 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
       *buffer = mOptions;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
+    if ((attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      *buffer = mDefaultMoveRateUnitsPerS;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
     // common attributes
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *buffer = (uint16_t) ZCL_LEVEL_CONTROL_CLUSTER_REVISION;
@@ -490,7 +502,22 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
       mOptions = *buffer;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
+    if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
+      mDefaultMoveRateUnitsPerS = *buffer;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
   }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+}
+
+
+void DeviceLevelControl::logStatus(const char *aReason)
+{
+  inherited::logStatus(aReason);
+  ChipLogDetail(DeviceLayer, "- currentLevel: %d", mLevel);
+  ChipLogDetail(DeviceLayer, "- OnLevel: %d", mOnLevel);
+  ChipLogDetail(DeviceLayer, "- Options: %d", mOptions);
+  ChipLogDetail(DeviceLayer, "- OnOffTime: %d", mOnOffTransitionTimeDS);
+  ChipLogDetail(DeviceLayer, "- DimRate: %d", mDefaultMoveRateUnitsPerS);
 }

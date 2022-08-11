@@ -25,6 +25,7 @@
 #include "deviceonoff.h"
 
 using namespace chip;
+using namespace app;
 
 
 class DeviceLevelControl : public DeviceOnOff
@@ -33,6 +34,8 @@ class DeviceLevelControl : public DeviceOnOff
 public:
 
   DeviceLevelControl();
+
+  virtual void logStatus(const char *aReason = NULL) override;
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
 
@@ -48,8 +51,8 @@ public:
 
   /// @name handlers for command implementations
   /// @{
-  void moveToLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
-  void move(uint8_t aMode, uint8_t aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   void stop(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   void effect(bool aNewValue);
 
@@ -67,7 +70,7 @@ private:
   uint8_t mOnLevel;
   uint8_t mOptions;
   uint16_t mOnOffTransitionTimeDS;
-
+  uint8_t mDefaultMoveRateUnitsPerS;
 
   bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   uint8_t finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride);

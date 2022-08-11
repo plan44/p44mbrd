@@ -63,12 +63,10 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(bridgedDeviceCommonClusters)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
-using namespace chip::app::Clusters::BridgedActions;
-
-
 // MARK: - Device
 
-Device::Device()
+Device::Device() :
+  mReachable(false)
 {
   // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;
@@ -184,12 +182,13 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
 }
 
 
-bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
+bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aParentEndpoint)
 {
   // finalize the declaration
   finalizeDeviceDeclaration();
   // add as dynamic endpoint
   mDynamicEndpointBase = aDynamicEndpointBase;
+  mParentEndpointId = aParentEndpoint;
   EmberAfStatus ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
     GetEndpointId(),
@@ -200,21 +199,28 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
   );
   if (ret==EMBER_ZCL_STATUS_SUCCESS) {
     ChipLogProgress(
-      DeviceLayer, "Added device '%s' to dynamic endpoint %d (index=%d)",
+      DeviceLayer, "p44 Added device '%s' to dynamic endpoint %d (index=%d)",
       GetName().c_str(), GetEndpointId(), mDynamicEndpointIdx
     );
   }
   else {
-    ChipLogError(DeviceLayer, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
+    ChipLogError(DeviceLayer, "p44 emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
     return false;
   }
   return true;
 }
 
 
-void Device::matterAnnounce()
+void Device::beforeChipMainloopPrep()
 {
-  /// TODO: properly define, now is called after device instantiation
+  /// TODO: NOP for now
+}
+
+
+void Device::inChipMainloopInit()
+{
+  /// TODO: NOP for now
+
 }
 
 
@@ -229,7 +235,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 {
   if (mReachable!=aReachable || aUpdateMode.Has(UpdateFlags::forced)) {
     mReachable = aReachable;
-    ChipLogProgress(DeviceLayer, "Device[%s]: %s", mName.c_str(), mReachable ? "REACHABLE" : "OFFLINE");
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: %s", mName.c_str(), mReachable ? "REACHABLE" : "OFFLINE");
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
     }
@@ -239,7 +245,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 {
   if (mName!=aDeviceName || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
+    ChipLogProgress(DeviceLayer, "p44 Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
     mName = aDeviceName;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       // propagate to native device
@@ -259,6 +265,7 @@ void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 
 void Device::notify(const string aNotification, JsonObjectPtr aParams)
 {
+  ChipLogDetail(DeviceLayer, "p44 bridge API: sending '%s': %s", aNotification.c_str(), aParams->json_c_str());
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
   BridgeApi::sharedBridgeApi().notify(aNotification, aParams);
@@ -333,4 +340,11 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
     }
   }
   return EMBER_ZCL_STATUS_FAILURE;
+}
+
+
+void Device::logStatus(const char *aReason)
+{
+  ChipLogDetail(DeviceLayer, "p44 Device[%s] @ endpoint %d: %s", mName.c_str(), GetEndpointId(), nonNullCStr(aReason));
+  ChipLogDetail(DeviceLayer, "- reachable: %d", mReachable);
 }

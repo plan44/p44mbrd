@@ -79,12 +79,15 @@ namespace {
 // Current ZCL implementation of Struct uses a max-size array of 254 bytes
 const int kDescriptorAttributeArraySize = 254;
 
-//EndpointId gCurrentEndpointId;
 EndpointId gFirstDynamicEndpointId;
 
 Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 typedef std::map<string, DevicePtr> DeviceDSUIDMap;
 DeviceDSUIDMap gDeviceDSUIDMap;
+
+// TODO: take this somehow out of generated ZAP
+// For now: Endpoint 1 must be the Matter Bridge (Endpoint 0 is the Root node)
+#define MATTER_BRIDGE_ENDPOINT 1
 
 } // namespace
 
@@ -116,11 +119,16 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
     Device * dev = gDevices[endpointIndex];
     if (dev) {
       ChipLogProgress(DeviceLayer,
-        "Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
+        "p44 Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
         (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
       );
       ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
-      if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute read not handled!");
+      if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
+        ChipLogError(DeviceLayer, "p44 Endpoint %d: Attribute read not handled!", (int)endpoint);
+      }
+      else {
+        dev->logStatus("processed attribute read");
+      }
     }
   }
   return ret;
@@ -137,9 +145,14 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
   if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
     Device * dev = gDevices[endpointIndex];
     if (dev) {
-      ChipLogProgress(DeviceLayer, "Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
+      ChipLogProgress(DeviceLayer, "p44 Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
       ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
-      if (ret!=EMBER_ZCL_STATUS_SUCCESS) ChipLogError(DeviceLayer, "- Attribute write not handled!");
+      if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
+        ChipLogError(DeviceLayer, "p44 Endpoint %d: Attribute write not handled!", (int)endpoint);
+      }
+      else {
+        dev->logStatus("processed attribute write");
+      }
     }
   }
   return ret;
@@ -148,7 +161,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
 
 void MatterBridgedDeviceBasicClusterServerAttributeChangedCallback(const chip::app::ConcreteAttributePath & attributePath)
 {
-  ChipLogProgress(DeviceLayer, "Endpoint %d, attributeId 0x%04x in BridgedDeviceBasicCluster has changed", (int)attributePath.mEndpointId, (int)attributePath.mAttributeId);
+  ChipLogProgress(DeviceLayer, "p44 Endpoint %d, attributeId 0x%04x in BridgedDeviceBasicCluster has changed", (int)attributePath.mEndpointId, (int)attributePath.mAttributeId);
 }
 
 // MARK: - Main program
@@ -291,18 +304,21 @@ void apinotification(JsonObjectPtr aJsonMsg, ErrorPtr aError)
       // device exists, dispatch
       if (aJsonMsg->get("notification", o, true)) {
         string notification = o->stringValue();
-        ChipLogProgress(DeviceLayer, "Bridge sent notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+        ChipLogProgress(DeviceLayer, "p44 Bridge sent notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
         bool handled = devpos->second->handleBridgeNotification(notification, aJsonMsg);
-        if (!handled) {
-          ChipLogError(DeviceLayer, "Could not handle bridge notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+        if (handled) {
+          devpos->second->logStatus("processed notification");
+        }
+        else {
+          ChipLogError(DeviceLayer, "p44 Could not handle bridge notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
         }
       }
       else {
-        ChipLogError(DeviceLayer, "Bridge sent unknown message type for device %s", targetDSUID.c_str());
+        ChipLogError(DeviceLayer, "p44 Bridge sent unknown message type for device %s", targetDSUID.c_str());
       }
     }
     else {
-      ChipLogError(DeviceLayer, "Bridge sent message for unknown device %s", targetDSUID.c_str());
+      ChipLogError(DeviceLayer, "p44 Bridge sent message for unknown device %s", targetDSUID.c_str());
     }
   }
   // continue waiting
@@ -320,7 +336,7 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
       "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
       "\"vendorName\":null, \"model\":null, \"configURL\":null, "
       "\"channelStates\":null, "
-      "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
+      "\"active\":null, \"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
     );
     BridgeApi::sharedBridgeApi().call("getProperty", params, answerreceived);
   }
@@ -334,6 +350,14 @@ void initializeP44(chip::System::Layer * aLayer, void * aAppState)
 {
   // enable API to run it in parallel with chip main loop
   BridgeApi::sharedBridgeApi().endStandalone();
+  for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
+    if (gDevices[i]) {
+      // give device chance to do things just after mainloop has started
+      gDevices[i]->inChipMainloopInit();
+      // dump status
+      gDevices[i]->logStatus();
+    }
+  }
 }
 
 
@@ -424,10 +448,10 @@ int chipmain(int argc, char * argv[])
       // try to re-use the endpoint ID for this dSUID
       // - sanity check
       if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-        LOG(LOG_WARNING, "inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+        ChipLogError(DeviceLayer, "p44 inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
       }
       if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-        LOG(LOG_ERR, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+        ChipLogError(DeviceLayer, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
         dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
       }
       else {
@@ -444,7 +468,7 @@ int chipmain(int argc, char * argv[])
     }
     else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-      LOG(LOG_NOTICE, "new device %s, adding to bridge", dev->bridgedDSUID().c_str());
+      ChipLogProgress(DeviceLayer, "p44 new device %s, adding to bridge", dev->bridgedDSUID().c_str());
     }
     else {
       LogErrorOnFailure(cerr);
@@ -461,7 +485,7 @@ int chipmain(int argc, char * argv[])
       }
       if (dynamicEndpointIdx==kInvalidEndpointId) {
         if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          LOG(LOG_ERR, "max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
+          ChipLogError(DeviceLayer, "p44 max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
         }
         else {
           dynamicEndpointIdx = numDynamicEndPoints++;
@@ -486,15 +510,12 @@ int chipmain(int argc, char * argv[])
   for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
     if (gDevices[i]) {
       // there is a device at this dynamic endpoint
-      if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId)) {
-        // make sure reachable and name get reported
-        gDevices[i]->matterAnnounce();
+      if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
+        // give device chance to do things before mainloop starts
+        gDevices[i]->beforeChipMainloopPrep();
       }
     }
   }
-
-  // FIXME: crashes, probably not safe with dynamic endpoints
-  //emberAfPrintAttributeTable();
 
   // Run CHIP
 

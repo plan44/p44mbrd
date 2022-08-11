@@ -124,7 +124,6 @@
 		ED36D8F2286DCF0B00CA28EC /* StatusResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8D1286DCF0A00CA28EC /* StatusResponse.cpp */; };
 		ED36D8F3286DCF0B00CA28EC /* TimedHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8D3286DCF0A00CA28EC /* TimedHandler.cpp */; };
 		ED36D8F4286DCF0B00CA28EC /* WriteClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8D5286DCF0A00CA28EC /* WriteClient.cpp */; };
-		ED36D8F5286DCF0B00CA28EC /* OperationalDeviceProxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8D6286DCF0A00CA28EC /* OperationalDeviceProxy.cpp */; };
 		ED36D8F6286DCF0B00CA28EC /* ReadClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8DD286DCF0A00CA28EC /* ReadClient.cpp */; };
 		ED36D908286DCF5100CA28EC /* AclStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8F9286DCF5000CA28EC /* AclStorage.cpp */; };
 		ED36D909286DCF5100CA28EC /* OnboardingCodesUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8FC286DCF5000CA28EC /* OnboardingCodesUtil.cpp */; };
@@ -374,6 +373,8 @@
 		EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F536289BF35E00A82418 /* deviceonoff.cpp */; };
 		EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */; };
 		EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */; };
+		EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */; };
+		EDF3F54928A528E700A82418 /* ASN1Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54828A528E700A82418 /* ASN1Time.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -613,7 +614,6 @@
 		ED36D8B0286DCF0900CA28EC /* FailSafeContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FailSafeContext.cpp; sourceTree = "<group>"; };
 		ED36D8B1286DCF0900CA28EC /* AttributePathParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AttributePathParams.h; sourceTree = "<group>"; };
 		ED36D8B2286DCF0900CA28EC /* ClusterStateCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ClusterStateCache.cpp; sourceTree = "<group>"; };
-		ED36D8B3286DCF0900CA28EC /* OperationalDeviceProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationalDeviceProxy.h; sourceTree = "<group>"; };
 		ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReadHandler.cpp; sourceTree = "<group>"; };
 		ED36D8B5286DCF0900CA28EC /* CommandResponseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandResponseHelper.h; sourceTree = "<group>"; };
 		ED36D8B6286DCF0900CA28EC /* CommandSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandSender.h; sourceTree = "<group>"; };
@@ -636,7 +636,6 @@
 		ED36D8C8286DCF0A00CA28EC /* EventLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventLogging.h; sourceTree = "<group>"; };
 		ED36D8C9286DCF0A00CA28EC /* TimedRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimedRequest.cpp; sourceTree = "<group>"; };
 		ED36D8CA286DCF0A00CA28EC /* CommandHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandHandler.h; sourceTree = "<group>"; };
-		ED36D8CB286DCF0A00CA28EC /* OperationalDeviceProxyPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationalDeviceProxyPool.h; sourceTree = "<group>"; };
 		ED36D8CC286DCF0A00CA28EC /* ChunkedWriteCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkedWriteCallback.cpp; sourceTree = "<group>"; };
 		ED36D8CD286DCF0A00CA28EC /* OTAUserConsentCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAUserConsentCommon.h; sourceTree = "<group>"; };
 		ED36D8CE286DCF0A00CA28EC /* GlobalAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalAttributes.h; sourceTree = "<group>"; };
@@ -647,7 +646,6 @@
 		ED36D8D3286DCF0A00CA28EC /* TimedHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimedHandler.cpp; sourceTree = "<group>"; };
 		ED36D8D4286DCF0A00CA28EC /* CommandHandlerInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandHandlerInterface.h; sourceTree = "<group>"; };
 		ED36D8D5286DCF0A00CA28EC /* WriteClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WriteClient.cpp; sourceTree = "<group>"; };
-		ED36D8D6286DCF0A00CA28EC /* OperationalDeviceProxy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OperationalDeviceProxy.cpp; sourceTree = "<group>"; };
 		ED36D8D7286DCF0A00CA28EC /* FailSafeContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FailSafeContext.h; sourceTree = "<group>"; };
 		ED36D8D8286DCF0A00CA28EC /* RequiredPrivilege.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequiredPrivilege.h; sourceTree = "<group>"; };
 		ED36D8D9286DCF0A00CA28EC /* EventManagement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventManagement.h; sourceTree = "<group>"; };
@@ -1381,6 +1379,11 @@
 		EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicelevelcontrol.cpp; path = linux/devicelevelcontrol.cpp; sourceTree = "<group>"; };
 		EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicecolorcontrol.cpp; path = linux/devicecolorcontrol.cpp; sourceTree = "<group>"; };
 		EDF3F542289BFC3E00A82418 /* device_impl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = device_impl.h; sourceTree = "<group>"; };
+		EDF3F54328A521ED00A82418 /* ReadPrepareParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReadPrepareParams.h; sourceTree = "<group>"; };
+		EDF3F54428A521ED00A82418 /* OperationalSessionSetupPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationalSessionSetupPool.h; sourceTree = "<group>"; };
+		EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OperationalSessionSetup.cpp; sourceTree = "<group>"; };
+		EDF3F54628A521ED00A82418 /* OperationalSessionSetup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationalSessionSetup.h; sourceTree = "<group>"; };
+		EDF3F54828A528E700A82418 /* ASN1Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASN1Time.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1649,14 +1652,15 @@
 				ED36D8AC286DCF0900CA28EC /* message-reader.h */,
 				ED36D804286DCDEC00CA28EC /* MessageDef */,
 				ED36D8BC286DCF0900CA28EC /* ObjectList.h */,
-				ED36D8D6286DCF0A00CA28EC /* OperationalDeviceProxy.cpp */,
-				ED36D8B3286DCF0900CA28EC /* OperationalDeviceProxy.h */,
-				ED36D8CB286DCF0A00CA28EC /* OperationalDeviceProxyPool.h */,
+				EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */,
+				EDF3F54628A521ED00A82418 /* OperationalSessionSetup.h */,
+				EDF3F54428A521ED00A82418 /* OperationalSessionSetupPool.h */,
 				ED36D8CD286DCF0A00CA28EC /* OTAUserConsentCommon.h */,
 				ED36D8DD286DCF0A00CA28EC /* ReadClient.cpp */,
 				ED36D8C2286DCF0900CA28EC /* ReadClient.h */,
 				ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */,
 				ED36D8A1286DCF0800CA28EC /* ReadHandler.h */,
+				EDF3F54328A521ED00A82418 /* ReadPrepareParams.h */,
 				ED36D8B7286DCF0900CA28EC /* reporting */,
 				ED36D8BB286DCF0900CA28EC /* RequiredPrivilege.cpp */,
 				ED36D8D8286DCF0A00CA28EC /* RequiredPrivilege.h */,
@@ -2327,6 +2331,7 @@
 		ED36DB56286DD2CE00CA28EC /* asn1 */ = {
 			isa = PBXGroup;
 			children = (
+				EDF3F54828A528E700A82418 /* ASN1Time.cpp */,
 				ED36DB57286DD2CE00CA28EC /* ASN1Reader.cpp */,
 				ED36DB59286DD2CE00CA28EC /* ASN1.h */,
 				ED36DB5A286DD2CE00CA28EC /* ASN1Writer.cpp */,
@@ -3504,7 +3509,6 @@
 				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
 				ED36DC09286DD57B00CA28EC /* UnitTestUtils.cpp in Sources */,
 				ED36DB6E286DD2CE00CA28EC /* IP.cpp in Sources */,
-				ED36D8F5286DCF0B00CA28EC /* OperationalDeviceProxy.cpp in Sources */,
 				ED36DC10286DD57B00CA28EC /* Base64.cpp in Sources */,
 				ED36D88C286DCDED00CA28EC /* ArrayParser.cpp in Sources */,
 				ED36DE89286E02CD00CA28EC /* ember-compatibility-functions.cpp in Sources */,
@@ -3613,6 +3617,7 @@
 				ED36DC4B286DD65900CA28EC /* CHIPTLVUtilities.cpp in Sources */,
 				ED36DC4A286DD65900CA28EC /* CHIPTLVWriter.cpp in Sources */,
 				ED36DDEE286DDB7700CA28EC /* Accessors.cpp in Sources */,
+				EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */,
 				ED36D7EE286DCDA300CA28EC /* localization-configuration-server.cpp in Sources */,
 				ED36D787286DCB8A00CA28EC /* DecoderCustomLog.cpp in Sources */,
 				ED36DD71286DD9A400CA28EC /* SystemClock.cpp in Sources */,
@@ -3623,6 +3628,7 @@
 				ED36DAB3286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp in Sources */,
 				ED36D883286DCDED00CA28EC /* AttributeReportIBs.cpp in Sources */,
 				ED36DD0A286DD8A000CA28EC /* UnsolicitedStatusHandler.cpp in Sources */,
+				EDF3F54928A528E700A82418 /* ASN1Time.cpp in Sources */,
 				ED36DC9E286DD7F200CA28EC /* Logging.cpp in Sources */,
 				ED36DD77286DD9A400CA28EC /* SystemStats.cpp in Sources */,
 				ED36D8EA286DCF0B00CA28EC /* BufferedReadCallback.cpp in Sources */,
