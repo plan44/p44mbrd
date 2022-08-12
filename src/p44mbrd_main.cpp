@@ -86,9 +86,6 @@ Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 typedef std::map<string, DevicePtr> DeviceDSUIDMap;
 DeviceDSUIDMap gDeviceDSUIDMap;
 
-// device instance info provider
-BridgeInfoProvider gP44dbrDeviceInstanceInfoProvider;
-
 
 // TODO: take this somehow out of generated ZAP
 // For now: Endpoint 1 must be the Matter Bridge (Endpoint 0 is the Root node)
@@ -546,3 +543,254 @@ int chipmain(int argc, char * argv[])
 
   return 0;
 }
+
+
+#include "application.hpp"
+
+#include <platform/TestOnlyCommissionableDataProvider.h>
+#include <app/server/OnboardingCodesUtil.h>
+#include <system/SystemLayerImpl.h>
+#include <DeviceInfoProviderImpl.h>
+
+#if CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE
+#include "CommissionerMain.h"
+#include <ControllerShellCommands.h>
+#include <controller/CHIPDeviceControllerFactory.h>
+#include <controller/ExampleOperationalCredentialsIssuer.h>
+#include <lib/core/CHIPPersistentStorageDelegate.h>
+#include <platform/KeyValueStoreManager.h>
+#endif // CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE
+
+#if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+#include "TraceDecoder.h"
+#include "TraceHandlers.h"
+#endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+
+using namespace p44;
+
+/// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
+class P44mbrd : public CmdLineApp
+{
+  typedef CmdLineApp inherited;
+
+  LinuxCommissionableDataProvider mCommissionableDataProvider;
+  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider;
+
+  // device instance info provider
+  BridgeInfoProvider gP44dbrDeviceInstanceInfoProvider;
+
+public:
+
+  P44mbrd()
+  {
+  }
+
+
+  virtual int main(int argc, char **argv)
+  {
+    const char *usageText =
+      "Usage: %1$s [options]\n";
+
+    /*
+    const CmdLineOptionDescriptor options[] = {
+      { 0  , "bridgeapi",        true,  "connection_spec; host:port connection to bridge API" },
+      { 0  , "kvspath",          true,  "path; where to store the kvs data" },
+      { 0  , "setuppincode",     true,  "setuppincode; setup pin code for commissioning" },
+      { 0  , "spake2pVerifier",  true,  "spake2pVerifier; for commissioning" },
+      { 0  , "spake2pIterationCount",  true,  "spake2pIterationCount; for commissioning" },
+      { 0  , "discriminator",    true,  "discriminator; for commissioning" },
+      { 0  , "productid",        true,  "productid; for commissioning" },
+      { 0  , "vendorid",         true,  "vendorid; for commissioning" },
+      DAEMON_APPLICATION_LOGOPTIONS,
+      CMDLINE_APPLICATION_STDOPTIONS,
+      CMDLINE_APPLICATION_PATHOPTIONS,
+      { 0, NULL } // list terminator
+    };
+    */
+
+    // parse the command line, exits when syntax errors occur
+//    setCommandDescriptors(usageText, options);
+    if (true /* parseCommandLine(argc, argv) */) {
+
+//      if ((numOptions()<1) || (numArguments()>0)) {
+//        // show usage
+//        showUsage();
+//        terminateApp(EXIT_SUCCESS);
+//      }
+//      else
+      {
+        // @note basically reduced ChipLinuxAppInit()
+
+        CHIP_ERROR err = CHIP_NO_ERROR;
+        RendezvousInformationFlag rendezvousFlags = RendezvousInformationFlag::kOnNetwork;
+
+        err = Platform::MemoryInit();
+        SuccessOrExit(err);
+
+        // FIXME: for now, just use the linux command line options parser from CHIP
+        err = ParseArguments(argc, argv, nullptr);
+        SuccessOrExit(err);
+
+        #ifdef CHIP_CONFIG_KVS_PATH
+        if (LinuxDeviceOptions::GetInstance().KVS == nullptr) {
+          err = DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(tempPath("chip_kvs").c_str());
+        }
+        else {
+          err = DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(LinuxDeviceOptions::GetInstance().KVS);
+        }
+        SuccessOrExit(err);
+        #endif
+
+        err = DeviceLayer::PlatformMgr().InitChipStack();
+        SuccessOrExit(err);
+        // IMPORTANT: pass the p44utils mainloop to the system layer!
+        static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetLibEvLoop(MainLoop::currentMainLoop().libevLoop());
+
+        // Init the commissionable data provider based on command line options
+        // to handle custom verifiers, discriminators, etc.
+        err = chip::examples::InitCommissionableDataProvider(mCommissionableDataProvider, LinuxDeviceOptions::GetInstance());
+        SuccessOrExit(err);
+        DeviceLayer::SetCommissionableDataProvider(&mCommissionableDataProvider);
+
+        err = chip::examples::InitConfigurationManager(reinterpret_cast<ConfigurationManagerImpl &>(ConfigurationMgr()),
+                                                       LinuxDeviceOptions::GetInstance());
+        SuccessOrExit(err);
+
+        if (LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.HasValue()) {
+            rendezvousFlags = LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.Value();
+        }
+
+        err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
+        SuccessOrExit(err);
+
+        ConfigurationMgr().LogDeviceConfig();
+
+        {
+          ChipLogProgress(NotSpecified, "==== Onboarding payload for Standard Commissioning Flow ====");
+          PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
+        }
+        {
+          // For testing of manual pairing code with custom commissioning flow
+          ChipLogProgress(NotSpecified, "==== Onboarding payload for Custom Commissioning Flows ====");
+          err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
+          SuccessOrExit(err);
+
+          LinuxDeviceOptions::GetInstance().payload.commissioningFlow = chip::CommissioningFlow::kCustom;
+
+          PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
+        }
+
+        #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+        if (LinuxDeviceOptions::GetInstance().traceStreamFilename.HasValue()) {
+          const char * traceFilename = LinuxDeviceOptions::GetInstance().traceStreamFilename.Value().c_str();
+          auto traceStream           = new chip::trace::TraceStreamFile(traceFilename);
+          chip::trace::AddTraceStream(traceStream);
+        }
+        else if (LinuxDeviceOptions::GetInstance().traceStreamToLogEnabled) {
+          auto traceStream = new chip::trace::TraceStreamLog();
+          chip::trace::AddTraceStream(traceStream);
+        }
+        if (LinuxDeviceOptions::GetInstance().traceStreamDecodeEnabled) {
+          chip::trace::TraceDecoderOptions options;
+          options.mEnableProtocolInteractionModelResponse = false;
+          chip::trace::TraceDecoder * decoder = new chip::trace::TraceDecoder();
+          decoder->SetOptions(options);
+          chip::trace::AddTraceStream(decoder);
+        }
+        chip::trace::InitTrace();
+        #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+
+    exit:
+        if (err != CHIP_NO_ERROR) {
+          ChipLogProgress(NotSpecified, "Failed to init p44utils App: %s ", ErrorStr(err));
+          terminateApp(EXIT_FAILURE);
+        }
+
+      } // command line ok
+    } // option processing did not terminate app
+
+    if (!isTerminated()) {
+      // @note basically reduced ChipLinuxAppMainLoop()
+      // prepare for mainloop
+      static chip::CommonCaseDeviceServerInitParams initParams;
+      VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
+
+      initParams.operationalServicePort        = CHIP_PORT;
+      initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
+
+      #if CHIP_DEVICE_ENABLE_PORT_PARAMS
+      // use a different service port to make testing possible with other sample devices running on same host
+      initParams.operationalServicePort        = LinuxDeviceOptions::GetInstance().securedDevicePort;
+      initParams.userDirectedCommissioningPort = LinuxDeviceOptions::GetInstance().unsecuredCommissionerPort;
+      #endif
+
+      initParams.interfaceId = LinuxDeviceOptions::GetInstance().interfaceId;
+
+      if (LinuxDeviceOptions::GetInstance().mCSRResponseOptions.csrExistingKeyPair) {
+        LinuxDeviceOptions::GetInstance().mCSRResponseOptions.badCsrOperationalKeyStoreForTest.Init(initParams.persistentStorageDelegate);
+        initParams.operationalKeystore = &LinuxDeviceOptions::GetInstance().mCSRResponseOptions.badCsrOperationalKeyStoreForTest;
+      }
+
+      // Init ZCL Data Model and CHIP App Server
+      Server::GetInstance().Init(initParams);
+
+      mExampleDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
+      DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
+
+      // Now that the server has started and we are done with our startup logging,
+      // log our discovery/onboarding information again so it's not lost in the
+      // noise.
+      ConfigurationMgr().LogDeviceConfig();
+
+      PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
+
+      // Initialize device attestation config
+      SetDeviceAttestationCredentialsProvider(LinuxDeviceOptions::GetInstance().dacProvider);
+
+      // Set our own device info provider
+      SetDeviceInstanceInfoProvider(&gP44dbrDeviceInstanceInfoProvider);
+
+      ApplicationInit();
+    }
+    // app now ready to run (or cleanup when already terminated)
+    return run();
+  }
+
+
+  virtual void cleanup(int aExitCode) override
+  {
+    Server::GetInstance().Shutdown();
+    DeviceLayer::PlatformMgr().Shutdown();
+    #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+    chip::trace::DeInitTrace();
+    #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+  }
+
+
+  virtual void initialize() override
+  {
+    %%%
+  }
+
+};
+
+
+
+
+#ifndef IS_MULTICALL_BINARY_MODULE
+
+int main(int argc, char **argv)
+{
+  // prevent all logging until command line determines level
+  SETLOGLEVEL(LOG_EMERG);
+  SETERRLEVEL(LOG_EMERG, false); // messages, if any, go to stderr
+  // create app with current mainloop
+  P44mbrd* application = new(P44mbrd);
+  // pass control
+  int status = application->main(argc, argv);
+  // done
+  delete application;
+  return status;
+}
+
+#endif // !IS_MULTICALL_BINARY_MODULE

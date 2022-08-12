@@ -22,6 +22,8 @@
 #ifndef __p44utils__config__
 #define __p44utils__config__
 
+// connectedhomeip definition
+#include <system/SystemBuildConfig.h>
 
 #ifndef ENABLE_NAMED_ERRORS
   #define ENABLE_NAMED_ERRORS P44_CPP17_FEATURE // Enable if compiler can do C++17
@@ -37,6 +39,12 @@
 #endif
 #ifndef ENABLE_JSON_APPLICATION
   #define ENABLE_JSON_APPLICATION 0 // enables JSON utilities in Application, requires json-c
+#endif
+
+#if CHIP_SYSTEM_CONFIG_USE_LIBEV
+  #define MAINLOOP_LIBEV_BASED 1
+#else
+  #error "using p44 mainloop needs libev support in CHIP"
 #endif
 
 
