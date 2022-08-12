@@ -18,28 +18,26 @@ import("${chip_root}/build/chip/tools.gni")
 
 assert(chip_build_tools)
 
-executable("chip-bridge-app") {
+executable("p44mbrd") {
   sources = [
-    "${chip_root}/examples/bridge-app/linux/bridged-actions-stub.cpp",
-    "${chip_root}/examples/tv-app/tv-common/include/CHIPProjectAppConfig.h",
-    "bridgeapi.cpp",
-    "bridgeapi.h",
-    "device.h",
-    "device_impl.h",
-    "device.cpp",
-    "device.h",
-    "deviceonoff.cpp",
-    "deviceonoff.h",
-    "devicelevelcontrol.cpp",
-    "devicelevelcontrol.h",
-    "devicecolorcontrol.cpp",
-    "devicecolorcontrol.h",
-    "main.h",
-    "main.cpp",
+    "zap/CHIPProjectAppConfig.h",
+    "bridgeapi/bridgeapi.cpp",
+    "bridgeapi/bridgeapi.h",
+    "devices/device.h",
+    "devices/device_impl.h",
+    "devices/device.cpp",
+    "devices/device.h",
+    "devices/deviceonoff.cpp",
+    "devices/deviceonoff.h",
+    "devices/devicelevelcontrol.cpp",
+    "devices/devicelevelcontrol.h",
+    "devices/devicecolorcontrol.cpp",
+    "devices/devicecolorcontrol.h",
+    "p44mbrd_main.cpp",
   ]
 
   deps = [
-    "${chip_root}/examples/bridge-app/bridge-common",
+    "zap",
     "${chip_root}/examples/platform/linux:app-main",
     "${chip_root}/src/lib",
   ]
@@ -52,5 +50,5 @@ executable("chip-bridge-app") {
 }
 
 group("linux") {
-  deps = [ ":chip-bridge-app" ]
+  deps = [ ":p44mbrd" ]
 }

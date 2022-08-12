@@ -8,13 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
-		ED23300B288698AF00D934D7 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED233009288698AF00D934D7 /* bridgeapi.cpp */; };
 		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
 		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
 		ED2330232886A69700D934D7 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301B2886A69700D934D7 /* logger.cpp */; };
 		ED2330242886A69700D934D7 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301D2886A69700D934D7 /* utils.cpp */; };
-		ED24BDB428A58CC90025CC14 /* deviceinfoprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */; };
+		ED24BDC428A6709E0025CC14 /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */; };
+		ED24BDC528A6709E0025CC14 /* device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDBE28A6709E0025CC14 /* device.cpp */; };
+		ED24BDC628A6709E0025CC14 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */; };
+		ED24BDC728A6709E0025CC14 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */; };
+		ED24BDD028A671450025CC14 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDCF28A671450025CC14 /* bridgeapi.cpp */; };
+		ED24BDD328A673130025CC14 /* deviceinfoprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -362,8 +366,7 @@
 		ED36DEAE286E086300CA28EC /* DeviceInfoProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DEAC286E086300CA28EC /* DeviceInfoProviderImpl.cpp */; };
 		ED36DF22286E0D6400CA28EC /* CustomCSRResponseOperationalKeyStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */; };
 		ED36DF23286E0D6400CA28EC /* CustomCSRResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DF20286E0D4800CA28EC /* CustomCSRResponse.cpp */; };
-		ED690B62286DC7F600069215 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* main.cpp */; };
-		ED690B64286DC7F600069215 /* device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B61286DC7F600069215 /* device.cpp */; };
+		ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F520289A84B600A82418 /* callback-stub.cpp */; };
 		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
@@ -371,9 +374,6 @@
 		EDF3F533289AA96000A82418 /* scenes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F531289AA96000A82418 /* scenes.cpp */; };
 		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
 		EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CA286DCDA200CA28EC /* color-control-server.cpp */; };
-		EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F536289BF35E00A82418 /* deviceonoff.cpp */; };
-		EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */; };
-		EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */; };
 		EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */; };
 		EDF3F54928A528E700A82418 /* ASN1Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54828A528E700A82418 /* ASN1Time.cpp */; };
 /* End PBXBuildFile section */
@@ -392,8 +392,6 @@
 
 /* Begin PBXFileReference section */
 		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		ED233009288698AF00D934D7 /* bridgeapi.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = bridgeapi.cpp; path = linux/bridgeapi.cpp; sourceTree = "<group>"; };
-		ED23300A288698AF00D934D7 /* bridgeapi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bridgeapi.h; path = linux/bridgeapi.h; sourceTree = "<group>"; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
 		ED2330112886A1C500D934D7 /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
 		ED2330122886A1C500D934D7 /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
@@ -405,8 +403,22 @@
 		ED23301B2886A69700D934D7 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
 		ED23301D2886A69700D934D7 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
 		ED23301F2886A69700D934D7 /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
-		ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = deviceinfoprovider.cpp; path = linux/deviceinfoprovider.cpp; sourceTree = "<group>"; };
-		ED24BDB328A589FD0025CC14 /* deviceinfoprovider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = deviceinfoprovider.hpp; path = linux/deviceinfoprovider.hpp; sourceTree = "<group>"; };
+		ED24BDBB28A6709E0025CC14 /* device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = device.h; sourceTree = "<group>"; };
+		ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = devicelevelcontrol.cpp; sourceTree = "<group>"; };
+		ED24BDBD28A6709E0025CC14 /* deviceonoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deviceonoff.h; sourceTree = "<group>"; };
+		ED24BDBE28A6709E0025CC14 /* device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = device.cpp; sourceTree = "<group>"; };
+		ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devicelevelcontrol.h; sourceTree = "<group>"; };
+		ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deviceonoff.cpp; sourceTree = "<group>"; };
+		ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = devicecolorcontrol.cpp; sourceTree = "<group>"; };
+		ED24BDC228A6709E0025CC14 /* devicecolorcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devicecolorcontrol.h; sourceTree = "<group>"; };
+		ED24BDC328A6709E0025CC14 /* device_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = device_impl.h; sourceTree = "<group>"; };
+		ED24BDC928A670DB0025CC14 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
+		ED24BDCB28A670DB0025CC14 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
+		ED24BDCC28A670DB0025CC14 /* p44mbrd.zap */ = {isa = PBXFileReference; lastKnownFileType = text; path = p44mbrd.zap; sourceTree = "<group>"; };
+		ED24BDCE28A671450025CC14 /* bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeapi.h; sourceTree = "<group>"; };
+		ED24BDCF28A671450025CC14 /* bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bridgeapi.cpp; sourceTree = "<group>"; };
+		ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deviceinfoprovider.cpp; sourceTree = "<group>"; };
+		ED24BDD228A673130025CC14 /* deviceinfoprovider.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = deviceinfoprovider.hpp; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -1289,10 +1301,7 @@
 		ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CustomCSRResponseOperationalKeyStore.cpp; sourceTree = "<group>"; };
 		ED36DF24286E354400CA28EC /* p44mbrd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = p44mbrd.entitlements; sourceTree = "<group>"; };
 		ED690B52286DC79500069215 /* p44mbrd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = p44mbrd; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED690B5C286DC7F600069215 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = linux/main.cpp; sourceTree = "<group>"; };
-		ED690B5E286DC7F600069215 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = linux/main.h; sourceTree = "<group>"; };
-		ED690B5F286DC7F600069215 /* device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = device.h; path = linux/device.h; sourceTree = "<group>"; };
-		ED690B61286DC7F600069215 /* device.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = device.cpp; path = linux/device.cpp; sourceTree = "<group>"; };
+		ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44mbrd_main.cpp; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -1354,10 +1363,6 @@
 		EDF3F4F72893EC9700A82418 /* ThreadStackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadStackManager.h; sourceTree = "<group>"; };
 		EDF3F4F82893EC9700A82418 /* TestOnlyCommissionableDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestOnlyCommissionableDataProvider.h; sourceTree = "<group>"; };
 		EDF3F4F92893EC9700A82418 /* CHIPDeviceError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceError.h; sourceTree = "<group>"; };
-		EDF3F4FB2893ED9500A82418 /* BUILD.gn */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
-		EDF3F4FD2893ED9500A82418 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
-		EDF3F4FE2893ED9500A82418 /* bridge-app.zap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.zap"; sourceTree = "<group>"; };
-		EDF3F4FF2893ED9500A82418 /* bridge-app.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "bridge-app.matter"; sourceTree = "<group>"; };
 		EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
 		EDF3F51E289A84B600A82418 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
 		EDF3F51F289A84B600A82418 /* Clusters.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Clusters.matter; sourceTree = "<group>"; };
@@ -1373,15 +1378,8 @@
 		EDF3F52F289AA96000A82418 /* scenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scenes.h; sourceTree = "<group>"; };
 		EDF3F530289AA96000A82418 /* scenes-tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "scenes-tokens.h"; sourceTree = "<group>"; };
 		EDF3F531289AA96000A82418 /* scenes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scenes.cpp; sourceTree = "<group>"; };
-		EDF3F536289BF35E00A82418 /* deviceonoff.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = deviceonoff.cpp; path = linux/deviceonoff.cpp; sourceTree = "<group>"; };
-		EDF3F537289BF35E00A82418 /* deviceonoff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = deviceonoff.h; path = linux/deviceonoff.h; sourceTree = "<group>"; };
-		EDF3F539289BF3C100A82418 /* args.gni */ = {isa = PBXFileReference; lastKnownFileType = text; name = args.gni; path = linux/args.gni; sourceTree = "<group>"; };
-		EDF3F53A289BF3C100A82418 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; name = BUILD.gn; path = linux/BUILD.gn; sourceTree = "<group>"; };
-		EDF3F53B289BF46100A82418 /* devicecolorcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = devicecolorcontrol.h; path = linux/devicecolorcontrol.h; sourceTree = "<group>"; };
-		EDF3F53C289BF46100A82418 /* devicelevelcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = devicelevelcontrol.h; path = linux/devicelevelcontrol.h; sourceTree = "<group>"; };
-		EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicelevelcontrol.cpp; path = linux/devicelevelcontrol.cpp; sourceTree = "<group>"; };
-		EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicecolorcontrol.cpp; path = linux/devicecolorcontrol.cpp; sourceTree = "<group>"; };
-		EDF3F542289BFC3E00A82418 /* device_impl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = device_impl.h; sourceTree = "<group>"; };
+		EDF3F539289BF3C100A82418 /* args.gni */ = {isa = PBXFileReference; lastKnownFileType = text; path = args.gni; sourceTree = "<group>"; };
+		EDF3F53A289BF3C100A82418 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
 		EDF3F54328A521ED00A82418 /* ReadPrepareParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReadPrepareParams.h; sourceTree = "<group>"; };
 		EDF3F54428A521ED00A82418 /* OperationalSessionSetupPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationalSessionSetupPool.h; sourceTree = "<group>"; };
 		EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OperationalSessionSetup.cpp; sourceTree = "<group>"; };
@@ -1423,6 +1421,68 @@
 				ED2330122886A1C500D934D7 /* p44obj.hpp */,
 			);
 			path = p44utils;
+			sourceTree = "<group>";
+		};
+		ED24BDB928A670570025CC14 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				EDF3F539289BF3C100A82418 /* args.gni */,
+				EDF3F53A289BF3C100A82418 /* BUILD.gn */,
+				ED690B65286DC80800069215 /* connectedhomeip */,
+				ED23300F2886A18300D934D7 /* p44utils */,
+				ED24BDC828A670DB0025CC14 /* zap */,
+				EDF3F51C289A84B600A82418 /* zap-generated */,
+				ED24BDCD28A671450025CC14 /* bridgeapi */,
+				ED24BDBA28A6709E0025CC14 /* devices */,
+				ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */,
+				ED24BDD228A673130025CC14 /* deviceinfoprovider.hpp */,
+				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
+				ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		ED24BDBA28A6709E0025CC14 /* devices */ = {
+			isa = PBXGroup;
+			children = (
+				ED24BDC328A6709E0025CC14 /* device_impl.h */,
+				ED24BDBE28A6709E0025CC14 /* device.cpp */,
+				ED24BDBB28A6709E0025CC14 /* device.h */,
+				ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */,
+				ED24BDC228A6709E0025CC14 /* devicecolorcontrol.h */,
+				ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */,
+				ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */,
+				ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */,
+				ED24BDBD28A6709E0025CC14 /* deviceonoff.h */,
+			);
+			path = devices;
+			sourceTree = "<group>";
+		};
+		ED24BDC828A670DB0025CC14 /* zap */ = {
+			isa = PBXGroup;
+			children = (
+				ED24BDC928A670DB0025CC14 /* BUILD.gn */,
+				ED24BDCA28A670DB0025CC14 /* include */,
+				ED24BDCC28A670DB0025CC14 /* p44mbrd.zap */,
+			);
+			path = zap;
+			sourceTree = "<group>";
+		};
+		ED24BDCA28A670DB0025CC14 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				ED24BDCB28A670DB0025CC14 /* CHIPProjectAppConfig.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		ED24BDCD28A671450025CC14 /* bridgeapi */ = {
+			isa = PBXGroup;
+			children = (
+				ED24BDCE28A671450025CC14 /* bridgeapi.h */,
+				ED24BDCF28A671450025CC14 /* bridgeapi.cpp */,
+			);
+			path = bridgeapi;
 			sourceTree = "<group>";
 		};
 		ED36D75C286DCAF700CA28EC /* examples */ = {
@@ -3150,30 +3210,9 @@
 		ED690B49286DC79500069215 = {
 			isa = PBXGroup;
 			children = (
-				EDF3F539289BF3C100A82418 /* args.gni */,
-				EDF3F53A289BF3C100A82418 /* BUILD.gn */,
-				EDF3F51C289A84B600A82418 /* zap-generated */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
+				ED24BDB928A670570025CC14 /* src */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
-				ED23300F2886A18300D934D7 /* p44utils */,
-				EDF3F4FA2893ED9500A82418 /* bridge-common */,
-				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
-				EDF3F542289BFC3E00A82418 /* device_impl.h */,
-				ED690B61286DC7F600069215 /* device.cpp */,
-				ED24BDB228A589FD0025CC14 /* deviceinfoprovider.cpp */,
-				ED24BDB328A589FD0025CC14 /* deviceinfoprovider.hpp */,
-				ED690B5F286DC7F600069215 /* device.h */,
-				EDF3F536289BF35E00A82418 /* deviceonoff.cpp */,
-				EDF3F537289BF35E00A82418 /* deviceonoff.h */,
-				EDF3F53D289BF46100A82418 /* devicelevelcontrol.cpp */,
-				EDF3F53C289BF46100A82418 /* devicelevelcontrol.h */,
-				EDF3F53E289BF46100A82418 /* devicecolorcontrol.cpp */,
-				EDF3F53B289BF46100A82418 /* devicecolorcontrol.h */,
-				ED233009288698AF00D934D7 /* bridgeapi.cpp */,
-				ED23300A288698AF00D934D7 /* bridgeapi.h */,
-				ED690B5C286DC7F600069215 /* main.cpp */,
-				ED690B5E286DC7F600069215 /* main.h */,
-				ED690B65286DC80800069215 /* connectedhomeip */,
 				ED690B53286DC79500069215 /* Products */,
 				ED36DE40286DFE6100CA28EC /* Frameworks */,
 			);
@@ -3196,8 +3235,7 @@
 				ED36DDE0286DDA7E00CA28EC /* third_party */,
 				ED36DDEA286DDB1600CA28EC /* zzz-generated */,
 			);
-			name = connectedhomeip;
-			path = linux/third_party/connectedhomeip;
+			path = connectedhomeip;
 			sourceTree = "<group>";
 		};
 		EDF3F4BD2893EC9700A82418 /* platform */ = {
@@ -3281,25 +3319,6 @@
 			path = testing;
 			sourceTree = "<group>";
 		};
-		EDF3F4FA2893ED9500A82418 /* bridge-common */ = {
-			isa = PBXGroup;
-			children = (
-				EDF3F4FB2893ED9500A82418 /* BUILD.gn */,
-				EDF3F4FC2893ED9500A82418 /* include */,
-				EDF3F4FE2893ED9500A82418 /* bridge-app.zap */,
-				EDF3F4FF2893ED9500A82418 /* bridge-app.matter */,
-			);
-			path = "bridge-common";
-			sourceTree = "<group>";
-		};
-		EDF3F4FC2893ED9500A82418 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				EDF3F4FD2893ED9500A82418 /* CHIPProjectAppConfig.h */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
 		EDF3F51C289A84B600A82418 /* zap-generated */ = {
 			isa = PBXGroup;
 			children = (
@@ -3314,8 +3333,7 @@
 				EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */,
 				EDF3F524289A84B600A82418 /* PluginApplicationCallbacks.h */,
 			);
-			name = "zap-generated";
-			path = "linux/zap-generated";
+			path = "zap-generated";
 			sourceTree = "<group>";
 		};
 		EDF3F52B289AA96000A82418 /* groups-server */ = {
@@ -3399,6 +3417,7 @@
 				ED36DC46286DD65900CA28EC /* CHIPError.cpp in Sources */,
 				ED36DE9F286E043500CA28EC /* CommissionableDataProvider.cpp in Sources */,
 				ED36DA0F286DCFC600CA28EC /* CHIPDeviceControllerFactory.cpp in Sources */,
+				ED24BDC628A6709E0025CC14 /* deviceonoff.cpp in Sources */,
 				ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */,
 				ED36D86B286DCDED00CA28EC /* AttributeDataIBs.cpp in Sources */,
 				ED36DAA2286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp in Sources */,
@@ -3471,7 +3490,6 @@
 				ED36D863286DCDED00CA28EC /* CommandPathIB.cpp in Sources */,
 				ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */,
 				ED36DE8A286E02CD00CA28EC /* af-event.cpp in Sources */,
-				EDF3F540289BF46100A82418 /* devicecolorcontrol.cpp in Sources */,
 				ED36DE9C286E043500CA28EC /* DeviceInstanceInfoProvider.cpp in Sources */,
 				ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */,
 				ED36DA60286DCFC600CA28EC /* AbstractDnssdDiscoveryController.cpp in Sources */,
@@ -3556,7 +3574,6 @@
 				ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */,
 				ED36DBAC286DD48C00CA28EC /* OnboardingCodes.cpp in Sources */,
 				ED36DE02286DDBCA00CA28EC /* cluster-objects.cpp in Sources */,
-				EDF3F53F289BF46100A82418 /* devicelevelcontrol.cpp in Sources */,
 				ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */,
 				ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
@@ -3605,11 +3622,12 @@
 				ED36DCFD286DD8A000CA28EC /* DefaultSessionResumptionStorage.cpp in Sources */,
 				ED36DC45286DD65900CA28EC /* CHIPCircularTLVBuffer.cpp in Sources */,
 				ED36DAA1286DD17F00CA28EC /* ExamplePAI.cpp in Sources */,
+				ED24BDC528A6709E0025CC14 /* device.cpp in Sources */,
 				ED36D78C286DCB8A00CA28EC /* Log.cpp in Sources */,
 				ED36DEA5286E043600CA28EC /* DeviceInfoProvider.cpp in Sources */,
 				ED36D90D286DCF5100CA28EC /* CommissioningWindowManager.cpp in Sources */,
 				ED36D889286DCDED00CA28EC /* StatusIB.cpp in Sources */,
-				ED690B62286DC7F600069215 /* main.cpp in Sources */,
+				ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */,
 				ED36DCA3286DD7F200CA28EC /* DeviceInstanceInfoProviderImpl.cpp in Sources */,
 				ED36DB87286DD2CE00CA28EC /* RecordData.cpp in Sources */,
 				ED36DC15286DD57B00CA28EC /* Verhoeff16.cpp in Sources */,
@@ -3681,7 +3699,6 @@
 				ED36D801286DCDA300CA28EC /* group-key-mgmt-server.cpp in Sources */,
 				ED36DC61286DD6A400CA28EC /* ExchangeContext.cpp in Sources */,
 				ED36DBAE286DD48C00CA28EC /* Dns.cpp in Sources */,
-				EDF3F538289BF35E00A82418 /* deviceonoff.cpp in Sources */,
 				ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */,
 				ED36DAD9286DD27200CA28EC /* InetArgParser.cpp in Sources */,
 				ED36DC11286DD57B00CA28EC /* Verhoeff.cpp in Sources */,
@@ -3690,6 +3707,7 @@
 				ED36DC49286DD65900CA28EC /* CHIPTLVUpdater.cpp in Sources */,
 				ED36D884286DCDED00CA28EC /* ListBuilder.cpp in Sources */,
 				ED36DC0B286DD57B00CA28EC /* BytesCircularBuffer.cpp in Sources */,
+				ED24BDC728A6709E0025CC14 /* devicecolorcontrol.cpp in Sources */,
 				ED36DB72286DD2CE00CA28EC /* QueryResponder.cpp in Sources */,
 				ED36DD72286DD9A400CA28EC /* SystemLayerImplSelect.cpp in Sources */,
 				ED36DDE9286DDAF300CA28EC /* json_reader.cpp in Sources */,
@@ -3705,15 +3723,14 @@
 				ED36DA86286DD14F00CA28EC /* GroupDataProviderImpl.cpp in Sources */,
 				ED36DB8E286DD2CE00CA28EC /* ActiveResolveAttempts.cpp in Sources */,
 				ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */,
+				ED24BDD028A671450025CC14 /* bridgeapi.cpp in Sources */,
 				ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */,
 				ED36DCAD286DD7F200CA28EC /* ConfigurationManagerImpl.cpp in Sources */,
 				ED36DC0E286DD57B00CA28EC /* ZclString.cpp in Sources */,
 				ED36DD50286DD91500CA28EC /* ManualSetupPayloadParser.cpp in Sources */,
 				ED36D7FC286DCDA300CA28EC /* network-commissioning.cpp in Sources */,
 				ED36DD47286DD91500CA28EC /* Base38Decode.cpp in Sources */,
-				ED690B64286DC7F600069215 /* device.cpp in Sources */,
 				ED36DC13286DD57B00CA28EC /* Verhoeff36.cpp in Sources */,
-				ED23300B288698AF00D934D7 /* bridgeapi.cpp in Sources */,
 				ED36DD74286DD9A400CA28EC /* SystemTimer.cpp in Sources */,
 				ED36DB9D286DD42300CA28EC /* streamer_stdio.cpp in Sources */,
 				ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */,
@@ -3728,6 +3745,7 @@
 				EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */,
 				ED36DAE5286DD29600CA28EC /* AddressResolve_DefaultImpl.cpp in Sources */,
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
+				ED24BDC428A6709E0025CC14 /* devicelevelcontrol.cpp in Sources */,
 				ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */,
 				ED36D7A0286DCC4100CA28EC /* CommissionableInit.cpp in Sources */,
 				ED36D7EF286DCDA300CA28EC /* operational-credentials-server.cpp in Sources */,
@@ -3742,7 +3760,7 @@
 				ED36DB9C286DD42300CA28EC /* Engine.cpp in Sources */,
 				ED36DD6E286DD9A400CA28EC /* WakeEvent.cpp in Sources */,
 				ED36D8F1286DCF0B00CA28EC /* CASESessionManager.cpp in Sources */,
-				ED24BDB428A58CC90025CC14 /* deviceinfoprovider.cpp in Sources */,
+				ED24BDD328A673130025CC14 /* deviceinfoprovider.cpp in Sources */,
 				ED36DADB286DD27200CA28EC /* TCPEndPointImplSockets.cpp in Sources */,
 				ED36DADA286DD27200CA28EC /* IPAddress-StringFuncts.cpp in Sources */,
 				ED36DA64286DCFC600CA28EC /* SetUpCodePairer.cpp in Sources */,
@@ -3898,22 +3916,21 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/linux/include",
-					"$(PROJECT_DIR)/linux",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated/app-common",
-					"$(PROJECT_DIR)/bridge-common/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/common/tracing",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/zap/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/common/tracing",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);
@@ -3940,22 +3957,21 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/linux/include",
-					"$(PROJECT_DIR)/linux",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/src",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated/app-common",
-					"$(PROJECT_DIR)/bridge-common/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/examples/common/tracing",
-					"$(PROJECT_DIR)/linux/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/zap/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/connectedhomeip/examples/common/tracing",
+					"$(PROJECT_DIR)/src/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);

@@ -37,7 +37,6 @@
 #include "p44obj.hpp"
 
 #include "bridgeapi.h"
-#include "main.h"
 
 using namespace chip;
 using namespace p44;

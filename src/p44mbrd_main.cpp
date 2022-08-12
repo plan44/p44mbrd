@@ -52,7 +52,6 @@
 #include <sys/ioctl.h>
 
 #include "CommissionableInit.h"
-#include "main.h"
 
 // plan44
 #include "bridgeapi.h"

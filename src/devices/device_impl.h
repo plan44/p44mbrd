@@ -38,8 +38,6 @@
 #include "device.h"
 #include "bridgeapi.h"
 
-#include "main.h"
-
 // Current ZCL implementation of Struct uses a max-size array of 254 bytes
 const int kDescriptorAttributeArraySize = 254;
 
