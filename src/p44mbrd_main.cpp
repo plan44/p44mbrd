@@ -304,7 +304,7 @@ void answerreceived(JsonObjectPtr aJsonMsg, ErrorPtr aError)
   // devices collected
   // start chip only now
   LOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
-  chipmain(gArgc, gArgv);
+  #error Restructure such that API setup runs first in p44 mainloop, and chip starts running only after
 }
 
 
@@ -365,185 +365,9 @@ void apiconnected(JsonObjectPtr aJsonMsg, ErrorPtr aError)
 }
 
 
-void initializeP44(chip::System::Layer * aLayer, void * aAppState)
-{
-  // enable API to run it in parallel with chip main loop
-  BridgeApi::sharedBridgeApi().endStandalone();
-  for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
-    if (gDevices[i]) {
-      // give device chance to do things just after mainloop has started
-      gDevices[i]->inChipMainloopInit();
-      // dump status
-      gDevices[i]->logStatus();
-    }
-  }
-}
-
-
-// MARK: - entry point
-
-int main(int argc, char * argv[])
-{
-  gArgc = argc;
-  gArgv = argv;
-
-  // try bridge API
-  BridgeApi::sharedBridgeApi().setConnectionParams("127.0.0.1", 4444, 10*Second);
-  BridgeApi::sharedBridgeApi().setIncomingMessageCallback(apinotification);
-  BridgeApi::sharedBridgeApi().connect(apiconnected);
-  // we'll never return if everything goes well
-  return 0;
-}
-
-
 // MARK: - chipmain
 
 #define kP44mbrNamespace "/ch.plan44.p44mbrd/"
-
-int chipmain(int argc, char * argv[])
-{
-
-  if (ChipLinuxAppInit(argc, argv) != 0)
-  {
-      return -1;
-  }
-  // override the generic device instance info provider with our own
-  SetDeviceInstanceInfoProvider(&gP44dbrDeviceInstanceInfoProvider);
-
-  // Init Data Model and CHIP App Server
-  static chip::CommonCaseDeviceServerInitParams initParams;
-  (void) initParams.InitializeStaticResourcesBeforeServerInit();
-
-#if CHIP_DEVICE_ENABLE_PORT_PARAMS
-  // use a different service port to make testing possible with other sample devices running on same host
-  initParams.operationalServicePort = LinuxDeviceOptions::GetInstance().securedDevicePort;
-#endif
-
-  initParams.interfaceId = LinuxDeviceOptions::GetInstance().interfaceId;
-  chip::Server::GetInstance().Init(initParams);
-
-  // Initialize device attestation config
-  SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
-
-  // Set starting endpoint id where dynamic endpoints will be assigned, which
-  // will be the next consecutive endpoint id after the last fixed endpoint.
-  gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
-    static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
-
-  // Disable last fixed endpoint, which is used as a placeholder for all of the
-  // supported clusters so that ZAP will generated the requisite code.
-  emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
-
-  // MARK: p44 code for generating dynamic endpoints
-
-  // Clear out the array of dynamic endpoints
-  memset(gDevices, 0, sizeof(gDevices));
-  CHIP_ERROR cerr;
-  chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-  // get list of endpoints known in use
-  char dynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
-  size_t numDynamicEndPoints = 0;
-  cerr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numDynamicEndPoints);
-  if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-    // no endpoint map yet
-  }
-  else {
-    LogErrorOnFailure(cerr);
-  }
-  dynamicEndPointMap[numDynamicEndPoints]=0; // null terminate for easy debug printing as string
-  LOG(LOG_INFO,"DynamicEndpointMap: %s", dynamicEndPointMap);
-  // revert all endpoint map markers to "unconfimed"
-  for (size_t i=0; i<numDynamicEndPoints; i++) {
-    if (dynamicEndPointMap[i]=='D') dynamicEndPointMap[i]='d'; // unconfirmed device
-  }
-  // process list of to-be-bridged devices
-  for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
-    DevicePtr dev = pos->second;
-    // look up previous endpoint mapping
-    string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
-    EndpointId dynamicEndpointIdx = kInvalidEndpointId;
-    cerr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
-    if (cerr==CHIP_NO_ERROR) {
-      // try to re-use the endpoint ID for this dSUID
-      // - sanity check
-      if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-        ChipLogError(DeviceLayer, "p44 inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
-      }
-      if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-        ChipLogError(DeviceLayer, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
-        dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
-      }
-      else {
-        // add to map
-        if (dynamicEndpointIdx<numDynamicEndPoints) {
-          dynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
-        }
-        else {
-          for (size_t i = numDynamicEndPoints; i<dynamicEndpointIdx; i++) dynamicEndPointMap[i]=' ';
-          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
-          dynamicEndPointMap[dynamicEndpointIdx+1] = 0;
-        }
-      }
-    }
-    else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-      // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-      ChipLogProgress(DeviceLayer, "p44 new device %s, adding to bridge", dev->bridgedDSUID().c_str());
-    }
-    else {
-      LogErrorOnFailure(cerr);
-    }
-    // update and possibly extend endpoint map
-    if (dynamicEndpointIdx==kInvalidEndpointId) {
-      // this device needs a new endpoint
-      for (size_t i=0; i<numDynamicEndPoints; i++) {
-        if (dynamicEndPointMap[i]==' ') {
-          // use the gap
-          dynamicEndpointIdx = i;
-          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-        }
-      }
-      if (dynamicEndpointIdx==kInvalidEndpointId) {
-        if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          ChipLogError(DeviceLayer, "p44 max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
-        }
-        else {
-          dynamicEndpointIdx = numDynamicEndPoints++;
-          dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-          // save in KVS
-          cerr = kvs.Put(key.c_str(), dynamicEndpointIdx);
-          LogErrorOnFailure(cerr);
-        }
-      }
-    }
-    // assign to dynamic endpoint array
-    if (dynamicEndpointIdx!=kInvalidEndpointId) {
-      dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
-      gDevices[dynamicEndpointIdx] = dev.get();
-    }
-  }
-  // save updated endpoint map
-  cerr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
-  LogErrorOnFailure(cerr);
-
-  // Add the devices as dynamic endpoints
-  for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
-    if (gDevices[i]) {
-      // there is a device at this dynamic endpoint
-      if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
-        // give device chance to do things before mainloop starts
-        gDevices[i]->beforeChipMainloopPrep();
-      }
-    }
-  }
-
-  // Run CHIP
-
-  chip::DeviceLayer::SystemLayer().ScheduleWork(initializeP44, NULL);
-  chip::DeviceLayer::PlatformMgr().RunEventLoop();
-
-  return 0;
-}
-
 
 #include "application.hpp"
 
@@ -744,13 +568,131 @@ public:
 
       PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
 
-      // Initialize device attestation config
+// FIXME: which one is correct?
+      // From ChipLinuxAppMainLoop Initialize device attestation config
       SetDeviceAttestationCredentialsProvider(LinuxDeviceOptions::GetInstance().dacProvider);
+//      // From Bridge Sample: Initialize device attestation config
+//      SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 
       // Set our own device info provider
       SetDeviceInstanceInfoProvider(&gP44dbrDeviceInstanceInfoProvider);
 
       ApplicationInit();
+
+      // MARK: - p44mbrd specific setup before entering mainloop
+
+      // Set starting endpoint id where dynamic endpoints will be assigned, which
+      // will be the next consecutive endpoint id after the last fixed endpoint.
+      gFirstDynamicEndpointId = static_cast<chip::EndpointId>(
+        static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
+
+      // Disable last fixed endpoint, which is used as a placeholder for all of the
+      // supported clusters so that ZAP will generated the requisite code.
+      emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
+
+      // Clear out the array of dynamic endpoints
+      memset(gDevices, 0, sizeof(gDevices));
+      CHIP_ERROR cerr;
+      chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
+      // get list of endpoints known in use
+      char dynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
+      size_t numDynamicEndPoints = 0;
+      cerr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numDynamicEndPoints);
+      if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+        // no endpoint map yet
+      }
+      else {
+        LogErrorOnFailure(cerr);
+      }
+      dynamicEndPointMap[numDynamicEndPoints]=0; // null terminate for easy debug printing as string
+      LOG(LOG_INFO,"DynamicEndpointMap: %s", dynamicEndPointMap);
+      // revert all endpoint map markers to "unconfimed"
+      for (size_t i=0; i<numDynamicEndPoints; i++) {
+        if (dynamicEndPointMap[i]=='D') dynamicEndPointMap[i]='d'; // unconfirmed device
+      }
+      // process list of to-be-bridged devices
+      for (DeviceDSUIDMap::iterator pos = gDeviceDSUIDMap.begin(); pos!=gDeviceDSUIDMap.end(); ++pos) {
+        DevicePtr dev = pos->second;
+        // look up previous endpoint mapping
+        string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
+        EndpointId dynamicEndpointIdx = kInvalidEndpointId;
+        cerr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
+        if (cerr==CHIP_NO_ERROR) {
+          // try to re-use the endpoint ID for this dSUID
+          // - sanity check
+          if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
+            ChipLogError(DeviceLayer, "p44 inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+          }
+          if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+            ChipLogError(DeviceLayer, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+            dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
+          }
+          else {
+            // add to map
+            if (dynamicEndpointIdx<numDynamicEndPoints) {
+              dynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
+            }
+            else {
+              for (size_t i = numDynamicEndPoints; i<dynamicEndpointIdx; i++) dynamicEndPointMap[i]=' ';
+              dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
+              dynamicEndPointMap[dynamicEndpointIdx+1] = 0;
+            }
+          }
+        }
+        else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+          // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
+          ChipLogProgress(DeviceLayer, "p44 new device %s, adding to bridge", dev->bridgedDSUID().c_str());
+        }
+        else {
+          LogErrorOnFailure(cerr);
+        }
+        // update and possibly extend endpoint map
+        if (dynamicEndpointIdx==kInvalidEndpointId) {
+          // this device needs a new endpoint
+          for (size_t i=0; i<numDynamicEndPoints; i++) {
+            if (dynamicEndPointMap[i]==' ') {
+              // use the gap
+              dynamicEndpointIdx = i;
+              dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+            }
+          }
+          if (dynamicEndpointIdx==kInvalidEndpointId) {
+            if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+              ChipLogError(DeviceLayer, "p44 max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
+            }
+            else {
+              dynamicEndpointIdx = numDynamicEndPoints++;
+              dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+              // save in KVS
+              cerr = kvs.Put(key.c_str(), dynamicEndpointIdx);
+              LogErrorOnFailure(cerr);
+            }
+          }
+        }
+        // assign to dynamic endpoint array
+        if (dynamicEndpointIdx!=kInvalidEndpointId) {
+          dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
+          gDevices[dynamicEndpointIdx] = dev.get();
+        }
+      }
+      // save updated endpoint map
+      cerr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
+      LogErrorOnFailure(cerr);
+
+      // Add the devices as dynamic endpoints
+      for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
+        if (gDevices[i]) {
+          // there is a device at this dynamic endpoint
+          if (gDevices[i]->AddAsDeviceEndpoint(gFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
+            // give device chance to do things before mainloop starts
+            gDevices[i]->beforeChipMainloopPrep();
+          }
+        }
+      }
+
+      // Run CHIP
+      // FIXME: remove this comment, but it shows for now that we would have started the select mainloop here
+      //chip::DeviceLayer::PlatformMgr().RunEventLoop();
     }
     // app now ready to run (or cleanup when already terminated)
     return run();
@@ -769,7 +711,25 @@ public:
 
   virtual void initialize() override
   {
-    %%%
+    ChipLogProgress(DeviceLayer, "p44: p44utils mainloop started");
+
+    // enable API to run it in parallel with chip main loop
+    BridgeApi::sharedBridgeApi().endStandalone();
+
+    // try bridge API
+    BridgeApi::sharedBridgeApi().setConnectionParams("127.0.0.1", 4444, 10*Second);
+    BridgeApi::sharedBridgeApi().setIncomingMessageCallback(apinotification);
+    BridgeApi::sharedBridgeApi().connect(apiconnected);
+
+    for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
+      if (gDevices[i]) {
+        // give device chance to do things just after mainloop has started
+        gDevices[i]->inChipMainloopInit();
+        // dump status
+        gDevices[i]->logStatus();
+      }
+    }
+
   }
 
 };
