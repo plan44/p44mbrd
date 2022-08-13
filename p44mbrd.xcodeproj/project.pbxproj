@@ -17,7 +17,6 @@
 		ED24BDC528A6709E0025CC14 /* device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDBE28A6709E0025CC14 /* device.cpp */; };
 		ED24BDC628A6709E0025CC14 /* deviceonoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */; };
 		ED24BDC728A6709E0025CC14 /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */; };
-		ED24BDD028A671450025CC14 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDCF28A671450025CC14 /* bridgeapi.cpp */; };
 		ED24BDD328A673130025CC14 /* deviceinfoprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */; };
 		ED24BDDE28A68AE20025CC14 /* mainloop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD628A68AE10025CC14 /* mainloop.cpp */; };
 		ED24BDDF28A68AE20025CC14 /* socketcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD728A68AE10025CC14 /* socketcomm.cpp */; };
@@ -25,6 +24,9 @@
 		ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD928A68AE20025CC14 /* jsoncomm.cpp */; };
 		ED24BDE228A68AE20025CC14 /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDDD28A68AE20025CC14 /* application.cpp */; };
 		ED24BDE428A6ADA70025CC14 /* libev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED24BDE328A6ADA70025CC14 /* libev.a */; };
+		ED24BDE828A812E00025CC14 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* bridgeapi.cpp */; };
+		ED24BDEC28A8FCBB0025CC14 /* devices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDEA28A8FCBB0025CC14 /* devices.cpp */; };
+		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -37,11 +39,6 @@
 		ED36D78B286DCB8A00CA28EC /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D77B286DCB8A00CA28EC /* Decoder.cpp */; };
 		ED36D78C286DCB8A00CA28EC /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D77D286DCB8A00CA28EC /* Log.cpp */; };
 		ED36D78D286DCB8A00CA28EC /* ToCertificateString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D77F286DCB8A00CA28EC /* ToCertificateString.cpp */; };
-		ED36D79E286DCC4100CA28EC /* CommissionerMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D790286DCC4000CA28EC /* CommissionerMain.cpp */; };
-		ED36D79F286DCC4100CA28EC /* ControllerShellCommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D791286DCC4000CA28EC /* ControllerShellCommands.cpp */; };
-		ED36D7A0286DCC4100CA28EC /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
-		ED36D7A1286DCC4100CA28EC /* CommissioneeShellCommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D798286DCC4000CA28EC /* CommissioneeShellCommands.cpp */; };
-		ED36D7A2286DCC4100CA28EC /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D79A286DCC4000CA28EC /* AppMain.cpp */; };
 		ED36D7A3286DCC4100CA28EC /* Options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D79B286DCC4000CA28EC /* Options.cpp */; };
 		ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D79C286DCC4000CA28EC /* LinuxCommissionableDataProvider.cpp */; };
 		ED36D7B3286DCCBB00CA28EC /* AccessControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7A9286DCCBB00CA28EC /* AccessControl.cpp */; };
@@ -421,10 +418,8 @@
 		ED24BDC928A670DB0025CC14 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
 		ED24BDCB28A670DB0025CC14 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
 		ED24BDCC28A670DB0025CC14 /* p44mbrd.zap */ = {isa = PBXFileReference; lastKnownFileType = text; path = p44mbrd.zap; sourceTree = "<group>"; };
-		ED24BDCE28A671450025CC14 /* bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeapi.h; sourceTree = "<group>"; };
-		ED24BDCF28A671450025CC14 /* bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bridgeapi.cpp; sourceTree = "<group>"; };
 		ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deviceinfoprovider.cpp; sourceTree = "<group>"; };
-		ED24BDD228A673130025CC14 /* deviceinfoprovider.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = deviceinfoprovider.hpp; sourceTree = "<group>"; };
+		ED24BDD228A673130025CC14 /* deviceinfoprovider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deviceinfoprovider.h; sourceTree = "<group>"; };
 		ED24BDD428A68AE10025CC14 /* jsoncomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsoncomm.hpp; sourceTree = "<group>"; };
 		ED24BDD528A68AE10025CC14 /* fdcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fdcomm.hpp; sourceTree = "<group>"; };
 		ED24BDD628A68AE10025CC14 /* mainloop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainloop.cpp; sourceTree = "<group>"; };
@@ -436,6 +431,11 @@
 		ED24BDDC28A68AE20025CC14 /* socketcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = socketcomm.hpp; sourceTree = "<group>"; };
 		ED24BDDD28A68AE20025CC14 /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
 		ED24BDE328A6ADA70025CC14 /* libev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libev.a; path = ../../../../../../usr/local/Cellar/libev/4.33/lib/libev.a; sourceTree = "<group>"; };
+		ED24BDE628A812E00025CC14 /* bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeapi.h; sourceTree = "<group>"; };
+		ED24BDE728A812E00025CC14 /* bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bridgeapi.cpp; sourceTree = "<group>"; };
+		ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44mbrd_main.h; sourceTree = "<group>"; };
+		ED24BDEA28A8FCBB0025CC14 /* devices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = devices.cpp; sourceTree = "<group>"; };
+		ED24BDEB28A8FCBB0025CC14 /* devices.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = devices.hpp; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -1460,12 +1460,13 @@
 				ED23300F2886A18300D934D7 /* p44utils */,
 				ED24BDC828A670DB0025CC14 /* zap */,
 				EDF3F51C289A84B600A82418 /* zap-generated */,
-				ED24BDCD28A671450025CC14 /* bridgeapi */,
 				ED24BDBA28A6709E0025CC14 /* devices */,
+				ED24BDE528A812E00025CC14 /* bridgeapi */,
 				ED24BDD128A673130025CC14 /* deviceinfoprovider.cpp */,
-				ED24BDD228A673130025CC14 /* deviceinfoprovider.hpp */,
+				ED24BDD228A673130025CC14 /* deviceinfoprovider.h */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */,
+				ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -1482,6 +1483,8 @@
 				ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */,
 				ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */,
 				ED24BDBD28A6709E0025CC14 /* deviceonoff.h */,
+				ED24BDEA28A8FCBB0025CC14 /* devices.cpp */,
+				ED24BDEB28A8FCBB0025CC14 /* devices.hpp */,
 			);
 			path = devices;
 			sourceTree = "<group>";
@@ -1504,11 +1507,11 @@
 			path = include;
 			sourceTree = "<group>";
 		};
-		ED24BDCD28A671450025CC14 /* bridgeapi */ = {
+		ED24BDE528A812E00025CC14 /* bridgeapi */ = {
 			isa = PBXGroup;
 			children = (
-				ED24BDCE28A671450025CC14 /* bridgeapi.h */,
-				ED24BDCF28A671450025CC14 /* bridgeapi.cpp */,
+				ED24BDE628A812E00025CC14 /* bridgeapi.h */,
+				ED24BDE728A812E00025CC14 /* bridgeapi.cpp */,
 			);
 			path = bridgeapi;
 			sourceTree = "<group>";
@@ -3491,7 +3494,6 @@
 				ED36D7FB286DCDA300CA28EC /* access-control-server.cpp in Sources */,
 				ED2330242886A69700D934D7 /* utils.cpp in Sources */,
 				ED36DDC4286DDA0300CA28EC /* SecureMessageCodec.cpp in Sources */,
-				ED36D7A1286DCC4100CA28EC /* CommissioneeShellCommands.cpp in Sources */,
 				ED36DCFB286DD8A000CA28EC /* CASEServer.cpp in Sources */,
 				ED36DC64286DD6A400CA28EC /* ApplicationExchangeDispatch.cpp in Sources */,
 				EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */,
@@ -3504,7 +3506,6 @@
 				EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */,
 				ED36DE9B286E043500CA28EC /* PersistedStorage.cpp in Sources */,
 				ED36D87F286DCDED00CA28EC /* WriteRequestMessage.cpp in Sources */,
-				ED36D79F286DCC4100CA28EC /* ControllerShellCommands.cpp in Sources */,
 				ED36DC9F286DD7F200CA28EC /* UUIDHelperImpl.mm in Sources */,
 				EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */,
 				ED36DA8D286DD14F00CA28EC /* FabricTable.cpp in Sources */,
@@ -3516,6 +3517,7 @@
 				ED36D90B286DCF5100CA28EC /* Dnssd.cpp in Sources */,
 				ED36DCFC286DD8A000CA28EC /* PASESession.cpp in Sources */,
 				ED36D867286DCDED00CA28EC /* InvokeResponseMessage.cpp in Sources */,
+				ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */,
 				ED36D863286DCDED00CA28EC /* CommandPathIB.cpp in Sources */,
 				ED24BDDE28A68AE20025CC14 /* mainloop.cpp in Sources */,
 				ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */,
@@ -3559,7 +3561,6 @@
 				ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */,
 				EDF3F533289AA96000A82418 /* scenes.cpp in Sources */,
 				ED36DA61286DCFC600CA28EC /* CHIPDeviceController.cpp in Sources */,
-				ED36D79E286DCC4100CA28EC /* CommissionerMain.cpp in Sources */,
 				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
 				ED36DC09286DD57B00CA28EC /* UnitTestUtils.cpp in Sources */,
 				ED36DB6E286DD2CE00CA28EC /* IP.cpp in Sources */,
@@ -3619,6 +3620,7 @@
 				ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */,
 				ED36D8E9286DCF0B00CA28EC /* AttributeAccessInterface.cpp in Sources */,
 				ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */,
+				ED24BDEC28A8FCBB0025CC14 /* devices.cpp in Sources */,
 				ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */,
 				ED36DC48286DD65900CA28EC /* CHIPTLVReader.cpp in Sources */,
 				ED36DA89286DD14F00CA28EC /* CHIPCertFromX509.cpp in Sources */,
@@ -3750,6 +3752,7 @@
 				ED36DD0C286DD8A000CA28EC /* BdxUri.cpp in Sources */,
 				ED36DE83286E02CD00CA28EC /* error-mapping.cpp in Sources */,
 				ED36DE7F286E02CD00CA28EC /* util.cpp in Sources */,
+				ED24BDE828A812E00025CC14 /* bridgeapi.cpp in Sources */,
 				ED36D872286DCDED00CA28EC /* TimedRequestMessage.cpp in Sources */,
 				ED36D90A286DCF5100CA28EC /* EchoHandler.cpp in Sources */,
 				ED36D865286DCDED00CA28EC /* ReadRequestMessage.cpp in Sources */,
@@ -3757,7 +3760,6 @@
 				ED36DA86286DD14F00CA28EC /* GroupDataProviderImpl.cpp in Sources */,
 				ED36DB8E286DD2CE00CA28EC /* ActiveResolveAttempts.cpp in Sources */,
 				ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */,
-				ED24BDD028A671450025CC14 /* bridgeapi.cpp in Sources */,
 				ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */,
 				ED36DCAD286DD7F200CA28EC /* ConfigurationManagerImpl.cpp in Sources */,
 				ED36DC0E286DD57B00CA28EC /* ZclString.cpp in Sources */,
@@ -3781,10 +3783,8 @@
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
 				ED24BDC428A6709E0025CC14 /* devicelevelcontrol.cpp in Sources */,
 				ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */,
-				ED36D7A0286DCC4100CA28EC /* CommissionableInit.cpp in Sources */,
 				ED36D7EF286DCDA300CA28EC /* operational-credentials-server.cpp in Sources */,
 				ED36DB92286DD2CE00CA28EC /* ASN1OID.cpp in Sources */,
-				ED36D7A2286DCC4100CA28EC /* AppMain.cpp in Sources */,
 				ED36DA30286DCFC600CA28EC /* CommissioneeDeviceProxy.cpp in Sources */,
 				ED36D8DF286DCF0B00CA28EC /* DefaultAttributePersistenceProvider.cpp in Sources */,
 				ED36D788286DCB8A00CA28EC /* Decoder.cpp in Sources */,

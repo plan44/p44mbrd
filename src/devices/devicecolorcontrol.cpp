@@ -238,7 +238,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint8_t aColortemp, UpdateMode a
       params->add("channelId", JsonObject::newString("colortemp"));
       params->add("value", JsonObject::newDouble(mColorTemp)); // is in mireds
       params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
-      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+      BridgeApi::api().notify("setOutputChannelValue", params);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID);
@@ -260,7 +260,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
       params->add("channelId", JsonObject::newString("x"));
       params->add("value", JsonObject::newDouble((double)mX/0xFFFE));
       params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
-      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+      BridgeApi::api().notify("setOutputChannelValue", params);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID);
@@ -282,7 +282,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
       params->add("channelId", JsonObject::newString("y"));
       params->add("value", JsonObject::newDouble((double)mY/0xFFFE));
       params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
-      BridgeApi::sharedBridgeApi().notify("setOutputChannelValue", params);
+      BridgeApi::api().notify("setOutputChannelValue", params);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID);

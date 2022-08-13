@@ -254,7 +254,7 @@ void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
       JsonObjectPtr props = JsonObject::newObj();
       props->add("name", JsonObject::newString(mName));
       params->add("properties", props);
-      BridgeApi::sharedBridgeApi().call("setProperty", params, NULL);
+      BridgeApi::api().call("setProperty", params, NULL);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
@@ -262,20 +262,19 @@ void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
   }
 }
 
-
 void Device::notify(const string aNotification, JsonObjectPtr aParams)
 {
   ChipLogDetail(DeviceLayer, "p44 bridge API: sending '%s': %s", aNotification.c_str(), aParams->json_c_str());
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
-  BridgeApi::sharedBridgeApi().notify(aNotification, aParams);
+  BridgeApi::api().notify(aNotification, aParams);
 }
 
-void Device::call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB aResponseCB)
+void Device::call(const string aNotification, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
 {
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
-  BridgeApi::sharedBridgeApi().call(aNotification, aParams, aResponseCB);
+  BridgeApi::api().call(aNotification, aParams, aResponseCB);
 }
 
 // MARK: Attribute access

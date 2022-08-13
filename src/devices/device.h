@@ -30,22 +30,24 @@
 #include <stdint.h>
 
 #include <functional>
+#include <list>
+#include <string>
 #include <vector>
 
 #include <controller/chipcluster.h>
 
-#include "p44obj.hpp"
-
 #include "bridgeapi.h"
+#include "p44mbrd_main.h"
 
 using namespace chip;
+using namespace std;
 using namespace p44;
-
-typedef const chip::app::Clusters::LevelControl::Commands::MoveToLevel::DecodableType& CommandData;
 
 class Device;
 typedef boost::intrusive_ptr<Device> DevicePtr;
 
+// FIXME: put these somewhere more suitable
+DevicePtr deviceForEndPointIndex(EndpointId aDynamicEndpointIndex);
 DevicePtr deviceForEndPointId(EndpointId aEndpointId);
 
 class DeviceEndpoints
@@ -148,7 +150,7 @@ public:
   /// @{
 
   void notify(const string aNotification, JsonObjectPtr aParams);
-  void call(const string aNotification, JsonObjectPtr aParams, BridgeApiCB aResponseCB);
+  void call(const string aNotification, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
 
   /// called to handle notifications from bridge
   bool handleBridgeNotification(const string aNotification, JsonObjectPtr aParams);

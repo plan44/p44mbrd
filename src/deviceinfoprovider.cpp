@@ -21,7 +21,7 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "deviceinfoprovider.hpp"
+#include "deviceinfoprovider.h"
 
 #define P44_VENDOR_NAME "plan44.ch"
 
