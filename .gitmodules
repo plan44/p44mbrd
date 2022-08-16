@@ -1,5 +1,5 @@
-[submodule "src/connectedhomeip"]
-	path = src/connectedhomeip
+[submodule "src/third_party/connectedhomeip"]
+	path = src/third_party/connectedhomeip
 	url = /Users/luz/Code/looking_at_external_stuff/connectedhomeip
 	branch = luz_p44mbrd
 [submodule "src/p44utils"]

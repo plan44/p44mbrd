@@ -20,7 +20,7 @@ assert(chip_build_tools)
 
 executable("p44mbrd") {
   sources = [
-    "zap/CHIPProjectAppConfig.h",
+    "zap/include/CHIPProjectAppConfig.h",
     "bridgeapi/bridgeapi.cpp",
     "bridgeapi/bridgeapi.h",
     "devices/device.h",
@@ -34,6 +34,7 @@ executable("p44mbrd") {
     "devices/devicecolorcontrol.cpp",
     "devices/devicecolorcontrol.h",
     "p44mbrd_main.cpp",
+    "p44mbrd_main.h",
   ]
 
   deps = [
