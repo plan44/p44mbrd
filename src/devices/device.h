@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-#include <controller/chipcluster.h>
+#include <controller/CHIPCluster.h>
 
 #include "bridgeapi.h"
 #include "p44mbrd_main.h"

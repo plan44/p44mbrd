@@ -107,7 +107,8 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
     JsonObjectPtr vo;
     if (o->get("age", vo, true)) colorMode = colormode_ct; // age is non-null -> component detemines colormode
     if (o->get("value", vo, true)) {
-      updateCurrentColortemp(vo->doubleValue()/100*0xFE, colorMode==colormode_ct ? aUpdateMode : UpdateMode());
+      // scaling: ct is directly in mired
+      updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), colorMode==colormode_ct ? aUpdateMode : UpdateMode());
     }
   }
   if (!mCtOnly) {
@@ -116,14 +117,16 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("age", vo, true)) colorMode = colormode_hs; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
-        updateCurrentHue(vo->doubleValue()/360*0xFE, colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+        // scaling: hue is 0..360 degrees mapped to 0..0xFE
+        updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), colorMode==colormode_hs ? aUpdateMode : UpdateMode());
       }
     }
     if (aChannelStates->get("saturation", o)) {
       JsonObjectPtr vo;
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
-        updateCurrentSaturation(vo->doubleValue()/100*0xFE, colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+        // scaling: saturation is 0..100% mapped to 0..0xFE
+        updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), colorMode==colormode_hs ? aUpdateMode : UpdateMode());
       }
     }
     if (aChannelStates->get("x", o)) {
@@ -131,14 +134,16 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("age", vo, true)) colorMode = colormode_xy; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
-        updateCurrentX(vo->doubleValue()*0xFFFE, colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+        // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
+        updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), colorMode==colormode_xy ? aUpdateMode : UpdateMode());
       }
     }
     if (aChannelStates->get("y", o)) {
       JsonObjectPtr vo;
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
-        updateCurrentY(vo->doubleValue()*0xFFFE, colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+        // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
+        updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), colorMode==colormode_xy ? aUpdateMode : UpdateMode());
       }
     }
   }
@@ -227,7 +232,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 }
 
 
-bool DeviceColorControl::updateCurrentColortemp(uint8_t aColortemp, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode)
 {
   if (aColortemp!=mColorTemp || aUpdateMode.Has(UpdateFlags::forced)) {
     ChipLogProgress(DeviceLayer, "p44 Device[%s]: set colortemp to %d - updatemode=%d", GetName().c_str(), aColortemp, aUpdateMode.Raw());

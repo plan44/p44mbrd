@@ -168,9 +168,9 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
   }
   // - generate the final clusters
   mEndpointDefinition.cluster = new EmberAfCluster[mEndpointDefinition.clusterCount];
-  int i = 0;
+  size_t i = 0;
   for (std::list<Span<EmberAfCluster>>::iterator pos = mClusterListCollector.begin(); pos!=mClusterListCollector.end(); ++pos) {
-    for (int j=0; j<pos->size(); j++) {
+    for (size_t j=0; j<pos->size(); j++) {
       memcpy((void *)&mEndpointDefinition.cluster[i], &pos->data()[j], sizeof(EmberAfCluster));
       i++;
     }

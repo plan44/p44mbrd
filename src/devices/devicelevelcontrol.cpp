@@ -73,10 +73,10 @@ const EmberAfDeviceType gDimmableLightTypes[] = {
 // MARK: - DeviceLevelControl
 
 DeviceLevelControl::DeviceLevelControl() :
-  mLevel(0),
   // Attribute defaults
-  mOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
+  mLevel(0),
   mOnLevel(0xFE), // FIXME: just assume full power for default on state
+  mOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
   mOnOffTransitionTimeDS(5), // FIXME: this is just the dS default of 0.5 sec, report actual value later
   mDefaultMoveRateUnitsPerS(0xFE/7) // FIXME: just dS default of full range in 7 seconds
 {
@@ -106,7 +106,7 @@ void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   if (aChannelStates->get("brightness", o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
-      updateCurrentLevel(vo->doubleValue()/100*0xFE, 0, 0, false, aUpdateMode);
+      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), 0, 0, false, aUpdateMode);
     }
   }
 }
@@ -138,7 +138,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       else if (mLevel==1) return false; // already at minimum: no change
       else level = 1; // set to minimum, but not to off
     }
-    mLevel = level;
+    mLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       // adjust default channel
       // Note: transmit relative changes as such, although we already calculate the outcome above,
@@ -290,7 +290,7 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
 
 
 
-void DeviceLevelControl::dim(uint8_t aDirection, uint8_t aRate)
+void DeviceLevelControl::dim(int8_t aDirection, uint8_t aRate)
 {
   // adjust default channel
   JsonObjectPtr params = JsonObject::newObj();
@@ -421,7 +421,7 @@ void DeviceLevelControl::effect(bool aTurnOn)
         targetOnLevel.SetNonNull(currentLevel());
       }
     }
-    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(0xFE);
+    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(0xFE));
     updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {

@@ -23,12 +23,14 @@
 
 #include <AppMain.h>
 #include <platform/CHIPDeviceLayer.h>
+#include <platform/CHIPDeviceLayer.h>
 #include <platform/PlatformManager.h>
 
 #include <app-common/zap-generated/af-structs.h>
 
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/cluster-id.h>
+
 #include <app/EventLogging.h>
 #include <app/chip-zcl-zpro-codec.h>
 #include <app/reporting/reporting.h>
@@ -109,16 +111,12 @@ class P44mbrd : public CmdLineApp
 {
   typedef CmdLineApp inherited;
 
-  // Current ZCL implementation of Struct uses a max-size array of 254 bytes
-  const int kDescriptorAttributeArraySize = 254;
-
   // CHIP "globals"
   LinuxCommissionableDataProvider mCommissionableDataProvider;
   chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: example? do we need our own?
   BridgeInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device instance info provider
 
   // Bridged devices info
-  bool mGotBridgedDevices;
   EndpointId mFirstDynamicEndpointId;
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
   typedef std::map<string, DevicePtr> DeviceDSUIDMap;
@@ -130,8 +128,7 @@ class P44mbrd : public CmdLineApp
 
 public:
 
-  P44mbrd() :
-    mGotBridgedDevices(false)
+  P44mbrd()
   {
   }
 
@@ -147,10 +144,10 @@ public:
     mArgc = argc;
     mArgv = argv;
 
+    /*
     const char *usageText =
       "Usage: %1$s [options]\n";
 
-    /*
     const CmdLineOptionDescriptor options[] = {
       { 0  , "bridgeapi",        true,  "connection_spec; host:port connection to bridge API" },
       { 0  , "kvspath",          true,  "path; where to store the kvs data" },
@@ -385,17 +382,21 @@ public:
 
     // Clear out the array of dynamic endpoints
     memset(mDevices, 0, sizeof(mDevices));
-    CHIP_ERROR cerr;
+    CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
     // get list of endpoints known in use
     char dynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
-    size_t numDynamicEndPoints = 0;
-    cerr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &numDynamicEndPoints);
-    if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+    EndpointId numDynamicEndPoints = 0;
+    size_t nde;
+    chiperr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &nde);
+    if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       // no endpoint map yet
     }
+    else if (chiperr==CHIP_NO_ERROR){
+      numDynamicEndPoints = static_cast<EndpointId>(nde);
+    }
     else {
-      LogErrorOnFailure(cerr);
+      LogErrorOnFailure(chiperr);
     }
     dynamicEndPointMap[numDynamicEndPoints]=0; // null terminate for easy debug printing as string
     OLOG(LOG_INFO,"DynamicEndpointMap: %s", dynamicEndPointMap);
@@ -409,8 +410,8 @@ public:
       // look up previous endpoint mapping
       string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
       EndpointId dynamicEndpointIdx = kInvalidEndpointId;
-      cerr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
-      if (cerr==CHIP_NO_ERROR) {
+      chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
+      if (chiperr==CHIP_NO_ERROR) {
         // try to re-use the endpoint ID for this dSUID
         // - sanity check
         if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
@@ -432,17 +433,17 @@ public:
           }
         }
       }
-      else if (cerr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+      else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
         // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
         OLOG(LOG_NOTICE, "p44 new device %s, adding to bridge", dev->bridgedDSUID().c_str());
       }
       else {
-        LogErrorOnFailure(cerr);
+        LogErrorOnFailure(chiperr);
       }
       // update and possibly extend endpoint map
       if (dynamicEndpointIdx==kInvalidEndpointId) {
         // this device needs a new endpoint
-        for (size_t i=0; i<numDynamicEndPoints; i++) {
+        for (EndpointId i=0; i<numDynamicEndPoints; i++) {
           if (dynamicEndPointMap[i]==' ') {
             // use the gap
             dynamicEndpointIdx = i;
@@ -457,8 +458,8 @@ public:
             dynamicEndpointIdx = numDynamicEndPoints++;
             dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
             // save in KVS
-            cerr = kvs.Put(key.c_str(), dynamicEndpointIdx);
-            LogErrorOnFailure(cerr);
+            chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
+            LogErrorOnFailure(chiperr);
           }
         }
       }
@@ -469,8 +470,8 @@ public:
       }
     }
     // save updated endpoint map
-    cerr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
-    LogErrorOnFailure(cerr);
+    chiperr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
+    LogErrorOnFailure(chiperr);
 
     // Add the devices as dynamic endpoints
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {

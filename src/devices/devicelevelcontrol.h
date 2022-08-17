@@ -74,5 +74,5 @@ private:
 
   bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   uint8_t finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride);
-  void dim(uint8_t aDirection, uint8_t aRate);
+  void dim(int8_t aDirection, uint8_t aRate);
 };

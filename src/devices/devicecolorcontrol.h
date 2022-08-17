@@ -57,7 +57,7 @@ public:
   bool updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode);
   bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode);
   bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode);
-  bool updateCurrentColortemp(uint8_t aColortemp, UpdateMode aUpdateMode);
+  bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode);
   bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode);
   bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode);
 

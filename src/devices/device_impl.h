@@ -24,16 +24,17 @@
 #pragma once
 
 #include <cstdio>
+
 #include <platform/CHIPDeviceLayer.h>
+#include <lib/support/ZclString.h>
 
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/cluster-id.h>
-#include "ZclString.h"
-#include <app/reporting/reporting.h>
-#include <controller/chipcluster.h>
+#include <app-common/zap-generated/attributes/Accessors.h>
 
+#include <app/reporting/reporting.h>
 #include <app/util/util.h>
-#include "Accessors.h"
+
 
 #include "devices/device.h"
 #include "bridgeapi/bridgeapi.h"
