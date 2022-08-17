@@ -15,8 +15,14 @@
 import("//build_overrides/chip.gni")
 
 import("${chip_root}/build/chip/tools.gni")
+import("${chip_root}/src/app/common_flags.gni")
+import("${chip_root}/src/lib/core/core.gni")
+import("${chip_root}/src/lib/lib.gni")
 
 assert(chip_build_tools)
+
+# p44mbrd
+# =======
 
 executable("p44mbrd") {
   sources = [
@@ -33,23 +39,165 @@ executable("p44mbrd") {
     "devices/devicelevelcontrol.h",
     "devices/devicecolorcontrol.cpp",
     "devices/devicecolorcontrol.h",
+    "deviceinfoprovider.cpp",
+    "deviceinfoprovider.h",
     "p44mbrd_main.cpp",
     "p44mbrd_main.h",
   ]
 
   deps = [
-    "zap",
-    "${chip_root}/examples/platform/linux:app-main",
+    "//:p44utils",
+    # FIXME: eliminate - this is a source-set we should replace with our own files over time
+    "//:example_app_code",
+    "//zap",
     "${chip_root}/src/lib",
+    "${chip_root}/src/platform",
+    "${chip_root}/third_party/jsoncpp",
   ]
 
-  cflags = [ "-Wconversion" ]
+  cflags = [
+    "-Wconversion",
+    "-Wno-noexcept-type"
+  ]
 
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "devices",
+    "bridgeapi",
+    "."
+  ]
 
   output_dir = root_out_dir
+
+}
+
+# global config added to everything via default_configs_extra in //args.gni
+config("p44mbrd_config_extra") {
+  cflags = [
+    # for libev based event handling
+    "-Wno-noexcept-type",
+    # no exceptions in general
+    "-fno-exceptions",
+  ]
+  libs = [
+    # for libev based event handling
+    "ev",
+  ]
 }
 
 group("linux") {
   deps = [ ":p44mbrd" ]
+}
+
+
+# FIXME: eliminate - but for now we still need some linux example code
+
+# for now, mostly copy from examples/platform/linux/BUILD.gn
+source_set("example_app_code") {
+  defines = []
+  sources = [
+#     "${chip_root}/examples/platform/linux/AppMain.cpp",
+#     "${chip_root}/examples/platform/linux/AppMain.h",
+    "${chip_root}/examples/platform/linux/CommissionableInit.cpp",
+    "${chip_root}/examples/platform/linux/CommissionableInit.h",
+    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.cpp",
+    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.h",
+    "${chip_root}/examples/platform/linux/CommissionerMain.cpp",
+    "${chip_root}/examples/platform/linux/CommissionerMain.h",
+    "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.cpp",
+    "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.h",
+    "${chip_root}/examples/platform/linux/NamedPipeCommands.cpp",
+    "${chip_root}/examples/platform/linux/NamedPipeCommands.h",
+    "${chip_root}/examples/platform/linux/Options.cpp",
+    "${chip_root}/examples/platform/linux/Options.h",
+    "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.cpp",
+    "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.h",
+    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.cpp",
+    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.h",
+    "${chip_root}/examples/providers/DeviceInfoProviderImpl.cpp",
+    "${chip_root}/examples/providers/DeviceInfoProviderImpl.h",
+  ]
+
+  deps = [
+  ]
+
+  public_configs = [
+    ":example_app_code_config"
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app/server",
+    "${chip_root}/src/credentials:default_attestation_verifier",
+    "${chip_root}/src/lib",
+  ]
+
+  if (chip_enable_transport_trace) {
+    public_deps +=
+        [ "${chip_root}/examples/common/tracing:trace_handlers_decoder" ]
+  }
+}
+
+config("example_app_code_config") {
+  include_dirs = [
+    ".",
+    "${chip_root}/examples/platform/linux",
+    "${chip_root}/examples/providers",
+    "${chip_root}/examples/common",
+    "${chip_root}/examples",
+  ]
+}
+
+
+# p44utils
+# ========
+
+source_set("p44utils") {
+  defines = [
+  ]
+  sources = [
+    "p44utils/p44utils_common.hpp",
+    "p44utils/mainloop.cpp",
+    "p44utils/socketcomm.cpp",
+    "p44utils/mainloop.hpp",
+    "p44utils/error.cpp",
+    "p44utils/application.hpp",
+    "p44utils/application.cpp",
+    "p44utils/socketcomm.hpp",
+    "p44utils/p44utils_minimal.hpp",
+    "p44utils/fdcomm.hpp",
+    "p44utils/p44utils_defs.hpp",
+    "p44utils/utils.hpp",
+    "p44utils/utils.cpp",
+    "p44utils/p44obj.hpp",
+    "p44utils/p44obj.cpp",
+    "p44utils/logger.hpp",
+    "p44utils/logger.cpp",
+    "p44utils/jsonobject.hpp",
+    "p44utils/jsonobject.cpp",
+    "p44utils/jsoncomm.hpp",
+    "p44utils/jsoncomm.cpp",
+    "p44utils/fdcomm.cpp",
+    "p44utils/error.hpp"
+  ]
+
+  deps = [
+  ]
+
+  public_configs = [ ":p44utils_config" ]
+
+}
+
+config("p44utils_config") {
+  include_dirs = [
+    "//",
+    "//p44utils",
+  ]
+  cflags = [
+    "-Wconversion",
+    "-Wno-noexcept-type",
+  ]
+  libs = [
+    "ev",
+    "json-c",
+  ]
 }

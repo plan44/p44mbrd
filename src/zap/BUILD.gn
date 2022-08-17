@@ -18,8 +18,9 @@ import("${chip_root}/src/app/chip_data_model.gni")
 
 chip_data_model("zap") {
   zap_file = "p44mbrd.zap"
+  zap_clusters_with_custom_implementation = [ "level-control" ]
 
-  zap_pregenerated_dir = "zap-generated"
+  zap_pregenerated_dir = "//zap-generated"
   is_server = true
 
   # TODO: the definition of DYNAMIC_ENDPOINT_COUNT needs find a common home!

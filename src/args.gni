@@ -20,16 +20,33 @@ chip_device_project_config_include = "<CHIPProjectAppConfig.h>"
 chip_project_config_include = "<CHIPProjectAppConfig.h>"
 chip_system_project_config_include = "<SystemProjectConfig.h>"
 
-chip_project_config_include_dirs = [ "zap/include" ]
+chip_project_config_include_dirs = [ "//zap/include" ]
 chip_project_config_include_dirs += [ "${chip_root}/config/standalone" ]
 
-# p44mbrd specifics
-# - we do not want BLE
+# p44mbrd specifics extra config
+default_configs_extra = [ "//:p44mbrd_config_extra" ]
+
+# FIXME: should be removed once everything works
+treat_warnings_as_errors = false
+
+# we do not want BLE
 chip_config_network_layer_ble = false
-# - we do not want Wifi
+
+# we do not want Wifi
 chip_enable_wifi=false
-# - we do not want Openthread
+
+# we do not want Openthread
 chip_enable_openthread=false
+
+
+# we need libev, not dispatch (even on macos)
+chip_system_config_use_libev = true
+
+# we need libev, not dispatch (even on macos)
+chip_system_config_use_dispatch = false
+
+# we want posix locking
+chip_system_config_locking = "posix"
 
 
 # Potential other default args

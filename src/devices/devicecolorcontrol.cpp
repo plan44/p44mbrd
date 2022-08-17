@@ -152,7 +152,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
 }
 
 
-
 bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
 {
   if (aColorMode!=mColorMode || aUpdateMode.Has(UpdateFlags::forced)) {

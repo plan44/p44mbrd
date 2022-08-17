@@ -27,6 +27,7 @@
 		ED24BDE828A812E00025CC14 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* bridgeapi.cpp */; };
 		ED24BDEC28A8FCBB0025CC14 /* devices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDEA28A8FCBB0025CC14 /* devices.cpp */; };
 		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
+		ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -436,6 +437,10 @@
 		ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44mbrd_main.h; sourceTree = "<group>"; };
 		ED24BDEA28A8FCBB0025CC14 /* devices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = devices.cpp; sourceTree = "<group>"; };
 		ED24BDEB28A8FCBB0025CC14 /* devices.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = devices.hpp; sourceTree = "<group>"; };
+		ED24BDF028ACE3E10025CC14 /* p44utils_defs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_defs.hpp; sourceTree = "<group>"; };
+		ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_common.hpp; sourceTree = "<group>"; };
+		ED24BDF228ACE3E10025CC14 /* p44utils_minimal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_minimal.hpp; sourceTree = "<group>"; };
+		ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "bridged-device-basic-information-server.cpp"; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -1427,6 +1432,9 @@
 		ED23300F2886A18300D934D7 /* p44utils */ = {
 			isa = PBXGroup;
 			children = (
+				ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */,
+				ED24BDF028ACE3E10025CC14 /* p44utils_defs.hpp */,
+				ED24BDF228ACE3E10025CC14 /* p44utils_minimal.hpp */,
 				ED24BDDD28A68AE20025CC14 /* application.cpp */,
 				ED24BDDA28A68AE20025CC14 /* application.hpp */,
 				ED23301A2886A69700D934D7 /* error.cpp */,
@@ -1514,6 +1522,14 @@
 				ED24BDE728A812E00025CC14 /* bridgeapi.cpp */,
 			);
 			path = bridgeapi;
+			sourceTree = "<group>";
+		};
+		ED24BDF328AF8F670025CC14 /* bridged-device-basic-information-server */ = {
+			isa = PBXGroup;
+			children = (
+				ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */,
+			);
+			path = "bridged-device-basic-information-server";
 			sourceTree = "<group>";
 		};
 		ED36D75C286DCAF700CA28EC /* examples */ = {
@@ -1789,6 +1805,7 @@
 		ED36D7B6286DCD0900CA28EC /* clusters */ = {
 			isa = PBXGroup;
 			children = (
+				ED24BDF328AF8F670025CC14 /* bridged-device-basic-information-server */,
 				ED36D7D8286DCDA300CA28EC /* access-control-server */,
 				ED36D7E2286DCDA300CA28EC /* administrator-commissioning-server */,
 				ED36D7E4286DCDA300CA28EC /* basic */,
@@ -3267,7 +3284,8 @@
 				ED36DDE0286DDA7E00CA28EC /* third_party */,
 				ED36DDEA286DDB1600CA28EC /* zzz-generated */,
 			);
-			path = connectedhomeip;
+			name = connectedhomeip;
+			path = third_party/connectedhomeip;
 			sourceTree = "<group>";
 		};
 		EDF3F4BD2893EC9700A82418 /* platform */ = {
@@ -3760,6 +3778,7 @@
 				ED36DA86286DD14F00CA28EC /* GroupDataProviderImpl.cpp in Sources */,
 				ED36DB8E286DD2CE00CA28EC /* ActiveResolveAttempts.cpp in Sources */,
 				ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */,
+				ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */,
 				ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */,
 				ED36DCAD286DD7F200CA28EC /* ConfigurationManagerImpl.cpp in Sources */,
 				ED36DC0E286DD57B00CA28EC /* ZclString.cpp in Sources */,
@@ -3953,20 +3972,21 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/src",
-					"$(PROJECT_DIR)/src/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
 					"$(PROJECT_DIR)/src/zap/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/common/tracing",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);
@@ -3996,20 +4016,21 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/src",
-					"$(PROJECT_DIR)/src/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
 					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
 					"$(PROJECT_DIR)/src/zap/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/src/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/src/connectedhomeip/examples/common/tracing",
-					"$(PROJECT_DIR)/src/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
 					"/usr/local/opt/openssl@1.1/include",
 				);

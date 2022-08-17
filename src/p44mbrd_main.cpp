@@ -21,7 +21,7 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <AppMain.h>
+//#include <AppMain.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/PlatformManager.h>
@@ -51,7 +51,7 @@
 #include <pthread.h>
 #include <sys/ioctl.h>
 
-#include "CommissionableInit.h"
+#include <CommissionableInit.h>
 
 // plan44
 #include "bridgeapi.h"
@@ -88,20 +88,11 @@ using namespace chip::app::Clusters;
 #include <platform/TestOnlyCommissionableDataProvider.h>
 #include <app/server/OnboardingCodesUtil.h>
 #include <system/SystemLayerImpl.h>
-#include <DeviceInfoProviderImpl.h>
-
-#if CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE
-#include "CommissionerMain.h"
-#include <ControllerShellCommands.h>
-#include <controller/CHIPDeviceControllerFactory.h>
-#include <controller/ExampleOperationalCredentialsIssuer.h>
-#include <lib/core/CHIPPersistentStorageDelegate.h>
-#include <platform/KeyValueStoreManager.h>
-#endif // CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE
+#include <providers/DeviceInfoProviderImpl.h>
 
 #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
-#include "TraceDecoder.h"
-#include "TraceHandlers.h"
+#include <tracing/TraceDecoder.h>
+#include <tracing/TraceHandlers.h>
 #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
 
 using namespace p44;
@@ -764,12 +755,6 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
     }
   }
   return ret;
-}
-
-
-void MatterBridgedDeviceBasicClusterServerAttributeChangedCallback(const chip::app::ConcreteAttributePath & attributePath)
-{
-  LOG(LOG_NOTICE, "p44 Endpoint %d, attributeId 0x%04x in BridgedDeviceBasicCluster has changed", (int)attributePath.mEndpointId, (int)attributePath.mAttributeId);
 }
 
 
