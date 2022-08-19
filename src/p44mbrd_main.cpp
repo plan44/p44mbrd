@@ -137,7 +137,7 @@ public:
 
     /*
     const char *usageText =
-      "Usage: %1$s [options]\n";
+      "Usage: ${toolname} [options]\n";
 
     const CmdLineOptionDescriptor options[] = {
       { 0  , "bridgeapi",        true,  "connection_spec; host:port connection to bridge API" },
