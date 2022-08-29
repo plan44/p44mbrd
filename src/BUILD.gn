@@ -74,10 +74,26 @@ executable("p44mbrd") {
 # global config added to everything via default_configs_extra in //args.gni
 config("p44mbrd_config_extra") {
   cflags = [
-    # for libev based event handling
-    "-Wno-noexcept-type",
+    # ev_loop shadows struct constructor in libev@openwrt22.03
+    "-Wno-shadow",
     # no exceptions in general
     "-fno-exceptions",
+    # unfortunately, format argument checking for strftime is still broken in gcc 11.2
+    # the only way to get trough with -Werror is disabling all format string checking
+    "-Wno-format-nonliteral",
+  ]
+  if (current_os == "openwrt") {
+    # we cannot put this into include_dirs because it would be taken as relative path
+    cflags += [
+      # this is a compiler --sysroot relative path, the variable SYSROOT is NOT a gn variable!
+      "-I\$SYSROOT/usr/include"
+    ]
+  }
+  cflags_cc = [
+    # for libev based event handling
+    "-Wno-noexcept-type",
+  ]
+  include_dirs = [
   ]
   libs = [
     # for libev based event handling

@@ -29,6 +29,9 @@ default_configs_extra = [ "//:p44mbrd_config_extra" ]
 # zero warning policy
 treat_warnings_as_errors = true
 
+# p44utils needs things like dynamic_cast<>
+enable_rtti = true
+
 # we do not want BLE
 chip_config_network_layer_ble = false
 
