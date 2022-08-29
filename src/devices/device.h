@@ -53,15 +53,6 @@ DevicePtr deviceForEndPointId(EndpointId aEndpointId);
 class DeviceEndpoints
 {
 public:
-
-//  template<typename DevType> static bool handleCallback(
-//    chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
-//    const chip::app::Clusters::LevelControl::Commands::MoveToLevel::DecodableType & commandData,
-//    void (DevType::*)(
-//      CommandId aCommandId,
-//      CommandData aCommandData
-//    )
-//  );
   template<typename DevType> static boost::intrusive_ptr<DevType> getDevice(EndpointId aEndpointId) {
     return dynamic_pointer_cast<DevType>(deviceForEndPointId(aEndpointId));
   };

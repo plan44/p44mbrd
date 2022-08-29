@@ -167,7 +167,7 @@ using namespace LevelControl;
 
 uint8_t DeviceLevelControl::finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride)
 {
-  return (mOptions & ~aOptionMask) | (aOptionOverride & aOptionMask);
+  return (mOptions & (uint8_t)(~aOptionMask)) | (aOptionOverride & aOptionMask);
 }
 
 

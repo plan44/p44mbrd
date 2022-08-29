@@ -164,7 +164,7 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
   // - count the clusters
   mEndpointDefinition.clusterCount = 0;
   for (std::list<Span<EmberAfCluster>>::iterator pos = mClusterListCollector.begin(); pos!=mClusterListCollector.end(); ++pos) {
-    mEndpointDefinition.clusterCount += pos->size();
+    mEndpointDefinition.clusterCount += (uint8_t)pos->size();
   }
   // - generate the final clusters
   mEndpointDefinition.cluster = new EmberAfCluster[mEndpointDefinition.clusterCount];
@@ -254,7 +254,7 @@ void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
       JsonObjectPtr props = JsonObject::newObj();
       props->add("name", JsonObject::newString(mName));
       params->add("properties", props);
-      BridgeApi::api().call("setProperty", params, NULL);
+      BridgeApi::api().call("setProperty", params, NoOP);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
