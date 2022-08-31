@@ -29,11 +29,11 @@
 using namespace chip;
 using namespace std;
 
-class BridgeInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
+class P44DeviceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
 {
 public:
-  BridgeInfoProvider()          = default;
-  virtual ~BridgeInfoProvider() = default;
+  P44DeviceInfoProvider()          = default;
+  virtual ~P44DeviceInfoProvider() = default;
 
   virtual CHIP_ERROR GetVendorName(char * buf, size_t bufSize) override;
   virtual CHIP_ERROR GetVendorId(uint16_t & vendorId) override;

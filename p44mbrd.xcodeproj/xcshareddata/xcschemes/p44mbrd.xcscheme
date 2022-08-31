@@ -52,11 +52,19 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--vendor 0xFFF1 --product-id 0x8002 --capabilities 4  --interface-id eth0 "
+            argument = "--payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3840"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--trace_log 1 --trace_decode 1"
+            argument = "--loglevel 7"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--chiploglevel 5"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--trace_log --trace_decode"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument

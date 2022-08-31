@@ -39,8 +39,10 @@ executable("p44mbrd") {
     "devices/devicelevelcontrol.h",
     "devices/devicecolorcontrol.cpp",
     "devices/devicecolorcontrol.h",
-    "deviceinfoprovider.cpp",
-    "deviceinfoprovider.h",
+    "chip_glue/deviceinfoprovider.cpp",
+    "chip_glue/deviceinfoprovider.h",
+    "chip_glue/chip_error.cpp",
+    "chip_glue/chip_error.h",
     "p44mbrd_main.cpp",
     "p44mbrd_main.h",
   ]
@@ -63,6 +65,7 @@ executable("p44mbrd") {
   include_dirs = [
     "include",
     "devices",
+    "chip_glue",
     "bridgeapi",
     "."
   ]
@@ -73,6 +76,10 @@ executable("p44mbrd") {
 
 # global config added to everything via default_configs_extra in //args.gni
 config("p44mbrd_config_extra") {
+  defines = [
+    # we want log filtering
+    "CHIP_LOG_FILTERING=1",
+  ]
   cflags = [
     # ev_loop shadows struct constructor in libev@openwrt22.03
     "-Wno-shadow",
@@ -116,16 +123,16 @@ source_set("example_app_code") {
 #     "${chip_root}/examples/platform/linux/AppMain.h",
     "${chip_root}/examples/platform/linux/CommissionableInit.cpp",
     "${chip_root}/examples/platform/linux/CommissionableInit.h",
-    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.cpp",
-    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.h",
+#    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.cpp",
+#    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.h",
     "${chip_root}/examples/platform/linux/CommissionerMain.cpp",
     "${chip_root}/examples/platform/linux/CommissionerMain.h",
     "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.cpp",
     "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.h",
-    "${chip_root}/examples/platform/linux/NamedPipeCommands.cpp",
-    "${chip_root}/examples/platform/linux/NamedPipeCommands.h",
-    "${chip_root}/examples/platform/linux/Options.cpp",
-    "${chip_root}/examples/platform/linux/Options.h",
+#    "${chip_root}/examples/platform/linux/NamedPipeCommands.cpp",
+#    "${chip_root}/examples/platform/linux/NamedPipeCommands.h",
+#    "${chip_root}/examples/platform/linux/Options.cpp",
+#    "${chip_root}/examples/platform/linux/Options.h",
     "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.cpp",
     "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.h",
     "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.cpp",

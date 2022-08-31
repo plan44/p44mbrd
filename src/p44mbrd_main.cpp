@@ -44,6 +44,7 @@
 #include <lib/core/CHIPError.h>
 #include <lib/support/CHIPMem.h>
 #include <lib/support/ZclString.h>
+#include <lib/support/logging/CHIPLogging.h>
 #include <platform/CommissionableDataProvider.h>
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
@@ -56,8 +57,8 @@
 // plan44
 #include "bridgeapi.h"
 #include "p44mbrd_main.h"
-
-#include "deviceinfoprovider.h"
+#include "chip_glue/chip_error.h"
+#include "chip_glue/deviceinfoprovider.h"
 
 #include "device.h"
 #include "deviceonoff.h"
@@ -97,15 +98,19 @@ using namespace chip::app::Clusters;
 
 using namespace p44;
 
+#define DEFAULT_BRIDGE_SERVICE "4444"
+#define DEFAULT_BRIDGE_HOST "127.0.0.1"
+
 /// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
 class P44mbrd : public CmdLineApp
 {
   typedef CmdLineApp inherited;
 
   // CHIP "globals"
+  bool mChipAppInitialized;
   LinuxCommissionableDataProvider mCommissionableDataProvider;
   chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: example? do we need our own?
-  BridgeInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device instance info provider
+  P44DeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
 
   // Bridged devices info
   EndpointId mFirstDynamicEndpointId;
@@ -113,13 +118,10 @@ class P44mbrd : public CmdLineApp
   typedef std::map<string, DevicePtr> DeviceDSUIDMap;
   DeviceDSUIDMap mDeviceDSUIDMap;
 
-  // FIXME: eventually remove these, needed as long as chip app needs to parse them
-  int mArgc;
-  char **mArgv;
-
 public:
 
-  P44mbrd()
+  P44mbrd() :
+    mChipAppInitialized(false)
   {
   }
 
@@ -131,53 +133,61 @@ public:
 
   virtual int main(int argc, char **argv) override
   {
-    // FIXME: eventually remove these, needed as long as chip app needs to parse them
-    mArgc = argc;
-    mArgv = argv;
-
-    /*
     const char *usageText =
       "Usage: ${toolname} [options]\n";
 
     const CmdLineOptionDescriptor options[] = {
-      { 0  , "bridgeapi",        true,  "connection_spec; host:port connection to bridge API" },
-      { 0  , "kvspath",          true,  "path; where to store the kvs data" },
-      { 0  , "setuppincode",     true,  "setuppincode; setup pin code for commissioning" },
-      { 0  , "spake2pVerifier",  true,  "spake2pVerifier; for commissioning" },
-      { 0  , "spake2pIterationCount",  true,  "spake2pIterationCount; for commissioning" },
-      { 0  , "discriminator",    true,  "discriminator; for commissioning" },
-      { 0  , "productid",        true,  "productid; for commissioning" },
-      { 0  , "vendorid",         true,  "vendorid; for commissioning" },
+      // Original CHIP command line args
+      { 0, "vendor-id",           true, "vendorid;vendor ID as assigned by the csa-iot" },
+      { 0, "product-id",          true, "productid;product ID as specified by vendor" },
+      { 0, "custom-flow",         true, "flow;commissioning flow: Standard = 0, UserActionRequired = 1, Custom = 2" },
+      { 0, "payloadversion",      true, "version;The version indication provides versioning of the setup payload (default is 0)" },
+      { 0, "discriminator",       true, "discriminator;a12-bit unsigned integer match the value which a device advertises during commissioning" },
+      { 0, "setuppin",            true, "pincode;A 27-bit unsigned integer, which serves as proof of possession during commissioning.\n"
+                                        "If not provided to compute a verifier, the --spake2p-verifier must be provided." },
+      { 0, "spake2p-verifier",    true, "b64_PASE_verifier;A raw concatenation of 'W0' and 'L' (67 bytes) as base64 to override the verifier\n"
+                                            "Auto-computed from the passcode, if provided" },
+      { 0, "spake2p-salt",        true, "b64_PASE_salt;16-32 bytes of salt to use for the PASE verifier, as base64. If omitted, will be generated randomly" },
+      { 0, "spake2p-iterations",  true, "iterations;Number of PBKDF iterations to use." },
+      { 0, "matter-tcp-port",     true, "port;matter TCP port (secured)" },
+      { 0, "matter-udp-port",     true, "arg;matter UDP port (unsecured)" },
+      { 0, "interface-id",        true, "interfaceid;A interface id to advertise on" },
+      { 0, "PICS",                true, "filepath;A file containing PICS items" },
+      { 0, "KVS",                 true, "filepath;A file to store Key Value Store items" },
+      #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+      { 0, "trace_file",          true, "filepath;Output trace data to the provided file." },
+      { 0, "trace_log",           false, "enables traces to go to the log" },
+      { 0, "trace_decode",        false, "enables traces decoding" },
+      #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+      // p44mbrd command line args
+      { 0, "bridgeapihost",       true, "host;host of the bridge API, default is " DEFAULT_BRIDGE_HOST },
+      { 0, "bridgeapiport",       true, "port;port of the bridge API, default is " DEFAULT_BRIDGE_SERVICE },
+      #if CHIP_LOG_FILTERING
+      { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
+      #endif // CHIP_LOG_FILTERING
       DAEMON_APPLICATION_LOGOPTIONS,
       CMDLINE_APPLICATION_STDOPTIONS,
       CMDLINE_APPLICATION_PATHOPTIONS,
       { 0, NULL } // list terminator
     };
-    */
 
     // parse the command line, exits when syntax errors occur
-//    setCommandDescriptors(usageText, options);
-    if (true /* parseCommandLine(argc, argv) */) {
-
-//      if ((numOptions()<1) || (numArguments()>0)) {
-//        // show usage
-//        showUsage();
-//        terminateApp(EXIT_SUCCESS);
-//      }
-//      else
-      {
-        // TODO: later get at least the bridge API command line params here
-        // TODO: better: set up a chip param object from our command line params
-      } // command line ok
+    setCommandDescriptors(usageText, options);
+    if (parseCommandLine(argc, argv)) {
+      // parsed ok, app not terminated
+      processStandardLogOptions(true, LOG_ERR);
+      /* NOP at this time */
     }
-    // app now ready to run (or cleanup when already terminated)
+    // app now ready to run (or cleanup when already terminated by cmd line parsing)
     return run();
   }
 
 
   virtual void cleanup(int aExitCode) override
   {
-    chipAppCleanup();
+    if (mChipAppInitialized) {
+      chipAppCleanup();
+    }
   }
 
 
@@ -192,7 +202,11 @@ public:
 
   void connectBridgeApi()
   {
-    BridgeApi::api().setConnectionParams("127.0.0.1", "4444", SOCK_STREAM);
+    const char* bridgeapihost = DEFAULT_BRIDGE_HOST;
+    const char* bridgeapiservice = DEFAULT_BRIDGE_SERVICE;
+    getStringOption("bridgeapihost", bridgeapihost);
+    getStringOption("bridgeapiservice", bridgeapiservice);
+    BridgeApi::api().setConnectionParams(bridgeapihost, bridgeapiservice, SOCK_STREAM);
     BridgeApi::api().setNotificationHandler(boost::bind(&P44mbrd::bridgeApiNotificationHandler, this, _1, _2));
     BridgeApi::api().connectBridgeApi(boost::bind(&P44mbrd::bridgeApiConnectedHandler, this, _1));
   }
@@ -231,7 +245,7 @@ public:
 
   void bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
   {
-    OLOG(LOG_NOTICE, "method call status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+    OLOG(LOG_INFO, "bridge query: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
     JsonObjectPtr o;
     JsonObjectPtr result;
     if (aJsonMsg && aJsonMsg->get("result", result)) {
@@ -346,14 +360,20 @@ public:
     // devices collected
     // start chip only now
     OLOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
-    startChip();
+    // - start but unwind call stack before
+    MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
   }
 
 
   void startChip()
   {
-    chipAppInit(mArgc, mArgv);
-    chipMainloopPrep();
+    ErrorPtr err;
+    err = chipAppInit();
+    if (Error::notOK(err)) {
+      OLOG(LOG_ERR, "chipAppInit failed: %s ", err->text());
+      terminateApp(EXIT_FAILURE);
+      return;
+    }
     installBridgedDevices();
   }
 
@@ -474,10 +494,6 @@ public:
         }
       }
     }
-
-    // Run CHIP
-    // FIXME: remove this comment, but it shows for now that we would have started the select mainloop here
-    //chip::DeviceLayer::PlatformMgr().RunEventLoop();
   }
 
 
@@ -544,80 +560,187 @@ public:
 
   // MARK: - chip stack setup
 
-  void chipAppInit(int argc, char **argv)
+  static bool Base64ArgToVector(const char * arg, size_t maxSize, std::vector<uint8_t> & outVector)
   {
-    // @note basically reduced ChipLinuxAppInit()
-    CHIP_ERROR err = CHIP_NO_ERROR;
-    RendezvousInformationFlag rendezvousFlags = RendezvousInformationFlag::kOnNetwork;
+    size_t maxBase64Size = BASE64_ENCODED_LEN(maxSize);
+    outVector.resize(maxSize);
 
-    err = Platform::MemoryInit();
-    SuccessOrExit(err);
+    size_t argLen = strlen(arg);
+    if (argLen > maxBase64Size) {
+      return false;
+    }
+    size_t decodedLen = chip::Base64Decode32(arg, (uint32_t)argLen, reinterpret_cast<uint8_t *>(outVector.data()));
+    if (decodedLen == 0) {
+      return false;
+    }
+    outVector.resize(decodedLen);
+    return true;
+  }
 
-    // FIXME: for now, just use the linux command line options parser from CHIP
-    err = ParseArguments(argc, argv, nullptr);
-    SuccessOrExit(err);
 
-    #ifdef CHIP_CONFIG_KVS_PATH
-    if (LinuxDeviceOptions::GetInstance().KVS == nullptr) {
-      err = DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(tempPath("chip_kvs").c_str());
+  ErrorPtr InitCommissionableDataProvider(LinuxCommissionableDataProvider& aCommissionableDataProvider, chip::PayloadContents& aOnBoardingPayload)
+  {
+    chip::Optional<std::vector<uint8_t>> spake2pVerifier;
+    chip::Optional<std::vector<uint8_t>> spake2pSalt;
+
+    const char* s = nullptr;
+    // spake2p-verifier
+    if (getStringOption("spake2p-verifier", s)) {
+      std::vector<uint8_t> s2pvec;
+      if (Base64ArgToVector(s, chip::Crypto::kSpake2p_VerifierSerialized_Length, s2pvec)) {
+        if (s2pvec.size()!=chip::Crypto::kSpake2p_VerifierSerialized_Length) {
+          return TextError::err("--spake2p-verifier must be %zu bytes", chip::Crypto::kSpake2p_VerifierSerialized_Length);
+        }
+        spake2pVerifier.SetValue(s2pvec);
+      }
+      else {
+        return TextError::err("invalid b64 in --spake2p-verifier");
+      }
+    }
+    // spake2p-salt
+    if (getStringOption("spake2p-salt", s)) {
+      std::vector<uint8_t> saltvec;
+      if (Base64ArgToVector(s, chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length, saltvec)) {
+        if (
+          saltvec.size()>chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length ||
+          saltvec.size()<chip::Crypto::kSpake2p_Min_PBKDF_Salt_Length
+        ) {
+          return TextError::err("--spake2p-salt must be %zu..%zu bytes", chip::Crypto::kSpake2p_Min_PBKDF_Salt_Length, chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length);
+        }
+        spake2pSalt.SetValue(saltvec);
+      }
+      else {
+        return TextError::err("invalid b64 in --spake2p-salt");
+      }
+    }
+    // spake2p-iterations
+    unsigned int spake2pIterationCount = chip::Crypto::kSpake2p_Min_PBKDF_Iterations;
+    getUIntOption("spake2p-iterations", spake2pIterationCount);
+    if (spake2pIterationCount<chip::Crypto::kSpake2p_Min_PBKDF_Iterations || spake2pIterationCount>chip::Crypto::kSpake2p_Max_PBKDF_Iterations) {
+      return TextError::err("--spake2p-iterations must be in range %u..%u", chip::Crypto::kSpake2p_Min_PBKDF_Iterations, chip::Crypto::kSpake2p_Max_PBKDF_Iterations);
+    }
+    // setup pincode
+    chip::Optional<uint32_t> setUpPINCode;
+    if (aOnBoardingPayload.setUpPINCode==0) {
+      if (!spake2pVerifier.HasValue()) {
+        return TextError::err("missing --setuppin or --spake2p-verifier");
+      }
+      // Passcode is 0, so will be ignored, and verifier will take over. Onboarding payload
+      // printed for debug will be invalid, but if the onboarding payload had been given
+      // properly to the commissioner later, PASE will succeed.
     }
     else {
-      err = DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(LinuxDeviceOptions::GetInstance().KVS);
+      // assign to optional
+      setUpPINCode.SetValue(aOnBoardingPayload.setUpPINCode);
     }
-    SuccessOrExit(err);
+
+    return P44ChipError::err(aCommissionableDataProvider.Init(
+      spake2pVerifier, spake2pSalt, spake2pIterationCount, setUpPINCode, aOnBoardingPayload.discriminator.GetLongValue()
+    ));
+  }
+
+
+  ErrorPtr InitConfigurationManager(ConfigurationManagerImpl& aConfigManager, chip::PayloadContents& aOnBoardingPayload)
+  {
+    ErrorPtr err;
+    // TODO: do we really need to store these IDs? For p44mbrd these should be commandline params only
+    if (aOnBoardingPayload.vendorID != 0)
+    {
+      err = P44ChipError::err(aConfigManager.StoreVendorId(aOnBoardingPayload.vendorID));
+      if (Error::notOK(err)) return err;
+    }
+    if (aOnBoardingPayload.productID != 0)
+    {
+      err = P44ChipError::err(aConfigManager.StoreProductId(aOnBoardingPayload.productID));
+      if (Error::notOK(err)) return err;
+    }
+    return err;
+  }
+
+
+  ErrorPtr chipAppInit()
+  {
+    #if CHIP_LOG_FILTERING
+    // set up the log level
+    int chiplogmaxcategory = chip::Logging::kLogCategory_Progress;
+    getIntOption("chiploglevel", chiplogmaxcategory);
+    chip::Logging::SetLogFilter(chiplogmaxcategory);
+    #endif // CHIP_LOG_FILTERING
+
+    // MARK: basically reduced ChipLinuxAppInit() from here
+    ErrorPtr err;
+
+    // prepare the onboarding payload
+    chip::PayloadContents onBoardingPayload;
+    // - always on-network
+    onBoardingPayload.rendezvousInformation.SetValue(RendezvousInformationFlag::kOnNetwork);
+    // - get from command line
+    int i;
+    if (getIntOption("payloadversion", i)) onBoardingPayload.version = i;
+    if (getIntOption("vendor-id", i)) onBoardingPayload.vendorID = i;
+    if (getIntOption("product-id", i)) onBoardingPayload.productID = i;
+    if (getIntOption("custom-flow", i)) onBoardingPayload.commissioningFlow = static_cast<CommissioningFlow>(i);
+    if (getIntOption("discriminator", i)) onBoardingPayload.discriminator.SetLongValue(static_cast<uint16_t>(i & ((1<<12)-1)));
+    if (getIntOption("setuppin", i)) onBoardingPayload.setUpPINCode = i & ((1<<27)-1);
+
+    // memory init
+    err = P44ChipError::err(Platform::MemoryInit());
+    if (Error::notOK(err)) return err;
+
+    // KVS path
+    #ifdef CHIP_CONFIG_KVS_PATH
+    const char* strP;
+    if (getStringOption("KVS", strP)) {
+      err = P44ChipError::err(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(strP));
+    }
+    else {
+      err = P44ChipError::err(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(tempPath("chip_kvs").c_str()));
+    }
+    if (Error::notOK(err)) return err;
     #endif
 
     // IMPORTANT: pass the p44utils mainloop to the system layer!
     static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetLibEvLoop(MainLoop::currentMainLoop().libevLoop());
 
-    err = DeviceLayer::PlatformMgr().InitChipStack();
-    SuccessOrExit(err);
+    // chip stack init
+    err = P44ChipError::err(DeviceLayer::PlatformMgr().InitChipStack());
+    if (Error::notOK(err)) return err;
 
-    // Init the commissionable data provider based on command line options
-    // to handle custom verifiers, discriminators, etc.
-    err = chip::examples::InitCommissionableDataProvider(mCommissionableDataProvider, LinuxDeviceOptions::GetInstance());
-    SuccessOrExit(err);
+    // Init the commissionable data provider based on command line options and onboardingpayload
+    err = InitCommissionableDataProvider(mCommissionableDataProvider, onBoardingPayload);
+    if (Error::notOK(err)) return err;
     DeviceLayer::SetCommissionableDataProvider(&mCommissionableDataProvider);
 
-    err = chip::examples::InitConfigurationManager(reinterpret_cast<ConfigurationManagerImpl &>(ConfigurationMgr()),
-                                                   LinuxDeviceOptions::GetInstance());
-    SuccessOrExit(err);
+    // Init the configuration manager
+    err = InitConfigurationManager(reinterpret_cast<ConfigurationManagerImpl &>(ConfigurationMgr()), onBoardingPayload);
+    if (Error::notOK(err)) return err;
 
-    if (LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.HasValue()) {
-        rendezvousFlags = LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.Value();
-    }
-
-    err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
-    SuccessOrExit(err);
+// FIXME: we don't need to re-fetch this info here?? Should all be contained in onBoardingPayload already
+//    if (LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.HasValue()) {
+//        rendezvousFlags = LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.Value();
+//    }
+//
+//    err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
+//    SuccessOrExit(err);
 
     ConfigurationMgr().LogDeviceConfig();
 
-    {
-      ChipLogProgress(NotSpecified, "==== Onboarding payload for Standard Commissioning Flow ====");
-      PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
-    }
-    {
-      // For testing of manual pairing code with custom commissioning flow
-      ChipLogProgress(NotSpecified, "==== Onboarding payload for Custom Commissioning Flows ====");
-      err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
-      SuccessOrExit(err);
-
-      LinuxDeviceOptions::GetInstance().payload.commissioningFlow = chip::CommissioningFlow::kCustom;
-
-      PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
-    }
+    OLOG(LOG_NOTICE, "==== Onboarding payload for %s Commissioning Flow ====",
+      onBoardingPayload.commissioningFlow == chip::CommissioningFlow::kStandard ? "STANDARD" : "USER-ACTION or CUSTOM"
+    );
+    PrintOnboardingCodes(onBoardingPayload);
 
     #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
-    if (LinuxDeviceOptions::GetInstance().traceStreamFilename.HasValue()) {
-      const char * traceFilename = LinuxDeviceOptions::GetInstance().traceStreamFilename.Value().c_str();
-      auto traceStream           = new chip::trace::TraceStreamFile(traceFilename);
+    const char *s;
+    if (getStringOption("trace_file", s)) {
+      auto traceStream = new chip::trace::TraceStreamFile(s);
       chip::trace::AddTraceStream(traceStream);
     }
-    else if (LinuxDeviceOptions::GetInstance().traceStreamToLogEnabled) {
+    else if (getOption("trace_log")) {
       auto traceStream = new chip::trace::TraceStreamLog();
       chip::trace::AddTraceStream(traceStream);
     }
-    if (LinuxDeviceOptions::GetInstance().traceStreamDecodeEnabled) {
+    if (getOption("trace_decode")) {
       chip::trace::TraceDecoderOptions options;
       options.mEnableProtocolInteractionModelResponse = false;
       chip::trace::TraceDecoder * decoder = new chip::trace::TraceDecoder();
@@ -627,59 +750,33 @@ public:
     chip::trace::InitTrace();
     #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
 
-exit:
-    if (err != CHIP_NO_ERROR) {
-      OLOG(LOG_ERR, "chipAppInit failed: %s ", ErrorStr(err));
-      terminateApp(EXIT_FAILURE);
-    }
-  }
 
-  void chipMainloopPrep()
-  {
-    // @note basically reduced ChipLinuxAppMainLoop(), without actually starting the mainloop
-    // prepare for mainloop
-    static chip::CommonCaseDeviceServerInitParams initParams;
-    VerifyOrDie(initParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
+    // MARK: basically reduced ChipLinuxAppMainLoop() from here, without actually starting the mainloop
 
-    initParams.operationalServicePort        = CHIP_PORT;
-    initParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
-
-    #if CHIP_DEVICE_ENABLE_PORT_PARAMS
-    // use a different service port to make testing possible with other sample devices running on same host
-    initParams.operationalServicePort        = LinuxDeviceOptions::GetInstance().securedDevicePort;
-    initParams.userDirectedCommissioningPort = LinuxDeviceOptions::GetInstance().unsecuredCommissionerPort;
-    #endif
-
-    initParams.interfaceId = LinuxDeviceOptions::GetInstance().interfaceId;
-
-    if (LinuxDeviceOptions::GetInstance().mCSRResponseOptions.csrExistingKeyPair) {
-      LinuxDeviceOptions::GetInstance().mCSRResponseOptions.badCsrOperationalKeyStoreForTest.Init(initParams.persistentStorageDelegate);
-      initParams.operationalKeystore = &LinuxDeviceOptions::GetInstance().mCSRResponseOptions.badCsrOperationalKeyStoreForTest;
-    }
-
+    // prepare the onboarding payload
+    static chip::CommonCaseDeviceServerInitParams serverInitParams;
+    VerifyOrDie(serverInitParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
+    serverInitParams.operationalServicePort        = CHIP_PORT;
+    serverInitParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
+    if (getIntOption("matter-tcp-port", i)) serverInitParams.operationalServicePort = (uint16_t)i;
+    if (getIntOption("matter-udp-port", i)) serverInitParams.userDirectedCommissioningPort = (uint16_t)i;
+    if (getIntOption("interface-id", i)) serverInitParams.interfaceId = Inet::InterfaceId(static_cast<chip::Inet::InterfaceId::PlatformType>(i));
     // Init ZCL Data Model and CHIP App Server
-    Server::GetInstance().Init(initParams);
+    Server::GetInstance().Init(serverInitParams);
 
+    // prepare the storage delegate
     mExampleDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
     DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
 
-    // Now that the server has started and we are done with our startup logging,
-    // log our discovery/onboarding information again so it's not lost in the
-    // noise.
-    ConfigurationMgr().LogDeviceConfig();
-
-    PrintOnboardingCodes(LinuxDeviceOptions::GetInstance().payload);
-
-// FIXME: which one is correct?
-    // From ChipLinuxAppMainLoop Initialize device attestation config
-    SetDeviceAttestationCredentialsProvider(LinuxDeviceOptions::GetInstance().dacProvider);
-//      // From Bridge Sample: Initialize device attestation config
-//      SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    // TODO: implement our own real DAC provider later
+    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 
     // Set our own device info provider
     SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
 
-    //ApplicationInit();
+    // done, ready to run
+    mChipAppInitialized = true;
+    return err;
   }
 
 
@@ -764,12 +861,9 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
 
 int main(int argc, char **argv)
 {
-  // FIXME: back to LOG_EMERG as soon as we have command line parsing
-//  // prevent all logging until command line determines level
-//  SETLOGLEVEL(LOG_EMERG);
-//  SETERRLEVEL(LOG_EMERG, false); // messages, if any, go to stderr
-  SETLOGLEVEL(LOG_DEBUG);
-  SETERRLEVEL(LOG_DEBUG, false); // messages, if any, go to stderr
+  // prevent all logging until command line determines level
+  SETLOGLEVEL(LOG_EMERG);
+  SETERRLEVEL(LOG_EMERG, false); // messages, if any, go to stderr
   // create app with current mainloop
   P44mbrd* application = new(P44mbrd);
   // pass control

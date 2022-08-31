@@ -41,6 +41,8 @@ chip_enable_wifi=false
 # we do not want Openthread
 chip_enable_openthread=false
 
+# we want to have the (command line) options to write and decode transport traces
+chip_enable_transport_trace = true
 
 # we need libev, not dispatch (even on macos)
 chip_system_config_use_libev = true

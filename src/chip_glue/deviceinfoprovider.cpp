@@ -25,21 +25,21 @@
 
 #define P44_VENDOR_NAME "plan44.ch"
 
-CHIP_ERROR BridgeInfoProvider::GetVendorName(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < sizeof(P44_VENDOR_NAME), CHIP_ERROR_BUFFER_TOO_SMALL);
   strcpy(buf, P44_VENDOR_NAME);
   return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR BridgeInfoProvider::GetVendorId(uint16_t & vendorId)
+CHIP_ERROR P44DeviceInfoProvider::GetVendorId(uint16_t & vendorId)
 {
   vendorId = 0xFFF1; // FIXME: testing
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetProductName(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mProductName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strcpy(buf, mProductName.c_str());
@@ -47,14 +47,14 @@ CHIP_ERROR BridgeInfoProvider::GetProductName(char * buf, size_t bufSize)
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetProductId(uint16_t & productId)
+CHIP_ERROR P44DeviceInfoProvider::GetProductId(uint16_t & productId)
 {
   productId = 0x8002; // FIXME: testing
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mSerial.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strcpy(buf, mSerial.c_str());
@@ -62,7 +62,7 @@ CHIP_ERROR BridgeInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
+CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
 {
   // FIXME: testing
   year = 2022;
@@ -72,21 +72,21 @@ CHIP_ERROR BridgeInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & m
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
+CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
 {
   hardwareVersion = 0; // FIXME: testing
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
 {
   *buf = 0; // FIXME: testing, no version
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR BridgeInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
+CHIP_ERROR P44DeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
 {
   ReturnErrorCodeIf(mDSUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   memcpy(uniqueIdSpan.data(), mDSUID.c_str(), mDSUID.size());
