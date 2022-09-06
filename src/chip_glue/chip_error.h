@@ -35,8 +35,6 @@ namespace p44 {
   /// ConnectedHomeIP/Matter error
   class P44ChipError : public Error
   {
-    CHIP_ERROR mChipError;
-
   public:
     static const char *domain();
     virtual const char *getErrorDomain() const P44_OVERRIDE;

@@ -367,7 +367,6 @@
 		ED36DEA6286E043600CA28EC /* DeviceControlServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DE98286E043500CA28EC /* DeviceControlServer.cpp */; };
 		ED36DEA8286E04A100CA28EC /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DEA7286E04A100CA28EC /* CoreData.framework */; };
 		ED36DEAE286E086300CA28EC /* DeviceInfoProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DEAC286E086300CA28EC /* DeviceInfoProviderImpl.cpp */; };
-		ED36DF22286E0D6400CA28EC /* CustomCSRResponseOperationalKeyStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */; };
 		ED60FD0428BF88EE00FE950E /* chip_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0228BF88ED00FE950E /* chip_error.cpp */; };
 		ED60FD0B28BFCA9C00FE950E /* AddressPolicy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0628BFCA9B00FE950E /* AddressPolicy.cpp */; };
 		ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */; };
@@ -1313,10 +1312,6 @@
 		ED36DEA7286E04A100CA28EC /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		ED36DEAC286E086300CA28EC /* DeviceInfoProviderImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceInfoProviderImpl.cpp; sourceTree = "<group>"; };
 		ED36DEAD286E086300CA28EC /* DeviceInfoProviderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInfoProviderImpl.h; sourceTree = "<group>"; };
-		ED36DF1E286E0D4800CA28EC /* CustomCSRResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomCSRResponse.h; sourceTree = "<group>"; };
-		ED36DF1F286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomCSRResponseOperationalKeyStore.h; sourceTree = "<group>"; };
-		ED36DF20286E0D4800CA28EC /* CustomCSRResponse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CustomCSRResponse.cpp; sourceTree = "<group>"; };
-		ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CustomCSRResponseOperationalKeyStore.cpp; sourceTree = "<group>"; };
 		ED36DF24286E354400CA28EC /* p44mbrd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = p44mbrd.entitlements; sourceTree = "<group>"; };
 		ED60FD0228BF88ED00FE950E /* chip_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chip_error.cpp; sourceTree = "<group>"; };
 		ED60FD0328BF88ED00FE950E /* chip_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chip_error.h; sourceTree = "<group>"; };
@@ -1652,7 +1647,6 @@
 		ED36D78E286DCBF900CA28EC /* linux */ = {
 			isa = PBXGroup;
 			children = (
-				ED36DF1D286E0D4800CA28EC /* testing */,
 				ED36D79A286DCC4000CA28EC /* AppMain.cpp */,
 				ED36D794286DCC4000CA28EC /* AppMain.h */,
 				ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */,
@@ -3250,17 +3244,6 @@
 			path = providers;
 			sourceTree = "<group>";
 		};
-		ED36DF1D286E0D4800CA28EC /* testing */ = {
-			isa = PBXGroup;
-			children = (
-				ED36DF1E286E0D4800CA28EC /* CustomCSRResponse.h */,
-				ED36DF1F286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.h */,
-				ED36DF20286E0D4800CA28EC /* CustomCSRResponse.cpp */,
-				ED36DF21286E0D4800CA28EC /* CustomCSRResponseOperationalKeyStore.cpp */,
-			);
-			path = testing;
-			sourceTree = "<group>";
-		};
 		ED60FD0128BF888E00FE950E /* chip_glue */ = {
 			isa = PBXGroup;
 			children = (
@@ -3730,7 +3713,6 @@
 				ED36DB90286DD2CE00CA28EC /* ASN1Writer.cpp in Sources */,
 				ED36DA6F286DD04300CA28EC /* DeviceAttestationVerifier.cpp in Sources */,
 				ED36DD41286DD91500CA28EC /* AdditionalDataPayloadGenerator.cpp in Sources */,
-				ED36DF22286E0D6400CA28EC /* CustomCSRResponseOperationalKeyStore.cpp in Sources */,
 				ED36DBAA286DD48C00CA28EC /* Base64.cpp in Sources */,
 				ED36DB74286DD2CE00CA28EC /* IP.cpp in Sources */,
 				ED36D7F2286DCDA300CA28EC /* general-commissioning-server.cpp in Sources */,

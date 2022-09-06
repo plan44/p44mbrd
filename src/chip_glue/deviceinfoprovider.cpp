@@ -34,7 +34,7 @@ CHIP_ERROR P44DeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 
 CHIP_ERROR P44DeviceInfoProvider::GetVendorId(uint16_t & vendorId)
 {
-  vendorId = 0xFFF1; // FIXME: testing
+  vendorId = mVendorId;
   return CHIP_NO_ERROR;
 }
 
@@ -49,7 +49,7 @@ CHIP_ERROR P44DeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 
 CHIP_ERROR P44DeviceInfoProvider::GetProductId(uint16_t & productId)
 {
-  productId = 0x8002; // FIXME: testing
+  productId = mProductId;
   return CHIP_NO_ERROR;
 }
 
@@ -66,8 +66,8 @@ CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t 
 {
   // FIXME: testing
   year = 2022;
-  month = 8;
-  day = 11;
+  month = 9;
+  day = 6;
   return CHIP_NO_ERROR;
 }
 

@@ -664,7 +664,7 @@ public:
     // set up the log level
     int chiplogmaxcategory = chip::Logging::kLogCategory_Progress;
     getIntOption("chiploglevel", chiplogmaxcategory);
-    chip::Logging::SetLogFilter(chiplogmaxcategory);
+    chip::Logging::SetLogFilter((uint8_t)chiplogmaxcategory);
     #endif // CHIP_LOG_FILTERING
 
     // MARK: basically reduced ChipLinuxAppInit() from here
@@ -674,14 +674,39 @@ public:
     chip::PayloadContents onBoardingPayload;
     // - always on-network
     onBoardingPayload.rendezvousInformation.SetValue(RendezvousInformationFlag::kOnNetwork);
+    // - use baked in product and vendor IDs if defined
+    #ifdef CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID
+    onBoardingPayload.vendorID = CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID;
+    OLOG(LOG_WARNING, "May need to use hard-coded Vendor ID 0x%04X (set as default)", onBoardingPayload.vendorID);
+    #endif
+    #ifdef CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
+    onBoardingPayload.productID = CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID;
+    OLOG(LOG_WARNING, "May need to use hard-coded Product ID 0x%04X (set as default)", onBoardingPayload.productID);
+    #endif
     // - get from command line
     int i;
-    if (getIntOption("payloadversion", i)) onBoardingPayload.version = i;
-    if (getIntOption("vendor-id", i)) onBoardingPayload.vendorID = i;
-    if (getIntOption("product-id", i)) onBoardingPayload.productID = i;
+    if (getIntOption("payloadversion", i)) onBoardingPayload.version = (uint8_t)i;
+    if (getIntOption("vendor-id", i)) onBoardingPayload.vendorID = (uint16_t)i;
+    if (getIntOption("product-id", i)) onBoardingPayload.productID = (uint16_t)i;
     if (getIntOption("custom-flow", i)) onBoardingPayload.commissioningFlow = static_cast<CommissioningFlow>(i);
     if (getIntOption("discriminator", i)) onBoardingPayload.discriminator.SetLongValue(static_cast<uint16_t>(i & ((1<<12)-1)));
     if (getIntOption("setuppin", i)) onBoardingPayload.setUpPINCode = i & ((1<<27)-1);
+
+    // TODO: avoid duplicating these, later
+    mP44dbrDeviceInstanceInfoProvider.mVendorId = onBoardingPayload.vendorID;
+    mP44dbrDeviceInstanceInfoProvider.mProductId = onBoardingPayload.productID;
+
+    // TODO: remove this later - Safety check, we're still forced to use predefined testing IDs for now
+    #ifdef CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID
+    if (CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID!=onBoardingPayload.vendorID) {
+      ChipLogError(DeviceLayer, "CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID (0x%04X) != command line vendor ID (0x%04X)", CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID, onBoardingPayload.vendorID);
+    }
+    #endif
+    #ifdef CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
+    if (CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID!=onBoardingPayload.productID) {
+      ChipLogError(DeviceLayer, "CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID (0x%04X) != command line product ID (0x%04X)", CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID, onBoardingPayload.productID);
+    }
+    #endif
 
     // memory init
     err = P44ChipError::err(Platform::MemoryInit());
@@ -753,6 +778,12 @@ public:
 
     // MARK: basically reduced ChipLinuxAppMainLoop() from here, without actually starting the mainloop
 
+    // TODO: implement our own real DAC provider later
+    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+
+    // Set our own device info provider (before initializing server, which wants to see it installed)
+    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
+
     // prepare the onboarding payload
     static chip::CommonCaseDeviceServerInitParams serverInitParams;
     VerifyOrDie(serverInitParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
@@ -761,18 +792,15 @@ public:
     if (getIntOption("matter-tcp-port", i)) serverInitParams.operationalServicePort = (uint16_t)i;
     if (getIntOption("matter-udp-port", i)) serverInitParams.userDirectedCommissioningPort = (uint16_t)i;
     if (getIntOption("interface-id", i)) serverInitParams.interfaceId = Inet::InterfaceId(static_cast<chip::Inet::InterfaceId::PlatformType>(i));
+
+    // We need to set DeviceInfoProvider before Server::Init to setup the storage of DeviceInfoProvider properly.
+    DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
+
     // Init ZCL Data Model and CHIP App Server
     Server::GetInstance().Init(serverInitParams);
 
     // prepare the storage delegate
     mExampleDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
-    DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
-
-    // TODO: implement our own real DAC provider later
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
-
-    // Set our own device info provider
-    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
 
     // done, ready to run
     mChipAppInitialized = true;

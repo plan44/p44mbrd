@@ -32,7 +32,7 @@ using namespace std;
 class P44DeviceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
 {
 public:
-  P44DeviceInfoProvider()          = default;
+  P44DeviceInfoProvider() : mVendorId(0), mProductId(0) {};
   virtual ~P44DeviceInfoProvider() = default;
 
   virtual CHIP_ERROR GetVendorName(char * buf, size_t bufSize) override;
@@ -49,4 +49,7 @@ public:
   string mLabel; ///< label
   string mSerial; ///< serial number
   string mDSUID; ///< unique ID base
+
+  uint16_t mVendorId; ///< vendor ID
+  uint16_t mProductId; ///< product ID
 };
