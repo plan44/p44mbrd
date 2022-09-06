@@ -86,9 +86,6 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
      case ZCL_SOFTWARE_DIAGNOSTICS_CLUSTER_ID :
         emberAfSoftwareDiagnosticsClusterInitCallback(endpoint);
         break;
-     case ZCL_THREAD_NETWORK_DIAGNOSTICS_CLUSTER_ID :
-        emberAfThreadNetworkDiagnosticsClusterInitCallback(endpoint);
-        break;
      case ZCL_TIME_FORMAT_LOCALIZATION_CLUSTER_ID :
         emberAfTimeFormatLocalizationClusterInitCallback(endpoint);
         break;
@@ -97,9 +94,6 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
         break;
      case ZCL_USER_LABEL_CLUSTER_ID :
         emberAfUserLabelClusterInitCallback(endpoint);
-        break;
-     case ZCL_WIFI_NETWORK_DIAGNOSTICS_CLUSTER_ID :
-        emberAfWiFiNetworkDiagnosticsClusterInitCallback(endpoint);
         break;
     default:
         // Unrecognized cluster ID
@@ -202,11 +196,6 @@ void __attribute__((weak)) emberAfSoftwareDiagnosticsClusterInitCallback(Endpoin
     // To prevent warning
     (void) endpoint;
 }
-void __attribute__((weak)) emberAfThreadNetworkDiagnosticsClusterInitCallback(EndpointId endpoint)
-{
-    // To prevent warning
-    (void) endpoint;
-}
 void __attribute__((weak)) emberAfTimeFormatLocalizationClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -218,11 +207,6 @@ void __attribute__((weak)) emberAfUnitLocalizationClusterInitCallback(EndpointId
     (void) endpoint;
 }
 void __attribute__((weak)) emberAfUserLabelClusterInitCallback(EndpointId endpoint)
-{
-    // To prevent warning
-    (void) endpoint;
-}
-void __attribute__((weak)) emberAfWiFiNetworkDiagnosticsClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;
