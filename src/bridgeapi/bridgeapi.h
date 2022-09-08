@@ -60,6 +60,17 @@ public:
   /// @param aResponseCB will be called with method response or transport/encoding level error
   void call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
 
+  /// convenience method to set properties
+  /// @param aDSUID the dsuid
+  /// @param aProperties the property value to set, or if aPropName is empty, the object containing all properties to set.
+  void setProperties(const string aDSUID, JsonObjectPtr aProperties);
+
+  /// convenience method to set single property
+  /// @param aDSUID the dsuid
+  /// @param aPropertyPath the property path (dot separated)
+  /// @param aProperties the property value to set, or if aPropName is empty, the object containing all properties to set.
+  void setProperty(const string aDSUID, const string aPropertyPath, JsonObjectPtr aValue);
+
   /// send notification via bridge API
   /// @param aNotification the notification name
   /// @param aParams method parameters

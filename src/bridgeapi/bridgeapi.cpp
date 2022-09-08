@@ -126,6 +126,31 @@ void BridgeApi::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB 
 }
 
 
+void BridgeApi::setProperties(const string aDSUID, JsonObjectPtr aProperties)
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("dSUID", JsonObject::newString(aDSUID));
+  params->add("properties", aProperties);
+  call("setProperty", params, NoOP);
+}
+
+
+void BridgeApi::setProperty(const string aDSUID, const string aPropertyPath, JsonObjectPtr aValue)
+{
+  string path = aPropertyPath;
+  do {
+    size_t p = path.rfind(".");
+    size_t n = p==string::npos ? 0 : p+1;
+    JsonObjectPtr prop = JsonObject::newObj();
+    prop->add(path.substr(n).c_str(), aValue);
+    aValue = prop;
+    if (p==string::npos) break;
+    path.erase(p);
+  } while(true);
+  setProperties(aDSUID, aValue);
+}
+
+
 ErrorPtr BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
 {
   if (!aParams) aParams = JsonObject::newObj();
