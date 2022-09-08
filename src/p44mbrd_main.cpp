@@ -755,6 +755,15 @@ public:
     );
     PrintOnboardingCodes(onBoardingPayload);
 
+    // let the bridged app know
+    char payloadBuffer[chip::QRCodeBasicSetupPayloadGenerator::kMaxQRCodeBase38RepresentationLength + 1];
+    chip::MutableCharSpan qrCode(payloadBuffer);
+    if (GetQRCode(qrCode, onBoardingPayload) == CHIP_NO_ERROR) {
+      BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(qrCode.data()));
+      // FIXME: figure out if actually commissionable or not
+      BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(true));
+    }
+
     #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
     const char *s;
     if (getStringOption("trace_file", s)) {

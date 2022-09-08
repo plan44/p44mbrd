@@ -370,6 +370,7 @@
 		ED60FD0428BF88EE00FE950E /* chip_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0228BF88ED00FE950E /* chip_error.cpp */; };
 		ED60FD0B28BFCA9C00FE950E /* AddressPolicy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0628BFCA9B00FE950E /* AddressPolicy.cpp */; };
 		ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */; };
+		ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0E28C7D0B900FE950E /* extutils.cpp */; };
 		ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F520289A84B600A82418 /* callback-stub.cpp */; };
@@ -1321,6 +1322,8 @@
 		ED60FD0828BFCA9B00FE950E /* AddressPolicy_DefaultImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressPolicy_DefaultImpl.h; sourceTree = "<group>"; };
 		ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddressPolicy_DefaultImpl.cpp; sourceTree = "<group>"; };
 		ED60FD0A28BFCA9C00FE950E /* AddressPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressPolicy.h; sourceTree = "<group>"; };
+		ED60FD0E28C7D0B900FE950E /* extutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extutils.cpp; sourceTree = "<group>"; };
+		ED60FD0F28C7D0BA00FE950E /* extutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = extutils.hpp; sourceTree = "<group>"; };
 		ED690B52286DC79500069215 /* p44mbrd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = p44mbrd; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44mbrd_main.cpp; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
@@ -1431,13 +1434,12 @@
 		ED23300F2886A18300D934D7 /* p44utils */ = {
 			isa = PBXGroup;
 			children = (
-				ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */,
-				ED24BDF028ACE3E10025CC14 /* p44utils_defs.hpp */,
-				ED24BDF228ACE3E10025CC14 /* p44utils_minimal.hpp */,
 				ED24BDDD28A68AE20025CC14 /* application.cpp */,
 				ED24BDDA28A68AE20025CC14 /* application.hpp */,
 				ED23301A2886A69700D934D7 /* error.cpp */,
 				ED23301F2886A69700D934D7 /* error.hpp */,
+				ED60FD0E28C7D0B900FE950E /* extutils.cpp */,
+				ED60FD0F28C7D0BA00FE950E /* extutils.hpp */,
 				ED24BDD828A68AE20025CC14 /* fdcomm.cpp */,
 				ED24BDD528A68AE10025CC14 /* fdcomm.hpp */,
 				ED24BDD928A68AE20025CC14 /* jsoncomm.cpp */,
@@ -1450,6 +1452,9 @@
 				ED24BDDB28A68AE20025CC14 /* mainloop.hpp */,
 				ED2330112886A1C500D934D7 /* p44obj.cpp */,
 				ED2330122886A1C500D934D7 /* p44obj.hpp */,
+				ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */,
+				ED24BDF028ACE3E10025CC14 /* p44utils_defs.hpp */,
+				ED24BDF228ACE3E10025CC14 /* p44utils_minimal.hpp */,
 				ED24BDD728A68AE10025CC14 /* socketcomm.cpp */,
 				ED24BDDC28A68AE20025CC14 /* socketcomm.hpp */,
 				ED23301D2886A69700D934D7 /* utils.cpp */,
@@ -3484,6 +3489,7 @@
 				ED36D86F286DCDED00CA28EC /* ClusterPathIB.cpp in Sources */,
 				ED36DC02286DD57B00CA28EC /* ErrorStr.cpp in Sources */,
 				ED36DA8B286DD14F00CA28EC /* GenerateChipX509Cert.cpp in Sources */,
+				ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */,
 				ED36DDC8286DDA0300CA28EC /* SessionHolder.cpp in Sources */,
 				ED36D885286DCDED00CA28EC /* SubscribeResponseMessage.cpp in Sources */,
 				ED36DBAF286DD48C00CA28EC /* Help.cpp in Sources */,
