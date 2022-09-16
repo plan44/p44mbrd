@@ -84,7 +84,7 @@ DeviceLevelControl::DeviceLevelControl() :
   // Attribute defaults
   mLevel(0),
   mOnLevel(0xFE), // FIXME: just assume full power for default on state
-  mOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
+  mLevelControlOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
   mOnOffTransitionTimeDS(5), // FIXME: this is just the dS default of 0.5 sec, report actual value later
   mDefaultMoveRateUnitsPerS(0xFE/7) // FIXME: just dS default of full range in 7 seconds
 {
@@ -173,33 +173,9 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
 using namespace LevelControl;
 
 
-uint8_t DeviceLevelControl::finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride)
+bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
 {
-  return (mOptions & (uint8_t)(~aOptionMask)) | (aOptionOverride & aOptionMask);
-}
-
-
-bool DeviceLevelControl::shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
-{
-  // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
-  //   "Command execution SHALL NOT continue beyond the Options processing if
-  //    all of these criteria are true:
-  //      - The command is one of the ‘without On/Off’ commands: Move, Move to
-  //        Level, Stop, or Step.
-  //      - The On/Off cluster exists on the same endpoint as this cluster.
-  //      - The OnOff attribute of the On/Off cluster, on this endpoint, is 0x00
-  //        (FALSE).
-  //      - The value of the ExecuteIfOff bit is 0."
-  if (aWithOnOff) {
-    // command includes On/Off -> always execute
-    return true;
-  }
-  if (isOn()) {
-    // is already on -> execute anyway
-    return true;
-  }
-  // now the options bit decides about executing or not
-  return finalOptions(aOptionMask, aOptionOverride) & EMBER_ZCL_LEVEL_CONTROL_OPTIONS_EXECUTE_IF_OFF;
+  return shouldExecuteWithFlag(aWithOnOff, aOptionMask, aOptionOverride, mLevelControlOptions, EMBER_ZCL_LEVEL_CONTROL_OPTIONS_EXECUTE_IF_OFF);
 }
 
 
@@ -210,7 +186,7 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataMod
   if (aAmount > EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) {
     status = EMBER_ZCL_STATUS_INVALID_COMMAND;
   }
-  else if (shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
+  else if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     // OnOff status and options do allow executing
     uint16_t transitionTime;
     if (aTransitionTime.IsNull()) {
@@ -323,7 +299,7 @@ void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate,
   else {
     rate = aRate.Value();
   }
-  if (rate!=0 || shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
+  if (rate!=0 || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
       case EMBER_ZCL_MOVE_MODE_UP:
         if (currentLevel()==0) {
@@ -372,7 +348,7 @@ void DeviceLevelControl::stop(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOpt
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
-  if (shouldExecute(aWithOnOff, aOptionMask, aOptionOverride)) {
+  if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     dim(0,0); // stop dimming
   }
   // send response

@@ -68,11 +68,10 @@ private:
 
   uint8_t mLevel;
   uint8_t mOnLevel;
-  uint8_t mOptions;
+  uint8_t mLevelControlOptions;
   uint16_t mOnOffTransitionTimeDS;
   uint8_t mDefaultMoveRateUnitsPerS;
 
-  bool shouldExecute(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
-  uint8_t finalOptions(uint8_t aOptionMask, uint8_t aOptionOverride);
+  bool shouldExecuteLevelChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   void dim(int8_t aDirection, uint8_t aRate);
 };

@@ -58,6 +58,9 @@ protected:
 
   virtual void changeOnOff_impl(bool aOn);
 
+  /// Utility for derived classes
+  bool shouldExecuteWithFlag(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride, uint8_t aOptionsAttribute, uint8_t aExecuteIfOffFlag);
+
 private:
   bool mOn;
 };

@@ -311,6 +311,14 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
   return false; // no change
 }
 
+// MARK: color control cluster command implementation callbacks
+
+using namespace ColorControl;
+
+bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+{
+  return shouldExecuteWithFlag(aWithOnOff, aOptionMask, aOptionOverride, mColorControlOptions, EMBER_ZCL_COLOR_CONTROL_OPTIONS_EXECUTE_IF_OFF);
+}
 
 // MARK: Attribute access
 
