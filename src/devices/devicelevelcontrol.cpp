@@ -83,10 +83,10 @@ const EmberAfDeviceType gDimmableLightTypes[] = {
 DeviceLevelControl::DeviceLevelControl() :
   // Attribute defaults
   mLevel(0),
-  mOnLevel(0xFE), // FIXME: just assume full power for default on state
+  mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // FIXME: later, get this from preset1 scene brightness, maybe?
   mLevelControlOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
   mOnOffTransitionTimeDS(5), // FIXME: this is just the dS default of 0.5 sec, report actual value later
-  mDefaultMoveRateUnitsPerS(0xFE/7) // FIXME: just dS default of full range in 7 seconds
+  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7) // FIXME: just dS default of full range in 7 seconds
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
@@ -114,7 +114,8 @@ void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   if (aChannelStates->get("brightness", o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
-      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), 0, 0, false, aUpdateMode);
+      // handle switching off separately
+      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), 0, 0, false, aUpdateMode);
     }
   }
 }
@@ -131,19 +132,25 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   // handle relative movement
   int level = aAmount;
   if (aDirection!=0) level = (int)mLevel + (aDirection>0 ? aAmount : -aAmount);
-  if (level>0xFE) level = 0xFE;
+  if (level>EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) level = EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL;
   if (level<0) level = 0;
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set level to %d in %d00mS - updatemode=%d", GetName().c_str(), aAmount, aTransitionTimeDs, aUpdateMode.Raw());
-    if ((mLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
+    if (aDirection!=0) {
+      OLOG(LOG_INFO, "moving level by %d to %d in %d00mS - %supdatemode=%d", aAmount*aDirection, level, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
+    }
+    else {
+      OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=%d", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
+    }
+    uint8_t previousLevel = mLevel;
+    if ((previousLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
       // level is zero and becomes non-null: also set OnOff when enabled
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
     }
     else if (level==0) {
       // level is not zero and should becomes zero: prevent or clear OnOff
       if (aWithOnOff) updateOnOff(false, aUpdateMode);
-      else if (mLevel==1) return false; // already at minimum: no change
+      else if (previousLevel==1) return false; // already at minimum: no change
       else level = 1; // set to minimum, but not to off
     }
     mLevel = static_cast<uint8_t>(level);
@@ -154,7 +161,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       JsonObjectPtr params = JsonObject::newObj();
       params->add("channel", JsonObject::newInt32(0)); // default channel
       params->add("relative", JsonObject::newBool(aDirection!=0));
-      params->add("value", JsonObject::newDouble((double)aAmount*100/0xFE*(aDirection<0 ? -1 : 1)));
+      params->add("value", JsonObject::newDouble((double)aAmount*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL*(aDirection<0 ? -1 : 1)));
       if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble(aTransitionTimeDs/10));
       params->add("apply_now", JsonObject::newBool(true));
       notify("setOutputChannelValue", params);
@@ -282,7 +289,7 @@ void DeviceLevelControl::dim(int8_t aDirection, uint8_t aRate)
   params->add("mode", JsonObject::newInt32(aDirection));
   params->add("autostop", JsonObject::newBool(false));
   // matter rate is 0..0xFE units per second, p44 rate is 0..100 units per millisecond
-  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*100/0xFE/1000));
+  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
   notify("dimChannel", params);
 }
 
@@ -406,7 +413,7 @@ void DeviceLevelControl::effect(bool aTurnOn)
         targetOnLevel.SetNonNull(currentLevel());
       }
     }
-    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(0xFE));
+    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
     updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {
