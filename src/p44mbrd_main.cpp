@@ -426,10 +426,10 @@ public:
         // try to re-use the endpoint ID for this dSUID
         // - sanity check
         if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-          OLOG(LOG_ERR, "p44 inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+          OLOG(LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
         }
         if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          OLOG(LOG_ERR, "dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+          OLOG(LOG_ERR, "Dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
           dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
         }
         else {
@@ -446,7 +446,7 @@ public:
       }
       else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
         // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-        OLOG(LOG_NOTICE, "p44 new device %s, adding to bridge", dev->bridgedDSUID().c_str());
+        OLOG(LOG_NOTICE, "New device %s, adding to bridge", dev->bridgedDSUID().c_str());
       }
       else {
         LogErrorOnFailure(chiperr);
@@ -463,7 +463,7 @@ public:
         }
         if (dynamicEndpointIdx==kInvalidEndpointId) {
           if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-            OLOG(LOG_ERR, "p44 max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
+            OLOG(LOG_ERR, "Max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
           }
           else {
             dynamicEndpointIdx = numDynamicEndPoints++;
@@ -511,26 +511,27 @@ public:
           // device exists, dispatch
           if (aJsonMsg->get("notification", o, true)) {
             string notification = o->stringValue();
-            OLOG(LOG_NOTICE, "p44 Bridge sent notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+            OLOG(LOG_NOTICE, "Bridge API notification '%s' received", notification.c_str());
+            OLOG(LOG_INFO, "- JSON: %s", aJsonMsg->c_strValue());
             bool handled = devpos->second->handleBridgeNotification(notification, aJsonMsg);
             if (handled) {
-              devpos->second->logStatus("processed notification");
+              POLOG(devpos->second, LOG_INFO, "processed notification");
             }
             else {
-              OLOG(LOG_ERR, "p44 Could not handle bridge notification '%s' for device %s", notification.c_str(), targetDSUID.c_str());
+              POLOG(devpos->second, LOG_ERR, "could not handle notification '%s'", notification.c_str());
             }
           }
           else {
-            OLOG(LOG_ERR, "p44 Bridge sent unknown message type for device %s", targetDSUID.c_str());
+            POLOG(devpos->second, LOG_ERR, "unknown notification for device");
           }
         }
         else {
-          OLOG(LOG_ERR, "p44 Bridge sent message for unknown device %s", targetDSUID.c_str());
+          OLOG(LOG_ERR, "notfication for nknown device %s", targetDSUID.c_str());
         }
       }
     }
     else {
-      OLOG(LOG_ERR, "p44 Bridge Error %s", aError->text());
+      OLOG(LOG_ERR, "bridge API Error %s", aError->text());
     }
   }
 
@@ -542,7 +543,7 @@ public:
         // give device chance to do things just after mainloop has started
         mDevices[i]->inChipMainloopInit();
         // dump status
-        mDevices[i]->logStatus();
+        POLOG(mDevices[i], LOG_INFO, "initialized from chip mainloop: %s", mDevices[i]->description().c_str());
       }
     }
   }
@@ -855,16 +856,13 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
   EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
-    LOG(LOG_NOTICE,
-      "p44 Endpoint %d [%s]: read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
-      (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
+    POLOG(dev, LOG_NOTICE,
+      "read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
+      (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
     );
     ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
-      LOG(LOG_ERR, "p44 Endpoint %d: Attribute read not handled!", (int)endpoint);
-    }
-    else {
-      dev->logStatus("processed attribute read");
+      POLOG(dev, LOG_ERR, "Attribute read not handled!");
     }
   }
   return ret;
@@ -879,13 +877,13 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
   EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
-    LOG(LOG_NOTICE, "p44 Endpoint %d [%s]: write external attr 0x%04x in cluster 0x%04x", (int)endpoint, dev->GetName().c_str(), (int)attributeMetadata->attributeId, (int)clusterId);
+    POLOG(dev, LOG_NOTICE, "write external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
-      LOG(LOG_ERR, "p44 Endpoint %d: Attribute write not handled!", (int)endpoint);
+      POLOG(dev, LOG_ERR, "Attribute write not handled!");
     }
     else {
-      dev->logStatus("processed attribute write");
+      POLOG(dev, LOG_INFO, "processed attribute write: %s", dev->description().c_str());
     }
   }
   return ret;

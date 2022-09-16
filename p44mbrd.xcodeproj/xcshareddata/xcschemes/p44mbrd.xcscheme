@@ -56,12 +56,20 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--loglevel 7"
+            argument = "--KVS /tmp/p44bmr_for_chip_tool_kvs"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--chiploglevel 5"
-            isEnabled = "NO">
+            argument = "--KVS /tmp/p44mbr_mixwerk_kvs"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--loglevel 6"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--chiploglevel 2"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--trace_log --trace_decode"

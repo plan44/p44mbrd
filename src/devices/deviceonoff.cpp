@@ -20,6 +20,14 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// File scope debugging options
+// - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
+#define ALWAYS_DEBUG 0
+// - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
+//   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
+#define FOCUSLOGLEVEL 5
+
+
 #include "deviceonoff.h"
 #include "device_impl.h"
 
@@ -128,7 +136,7 @@ void DeviceOnOff::changeOnOff_impl(bool aOn)
 bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 {
   if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: updating onOff to %s - updatemode=%d", GetName().c_str(), aOn ? "ON" : "OFF", aUpdateMode.Raw());
+    OLOG(LOG_INFO, "updating onOff to %s - updatemode=%d", aOn ? "ON" : "OFF", aUpdateMode.Raw());
     mOn  = aOn;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       changeOnOff_impl(mOn);
@@ -148,6 +156,7 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
     if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading onOff isOn: %s", isOn() ? "ON" : "OFF");
       *buffer = isOn() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -158,6 +167,7 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
       *((uint32_t*)buffer) = (uint32_t) ZCL_ON_OFF_CLUSTER_FEATURE_MAP;
+      FOCUSOLOG("reading onOff featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -181,8 +191,9 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
 }
 
 
-void DeviceOnOff::logStatus(const char *aReason)
+string DeviceOnOff::description()
 {
-  inherited::logStatus(aReason);
-  ChipLogDetail(DeviceLayer, "- OnOff: %d", mOn);
+  string s = inherited::description();
+  string_format_append(s, "\n- OnOff: %d", mOn);
+  return s;
 }

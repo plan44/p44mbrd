@@ -38,6 +38,7 @@
 
 #include "bridgeapi.h"
 #include "p44mbrd_main.h"
+#include "logger.hpp"
 
 using namespace chip;
 using namespace std;
@@ -61,7 +62,7 @@ public:
 
 
 
-class Device : public p44::P44Obj
+class Device : public p44::P44LoggingObj
 {
   // info for instantiating
   Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
@@ -90,7 +91,9 @@ public:
   Device();
   virtual ~Device();
 
-  virtual void logStatus(const char *aReason = NULL);
+  virtual string logContextPrefix() override;
+
+  virtual string description();
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo);
 
@@ -141,7 +144,7 @@ public:
   /// @{
 
   void notify(const string aNotification, JsonObjectPtr aParams);
-  void call(const string aNotification, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
+  void call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
 
   /// called to handle notifications from bridge
   bool handleBridgeNotification(const string aNotification, JsonObjectPtr aParams);

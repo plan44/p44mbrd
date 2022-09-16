@@ -21,6 +21,13 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// File scope debugging options
+// - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
+#define ALWAYS_DEBUG 0
+// - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
+//   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
+#define FOCUSLOGLEVEL 5
+
 
 #include "device_impl.h"
 
@@ -79,6 +86,11 @@ Device::Device() :
   mParentEndpointId = kInvalidEndpointId;
   // - declare common bridged device clusters
   addClusterDeclarations(Span<EmberAfCluster>(bridgedDeviceCommonClusters));
+}
+
+string Device::logContextPrefix()
+{
+  return string_format("p44 endpoint #%d (%s)", GetEndpointId(), mName.c_str());
 }
 
 
@@ -198,13 +210,10 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aPa
     mParentEndpointId
   );
   if (ret==EMBER_ZCL_STATUS_SUCCESS) {
-    ChipLogProgress(
-      DeviceLayer, "p44 Added device '%s' to dynamic endpoint %d (index=%d)",
-      GetName().c_str(), GetEndpointId(), mDynamicEndpointIdx
-    );
+    OLOG(LOG_INFO, "Added to chip as dynamic endpoint %d (index=%d)", GetEndpointId(), mDynamicEndpointIdx);
   }
   else {
-    ChipLogError(DeviceLayer, "p44 emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
+    OLOG(LOG_ERR, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
     return false;
   }
   return true;
@@ -235,7 +244,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 {
   if (mReachable!=aReachable || aUpdateMode.Has(UpdateFlags::forced)) {
     mReachable = aReachable;
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: %s", mName.c_str(), mReachable ? "REACHABLE" : "OFFLINE");
+    OLOG(LOG_INFO, "Updating reachable to %s - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", aUpdateMode.Raw());
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
     }
@@ -245,7 +254,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 {
   if (mName!=aDeviceName || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: New Name=\"%s\"", mName.c_str(), aDeviceName.c_str());
+    OLOG(LOG_INFO, "Updating name to '%s' - updatemode=%d", aDeviceName.c_str(), aUpdateMode.Raw());
     mName = aDeviceName;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       // propagate to native device
@@ -264,51 +273,60 @@ void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
 
 void Device::notify(const string aNotification, JsonObjectPtr aParams)
 {
-  ChipLogDetail(DeviceLayer, "p44 bridge API: sending '%s': %s", aNotification.c_str(), aParams->json_c_str());
   if (!aParams) aParams = JsonObject::newObj();
+  OLOG(LOG_NOTICE, "mbr -> vdcd: sending notification '%s': %s", aNotification.c_str(), aParams->json_c_str());
   aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
   BridgeApi::api().notify(aNotification, aParams);
 }
 
-void Device::call(const string aNotification, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
+void Device::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
 {
   if (!aParams) aParams = JsonObject::newObj();
+  OLOG(LOG_NOTICE, "mbr -> vdcd: calling method '%s': %s", aMethod.c_str(), aParams->json_c_str());
   aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
-  BridgeApi::api().call(aNotification, aParams, aResponseCB);
+  BridgeApi::api().call(aMethod, aParams, aResponseCB);
 }
 
 // MARK: Attribute access
 
 EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if (clusterId==ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID) {
+  if (clusterId==ZCL_BASIC_CLUSTER_ID) {
+    OLOG(LOG_WARNING, "****** tried to access basic cluster *****");
+  }
+  else if (clusterId==ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID) {
     if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
       *buffer = IsReachable() ? 1 : 0;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     // Writable Node Label
     if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      FOCUSOLOG("reading node label: %s", mName.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mName.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     // Device Information attributes
     if ((attributeId == ZCL_VENDOR_NAME_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      FOCUSOLOG("reading vendor name: %s", mVendorName.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mVendorName.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_PRODUCT_NAME_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      FOCUSOLOG("reading product name: %s", mModelName.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mModelName.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_PRODUCT_URL_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      FOCUSOLOG("reading product url: %s", mConfigUrl.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mConfigUrl.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_SERIAL_NUMBER_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
+      FOCUSOLOG("reading serial number: %s", mBridgedDSUID.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mBridgedDSUID.c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
@@ -334,6 +352,7 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
     // Writable Node Label
     if (attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) {
       string newName((const char*)buffer+1, (size_t)buffer[0]);
+      FOCUSOLOG("writing nodel label: new label = '%s'", newName.c_str());
       updateName(newName, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -342,8 +361,7 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
 }
 
 
-void Device::logStatus(const char *aReason)
+string Device::description()
 {
-  ChipLogDetail(DeviceLayer, "p44 Device[%s] @ endpoint %d: %s", mName.c_str(), GetEndpointId(), nonNullCStr(aReason));
-  ChipLogDetail(DeviceLayer, "- reachable: %d", mReachable);
+  return string_format("device status:\n- reachable: %d", mReachable);
 }

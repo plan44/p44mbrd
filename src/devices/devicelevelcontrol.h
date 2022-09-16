@@ -35,7 +35,7 @@ public:
 
   DeviceLevelControl();
 
-  virtual void logStatus(const char *aReason = NULL) override;
+  virtual string description() override;
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
 

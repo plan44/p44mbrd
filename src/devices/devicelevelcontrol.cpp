@@ -20,6 +20,14 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// File scope debugging options
+// - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
+#define ALWAYS_DEBUG 0
+// - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
+//   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
+#define FOCUSLOGLEVEL 5
+
+
 #include "devicelevelcontrol.h"
 #include "device_impl.h"
 
@@ -411,6 +419,7 @@ void DeviceLevelControl::effect(bool aTurnOn)
     }
   }
   // turn on or off
+  OLOG(LOG_INFO, "levelcontrol effect: turnOn=%d", aTurnOn);
   if (aTurnOn) {
     // get the default onLevel
     app::DataModel::Nullable<uint8_t> targetOnLevel;
@@ -453,22 +462,27 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
 {
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
     if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading levelcontrol currentLevel: %hu", (unsigned short)currentLevel());
       *buffer = currentLevel();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      FOCUSOLOG("reading levelcontrol onOffTransitionTime: %hu", (unsigned short)mOnOffTransitionTimeDS);
       *((uint16_t *)buffer) = mOnOffTransitionTimeDS;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading levelcontrol onLevel: %hu", (unsigned short)mOnLevel);
       *buffer = mOnLevel;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = mOptions;
+      FOCUSOLOG("reading levelcontrol options: 0x%hx", (unsigned short)mLevelControlOptions);
+      *buffer = mLevelControlOptions;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading levelcontrol defaultMoveRateUnitsPerS: %hu", (unsigned short)mDefaultMoveRateUnitsPerS);
       *buffer = mDefaultMoveRateUnitsPerS;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -479,6 +493,7 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
       *((uint32_t*)buffer) = (uint32_t) ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP;
+      FOCUSOLOG("reading levelcontrol featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -492,18 +507,22 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
       mOnOffTransitionTimeDS = *((uint16_t *)buffer);
+      FOCUSOLOG("writing levelcontrol onOffTransitionTime: %hu", (unsigned short)mOnOffTransitionTimeDS);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
       mOnLevel = *buffer;
+      FOCUSOLOG("writing levelcontrol onLevel: %hu", (unsigned short)mOnLevel);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
-      mOptions = *buffer;
+      mLevelControlOptions = *buffer;
+      FOCUSOLOG("writing levelcontrol options: 0x%hx", (unsigned short)mLevelControlOptions);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
       mDefaultMoveRateUnitsPerS = *buffer;
+      FOCUSOLOG("writing levelcontrol defaultMoveRateUnitsPerS: %hu", (unsigned short)mDefaultMoveRateUnitsPerS);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -512,12 +531,13 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
 }
 
 
-void DeviceLevelControl::logStatus(const char *aReason)
+string DeviceLevelControl::description()
 {
-  inherited::logStatus(aReason);
-  ChipLogDetail(DeviceLayer, "- currentLevel: %d", mLevel);
-  ChipLogDetail(DeviceLayer, "- OnLevel: %d", mOnLevel);
-  ChipLogDetail(DeviceLayer, "- Options: %d", mOptions);
-  ChipLogDetail(DeviceLayer, "- OnOffTime: %d", mOnOffTransitionTimeDS);
-  ChipLogDetail(DeviceLayer, "- DimRate: %d", mDefaultMoveRateUnitsPerS);
+  string s = inherited::description();
+  string_format_append(s, "\n- currentLevel: %d", mLevel);
+  string_format_append(s, "\n- OnLevel: %d", mOnLevel);
+  string_format_append(s, "\n- Options: %d", mLevelControlOptions);
+  string_format_append(s, "\n- OnOffTime: %d", mOnOffTransitionTimeDS);
+  string_format_append(s, "\n- DimRate: %d", mDefaultMoveRateUnitsPerS);
+  return s;
 }

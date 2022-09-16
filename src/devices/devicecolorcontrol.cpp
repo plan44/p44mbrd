@@ -20,8 +20,19 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// File scope debugging options
+// - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
+#define ALWAYS_DEBUG 0
+// - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
+//   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
+#define FOCUSLOGLEVEL 5
+
+
 #include "devicecolorcontrol.h"
 #include "device_impl.h"
+
+using namespace app;
+using namespace Clusters;
 
 // MARK: - LevelControl Device specific declarations
 
@@ -155,7 +166,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
 bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
 {
   if (aColorMode!=mColorMode || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: color mode set to %d", GetName().c_str(), (int)aColorMode);
+    OLOG(LOG_INFO, "color mode set to %d", (int)aColorMode);
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       JsonObjectPtr params = JsonObject::newObj();
@@ -183,10 +194,13 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
 }
 
 
+
+
+
 bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
 {
   if (aHue!=mHue || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set hue to %d - updatemode=%d", GetName().c_str(), aHue, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set hue to %d - updatemode=%d", aHue, aUpdateMode.Raw());
     mHue = aHue;
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
@@ -210,7 +224,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
 bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode)
 {
   if (aSaturation!=mSaturation || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set saturation to %d - updatemode=%d", GetName().c_str(), aSaturation, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set saturation to %d - updatemode=%d", aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update saturation (otherwise, color mode change already sends H+S)
@@ -234,7 +248,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode)
 {
   if (aColortemp!=mColorTemp || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set colortemp to %d - updatemode=%d", GetName().c_str(), aColortemp, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set colortemp to %d - updatemode=%d", aColortemp, aUpdateMode.Raw());
     mColorTemp = aColortemp;
     if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
@@ -256,7 +270,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
 {
   if (aX!=mX || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set X to %d - updatemode=%d", GetName().c_str(), aX, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set X to %d - updatemode=%d", aX, aUpdateMode.Raw());
     mX = aX;
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
@@ -278,7 +292,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
 bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
 {
   if (aY!=mY || aUpdateMode.Has(UpdateFlags::forced)) {
-    ChipLogProgress(DeviceLayer, "p44 Device[%s]: set Y to %d - updatemode=%d", GetName().c_str(), aY, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set Y to %d - updatemode=%d", aY, aUpdateMode.Raw());
     mY = aY;
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
@@ -306,22 +320,27 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       *buffer =
       EMBER_AF_COLOR_CAPABILITIES_COLOR_TEMPERATURE_SUPPORTED |
         (mCtOnly ? 0 : EMBER_AF_COLOR_CAPABILITIES_HUE_SATURATION_SUPPORTED|EMBER_AF_COLOR_CAPABILITIES_XY_ATTRIBUTES_SUPPORTED);
+      FOCUSOLOG("reading colorcontrol colorCapabilities: 0x%hx", (unsigned short)*buffer);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
       // color mode: 0=HS, 1=XY, 2=Colortemp
+      FOCUSOLOG("reading colorControl colorMode: %hu", (unsigned short)mColorMode);
       *buffer = mColorMode;
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading colorControl currentHue: %hu", (unsigned short)currentHue());
       *buffer = currentHue();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading colorControl currentSaturation: %hu", (unsigned short)currentSaturation());
       *buffer = currentSaturation();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      FOCUSOLOG("reading colorControl currentColortemp: %hu", (unsigned short)currentColortemp());
       *((uint16_t *)buffer) = currentColortemp();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -332,6 +351,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
       *((uint32_t*)buffer) = (uint32_t) ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP;
+      FOCUSOLOG("reading colorControl featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -348,13 +368,14 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 }
 
 
-void DeviceColorControl::logStatus(const char *aReason)
+string DeviceColorControl::description()
 {
-  inherited::logStatus(aReason);
-  ChipLogDetail(DeviceLayer, "- colormode: %d", mColorMode);
-  ChipLogDetail(DeviceLayer, "- hue: %d", mHue);
-  ChipLogDetail(DeviceLayer, "- saturation: %d", mSaturation);
-  ChipLogDetail(DeviceLayer, "- ct: %d", mColorTemp);
-  ChipLogDetail(DeviceLayer, "- X: %d", mX);
-  ChipLogDetail(DeviceLayer, "- Y: %d", mY);
+  string s = inherited::description();
+  string_format_append(s, "\n- colormode: %d", mColorMode);
+  string_format_append(s, "\n- hue: %d", mHue);
+  string_format_append(s, "\n- saturation: %d", mSaturation);
+  string_format_append(s, "\n- ct: %d", mColorTemp);
+  string_format_append(s, "\n- X: %d", mX);
+  string_format_append(s, "\n- Y: %d", mY);
+  return s;
 }
