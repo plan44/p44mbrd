@@ -136,12 +136,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   if (level<0) level = 0;
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
-    if (aDirection!=0) {
-      OLOG(LOG_INFO, "moving level by %d to %d in %d00mS - %supdatemode=%d", aAmount*aDirection, level, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
-    }
-    else {
-      OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=%d", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
-    }
+    OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=0x%x", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     uint8_t previousLevel = mLevel;
     if ((previousLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
       // level is zero and becomes non-null: also set OnOff when enabled

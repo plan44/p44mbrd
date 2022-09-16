@@ -136,7 +136,7 @@ void DeviceOnOff::changeOnOff_impl(bool aOn)
 bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 {
   if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "updating onOff to %s - updatemode=%d", aOn ? "ON" : "OFF", aUpdateMode.Raw());
+    OLOG(LOG_INFO, "updating onOff to %s - updatemode=0x%x", aOn ? "ON" : "OFF", aUpdateMode.Raw());
     mOn  = aOn;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       changeOnOff_impl(mOn);
