@@ -71,6 +71,8 @@ private:
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() override;
 
+  uint8_t mColorControlOptions;
+
   bool mCtOnly;
 
   ColorMode mColorMode;

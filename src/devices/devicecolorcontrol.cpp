@@ -86,6 +86,7 @@ const EmberAfDeviceType gColorLightTypes[] = {
 // MARK: - DeviceColorControl
 
 DeviceColorControl::DeviceColorControl(bool aCTOnly) :
+  mColorControlOptions(0), // No default options (see EmberAfColorControlOptions for choices)
   mCtOnly(aCTOnly),
   mColorMode(aCTOnly ? colormode_ct : colormode_hs),
   mHue(0),
@@ -344,6 +345,27 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       *((uint16_t *)buffer) = currentColortemp();
       return EMBER_ZCL_STATUS_SUCCESS;
     }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      FOCUSOLOG("reading colorControl currentX: %hu", (unsigned short)currentX());
+      *((uint16_t *)buffer) = currentX();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+      FOCUSOLOG("reading colorControl currentY: %hu", (unsigned short)currentY());
+      *((uint16_t *)buffer) = currentY();
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if ((attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading colorControl options: 0x%hx", (unsigned short)mColorControlOptions);
+      *buffer = mColorControlOptions;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    // constants
+    if ((attributeId == ZCL_COLOR_CONTROL_NUMBER_OF_PRIMARIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+      FOCUSOLOG("reading numberOfPrimaries options: CONSTANT 0");
+      *buffer = 0; // no primary color support at all
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
     // common
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
       *((uint16_t *)buffer) = ZCL_COLOR_CONTROL_CLUSTER_REVISION;
@@ -362,7 +384,13 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
 
 EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
-  // TODO: implement
+  if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
+    if (attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) {
+      mColorControlOptions = *buffer;
+      FOCUSOLOG("writing colorcontrol options: 0x%hx", (unsigned short)mColorControlOptions);
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+  }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }
