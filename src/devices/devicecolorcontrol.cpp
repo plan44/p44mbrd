@@ -22,7 +22,7 @@
 
 // File scope debugging options
 // - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
-#define ALWAYS_DEBUG 0
+#define ALWAYS_DEBUG 1
 // - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
@@ -320,6 +320,246 @@ bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, uint8_t aOpti
   return shouldExecuteWithFlag(aWithOnOff, aOptionMask, aOptionOverride, mColorControlOptions, EMBER_ZCL_COLOR_CONTROL_OPTIONS_EXECUTE_IF_OFF);
 }
 
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
+
+bool emberAfColorControlClusterMoveHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                               const Commands::MoveHue::DecodableType & commandData)
+{
+  // FIXME: implement
+  return false;
+//  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
+//                                                         commandData.optionsMask, commandData.optionsOverride, false);
+}
+
+bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * commandObj,
+                                                      const app::ConcreteCommandPath & commandPath,
+                                                      const Commands::MoveSaturation::DecodableType & commandData)
+{
+  // FIXME: implement
+  return false;
+//  return ColorControlServer::Instance().moveSaturationCommand(commandPath, commandData);
+}
+
+
+bool emberAfColorControlClusterMoveToHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                 const Commands::MoveToHue::DecodableType & commandData)
+{
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
+  dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  return true;
+}
+
+bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * commandObj,
+                                                        const app::ConcreteCommandPath & commandPath,
+                                                        const Commands::MoveToSaturation::DecodableType & commandData)
+{
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
+  dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  return true;
+}
+
+bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandler * commandObj,
+                                                              const app::ConcreteCommandPath & commandPath,
+                                                              const Commands::MoveToHueAndSaturation::DecodableType & commandData)
+{
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
+  dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
+  dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  return true;
+}
+
+bool emberAfColorControlClusterStepHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                               const Commands::StepHue::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
+//                                                         commandData.transitionTime, commandData.optionsMask,
+//                                                         commandData.optionsOverride, false);
+}
+
+bool emberAfColorControlClusterStepSaturationCallback(app::CommandHandler * commandObj,
+                                                      const app::ConcreteCommandPath & commandPath,
+                                                      const Commands::StepSaturation::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().stepSaturationCommand(commandPath, commandData);
+}
+
+bool emberAfColorControlClusterEnhancedMoveHueCallback(app::CommandHandler * commandObj,
+                                                       const app::ConcreteCommandPath & commandPath,
+                                                       const Commands::EnhancedMoveHue::DecodableType & commandData)
+{
+  return false;
+//  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
+//                                                         commandData.optionsMask, commandData.optionsOverride, true);
+}
+
+bool emberAfColorControlClusterEnhancedMoveToHueCallback(app::CommandHandler * commandObj,
+                                                         const app::ConcreteCommandPath & commandPath,
+                                                         const Commands::EnhancedMoveToHue::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().moveToHueCommand(commandPath.mEndpointId, commandData.enhancedHue, commandData.direction,
+//                                                           commandData.transitionTime, commandData.optionsMask,
+//                                                           commandData.optionsOverride, true);
+}
+
+bool emberAfColorControlClusterEnhancedMoveToHueAndSaturationCallback(
+    app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+    const Commands::EnhancedMoveToHueAndSaturation::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().moveToHueAndSaturationCommand(commandPath.mEndpointId, commandData.enhancedHue,
+//                                                                        commandData.saturation, commandData.transitionTime,
+//                                                                        commandData.optionsMask, commandData.optionsOverride, true);
+}
+
+bool emberAfColorControlClusterEnhancedStepHueCallback(app::CommandHandler * commandObj,
+                                                       const app::ConcreteCommandPath & commandPath,
+                                                       const Commands::EnhancedStepHue::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
+//                                                         commandData.transitionTime, commandData.optionsMask,
+//                                                         commandData.optionsOverride, true);
+}
+
+bool emberAfColorControlClusterColorLoopSetCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                    const Commands::ColorLoopSet::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().colorLoopCommand(commandPath, commandData);
+}
+
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY
+
+bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                   const Commands::MoveToColor::DecodableType & commandData)
+{
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
+  dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
+  dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  return true;
+}
+
+bool emberAfColorControlClusterMoveColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                 const Commands::MoveColor::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().moveColorCommand(commandPath, commandData);
+}
+
+bool emberAfColorControlClusterStepColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                 const Commands::StepColor::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().stepColorCommand(commandPath, commandData);
+}
+
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+
+bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandler * commandObj,
+                                                              const app::ConcreteCommandPath & commandPath,
+                                                              const Commands::MoveToColorTemperature::DecodableType & commandData)
+{
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
+  dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  return true;
+}
+
+bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler * commandObj,
+                                                            const app::ConcreteCommandPath & commandPath,
+                                                            const Commands::MoveColorTemperature::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().moveColorTempCommand(commandPath, commandData);
+}
+
+bool emberAfColorControlClusterStepColorTemperatureCallback(app::CommandHandler * commandObj,
+                                                            const app::ConcreteCommandPath & commandPath,
+                                                            const Commands::StepColorTemperature::DecodableType & commandData)
+{
+  return false;
+//    return ColorControlServer::Instance().stepColorTempCommand(commandPath, commandData);
+}
+
+void emberAfPluginLevelControlCoupledColorTempChangeCallback(EndpointId endpoint)
+{
+  // TODO: implement
+//    ColorControlServer::Instance().levelControlColorTempChangeCommand(endpoint);
+}
+
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+
+bool emberAfColorControlClusterStopMoveStepCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                    const Commands::StopMoveStep::DecodableType & commandData)
+{
+  // FIXME: implement as soon as we have move commands!!
+  return false;
+//    return ColorControlServer::Instance().stopMoveStepCommand(commandPath.mEndpointId, commandData.optionsMask,
+//                                                              commandData.optionsOverride);
+}
+
+void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
+{
+  // TODO: check if we need this
+}
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+/**
+ * @brief Callback for temperature update when timer is finished
+ *
+ * @param endpoint
+ */
+void emberAfPluginColorControlServerTempTransitionEventHandler(EndpointId endpoint)
+{
+  // TODO: check if we need this
+}
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY
+/**
+ * @brief Callback for color update when timer is finished
+ *
+ * @param endpoint
+ */
+void emberAfPluginColorControlServerXyTransitionEventHandler(EndpointId endpoint)
+{
+  // TODO: check if we need this
+}
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY
+
+#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
+/**
+ * @brief Callback for color hue and saturation update when timer is finished
+ *
+ * @param endpoint
+ */
+void emberAfPluginColorControlServerHueSatTransitionEventHandler(EndpointId endpoint)
+{
+  // TODO: check if we need this
+}
+#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
+
+void MatterColorControlPluginServerInitCallback() {}
+
+
+
 // MARK: Attribute access
 
 EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
@@ -407,6 +647,7 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 string DeviceColorControl::description()
 {
   string s = inherited::description();
+  string_format_append(s, "\n- colorControlOptions: %d", mColorControlOptions);
   string_format_append(s, "\n- colormode: %d", mColorMode);
   string_format_append(s, "\n- hue: %d", mHue);
   string_format_append(s, "\n- saturation: %d", mSaturation);

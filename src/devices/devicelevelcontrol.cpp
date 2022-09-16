@@ -22,7 +22,7 @@
 
 // File scope debugging options
 // - Set ALWAYS_DEBUG to 1 to enable DBGLOG output even in non-DEBUG builds of this file
-#define ALWAYS_DEBUG 0
+#define ALWAYS_DEBUG 1
 // - set FOCUSLOGLEVEL to non-zero log level (usually, 5,6, or 7==LOG_DEBUG) to get focus (extensive logging) for this file
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
@@ -517,9 +517,9 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
 string DeviceLevelControl::description()
 {
   string s = inherited::description();
+  string_format_append(s, "\n- LevelControlOptions: %d", mLevelControlOptions);
   string_format_append(s, "\n- currentLevel: %d", mLevel);
   string_format_append(s, "\n- OnLevel: %d", mOnLevel);
-  string_format_append(s, "\n- Options: %d", mLevelControlOptions);
   string_format_append(s, "\n- OnOffTime: %d", mOnOffTransitionTimeDS);
   string_format_append(s, "\n- DimRate: %d", mDefaultMoveRateUnitsPerS);
   return s;
