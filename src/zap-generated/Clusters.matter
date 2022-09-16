@@ -1204,6 +1204,8 @@ server cluster ColorControl = 768 {
   readonly nosubscribe attribute int16u currentY = 4;
   readonly nosubscribe attribute int16u colorTemperature = 7;
   readonly attribute enum8 colorMode = 8;
+  attribute bitmap8 options = 15;
+  readonly attribute nullable int8u numberOfPrimaries = 16;
   readonly attribute int16u enhancedCurrentHue = 16384;
   readonly attribute enum8 enhancedColorMode = 16385;
   readonly attribute int8u colorLoopActive = 16386;
@@ -1686,6 +1688,8 @@ endpoint 2 {
     ram      attribute currentY default = 0x607D;
     callback attribute colorTemperature default = 0x00FA;
     callback attribute colorMode default = 0x01;
+    callback attribute options;
+    callback attribute numberOfPrimaries;
     callback attribute enhancedCurrentHue;
     callback attribute enhancedColorMode default = 0x01;
     ram      attribute colorLoopActive;
