@@ -142,7 +142,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
       changeOnOff_impl(mOn);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_NODE_LABEL_ATTRIBUTE_ID);
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID);
     }
     return true; // changed
   }
