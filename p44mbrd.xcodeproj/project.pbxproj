@@ -377,7 +377,6 @@
 		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
 		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
-		EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CA286DCDA200CA28EC /* color-control-server.cpp */; };
 		EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */; };
 		EDF3F54928A528E700A82418 /* ASN1Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54828A528E700A82418 /* ASN1Time.cpp */; };
 /* End PBXBuildFile section */
@@ -3801,7 +3800,6 @@
 				ED36DCAE286DD7F200CA28EC /* DnssdImpl.cpp in Sources */,
 				ED36D87C286DCDED00CA28EC /* InvokeResponseIBs.cpp in Sources */,
 				ED36DD75286DD9A400CA28EC /* SystemMutex.cpp in Sources */,
-				EDF3F535289BF28000A82418 /* color-control-server.cpp in Sources */,
 				ED36DAE5286DD29600CA28EC /* AddressResolve_DefaultImpl.cpp in Sources */,
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
 				ED24BDC428A6709E0025CC14 /* devicelevelcontrol.cpp in Sources */,
