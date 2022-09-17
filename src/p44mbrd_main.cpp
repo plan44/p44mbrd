@@ -426,18 +426,20 @@ public:
         // try to re-use the endpoint ID for this dSUID
         // - sanity check
         if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-          OLOG(LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by device %s", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+          POLOG(dev, LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by this device", dynamicEndpointIdx);
         }
         if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          OLOG(LOG_ERR, "Dynamic endpoint #%d for device %s exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx, dev->bridgedDSUID().c_str());
+          POLOG(dev, LOG_ERR, "Dynamic endpoint #%d for device exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx);
           dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
         }
         else {
           // add to map
+          POLOG(dev, LOG_NOTICE, "was previously mapped to dynamic endpoint #%d -> using same endpoint again", dynamicEndpointIdx);
           if (dynamicEndpointIdx<numDynamicEndPoints) {
             dynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
           }
           else {
+            // should not happen normally, but when dynamicEndPointMap gets cleared, but device dSUID/endpoint mappings remain, it can happen.
             for (size_t i = numDynamicEndPoints; i<dynamicEndpointIdx; i++) dynamicEndPointMap[i]=' ';
             dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
             dynamicEndPointMap[dynamicEndpointIdx+1] = 0;
@@ -446,7 +448,7 @@ public:
       }
       else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
         // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-        OLOG(LOG_NOTICE, "New device %s, adding to bridge", dev->bridgedDSUID().c_str());
+        POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
       }
       else {
         LogErrorOnFailure(chiperr);
@@ -463,9 +465,10 @@ public:
         }
         if (dynamicEndpointIdx==kInvalidEndpointId) {
           if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-            OLOG(LOG_ERR, "Max number of dynamic endpoints exhausted -> cannot add new device %s", dev->bridgedDSUID().c_str());
+            POLOG(dev, LOG_ERR, "Max number of dynamic endpoints (%d) exhausted -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
           }
           else {
+            POLOG(dev, LOG_NOTICE, "mapping device to free dynamic endpoint #%d", dynamicEndpointIdx);
             dynamicEndpointIdx = numDynamicEndPoints++;
             dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
             // save in KVS
@@ -500,19 +503,19 @@ public:
   void bridgeApiNotificationHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
   {
     if (Error::isOK(aError)) {
+      OLOG(LOG_DEBUG, "bridge API message received: %s", JsonObject::text(aJsonMsg));
       // handle push notifications
       JsonObjectPtr o;
       string targetDSUID;
       if (aJsonMsg && aJsonMsg->get("dSUID", o, true)) {
+        // request targets a device
         targetDSUID = o->stringValue();
-        // search for device
         DeviceDSUIDMap::iterator devpos = mDeviceDSUIDMap.find(targetDSUID);
         if (devpos!=mDeviceDSUIDMap.end()) {
           // device exists, dispatch
           if (aJsonMsg->get("notification", o, true)) {
             string notification = o->stringValue();
-            OLOG(LOG_NOTICE, "Bridge API notification '%s' received", notification.c_str());
-            OLOG(LOG_INFO, "- JSON: %s", aJsonMsg->c_strValue());
+            POLOG(devpos->second, LOG_INFO, "Notification '%s' received: %s", notification.c_str(), JsonObject::text(aJsonMsg));
             bool handled = devpos->second->handleBridgeNotification(notification, aJsonMsg);
             if (handled) {
               POLOG(devpos->second, LOG_INFO, "processed notification");
@@ -522,16 +525,69 @@ public:
             }
           }
           else {
-            POLOG(devpos->second, LOG_ERR, "unknown notification for device");
+            POLOG(devpos->second, LOG_ERR, "unknown request for device");
           }
         }
         else {
-          OLOG(LOG_ERR, "notfication for nknown device %s", targetDSUID.c_str());
+          OLOG(LOG_ERR, "request targeting unknown device %s", targetDSUID.c_str());
+        }
+      }
+      else {
+        // global request
+        if (aJsonMsg->get("notification", o, true)) {
+          string notification = o->stringValue();
+          OLOG(LOG_NOTICE, "Global notification '%s' received: %s", notification.c_str(), JsonObject::text(aJsonMsg));
+          handleGlobalNotification(notification, aJsonMsg);
+        }
+        else {
+          OLOG(LOG_ERR, "unknown global request");
         }
       }
     }
     else {
       OLOG(LOG_ERR, "bridge API Error %s", aError->text());
+    }
+  }
+
+
+  void handleGlobalNotification(const string notification, JsonObjectPtr aJsonMsg)
+  {
+    JsonObjectPtr o;
+    if (notification=="terminate") {
+      int exitcode = EXIT_SUCCESS;
+      if ((o = aJsonMsg->get("exitcode"))) {
+        // custom exit code
+        exitcode = o->int32Value();
+      }
+      OLOG(LOG_NOTICE, "Shutting down CHIP server");
+      Server::GetInstance().Shutdown();
+      OLOG(LOG_NOTICE, "Terminating application with exitcode=%d", exitcode);
+      terminateApp(exitcode);
+    }
+    else if (notification=="loglevel") {
+      if ((o = aJsonMsg->get("app"))) {
+        int newAppLogLevel = o->int32Value();
+        if (newAppLogLevel==8) {
+          // trigger statistics
+          LOG(LOG_NOTICE, "\n========== requested showing statistics");
+          LOG(LOG_NOTICE, "\n%s", MainLoop::currentMainLoop().description().c_str());
+          MainLoop::currentMainLoop().statistics_reset();
+          LOG(LOG_NOTICE, "========== statistics shown\n");
+        }
+        else if (newAppLogLevel>=0 && newAppLogLevel<=7) {
+          int oldLevel = LOGLEVEL;
+          SETLOGLEVEL(newAppLogLevel);
+          LOG(newAppLogLevel, "\n\n========== changed log level from %d to %d ===============", oldLevel, newAppLogLevel);
+        }
+        else {
+          LOG(LOG_ERR, "invalid log level %d", newAppLogLevel);
+        }
+      }
+      if ((o = aJsonMsg->get("chip"))) {
+        int newChipLogLevel = o->int32Value();
+        LOG(LOG_NOTICE, "\n\n========== changing CHIP log level from %d to %d ===============", (int)chip::Logging::GetLogFilter(), newChipLogLevel);
+        chip::Logging::SetLogFilter((uint8_t)newChipLogLevel);
+      }
     }
   }
 
@@ -887,6 +943,13 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
     }
   }
   return ret;
+}
+
+
+// callback for terminating mainloop
+void chip::DeviceLayer::Internal::ExitExternalMainLoop()
+{
+  P44mbrd::sharedApplication()->terminateApp(EXIT_SUCCESS);
 }
 
 

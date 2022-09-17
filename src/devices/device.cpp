@@ -90,7 +90,9 @@ Device::Device() :
 
 string Device::logContextPrefix()
 {
-  return string_format("p44 endpoint #%d (%s)", GetEndpointId(), mName.c_str());
+  string ep;
+  if (GetEndpointId()!=kInvalidEndpointId) ep = string_format(" @endpoint %d", GetEndpointId());
+  return string_format("device '%s'%s", mName.c_str(), ep.c_str());
 }
 
 
@@ -210,7 +212,7 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aPa
     mParentEndpointId
   );
   if (ret==EMBER_ZCL_STATUS_SUCCESS) {
-    OLOG(LOG_INFO, "Added to chip as dynamic endpoint %d (index=%d)", GetEndpointId(), mDynamicEndpointIdx);
+    OLOG(LOG_INFO, "Added to CHIP as dynamic endpoint index #%d", mDynamicEndpointIdx);
   }
   else {
     OLOG(LOG_ERR, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
