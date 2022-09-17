@@ -60,7 +60,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--KVS /tmp/p44mbr_mixwerk_kvs"
+            argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/p44mbr_mixwerk_kvs"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
