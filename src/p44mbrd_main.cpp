@@ -117,11 +117,14 @@ class P44mbrd : public CmdLineApp
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
   typedef std::map<string, DevicePtr> DeviceDSUIDMap;
   DeviceDSUIDMap mDeviceDSUIDMap;
+  char mDynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
+  EndpointId mNumDynamicEndPoints;
 
 public:
 
   P44mbrd() :
-    mChipAppInitialized(false)
+    mChipAppInitialized(false),
+    mNumDynamicEndPoints(0)
   {
   }
 
@@ -142,7 +145,7 @@ public:
       { 0, "product-id",          true, "productid;product ID as specified by vendor" },
       { 0, "custom-flow",         true, "flow;commissioning flow: Standard = 0, UserActionRequired = 1, Custom = 2" },
       { 0, "payloadversion",      true, "version;The version indication provides versioning of the setup payload (default is 0)" },
-      { 0, "discriminator",       true, "discriminator;a12-bit unsigned integer match the value which a device advertises during commissioning" },
+      { 0, "discriminator",       true, "discriminator;a 12-bit unsigned integer to advertise during commissioning" },
       { 0, "setuppin",            true, "pincode;A 27-bit unsigned integer, which serves as proof of possession during commissioning.\n"
                                         "If not provided to compute a verifier, the --spake2p-verifier must be provided." },
       { 0, "spake2p-verifier",    true, "b64_PASE_verifier;A raw concatenation of 'W0' and 'L' (67 bytes) as base64 to override the verifier\n"
@@ -228,24 +231,129 @@ public:
 
   // MARK: query and setup bridgeable devices
 
+  #define NEEDED_DEVICE_PROPERTIES \
+    "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, " \
+    "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
+    "\"channelStates\":null, " \
+    "\"active\":null, " \
+    "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
+
   void queryBridge()
   {
     JsonObjectPtr params = JsonObject::objFromText(
       "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
-      "\"dSUID\":null, \"model\":null, \"x-p44-deviceHardwareId\":null, "
+      "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, "
       "\"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
-      "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, "
-      "\"vendorName\":null, \"model\":null, \"configURL\":null, "
-      "\"channelStates\":null, "
-      "\"active\":null, \"x-p44-bridgeable\":null, \"x-p44-bridged\":null }} }} }}"
+      NEEDED_DEVICE_PROPERTIES
+      "} }} }}"
     );
     BridgeApi::api().call("getProperty", params, boost::bind(&P44mbrd::bridgeApiCollectQueryHandler, this, _1, _2));
   }
 
 
+  DevicePtr bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
+  {
+    JsonObjectPtr o;
+    DevicePtr dev;
+    if (aDeviceJSON->get("x-p44-bridgeable", o)) {
+      if (o->boolValue()) {
+        // bridgeable device
+        if (aDeviceJSON->get("dSUID", o)) {
+          string dsuid = o->stringValue();
+          string name;
+          if (aDeviceJSON->get("name", o)) name = o->stringValue(); // optional
+          // determine device type
+          // - first check if we have a bridging hint
+          if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
+            // bridging hint should determine bridged device
+            string bridgeAs = o->stringValue();
+            if (bridgeAs=="on-off") {
+              dev = new DeviceOnOff();
+            }
+            else if (bridgeAs=="level-control") {
+              dev = new DeviceLevelControl();
+            }
+            if (dev) {
+              OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
+            }
+          }
+          if (!dev) {
+            // no or unknown bridging hint - derive bridged type automatically
+            JsonObjectPtr outputdesc;
+            if (aDeviceJSON->get("outputDescription", outputdesc)) {
+              // output device
+              if (outputdesc->get("x-p44-behaviourType", o)) {
+                if (o->stringValue()=="light") {
+                  // this is a light device
+                  if (outputdesc->get("function", o)) {
+                    int outputfunction = (int)o->int32Value();
+                    OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                    // create to-be-bridged device
+                    // outputFunction_switch = 0, ///< switch output - single channel 0..100
+                    // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
+                    // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
+                    // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
+
+                    // From: docs/guides/darwin.md
+                    // -   Supported device types are (not exhaustive):
+                    //
+                    // | Type               | Decimal | HEX  |
+                    // | ------------------ | ------- | ---- |
+                    // | Lightbulb          | 256     | 0100 |
+                    // | Lightbulb + Dimmer | 257     | 0101 |
+                    // | Switch             | 259     | 0103 |
+                    // | Contact Sensor     | 21      | 0015 |
+                    // | Door Lock          | 10      | 000A |
+                    // | Light Sensor       | 262     | 0106 |
+                    // | Occupancy Sensor   | 263     | 0107 |
+                    // | Outlet             | 266     | 010A |
+                    // | Color Bulb         | 268     | 010C |
+                    // | Window Covering    | 514     | 0202 |
+                    // | Thermostat         | 769     | 0301 |
+                    // | Temperature Sensor | 770     | 0302 |
+                    // | Flow Sensor        | 774     | 0306 |
+
+                    switch(outputfunction) {
+                      default:
+                      case 0: // switch output
+                        dev = new DeviceOnOff();
+                        break;
+                      case 1: // effective value dimmer - single channel 0..100
+                        dev = new DeviceLevelControl();
+                        break;
+                      case 3: // dimmer with color temperature - channels 1 and 4
+                      case 4: // full color dimmer - channels 1..6
+                        dev = new DeviceColorControl(outputfunction==3 /* ctOnly */);
+                        break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (dev) {
+            // now init
+            dev->initBridgedInfo(aDeviceJSON);
+            mDeviceDSUIDMap[dsuid] = dev;
+            // enable it for bridging on the other side
+            JsonObjectPtr params = JsonObject::newObj();
+            params->add("dSUID", JsonObject::newString(dsuid));
+            JsonObjectPtr props = JsonObject::newObj();
+            props->add("x-p44-bridged", JsonObject::newBool(true));
+            params->add("properties", props);
+            // no callback, but will wait when bridgeapi is in standalone mode
+            BridgeApi::api().call("setProperty", params, NoOP);
+          }
+        }
+      }
+    }
+    return dev;
+  }
+
+
   void bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
   {
-    OLOG(LOG_INFO, "bridge query: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+    OLOG(LOG_INFO, "initial bridgeapi query: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
     JsonObjectPtr o;
     JsonObjectPtr result;
     if (aJsonMsg && aJsonMsg->get("result", result)) {
@@ -277,214 +385,208 @@ public:
             JsonObjectPtr device;
             while(devices->nextKeyValue(dn, device)) {
               // examine device
-              if (device->get("x-p44-bridgeable", o)) {
-                if (o->boolValue()) {
-                  // bridgeable device
-                  if (device->get("dSUID", o)) {
-                    string dsuid = o->stringValue();
-                    string name;
-                    if (device->get("name", o)) name = o->stringValue(); // optional
-                    // determine device type
-                    JsonObjectPtr outputdesc;
-                    if (device->get("outputDescription", outputdesc)) {
-                      // output device
-                      if (outputdesc->get("x-p44-behaviourType", o)) {
-                        if (o->stringValue()=="light") {
-                          // this is a light device
-                          if (outputdesc->get("function", o)) {
-                            int outputfunction = (int)o->int32Value();
-                            OLOG(LOG_NOTICE, "found light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                            // enable it for bridging
-                            JsonObjectPtr params = JsonObject::newObj();
-                            params->add("dSUID", JsonObject::newString(dsuid));
-                            JsonObjectPtr props = JsonObject::newObj();
-                            props->add("x-p44-bridged", JsonObject::newBool(true));
-                            params->add("properties", props);
-                            // no callback, but will wait when bridgeapi is in standalone mode
-                            BridgeApi::api().call("setProperty", params, NoOP);
-                            // create to-be-bridged device
-                            DevicePtr dev;
-                            // outputFunction_switch = 0, ///< switch output - single channel 0..100
-                            // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
-                            // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
-                            // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
-
-                            // From: docs/guides/darwin.md
-                            // -   Supported device types are (not exhaustive):
-                            //
-                            // | Type               | Decimal | HEX  |
-                            // | ------------------ | ------- | ---- |
-                            // | Lightbulb          | 256     | 0100 |
-                            // | Lightbulb + Dimmer | 257     | 0101 |
-                            // | Switch             | 259     | 0103 |
-                            // | Contact Sensor     | 21      | 0015 |
-                            // | Door Lock          | 10      | 000A |
-                            // | Light Sensor       | 262     | 0106 |
-                            // | Occupancy Sensor   | 263     | 0107 |
-                            // | Outlet             | 266     | 010A |
-                            // | Color Bulb         | 268     | 010C |
-                            // | Window Covering    | 514     | 0202 |
-                            // | Thermostat         | 769     | 0301 |
-                            // | Temperature Sensor | 770     | 0302 |
-                            // | Flow Sensor        | 774     | 0306 |
-
-                            switch(outputfunction) {
-                              default:
-                              case 0: // switch output - single channel 0..100
-                                dev = new DeviceOnOff();
-                                break;
-                              case 1: // effective value dimmer - single channel 0..100
-                                dev = new DeviceLevelControl();
-                                break;
-                              case 3: // dimmer with color temperature - channels 1 and 4
-                              case 4: // full color dimmer - channels 1..6
-                                dev = new DeviceColorControl(outputfunction==3 /* ctOnly */);
-                                break;
-                            }
-                            if (dev) {
-                              dev->initBridgedInfo(device);
-                              mDeviceDSUIDMap[dsuid] = dev;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              DevicePtr dev = bridgedDeviceFromJSON(device);
             }
           }
         }
       }
     }
-    // devices collected
-    // start chip only now
-    OLOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
-    // - start but unwind call stack before
-    MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+    // initial devices collected
+    if (mDeviceDSUIDMap.empty()) {
+      OLOG(LOG_WARNING, "Bridge has no devices yet, NOT starting CHIP now, waiting for first device to appear");
+    }
+    else {
+      // start chip only now
+      OLOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
+      // - start but unwind call stack before
+      MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+    }
+  }
+
+
+  void installAdditionalDevice(DevicePtr aDev)
+  {
+    if (aDev) {
+      if (!mChipAppInitialized) {
+        // we are still waiting for the first bridged device and haven't started CHIP yet -> start now
+        OLOG(LOG_NOTICE, "First bridgeable device installed, can start CHIP now, finally");
+        // starting chip will take care of actually installing the device
+        // - but unwind call stack before
+        MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+      }
+      else {
+        // already running
+        installBridgedDevice(aDev);
+        // save possibly modified endpoint map
+        chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
+        CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
+        LogErrorOnFailure(chiperr);
+        // add as new endpoint to bridge
+        if (aDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
+          POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while CHIP is already up");
+          aDev->inChipInit();
+          // dump status
+          POLOG(aDev, LOG_INFO, "initialized from chip: %s", aDev->description().c_str());
+        }
+      }
+    }
   }
 
 
   void startChip()
   {
     ErrorPtr err;
-    err = chipAppInit();
+    if (mChipAppInitialized) {
+      err = TextError::err("trying to call chipAppInit() a second time");
+    }
+    else {
+      err = chipAppInit();
+    }
     if (Error::notOK(err)) {
       OLOG(LOG_ERR, "chipAppInit failed: %s ", err->text());
       terminateApp(EXIT_FAILURE);
       return;
     }
-    installBridgedDevices();
+    installInitiallyBridgedDevices();
   }
 
 
-  void installBridgedDevices()
+  void newDeviceGotBridgeable(string aNewDeviceDSUID)
   {
-    // MARK: - p44mbrd specific setup before entering chip mainloop
+    JsonObjectPtr params = JsonObject::objFromText(
+      "{ \"query\": "
+      NEEDED_DEVICE_PROPERTIES
+      "}"
+    );
+    params->add("dSUID", JsonObject::newString(aNewDeviceDSUID));
+    BridgeApi::api().call("getProperty", params, boost::bind(&P44mbrd::newDeviceInfoQueryHandler, this, _1, _2));
+  }
 
+
+  void newDeviceInfoQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
+  {
+    OLOG(LOG_INFO, "bridgeapi query for additional device: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+    JsonObjectPtr o;
+    JsonObjectPtr result;
+    if (aJsonMsg && aJsonMsg->get("result", result)) {
+      DevicePtr dev = bridgedDeviceFromJSON(result);
+      installAdditionalDevice(dev);
+    }
+  }
+
+
+
+  CHIP_ERROR installBridgedDevice(DevicePtr dev)
+  {
+    CHIP_ERROR chiperr;
+    chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
+    string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
+    EndpointId dynamicEndpointIdx = kInvalidEndpointId;
+    chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
+    if (chiperr==CHIP_NO_ERROR) {
+      // try to re-use the endpoint ID for this dSUID
+      // - sanity check
+      if (dynamicEndpointIdx>=mNumDynamicEndPoints || mDynamicEndPointMap[dynamicEndpointIdx]!='d') {
+        POLOG(dev, LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by this device", dynamicEndpointIdx);
+      }
+      if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+        POLOG(dev, LOG_ERR, "Dynamic endpoint #%d for device exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx);
+        dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
+      }
+      else {
+        // add to map
+        POLOG(dev, LOG_NOTICE, "was previously mapped to dynamic endpoint #%d -> using same endpoint again", dynamicEndpointIdx);
+        if (dynamicEndpointIdx<mNumDynamicEndPoints) {
+          mDynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
+        }
+        else {
+          // should not happen normally, but when dynamicEndPointMap gets cleared, but device dSUID/endpoint mappings remain, it can happen.
+          for (size_t i = mNumDynamicEndPoints; i<dynamicEndpointIdx; i++) mDynamicEndPointMap[i]=' ';
+          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
+          mDynamicEndPointMap[dynamicEndpointIdx+1] = 0;
+        }
+      }
+    }
+    else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+      // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
+      POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
+    }
+    else {
+      LogErrorOnFailure(chiperr);
+    }
+    // update and possibly extend endpoint map
+    if (dynamicEndpointIdx==kInvalidEndpointId) {
+      // this device needs a new endpoint
+      for (EndpointId i=0; i<mNumDynamicEndPoints; i++) {
+        if (mDynamicEndPointMap[i]==' ') {
+          // use the gap
+          dynamicEndpointIdx = i;
+          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+        }
+      }
+      if (dynamicEndpointIdx==kInvalidEndpointId) {
+        if (mNumDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+          POLOG(dev, LOG_ERR, "Max number of dynamic endpoints (%d) exhausted -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
+        }
+        else {
+          dynamicEndpointIdx = mNumDynamicEndPoints++;
+          POLOG(dev, LOG_NOTICE, "mapping device to free dynamic endpoint #%d", dynamicEndpointIdx);
+          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+          // save in KVS
+          chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
+          LogErrorOnFailure(chiperr);
+        }
+      }
+    }
+    // assign to dynamic endpoint array
+    if (dynamicEndpointIdx!=kInvalidEndpointId) {
+      dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
+      mDevices[dynamicEndpointIdx] = dev.get();
+    }
+    return chiperr;
+  }
+
+
+  void installInitiallyBridgedDevices()
+  {
     // Set starting endpoint id where dynamic endpoints will be assigned, which
     // will be the next consecutive endpoint id after the last fixed endpoint.
     mFirstDynamicEndpointId = static_cast<chip::EndpointId>(
       static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
-
     // Disable last fixed endpoint, which is used as a placeholder for all of the
     // supported clusters so that ZAP will generated the requisite code.
     emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
-
     // Clear out the array of dynamic endpoints
     memset(mDevices, 0, sizeof(mDevices));
     CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
     // get list of endpoints known in use
-    char dynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
-    EndpointId numDynamicEndPoints = 0;
+    mNumDynamicEndPoints = 0;
     size_t nde;
-    chiperr = kvs.Get(kP44mbrNamespace "endPointMap", dynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &nde);
+    chiperr = kvs.Get(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &nde);
     if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       // no endpoint map yet
     }
     else if (chiperr==CHIP_NO_ERROR){
-      numDynamicEndPoints = static_cast<EndpointId>(nde);
+      mNumDynamicEndPoints = static_cast<EndpointId>(nde);
     }
     else {
       LogErrorOnFailure(chiperr);
     }
-    dynamicEndPointMap[numDynamicEndPoints]=0; // null terminate for easy debug printing as string
-    OLOG(LOG_INFO,"DynamicEndpointMap: %s", dynamicEndPointMap);
+    mDynamicEndPointMap[mNumDynamicEndPoints]=0; // null terminate for easy debug printing as string
+    OLOG(LOG_INFO,"DynamicEndpointMap: %s", mDynamicEndPointMap);
     // revert all endpoint map markers to "unconfimed"
-    for (size_t i=0; i<numDynamicEndPoints; i++) {
-      if (dynamicEndPointMap[i]=='D') dynamicEndPointMap[i]='d'; // unconfirmed device
+    for (size_t i=0; i<mNumDynamicEndPoints; i++) {
+      if (mDynamicEndPointMap[i]=='D') mDynamicEndPointMap[i]='d'; // unconfirmed device
     }
     // process list of to-be-bridged devices
     for (DeviceDSUIDMap::iterator pos = mDeviceDSUIDMap.begin(); pos!=mDeviceDSUIDMap.end(); ++pos) {
       DevicePtr dev = pos->second;
-      // look up previous endpoint mapping
-      string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
-      EndpointId dynamicEndpointIdx = kInvalidEndpointId;
-      chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
-      if (chiperr==CHIP_NO_ERROR) {
-        // try to re-use the endpoint ID for this dSUID
-        // - sanity check
-        if (dynamicEndpointIdx>=numDynamicEndPoints || dynamicEndPointMap[dynamicEndpointIdx]!='d') {
-          POLOG(dev, LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by this device", dynamicEndpointIdx);
-        }
-        if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          POLOG(dev, LOG_ERR, "Dynamic endpoint #%d for device exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx);
-          dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
-        }
-        else {
-          // add to map
-          POLOG(dev, LOG_NOTICE, "was previously mapped to dynamic endpoint #%d -> using same endpoint again", dynamicEndpointIdx);
-          if (dynamicEndpointIdx<numDynamicEndPoints) {
-            dynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
-          }
-          else {
-            // should not happen normally, but when dynamicEndPointMap gets cleared, but device dSUID/endpoint mappings remain, it can happen.
-            for (size_t i = numDynamicEndPoints; i<dynamicEndpointIdx; i++) dynamicEndPointMap[i]=' ';
-            dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
-            dynamicEndPointMap[dynamicEndpointIdx+1] = 0;
-          }
-        }
-      }
-      else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-        // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
-        POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
-      }
-      else {
-        LogErrorOnFailure(chiperr);
-      }
-      // update and possibly extend endpoint map
-      if (dynamicEndpointIdx==kInvalidEndpointId) {
-        // this device needs a new endpoint
-        for (EndpointId i=0; i<numDynamicEndPoints; i++) {
-          if (dynamicEndPointMap[i]==' ') {
-            // use the gap
-            dynamicEndpointIdx = i;
-            dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-          }
-        }
-        if (dynamicEndpointIdx==kInvalidEndpointId) {
-          if (numDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-            POLOG(dev, LOG_ERR, "Max number of dynamic endpoints (%d) exhausted -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
-          }
-          else {
-            POLOG(dev, LOG_NOTICE, "mapping device to free dynamic endpoint #%d", dynamicEndpointIdx);
-            dynamicEndpointIdx = numDynamicEndPoints++;
-            dynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-            // save in KVS
-            chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
-            LogErrorOnFailure(chiperr);
-          }
-        }
-      }
-      // assign to dynamic endpoint array
-      if (dynamicEndpointIdx!=kInvalidEndpointId) {
-        dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
-        mDevices[dynamicEndpointIdx] = dev.get();
-      }
+      // install the device
+      chiperr = installBridgedDevice(dev);
     }
     // save updated endpoint map
-    chiperr = kvs.Put(kP44mbrNamespace "endPointMap", dynamicEndPointMap, numDynamicEndPoints);
+    chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
     LogErrorOnFailure(chiperr);
 
     // Add the devices as dynamic endpoints
@@ -492,8 +594,7 @@ public:
       if (mDevices[i]) {
         // there is a device at this dynamic endpoint
         if (mDevices[i]->AddAsDeviceEndpoint(mFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
-          // give device chance to do things before mainloop starts
-          mDevices[i]->beforeChipMainloopPrep();
+          POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
         }
       }
     }
@@ -529,6 +630,19 @@ public:
           }
         }
         else {
+          // unknown DSUID - check if it is a change in bridgeability
+          if (aJsonMsg->get("notification", o, true)) {
+            if (o->stringValue()=="pushNotification") {
+              JsonObjectPtr props;
+              if (aJsonMsg->get("changedproperties", props, true)) {
+                if (props->get("x-p44-bridgeable", o) && o->boolValue()) {
+                  // a new device got bridgeable
+                  newDeviceGotBridgeable(targetDSUID);
+                }
+                return;
+              }
+            }
+          }
           OLOG(LOG_ERR, "request targeting unknown device %s", targetDSUID.c_str());
         }
       }
@@ -540,7 +654,7 @@ public:
           handleGlobalNotification(notification, aJsonMsg);
         }
         else {
-          OLOG(LOG_ERR, "unknown global request");
+          OLOG(LOG_ERR, "unknown global request: %s", JsonObject::text(aJsonMsg));
         }
       }
     }
@@ -597,9 +711,9 @@ public:
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
       if (mDevices[i]) {
         // give device chance to do things just after mainloop has started
-        mDevices[i]->inChipMainloopInit();
+        mDevices[i]->inChipInit();
         // dump status
-        POLOG(mDevices[i], LOG_INFO, "initialized from chip mainloop: %s", mDevices[i]->description().c_str());
+        POLOG(mDevices[i], LOG_INFO, "initialized from chip: %s", mDevices[i]->description().c_str());
       }
     }
   }

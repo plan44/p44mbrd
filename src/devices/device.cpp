@@ -73,7 +73,9 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 // MARK: - Device
 
 Device::Device() :
-  mReachable(false)
+  mReachable(false),
+  mBridgeable(true), // assume bridgeable, otherwise device wouldn't be instantiated
+  mActive(false)
 {
   // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;
@@ -145,10 +147,16 @@ void Device::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
 {
   JsonObjectPtr o;
   if (aChangedProperties->get("active", o)) {
-    updateReachable(o->boolValue(), UpdateMode(UpdateFlags::matter));
+    mActive = o->boolValue();
+    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
   }
   if (aChangedProperties->get("name", o)) {
     updateName(o->stringValue(), UpdateMode(UpdateFlags::matter));
+  }
+  if (aChangedProperties->get("x-p44-bridgeable", o)) {
+    // note: non-bridgeable status just makes device unreachable
+    mBridgeable = o->boolValue();
+    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
   }
 }
 
@@ -222,13 +230,7 @@ bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aPa
 }
 
 
-void Device::beforeChipMainloopPrep()
-{
-  /// TODO: NOP for now
-}
-
-
-void Device::inChipMainloopInit()
+void Device::inChipInit()
 {
   /// TODO: NOP for now
 
@@ -239,14 +241,14 @@ void Device::inChipMainloopInit()
 
 bool Device::IsReachable()
 {
-  return mReachable;
+  return mActive && mBridgeable;
 }
 
 void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 {
   if (mReachable!=aReachable || aUpdateMode.Has(UpdateFlags::forced)) {
     mReachable = aReachable;
-    OLOG(LOG_INFO, "Updating reachable to %s - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", aUpdateMode.Raw());
+    OLOG(LOG_INFO, "Updating reachable to %s (bridgeable=%d, active=%d) - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", mBridgeable, mActive, aUpdateMode.Raw());
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID, ZCL_REACHABLE_ATTRIBUTE_ID);
     }

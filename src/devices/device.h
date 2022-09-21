@@ -86,6 +86,10 @@ class Device : public p44::P44LoggingObj
   string mName;
   string mZone;
 
+  // internal state
+  bool mBridgeable;
+  bool mActive;
+
 public:
 
   Device();
@@ -129,11 +133,8 @@ public:
   /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
   bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aParentEndpoint);
 
-  /// called after instantiating device as dynamic endpoint, but before chip mainloop starts
-  virtual void beforeChipMainloopPrep();
-
-  /// called as a chip mainloop scheduled work just after mainloop starts
-  virtual void inChipMainloopInit();
+  /// called when device is instantiated and registered in CHIP (and chip is running)
+  virtual void inChipInit();
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
