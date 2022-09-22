@@ -234,7 +234,7 @@ public:
   #define NEEDED_DEVICE_PROPERTIES \
     "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, " \
     "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
-    "\"channelStates\":null, " \
+    "\"channelStates\":null, \"channelDescriptions\":null, " \
     "\"active\":null, " \
     "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
 

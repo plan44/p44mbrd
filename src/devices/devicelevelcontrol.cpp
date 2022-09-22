@@ -111,7 +111,7 @@ void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   inherited::parseChannelStates(aChannelStates, aUpdateMode);
   // init level
   JsonObjectPtr o;
-  if (aChannelStates->get("brightness", o)) {
+  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
       // handle switching off separately

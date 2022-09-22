@@ -90,8 +90,22 @@ void DeviceOnOff::finalizeDeviceDeclaration()
 void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
   inherited::initBridgedInfo(aDeviceInfo);
+  // output devices should know which one is the default channel
+  JsonObjectPtr o = aDeviceInfo->get("channelDescriptions");
+  o->resetKeyIteration();
+  string cid;
+  JsonObjectPtr co;
+  while(o->nextKeyValue(cid, co)) {
+    JsonObjectPtr o2;
+    if (co->get("dsIndex", o2)) {
+      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
+    }
+//    if (co->get("channelType", o2)) {
+//      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
+//    }
+  }
   // output devices should examine the channel states
-  JsonObjectPtr o = aDeviceInfo->get("channelStates");
+  o = aDeviceInfo->get("channelStates");
   if (o) {
     parseChannelStates(o, UpdateMode());
   }
@@ -112,7 +126,7 @@ void DeviceOnOff::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
 void DeviceOnOff::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
   JsonObjectPtr o;
-  if (aChannelStates->get("brightness", o)) {
+  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
       updateOnOff(vo->doubleValue()>0, aUpdateMode);
