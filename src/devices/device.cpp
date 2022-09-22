@@ -139,6 +139,13 @@ bool Device::handleBridgeNotification(const string aNotification, JsonObjectPtr 
       return true;
     }
   }
+  else if (aNotification=="vanish") {
+    // device got removed, make unreachable
+    mBridgeable = false;
+    mActive = false;
+    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
+    return true;
+  }
   return false; // not handled
 }
 
