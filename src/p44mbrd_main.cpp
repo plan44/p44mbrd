@@ -241,6 +241,11 @@ public:
 
   void queryBridge()
   {
+    // first update (reset) bridge status
+    BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
+    BridgeApi::api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(false));
+    BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(false));
+    // query devices
     JsonObjectPtr params = JsonObject::objFromText(
       "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
       "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, "
@@ -448,6 +453,10 @@ public:
       terminateApp(EXIT_FAILURE);
       return;
     }
+    // update commissionable status
+    bool commissionable = Server::GetInstance().GetFabricTable().FabricCount() == 0;
+    BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(commissionable));
+    // install the devices we have
     installInitiallyBridgedDevices();
   }
 
@@ -983,6 +992,8 @@ public:
 
     // done, ready to run
     mChipAppInitialized = true;
+    // let bridge API know
+    BridgeApi::api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(true));
     return err;
   }
 
