@@ -817,7 +817,6 @@
 		ED36DAE3286DD29600CA28EC /* tool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tool.cpp; sourceTree = "<group>"; };
 		ED36DAE4286DD29600CA28EC /* AddressResolve.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressResolve.h; sourceTree = "<group>"; };
 		ED36DAE9286DD2CD00CA28EC /* Advertiser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Advertiser.h; sourceTree = "<group>"; };
-		ED36DAEA286DD2CD00CA28EC /* AllInterfacesListenIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllInterfacesListenIterator.h; sourceTree = "<group>"; };
 		ED36DAEB286DD2CD00CA28EC /* Discovery_ImplPlatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Discovery_ImplPlatform.h; sourceTree = "<group>"; };
 		ED36DAED286DD2CD00CA28EC /* TxtFields.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TxtFields.cpp; sourceTree = "<group>"; };
 		ED36DAEF286DD2CD00CA28EC /* Discovery_ImplPlatform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Discovery_ImplPlatform.cpp; sourceTree = "<group>"; };
@@ -2345,7 +2344,6 @@
 				ED36DB55286DD2CE00CA28EC /* ActiveResolveAttempts.cpp */,
 				ED36DAFC286DD2CD00CA28EC /* ActiveResolveAttempts.h */,
 				ED36DAE9286DD2CD00CA28EC /* Advertiser.h */,
-				ED36DAEA286DD2CD00CA28EC /* AllInterfacesListenIterator.h */,
 				ED36DAFF286DD2CE00CA28EC /* Constants.h */,
 				ED36DAEF286DD2CD00CA28EC /* Discovery_ImplPlatform.cpp */,
 				ED36DAEB286DD2CD00CA28EC /* Discovery_ImplPlatform.h */,

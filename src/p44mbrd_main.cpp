@@ -188,9 +188,10 @@ public:
 
   virtual void cleanup(int aExitCode) override
   {
-    if (mChipAppInitialized) {
-      chipAppCleanup();
-    }
+    // close bridge API connection
+    BridgeApi::api().closeConnection();
+    // cleanup chip app
+    chipAppCleanup();
   }
 
 
@@ -673,8 +674,6 @@ public:
         // custom exit code
         exitcode = o->int32Value();
       }
-      OLOG(LOG_NOTICE, "Shutting down CHIP server");
-      Server::GetInstance().Shutdown();
       OLOG(LOG_NOTICE, "Terminating application with exitcode=%d", exitcode);
       terminateApp(exitcode);
     }
@@ -990,11 +989,15 @@ public:
 
   void chipAppCleanup()
   {
-    Server::GetInstance().Shutdown();
-    DeviceLayer::PlatformMgr().Shutdown();
-    #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
-    chip::trace::DeInitTrace();
-    #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+    if (mChipAppInitialized) {
+      Server::GetInstance().Shutdown();
+      DeviceLayer::PlatformMgr().Shutdown();
+      #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+      chip::trace::DeInitTrace();
+      #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
+      // no more
+      mChipAppInitialized = false;
+    }
   }
 
 };
