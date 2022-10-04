@@ -111,6 +111,7 @@ gn gen \
     $OUT_DIR
 if [[ $? != 0 ]]; then
   echo "# gn FAILED"
+  exit 1
 fi
 
 # build with ninja (only the app, not other stuff like address-resolve-tool)
@@ -125,5 +126,9 @@ fi
 if [ -d "${PREBUILT_BIN}" ]; then
   "${BUILT_TOOLS}/binutils/binutils/strip-new" -o "${PREBUILT_BIN}/${CHIPAPP_NAME}" "${OUT_DIR}/${CHIPAPP_NAME}"
   echo "copied executable to: ${PREBUILT_BIN}"
+  # also save info about the source VERSION we built that binary from
+  git describe HEAD >"${PREBUILT_BIN}/git_version"
+  git rev-parse HEAD >"${PREBUILT_BIN}/git_rev"
+  echo "saved version/rev along with executable in: ${PREBUILT_BIN}"
 fi
 
