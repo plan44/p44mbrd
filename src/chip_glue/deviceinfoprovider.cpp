@@ -66,8 +66,8 @@ CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t 
 {
   // FIXME: testing
   year = 2022;
-  month = 9;
-  day = 6;
+  month = 10;
+  day = 04;
   return CHIP_NO_ERROR;
 }
 
