@@ -77,10 +77,16 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
   DECLARE_DYNAMIC_CLUSTER(ZCL_COLOR_CONTROL_CLUSTER_ID, colorControlAttrs, colorControlIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
+const EmberAfDeviceType gCTLightTypes[] = {
+  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+};
+
 const EmberAfDeviceType gColorLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
 };
+
 
 
 // MARK: - DeviceColorControl
@@ -99,7 +105,12 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly) :
 
 void DeviceColorControl::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
+  if (mCtOnly) {
+    finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gCTLightTypes));
+  }
+  else {
+    finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
+  }
 }
 
 void DeviceColorControl::initBridgedInfo(JsonObjectPtr aDeviceInfo)

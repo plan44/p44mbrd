@@ -49,8 +49,10 @@ const int kDescriptorAttributeArraySize = 254;
 #define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
 // (taken from matter-devices.xml)
 #define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
-// (taken from matter-devices.xml) FIXME: is it only "color temperature"? or just not extended (0x010D) color?
-#define DEVICE_TYPE_MA_COLOR_LIGHT 0x010C
+// (taken from matter-devices.xml)
+#define DEVICE_TYPE_MA_CT_LIGHT 0x010C
+// (taken from matter-devices.xml)
+#define DEVICE_TYPE_MA_COLOR_LIGHT 0x010D
 
 // Device Version for dynamic endpoints:
 #define DEVICE_VERSION_DEFAULT 1
