@@ -79,12 +79,12 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gCTLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
 const EmberAfDeviceType gColorLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
 
@@ -113,9 +113,9 @@ void DeviceColorControl::finalizeDeviceDeclaration()
   }
 }
 
-void DeviceColorControl::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+void DeviceColorControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
 {
-  inherited::initBridgedInfo(aDeviceInfo);
+  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
   // no extra info at this level so far -> NOP
 }
 
@@ -591,64 +591,45 @@ void MatterColorControlPluginServerInitCallback() {}
 EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer =
-      EMBER_AF_COLOR_CAPABILITIES_COLOR_TEMPERATURE_SUPPORTED |
-        (mCtOnly ? 0 : EMBER_AF_COLOR_CAPABILITIES_HUE_SATURATION_SUPPORTED|EMBER_AF_COLOR_CAPABILITIES_XY_ATTRIBUTES_SUPPORTED);
-      FOCUSOLOG("reading colorcontrol colorCapabilities: 0x%hx", (unsigned short)*buffer);
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) {
+      return getAttr<uint8_t>(
+        buffer, maxReadLength,
+        EMBER_AF_COLOR_CAPABILITIES_COLOR_TEMPERATURE_SUPPORTED |
+        (mCtOnly ? 0 : EMBER_AF_COLOR_CAPABILITIES_HUE_SATURATION_SUPPORTED|EMBER_AF_COLOR_CAPABILITIES_XY_ATTRIBUTES_SUPPORTED)
+      );
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) {
       // color mode: 0=HS, 1=XY, 2=Colortemp
-      FOCUSOLOG("reading colorControl colorMode: %hu", (unsigned short)mColorMode);
-      *buffer = mColorMode;
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return getAttr(buffer, maxReadLength, mColorMode);
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading colorControl currentHue: %hu", (unsigned short)currentHue());
-      *buffer = currentHue();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentHue());
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading colorControl currentSaturation: %hu", (unsigned short)currentSaturation());
-      *buffer = currentSaturation();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentSaturation());
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      FOCUSOLOG("reading colorControl currentColortemp: %hu", (unsigned short)currentColortemp());
-      *((uint16_t *)buffer) = currentColortemp();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentColortemp());
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      FOCUSOLOG("reading colorControl currentX: %hu", (unsigned short)currentX());
-      *((uint16_t *)buffer) = currentX();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentX());
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      FOCUSOLOG("reading colorControl currentY: %hu", (unsigned short)currentY());
-      *((uint16_t *)buffer) = currentY();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentY());
     }
-    if ((attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading colorControl options: 0x%hx", (unsigned short)mColorControlOptions);
-      *buffer = mColorControlOptions;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mColorControlOptions);
     }
     // constants
-    if ((attributeId == ZCL_COLOR_CONTROL_NUMBER_OF_PRIMARIES_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading numberOfPrimaries options: CONSTANT 0");
-      *buffer = 0; // no primary color support at all
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_COLOR_CONTROL_NUMBER_OF_PRIMARIES_ATTRIBUTE_ID) {
+      return getAttr<uint8_t>(buffer, maxReadLength, 0);
     }
     // common
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t *)buffer) = ZCL_COLOR_CONTROL_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_COLOR_CONTROL_CLUSTER_REVISION);
     }
-    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *((uint32_t*)buffer) = (uint32_t) ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP;
-      FOCUSOLOG("reading colorControl featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP);
     }
   }
   // let base class try
@@ -660,9 +641,7 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 {
   if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) {
-      mColorControlOptions = *buffer;
-      FOCUSOLOG("writing colorcontrol options: 0x%hx", (unsigned short)mColorControlOptions);
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return setAttr(mColorControlOptions, buffer);
     }
   }
   // let base class try

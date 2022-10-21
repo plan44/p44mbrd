@@ -74,7 +74,7 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gDimmableLightTypes[] = {
   { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
 
@@ -98,9 +98,9 @@ void DeviceLevelControl::finalizeDeviceDeclaration()
 }
 
 
-void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
 {
-  inherited::initBridgedInfo(aDeviceInfo);
+  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
   // no extra info at this level so far -> NOP
 }
 
@@ -439,40 +439,27 @@ void MatterLevelControlPluginServerInitCallback() {}
 EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
-    if ((attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading levelcontrol currentLevel: %hu", (unsigned short)currentLevel());
-      *buffer = currentLevel();
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, currentLevel());
     }
-    if ((attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      FOCUSOLOG("reading levelcontrol onOffTransitionTime: %hu", (unsigned short)mOnOffTransitionTimeDS);
-      *((uint16_t *)buffer) = mOnOffTransitionTimeDS;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mOnOffTransitionTimeDS);
     }
-    if ((attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading levelcontrol onLevel: %hu", (unsigned short)mOnLevel);
-      *buffer = mOnLevel;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mOnLevel);
     }
-    if ((attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading levelcontrol options: 0x%hx", (unsigned short)mLevelControlOptions);
-      *buffer = mLevelControlOptions;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mLevelControlOptions);
     }
-    if ((attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading levelcontrol defaultMoveRateUnitsPerS: %hu", (unsigned short)mDefaultMoveRateUnitsPerS);
-      *buffer = mDefaultMoveRateUnitsPerS;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mDefaultMoveRateUnitsPerS);
     }
     // common attributes
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t*)buffer) = (uint16_t) ZCL_LEVEL_CONTROL_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_REVISION);
     }
-    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *((uint32_t*)buffer) = (uint32_t) ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP;
-      FOCUSOLOG("reading levelcontrol featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP);
     }
   }
   // let base class try
@@ -484,24 +471,16 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
 {
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
-      mOnOffTransitionTimeDS = *((uint16_t *)buffer);
-      FOCUSOLOG("writing levelcontrol onOffTransitionTime: %hu", (unsigned short)mOnOffTransitionTimeDS);
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return setAttr(mOnOffTransitionTimeDS, buffer);
     }
     if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
-      mOnLevel = *buffer;
-      FOCUSOLOG("writing levelcontrol onLevel: %hu", (unsigned short)mOnLevel);
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return setAttr(mOnLevel, buffer);
     }
     if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
-      mLevelControlOptions = *buffer;
-      FOCUSOLOG("writing levelcontrol options: 0x%hx", (unsigned short)mLevelControlOptions);
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return setAttr(mLevelControlOptions, buffer);
     }
     if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
-      mDefaultMoveRateUnitsPerS = *buffer;
-      FOCUSOLOG("writing levelcontrol defaultMoveRateUnitsPerS: %hu", (unsigned short)mDefaultMoveRateUnitsPerS);
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return setAttr(mDefaultMoveRateUnitsPerS, buffer);
     }
   }
   // let base class try

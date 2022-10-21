@@ -75,7 +75,8 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 Device::Device() :
   mReachable(false),
   mBridgeable(true), // assume bridgeable, otherwise device wouldn't be instantiated
-  mActive(false)
+  mActive(false),
+  mPartOfComposedDevice(false)
 {
   // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;
@@ -98,7 +99,7 @@ string Device::logContextPrefix()
 }
 
 
-void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
 {
   // parse common info from bridge
   JsonObjectPtr o = aDeviceInfo->get("dSUID");
@@ -127,6 +128,14 @@ void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo)
   if (aDeviceInfo->get("active", o)) {
     mReachable = o->boolValue();
   }
+}
+
+
+const string Device::endpointDSUID()
+{
+  if (!mPartOfComposedDevice) return mBridgedDSUID; // is the base device for the dSUID
+  // device is a subdevice, must add suffix to dSUID to uniquely identify endpoint
+  return mBridgedDSUID + "_" + endPointDSUIDSuffix();
 }
 
 
@@ -211,13 +220,12 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
 }
 
 
-bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aParentEndpoint)
+bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
 {
   // finalize the declaration
   finalizeDeviceDeclaration();
   // add as dynamic endpoint
   mDynamicEndpointBase = aDynamicEndpointBase;
-  mParentEndpointId = aParentEndpoint;
   EmberAfStatus ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
     GetEndpointId(),
@@ -306,9 +314,8 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
     OLOG(LOG_WARNING, "****** tried to access basic cluster *****");
   }
   else if (clusterId==ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID) {
-    if ((attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      *buffer = IsReachable() ? 1 : 0;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_REACHABLE_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, IsReachable());
     }
     // Writable Node Label
     if ((attributeId == ZCL_NODE_LABEL_ATTRIBUTE_ID) && (maxReadLength == kDefaultTextSize)) {
@@ -343,13 +350,11 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     // common attributes
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t*)buffer) = (uint16_t) ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION);
     }
-    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *((uint32_t*)buffer) = (uint32_t) ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP);
     }
   }
   return EMBER_ZCL_STATUS_FAILURE;
@@ -375,4 +380,62 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
 string Device::description()
 {
   return string_format("device status:\n- reachable: %d", mReachable);
+}
+
+
+// MARK: - ComposedDevice
+
+const EmberAfDeviceType gComposedDeviceTypes[] = {
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+
+ComposedDevice::ComposedDevice()
+{
+  // - no additional clusters, just common bridged device clusters
+}
+
+
+ComposedDevice::~ComposedDevice()
+{
+}
+
+
+string ComposedDevice::description()
+{
+  string s = inherited::description();
+  string_format_append(s, "\n- Composed of %lu subdevices", mSubdevices.size());
+  return s;
+}
+
+
+void ComposedDevice::addSubdevice(DevicePtr aSubDevice)
+{
+  mSubdevices.push_back(aSubDevice);
+}
+
+
+void ComposedDevice::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gComposedDeviceTypes));
+}
+
+
+
+
+// MARK: - InputDevice
+
+InputDevice::InputDevice()
+{
+}
+
+InputDevice::~InputDevice()
+{
+}
+
+void InputDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+{
+  mInputType = aInputType;
+  mInputId = aInputId;
+  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
 }

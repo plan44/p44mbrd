@@ -24,6 +24,7 @@
 #pragma once
 
 #include "jsoncomm.hpp"
+#include "bridgeapi_defs.h"
 
 using namespace p44;
 
@@ -68,7 +69,7 @@ public:
   /// convenience method to set single property
   /// @param aDSUID the dsuid
   /// @param aPropertyPath the property path (dot separated)
-  /// @param aProperties the property value to set, or if aPropName is empty, the object containing all properties to set.
+  /// @param aValue the property value to set, or if aPropName is empty, the object containing all properties to set.
   void setProperty(const string aDSUID, const string aPropertyPath, JsonObjectPtr aValue);
 
   /// send notification via bridge API

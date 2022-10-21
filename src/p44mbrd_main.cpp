@@ -64,6 +64,7 @@
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
+#include "sensordevices.h"
 
 #include <app/server/Server.h>
 
@@ -236,6 +237,9 @@ public:
     "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, " \
     "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
     "\"channelStates\":null, \"channelDescriptions\":null, " \
+    "\"sensorDescriptions\":null, \"sensorStates\":null, " \
+    "\"inputDescriptions\":null, \"inputStates\":null, " \
+    "\"buttonDescriptions\":null, \"buttonStates\":null, " \
     "\"active\":null, " \
     "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
 
@@ -260,16 +264,20 @@ public:
   DevicePtr bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
   {
     JsonObjectPtr o;
-    DevicePtr dev;
+    DevicePtr mainDevice;
     if (aDeviceJSON->get("x-p44-bridgeable", o)) {
       if (o->boolValue()) {
         // bridgeable device
         if (aDeviceJSON->get("dSUID", o)) {
+          // with dSUID. Now find out what device structure to map towards matter
+          std::list<DevicePtr> devices;
+          // determine basic parameters for single or composed device
           string dsuid = o->stringValue();
           string name;
           if (aDeviceJSON->get("name", o)) name = o->stringValue(); // optional
-          // determine device type
-          // - first check if we have a bridging hint
+          // extract mappable devices
+          DevicePtr dev;
+          // - first check if we have a bridging hint that directly defines the mapping
           if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
             // bridging hint should determine bridged device
             string bridgeAs = o->stringValue();
@@ -281,10 +289,12 @@ public:
             }
             if (dev) {
               OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
+              devices.push_back(dev);
             }
           }
           if (!dev) {
-            // no or unknown bridging hint - derive bridged type automatically
+            // no or unknown bridging hint - derive bridged device type(s) automatically
+            // First: check output
             JsonObjectPtr outputdesc;
             if (aDeviceJSON->get("outputDescription", outputdesc)) {
               // output device
@@ -299,26 +309,6 @@ public:
                     // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
                     // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
                     // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
-
-                    // From: docs/guides/darwin.md
-                    // -   Supported device types are (not exhaustive):
-                    //
-                    // | Type               | Decimal | HEX  |
-                    // | ------------------ | ------- | ---- |
-                    // | Lightbulb          | 256     | 0100 |
-                    // | Lightbulb + Dimmer | 257     | 0101 |
-                    // | Switch             | 259     | 0103 |
-                    // | Contact Sensor     | 21      | 0015 |
-                    // | Door Lock          | 10      | 000A |
-                    // | Light Sensor       | 262     | 0106 |
-                    // | Occupancy Sensor   | 263     | 0107 |
-                    // | Outlet             | 266     | 010A |
-                    // | Color Bulb         | 268     | 010C |
-                    // | Window Covering    | 514     | 0202 |
-                    // | Thermostat         | 769     | 0301 |
-                    // | Temperature Sensor | 770     | 0302 |
-                    // | Flow Sensor        | 774     | 0306 |
-
                     switch(outputfunction) {
                       default:
                       case 0: // switch output
@@ -335,12 +325,71 @@ public:
                   }
                 }
               }
+              if (dev) {
+                dev->initBridgedInfo(aDeviceJSON, outputdesc);
+                devices.push_back(dev);
+              }
+            }
+            // Second: check inputs
+            typedef enum { sensor, input, button, numInputTypes } InputTypes;
+            const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "button" };
+            for (int inputType = sensor; inputType<numInputTypes; inputType++) {
+              JsonObjectPtr inputdescs;
+              if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Descriptions").c_str(), inputdescs)) {
+                // iterate through this input type's items
+                string inputid;
+                JsonObjectPtr inputdesc;
+                inputdescs->resetKeyIteration();
+                while (inputdescs->nextKeyValue(inputid, inputdesc)) {
+                  switch (inputType) {
+                    case sensor: {
+                      if (inputdesc->get("sensorType", o)) {
+                        int sensorType = o->int32Value();
+                        // determine sensor type
+                        switch(sensorType) {
+                          // Temperature sensor
+                          case sensorType_temperature: dev = new DeviceTemperature(); break;
+                          case sensorType_humidity: dev = new DeviceHumidity(); break;
+                          case sensorType_illumination: dev = new DeviceHumidity(); break;
+                        }
+                      }
+                      break;
+                    }
+                    case input: // TODO: handle
+                    case button: // TODO: maybe handle seperately, multiple button definitions in one device are usually coupled
+                    default:
+                      break;
+                  }
+                  if (dev) {
+                    dev->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
+                    devices.push_back(dev);
+                  }
+                } // iterating all inputs of one type
+              }
+            } // for all input types
+          }
+          // Now we have a list of matter devices that are contained in this single briged device
+          if (!devices.empty()) {
+            // at least one
+            if (devices.size()==1) {
+              // single device, not a composed one
+              mainDevice = devices.front();
+            }
+            else {
+              // we need a composed device to represent the multiple devices we have in matter
+              ComposedDevice *composedDevice = new ComposedDevice();
+              mainDevice = DevicePtr(composedDevice);
+              // add the subdevices
+              while(!devices.empty()) {
+                DevicePtr dev = devices.front();
+                devices.pop_front();
+                composedDevice->addSubdevice(dev);
+              }
             }
           }
-          if (dev) {
-            // now init
-            dev->initBridgedInfo(aDeviceJSON);
-            mDeviceDSUIDMap[dsuid] = dev;
+          if (mainDevice) {
+            // add bridge-side representing device (singular or possibly composed) to dSUID map
+            mDeviceDSUIDMap[dsuid] = mainDevice;
             // enable it for bridging on the other side
             JsonObjectPtr params = JsonObject::newObj();
             params->add("dSUID", JsonObject::newString(dsuid));
@@ -350,10 +399,10 @@ public:
             // no callback, but will wait when bridgeapi is in standalone mode
             BridgeApi::api().call("setProperty", params, NoOP);
           }
-        }
-      }
+        } // has dSUID
+      } // if bridgeable
     }
-    return dev;
+    return mainDevice;
   }
 
 
@@ -428,11 +477,21 @@ public:
         CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
         LogErrorOnFailure(chiperr);
         // add as new endpoint to bridge
-        if (aDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
+        if (aDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
           POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while CHIP is already up");
           aDev->inChipInit();
           // dump status
           POLOG(aDev, LOG_INFO, "initialized from chip: %s", aDev->description().c_str());
+          // also add subdevices that are part of this additional device and thus not yet present
+          for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
+            DevicePtr subDev = *pos;
+            if (subDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
+              POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
+              subDev->inChipInit();
+              // dump status
+              POLOG(subDev, LOG_INFO, "initialized composed device part from chip: %s", aDev->description().c_str());
+            }
+          }
         }
       }
     }
@@ -486,11 +545,11 @@ public:
 
 
 
-  CHIP_ERROR installBridgedDevice(DevicePtr dev)
+  CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId)
   {
     CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-    string key = kP44mbrNamespace "devices/"; key += dev->bridgedDSUID();
+    string key = kP44mbrNamespace "devices/"; key += dev->endpointDSUID(); // note: real dSUID for single devices, dSUID_inputtype_inputid or dSSUID_output for parts of composed ones
     EndpointId dynamicEndpointIdx = kInvalidEndpointId;
     chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (chiperr==CHIP_NO_ERROR) {
@@ -518,7 +577,7 @@ public:
       }
     }
     else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-      // we haven't seen that dSUID yet -> need to assign it a new endpoint ID
+      // we haven't seen that dSUID+suffix yet -> need to assign it a new endpoint ID
       POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
     }
     else {
@@ -552,9 +611,28 @@ public:
     if (dynamicEndpointIdx!=kInvalidEndpointId) {
       dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
       mDevices[dynamicEndpointIdx] = dev.get();
+      // also set parent endpoint id
+      dev->SetParentEndpointId(aParentEndpointId);
     }
     return chiperr;
   }
+
+
+  CHIP_ERROR installBridgedDevice(DevicePtr dev)
+  {
+    CHIP_ERROR chiperr;
+    // install base (or single) device
+    chiperr = installSingleBridgedDevice(dev, MATTER_BRIDGE_ENDPOINT);
+    if (chiperr==CHIP_NO_ERROR) {
+      // also add subdevices AFTER the main device (if any)
+      for (DevicesList::iterator pos = dev->subDevices().begin(); pos!=dev->subDevices().end(); ++pos) {
+        installSingleBridgedDevice(*pos, dev->GetParentEndpointId());
+        dev->flagAsPartOfComposedDevice();
+      }
+    }
+    return chiperr;
+  }
+
 
 
   void installInitiallyBridgedDevices()
@@ -603,7 +681,7 @@ public:
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
       if (mDevices[i]) {
         // there is a device at this dynamic endpoint
-        if (mDevices[i]->AddAsDeviceEndpoint(mFirstDynamicEndpointId, MATTER_BRIDGE_ENDPOINT)) {
+        if (mDevices[i]->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
           POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
         }
       }

@@ -60,7 +60,7 @@ public:
 
 };
 
-
+typedef std::list<DevicePtr> DevicesList;
 
 class Device : public p44::P44LoggingObj
 {
@@ -76,7 +76,8 @@ class Device : public p44::P44LoggingObj
   string mConfigUrl;
 
   // constant after init
-  string mBridgedDSUID;
+  string mBridgedDSUID; ///< ID of the bridge-side device
+  bool mPartOfComposedDevice; ///< if set, endpointDSUID is suffixed with endPointDSUIDSuffix()
   EndpointId mParentEndpointId;
   EndpointId mDynamicEndpointBase;
   EndpointId mDynamicEndpointIdx;
@@ -90,6 +91,11 @@ class Device : public p44::P44LoggingObj
   bool mBridgeable;
   bool mActive;
 
+protected:
+
+  // possible subdevices
+  DevicesList mSubdevices;
+
 public:
 
   Device();
@@ -99,9 +105,24 @@ public:
 
   virtual string description();
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo);
+  /// init device with information from bridge query results
+  /// @param aDeviceInfo the JSON object for the entire bridge-side device
+  /// @param aDeviceComponentInfo the JSON description object for the output or input that should be handled
+  /// @param aInputType the name of the input type (sensor, binaryInput, button), or NULL if device is not an input device
+  /// @param aInputId the name of the input ID within the input type, or NULL if device not an input device
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr);
 
+  /// @return the dSUID of the bridged device
   const string bridgedDSUID() { return mBridgedDSUID; };
+
+  /// @return the pseudo-dSUID (dSUID + suffix if this is a subdevice) of this endpoint
+  const string endpointDSUID();
+
+  /// @return list of subdevices, non-empty if this is a composed device
+  DevicesList& subDevices() { return mSubdevices; };
+
+  /// Set this device to behave as part of a composed device
+  inline void flagAsPartOfComposedDevice() { mPartOfComposedDevice = true; };
 
   bool IsReachable();
   inline chip::EndpointId GetEndpointId() { return mDynamicEndpointBase+mDynamicEndpointIdx; };
@@ -124,14 +145,15 @@ public:
   void updateName(const string aDeviceName, UpdateMode aUpdateMode);
 
   // setup setters
+  inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
   inline void initName(const string aName) { mName = aName; };
   inline void initZone(string aZone) { mZone = aZone; };
 
 
-  /// add the device using the previously set cluster info
+  /// add the device using the previously set cluster info (and parent endpoint ID)
   /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
-  bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase, EndpointId aParentEndpoint);
+  virtual bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
 
   /// called when device is instantiated and registered in CHIP (and chip is running)
   virtual void inChipInit();
@@ -159,6 +181,9 @@ public:
 
 protected:
 
+  /// return suffix for endpointDSUID() for when this device is installed as a subdevice
+  virtual const string endPointDSUIDSuffix() { return "output"; }
+
   /// Add a cluster declaration during device setup
   /// @note preferably this should be called from ctor, to have general cluster defs first
   /// @note this replaces use of `DECLARE_DYNAMIC_CLUSTER_LIST_xxx` macros, to allow dynamically collecting needed
@@ -172,4 +197,72 @@ protected:
   /// utility for implementing finalizeDeviceDeclaration()
   void finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList);
 
+  /// utility for returning attribute values in external attribute storage callbacks
+  template <typename T> static inline void storeInBuffer(uint8_t* aBuffer, T& aValue)
+  {
+    *((T*)aBuffer) = aValue;
+  }
+
+  template <typename T> static inline EmberAfStatus getAttr(uint8_t* aBuffer, uint16_t aMaxReadLength, T aValue)
+  {
+    using ST = typename app::NumericAttributeTraits<T>::StorageType;
+    if (aMaxReadLength==sizeof(ST)) {
+      *((ST*)aBuffer) = aValue;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    else {
+      return EMBER_ZCL_STATUS_FAILURE;
+    }
+  }
+
+  template <typename T> static inline EmberAfStatus setAttr(T &aValue, uint8_t* aBuffer)
+  {
+    aValue = *((T*)aBuffer);
+    return EMBER_ZCL_STATUS_SUCCESS;
+  }
+
 };
+
+
+class ComposedDevice : public Device
+{
+  typedef Device inherited;
+
+public:
+
+  ComposedDevice();
+  virtual ~ComposedDevice();
+
+  virtual string description() override;
+
+  void addSubdevice(DevicePtr aSubDevice);
+
+protected:
+
+  virtual void finalizeDeviceDeclaration() override;
+
+};
+
+
+class InputDevice : public Device
+{
+  typedef Device inherited;
+
+protected:
+
+  string mInputType;
+  string mInputId;
+
+public:
+
+  InputDevice();
+  virtual ~InputDevice();
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+
+protected:
+
+  virtual const string endPointDSUIDSuffix() override { return mInputType + "_" + mInputId; }
+
+};
+

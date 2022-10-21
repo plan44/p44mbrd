@@ -66,8 +66,8 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gOnOffLightTypes[] = {
-  { DEVICE_TYPE_LO_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_BRIDGED_NODE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
 
@@ -87,9 +87,9 @@ void DeviceOnOff::finalizeDeviceDeclaration()
 }
 
 
-void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo)
+void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
 {
-  inherited::initBridgedInfo(aDeviceInfo);
+  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
   // output devices should know which one is the default channel
   JsonObjectPtr o = aDeviceInfo->get("channelDescriptions");
   o->resetKeyIteration();
@@ -195,20 +195,15 @@ bool DeviceOnOff::shouldExecuteWithFlag(bool aWithOnOff, uint8_t aOptionMask, ui
 EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) && (maxReadLength == 1)) {
-      FOCUSOLOG("reading onOff isOn: %s", isOn() ? "ON" : "OFF");
-      *buffer = isOn() ? 1 : 0;
-      return EMBER_ZCL_STATUS_SUCCESS;
+    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID)) {
+      return getAttr(buffer, maxReadLength, isOn());
     }
     // common attributes
     if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
-      *((uint16_t*)buffer) = (uint16_t) ZCL_ON_OFF_CLUSTER_REVISION;
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      *((uint32_t*)buffer) = (uint32_t) ZCL_ON_OFF_CLUSTER_FEATURE_MAP;
-      FOCUSOLOG("reading onOff featureMap: 0x%lx", (unsigned long)*((uint32_t*)buffer));
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_FEATURE_MAP);
     }
   }
   // let base class try

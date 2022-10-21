@@ -36,7 +36,7 @@ public:
 
   virtual string description() override;
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
 
   virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);
 

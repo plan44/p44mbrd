@@ -34,7 +34,7 @@
 
 #include <app/reporting/reporting.h>
 #include <app/util/util.h>
-
+#include <app/util/attribute-storage-null-handling.h>
 
 #include "devices/device.h"
 #include "bridgeapi/bridgeapi.h"
@@ -42,17 +42,17 @@
 // Current ZCL implementation of Struct uses a max-size array of 254 bytes
 const int kDescriptorAttributeArraySize = 254;
 
+
 // Device types for dynamic endpoints: TODO Need a generated file from ZAP to define these!
-// (taken from chip-devices.xml)
-#define DEVICE_TYPE_BRIDGED_NODE 0x0013
-// (taken from lo-devices.xml)
-#define DEVICE_TYPE_LO_ON_OFF_LIGHT 0x0100
-// (taken from matter-devices.xml)
+// (taken from third_party/zap/repo/zcl-builtin/matter/matter-devices.xml)
+#define DEVICE_TYPE_MA_BRIDGED_DEVICE 0x0013
+#define DEVICE_TYPE_MA_ON_OFF_LIGHT 0x0100
 #define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
-// (taken from matter-devices.xml)
 #define DEVICE_TYPE_MA_CT_LIGHT 0x010C
-// (taken from matter-devices.xml)
 #define DEVICE_TYPE_MA_COLOR_LIGHT 0x010D
+#define DEVICE_TYPE_MA_TEMP_SENSOR 0x0302
+#define DEVICE_TYPE_MA_ILLUM_SENSOR 0x0106
+#define DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR 0x0307
 
 // Device Version for dynamic endpoints:
 #define DEVICE_VERSION_DEFAULT 1
