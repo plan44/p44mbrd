@@ -1068,6 +1068,11 @@ public:
     // prepare the storage delegate
     mExampleDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
 
+    #ifdef __APPLE__
+    // we need the dispatch queue for DnsSD, even if the mainloop runs on libev
+    DeviceLayer::PlatformMgr().StartEventLoopTask();
+    #endif
+
     // done, ready to run
     mChipAppInitialized = true;
     // let bridge API know
