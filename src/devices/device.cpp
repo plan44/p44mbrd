@@ -73,10 +73,10 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 // MARK: - Device
 
 Device::Device() :
+  mPartOfComposedDevice(false),
   mReachable(false),
   mBridgeable(true), // assume bridgeable, otherwise device wouldn't be instantiated
-  mActive(false),
-  mPartOfComposedDevice(false)
+  mActive(false)
 {
   // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;

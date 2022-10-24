@@ -33,6 +33,8 @@ executable("p44mbrd") {
     "devices/device_impl.h",
     "devices/device.cpp",
     "devices/device.h",
+    "devices/sensordevices.cpp",
+    "devices/sensordevices.h",
     "devices/deviceonoff.cpp",
     "devices/deviceonoff.h",
     "devices/devicelevelcontrol.cpp",
