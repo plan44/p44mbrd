@@ -5,7 +5,7 @@ CHIPAPP_NAME="p44mbrd"
 OPENWRT_WRAPPER_PACKAGE="feeds/p44i/p44mbrd"
 
 if [[ $# < 1 || $# > 2 ]]; then
-  echo "Usage: $0 <openwrt buildroot path>"
+  echo "Usage: $0 <openwrt buildroot path> [<OpenWrt .config file>]"
   echo "  builds '${CHIPAPP_NAME}' app from current dir"
   exit 1
 fi
@@ -67,10 +67,10 @@ fi
 TARGET_COMPILER="gcc-${CONFIG_GCC_VERSION}"
 
 # derived paths
-TOOLCHAIN_ARCH="${TARGET_ARCH}_${TARGET_CPU_TYPE}"
-STAGING_DIR="${BUILDROOT}/staging_dir"
-SYSROOT="${STAGING_DIR}/target-${TOOLCHAIN_ARCH}_${TARGET_LIBC}"
-TOOLCHAIN_PREFIX="${STAGING_DIR}/toolchain-${TOOLCHAIN_ARCH}_${TARGET_COMPILER}_${TARGET_LIBC}/bin/${TARGET_ARCH}-openwrt-linux${TARGET_SUFFIX}"
+export TOOLCHAIN_ARCH="${TARGET_ARCH}_${TARGET_CPU_TYPE}"
+export STAGING_DIR="${BUILDROOT}/staging_dir"
+export SYSROOT="${STAGING_DIR}/target-${TOOLCHAIN_ARCH}_${TARGET_LIBC}"
+export TOOLCHAIN_PREFIX="${STAGING_DIR}/toolchain-${TOOLCHAIN_ARCH}_${TARGET_COMPILER}_${TARGET_LIBC}/bin/${TARGET_ARCH}-openwrt-linux${TARGET_SUFFIX}"
 # - only needed for finding strip-new
 BUILT_TOOLS="${BUILDROOT}/build_dir/toolchain-${TOOLCHAIN_ARCH}_${TARGET_COMPILER}_${TARGET_LIBC}"
 
