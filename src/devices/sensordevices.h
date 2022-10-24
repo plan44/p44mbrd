@@ -130,7 +130,7 @@ class DeviceTemperature : public SignedSensorDevice
   typedef SignedSensorDevice inherited;
 public:
   DeviceTemperature();
-  virtual string description() override;
+  virtual const char *deviceType() { return "temperature sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;
@@ -146,7 +146,7 @@ class DeviceIlluminance : public UnsignedSensorDevice
   typedef SensorDevice inherited;
 public:
   DeviceIlluminance();
-  virtual string description() override;
+  virtual const char *deviceType() { return "illuminance sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;
@@ -162,7 +162,7 @@ class DeviceHumidity : public UnsignedSensorDevice
   typedef SensorDevice inherited;
 public:
   DeviceHumidity();
-  virtual string description() override;
+  virtual const char *deviceType() { return "humidity sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;

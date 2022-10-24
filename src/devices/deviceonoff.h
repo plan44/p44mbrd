@@ -34,6 +34,8 @@ public:
 
   DeviceOnOff();
 
+  virtual const char *deviceType() { return "on-off"; }
+
   virtual string description() override;
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;

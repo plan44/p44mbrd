@@ -294,14 +294,6 @@ uint16_t DeviceTemperature::sensorSpecificClusterRevision()
   return ZCL_TEMP_MEASUREMENT_CLUSTER_REVISION;
 }
 
-string DeviceTemperature::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- Type: Temperature Sensor");
-  return s;
-}
-
-
 // MARK: - Illumination Sensor Device
 
 // TODO: try to extract revision definitions from ZAP-generated defs
@@ -356,14 +348,6 @@ uint16_t DeviceIlluminance::sensorSpecificClusterRevision()
   return ZCL_ILLUM_MEASUREMENT_CLUSTER_REVISION;
 }
 
-string DeviceIlluminance::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- Type: Illuminance Sensor");
-  return s;
-}
-
-
 // MARK: - Humidity Sensor Device
 
 // TODO: try to extract revision definitions from ZAP-generated defs
@@ -416,11 +400,4 @@ ClusterId DeviceHumidity::sensorSpecificClusterId()
 uint16_t DeviceHumidity::sensorSpecificClusterRevision()
 {
   return ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_REVISION;
-}
-
-string DeviceHumidity::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- Type: Relative Humidity Sensor");
-  return s;
 }

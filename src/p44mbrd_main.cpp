@@ -277,6 +277,7 @@ public:
           if (aDeviceJSON->get("name", o)) name = o->stringValue(); // optional
           // extract mappable devices
           DevicePtr dev;
+          JsonObjectPtr outputdesc = aDeviceJSON->get("outputDescription");
           // - first check if we have a bridging hint that directly defines the mapping
           if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
             // bridging hint should determine bridged device
@@ -289,14 +290,14 @@ public:
             }
             if (dev) {
               OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
+              dev->initBridgedInfo(aDeviceJSON, outputdesc);
               devices.push_back(dev);
             }
           }
           if (!dev) {
             // no or unknown bridging hint - derive bridged device type(s) automatically
             // First: check output
-            JsonObjectPtr outputdesc;
-            if (aDeviceJSON->get("outputDescription", outputdesc)) {
+            if (outputdesc) {
               // output device
               if (outputdesc->get("x-p44-behaviourType", o)) {
                 if (o->stringValue()=="light") {
@@ -328,6 +329,7 @@ public:
               if (dev) {
                 dev->initBridgedInfo(aDeviceJSON, outputdesc);
                 devices.push_back(dev);
+                dev.reset();
               }
             }
             // Second: check inputs
@@ -363,6 +365,7 @@ public:
                   if (dev) {
                     dev->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
                     devices.push_back(dev);
+                    dev.reset();
                   }
                 } // iterating all inputs of one type
               }
@@ -379,6 +382,7 @@ public:
               // we need a composed device to represent the multiple devices we have in matter
               ComposedDevice *composedDevice = new ComposedDevice();
               mainDevice = DevicePtr(composedDevice);
+              mainDevice->initBridgedInfo(aDeviceJSON); // needs to have the infos, too
               // add the subdevices
               while(!devices.empty()) {
                 DevicePtr dev = devices.front();
@@ -471,13 +475,13 @@ public:
       }
       else {
         // already running
-        installBridgedDevice(aDev);
+        installBridgedDevice(aDev, mFirstDynamicEndpointId);
         // save possibly modified endpoint map
         chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
         CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
         LogErrorOnFailure(chiperr);
         // add as new endpoint to bridge
-        if (aDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
+        if (aDev->AddAsDeviceEndpoint()) {
           POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while CHIP is already up");
           aDev->inChipInit();
           // dump status
@@ -485,7 +489,7 @@ public:
           // also add subdevices that are part of this additional device and thus not yet present
           for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
             DevicePtr subDev = *pos;
-            if (subDev->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
+            if (subDev->AddAsDeviceEndpoint()) {
               POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
               subDev->inChipInit();
               // dump status
@@ -545,7 +549,7 @@ public:
 
 
 
-  CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId)
+  CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId, EndpointId aDynamicEndpointBase)
   {
     CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
@@ -591,6 +595,7 @@ public:
           // use the gap
           dynamicEndpointIdx = i;
           mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+          POLOG(dev, LOG_NOTICE, "mapping device to free gap in dynamic endpoints at #%d", dynamicEndpointIdx);
         }
       }
       if (dynamicEndpointIdx==kInvalidEndpointId) {
@@ -599,7 +604,7 @@ public:
         }
         else {
           dynamicEndpointIdx = mNumDynamicEndPoints++;
-          POLOG(dev, LOG_NOTICE, "mapping device to free dynamic endpoint #%d", dynamicEndpointIdx);
+          POLOG(dev, LOG_NOTICE, "mapping device to end of free dynamic endpoints at #%d", dynamicEndpointIdx);
           mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
           // save in KVS
           chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
@@ -611,23 +616,24 @@ public:
     if (dynamicEndpointIdx!=kInvalidEndpointId) {
       dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
       mDevices[dynamicEndpointIdx] = dev.get();
-      // also set parent endpoint id
+      // also set parent endpoint id and dynamic endpoint base
       dev->SetParentEndpointId(aParentEndpointId);
+      dev->SetDynamicEndpointBase(aDynamicEndpointBase);
     }
     return chiperr;
   }
 
 
-  CHIP_ERROR installBridgedDevice(DevicePtr dev)
+  CHIP_ERROR installBridgedDevice(DevicePtr aDev, EndpointId aDynamicEndpointBase)
   {
     CHIP_ERROR chiperr;
     // install base (or single) device
-    chiperr = installSingleBridgedDevice(dev, MATTER_BRIDGE_ENDPOINT);
+    chiperr = installSingleBridgedDevice(aDev, MATTER_BRIDGE_ENDPOINT, aDynamicEndpointBase);
     if (chiperr==CHIP_NO_ERROR) {
       // also add subdevices AFTER the main device (if any)
-      for (DevicesList::iterator pos = dev->subDevices().begin(); pos!=dev->subDevices().end(); ++pos) {
-        installSingleBridgedDevice(*pos, dev->GetParentEndpointId());
-        dev->flagAsPartOfComposedDevice();
+      for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
+        (*pos)->flagAsPartOfComposedDevice();
+        installSingleBridgedDevice(*pos, aDev->GetEndpointId(), aDynamicEndpointBase);
       }
     }
     return chiperr;
@@ -671,7 +677,7 @@ public:
     for (DeviceDSUIDMap::iterator pos = mDeviceDSUIDMap.begin(); pos!=mDeviceDSUIDMap.end(); ++pos) {
       DevicePtr dev = pos->second;
       // install the device
-      chiperr = installBridgedDevice(dev);
+      chiperr = installBridgedDevice(dev, mFirstDynamicEndpointId);
     }
     // save updated endpoint map
     chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
@@ -681,7 +687,7 @@ public:
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
       if (mDevices[i]) {
         // there is a device at this dynamic endpoint
-        if (mDevices[i]->AddAsDeviceEndpoint(mFirstDynamicEndpointId)) {
+        if (mDevices[i]->AddAsDeviceEndpoint()) {
           POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
         }
       }

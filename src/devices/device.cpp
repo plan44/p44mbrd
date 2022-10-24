@@ -95,7 +95,16 @@ string Device::logContextPrefix()
 {
   string ep;
   if (GetEndpointId()!=kInvalidEndpointId) ep = string_format(" @endpoint %d", GetEndpointId());
-  return string_format("device '%s'%s", mName.c_str(), ep.c_str());
+  string pep;
+  if (mPartOfComposedDevice && GetParentEndpointId()!=kInvalidEndpointId) pep = string_format(" (part of @endpoint %d)", GetParentEndpointId());
+  return string_format(
+    "%s %sdevice '%s'%s%s",
+    deviceType(),
+    mPartOfComposedDevice ? "sub" : "",
+    mName.c_str(),
+    ep.c_str(),
+    pep.c_str()
+  );
 }
 
 
@@ -220,12 +229,11 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
 }
 
 
-bool Device::AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase)
+bool Device::AddAsDeviceEndpoint()
 {
   // finalize the declaration
   finalizeDeviceDeclaration();
   // add as dynamic endpoint
-  mDynamicEndpointBase = aDynamicEndpointBase;
   EmberAfStatus ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
     GetEndpointId(),
@@ -421,6 +429,12 @@ void ComposedDevice::finalizeDeviceDeclaration()
 }
 
 
+void ComposedDevice::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
+{
+  for (DevicesList::iterator pos = mSubdevices.begin(); pos!=mSubdevices.end(); ++pos) {
+    (*pos)->handleBridgePushProperties(aChangedProperties);
+  }
+}
 
 
 // MARK: - InputDevice

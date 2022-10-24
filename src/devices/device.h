@@ -103,6 +103,9 @@ public:
 
   virtual string logContextPrefix() override;
 
+  /// @return a short name for the type of device
+  virtual const char *deviceType() = 0;
+
   virtual string description();
 
   /// init device with information from bridge query results
@@ -147,13 +150,13 @@ public:
   // setup setters
   inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
+  inline void SetDynamicEndpointBase(EndpointId aDynamicEndpointBase) { mDynamicEndpointBase = aDynamicEndpointBase; };
   inline void initName(const string aName) { mName = aName; };
   inline void initZone(string aZone) { mZone = aZone; };
 
 
   /// add the device using the previously set cluster info (and parent endpoint ID)
-  /// @param aDynamicEndpointBase the ID of the first dynamic endpoint
-  virtual bool AddAsDeviceEndpoint(EndpointId aDynamicEndpointBase);
+  virtual bool AddAsDeviceEndpoint();
 
   /// called when device is instantiated and registered in CHIP (and chip is running)
   virtual void inChipInit();
@@ -233,9 +236,13 @@ public:
   ComposedDevice();
   virtual ~ComposedDevice();
 
+  virtual const char *deviceType() { return "composed"; }
+
   virtual string description() override;
 
   void addSubdevice(DevicePtr aSubDevice);
+
+  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 protected:
 

@@ -41,6 +41,8 @@ public:
 
   DeviceColorControl(bool aCTOnly);
 
+  virtual const char *deviceType() { return "color-control"; }
+
   virtual string description() override;
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
