@@ -60,7 +60,11 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/p44mbr_mixwerk_kvs"
+            argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/p44mbr_xcode_mixwerk_kvs"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-hardturm/p44mbr_xcode_hardturm_kvs"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -72,7 +76,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--chiploglevel 2"
+            argument = "--chiploglevel 3"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

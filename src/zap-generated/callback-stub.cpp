@@ -41,6 +41,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
      case ZCL_BINDING_CLUSTER_ID :
         emberAfBindingClusterInitCallback(endpoint);
         break;
+     case ZCL_BOOLEAN_STATE_CLUSTER_ID :
+        emberAfBooleanStateClusterInitCallback(endpoint);
+        break;
      case ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_ID :
         emberAfBridgedDeviceBasicClusterInitCallback(endpoint);
         break;
@@ -68,6 +71,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
      case ZCL_IDENTIFY_CLUSTER_ID :
         emberAfIdentifyClusterInitCallback(endpoint);
         break;
+     case ZCL_ILLUMINANCE_MEASUREMENT_CLUSTER_ID :
+        emberAfIlluminanceMeasurementClusterInitCallback(endpoint);
+        break;
      case ZCL_LEVEL_CONTROL_CLUSTER_ID :
         emberAfLevelControlClusterInitCallback(endpoint);
         break;
@@ -77,14 +83,23 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
      case ZCL_NETWORK_COMMISSIONING_CLUSTER_ID :
         emberAfNetworkCommissioningClusterInitCallback(endpoint);
         break;
+     case ZCL_OCCUPANCY_SENSING_CLUSTER_ID :
+        emberAfOccupancySensingClusterInitCallback(endpoint);
+        break;
      case ZCL_ON_OFF_CLUSTER_ID :
         emberAfOnOffClusterInitCallback(endpoint);
         break;
      case ZCL_OPERATIONAL_CREDENTIALS_CLUSTER_ID :
         emberAfOperationalCredentialsClusterInitCallback(endpoint);
         break;
+     case ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_ID :
+        emberAfRelativeHumidityMeasurementClusterInitCallback(endpoint);
+        break;
      case ZCL_SOFTWARE_DIAGNOSTICS_CLUSTER_ID :
         emberAfSoftwareDiagnosticsClusterInitCallback(endpoint);
+        break;
+     case ZCL_TEMP_MEASUREMENT_CLUSTER_ID :
+        emberAfTemperatureMeasurementClusterInitCallback(endpoint);
         break;
      case ZCL_TIME_FORMAT_LOCALIZATION_CLUSTER_ID :
         emberAfTimeFormatLocalizationClusterInitCallback(endpoint);
@@ -117,6 +132,11 @@ void __attribute__((weak)) emberAfBasicClusterInitCallback(EndpointId endpoint)
     (void) endpoint;
 }
 void __attribute__((weak)) emberAfBindingClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
+void __attribute__((weak)) emberAfBooleanStateClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;
@@ -166,6 +186,11 @@ void __attribute__((weak)) emberAfIdentifyClusterInitCallback(EndpointId endpoin
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfIlluminanceMeasurementClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfLevelControlClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -181,6 +206,11 @@ void __attribute__((weak)) emberAfNetworkCommissioningClusterInitCallback(Endpoi
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfOccupancySensingClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -191,7 +221,17 @@ void __attribute__((weak)) emberAfOperationalCredentialsClusterInitCallback(Endp
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfRelativeHumidityMeasurementClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfSoftwareDiagnosticsClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
+void __attribute__((weak)) emberAfTemperatureMeasurementClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;

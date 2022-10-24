@@ -1335,6 +1335,7 @@
 		ED7F9A282904328F00A7CB48 /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Protocols.h; sourceTree = "<group>"; };
 		ED7F9A292904328F00A7CB48 /* Protocols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Protocols.cpp; sourceTree = "<group>"; };
 		ED7F9A2B290433FB00A7CB48 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
+		ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioningDriver.h; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -2675,6 +2676,7 @@
 			isa = PBXGroup;
 			children = (
 				ED36DE91286E043500CA28EC /* CommissionableDataProvider.cpp */,
+				ED36DC74286DD72B00CA28EC /* Darwin */,
 				ED36DE98286E043500CA28EC /* DeviceControlServer.cpp */,
 				ED36DE97286E043500CA28EC /* DeviceInfoProvider.cpp */,
 				ED36DE8E286E043500CA28EC /* DeviceInstanceInfoProvider.cpp */,
@@ -2685,11 +2687,10 @@
 				ED36DE92286E043500CA28EC /* GeneralUtils.cpp */,
 				ED36DE8C286E043400CA28EC /* Globals.cpp */,
 				ED36DE95286E043500CA28EC /* LockTracker.cpp */,
+				ED36DC6A286DD70000CA28EC /* logging */,
 				ED36DE8D286E043500CA28EC /* PersistedStorage.cpp */,
 				ED36DE94286E043500CA28EC /* PlatformEventSupport.cpp */,
 				ED36DE8F286E043500CA28EC /* SingletonConfigurationManager.cpp */,
-				ED36DC74286DD72B00CA28EC /* Darwin */,
-				ED36DC6A286DD70000CA28EC /* logging */,
 			);
 			path = platform;
 			sourceTree = "<group>";
@@ -2705,8 +2706,6 @@
 		ED36DC74286DD72B00CA28EC /* Darwin */ = {
 			isa = PBXGroup;
 			children = (
-				ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */,
-				ED7F9A262904312300A7CB48 /* DnssdHostNameRegistrar.h */,
 				ED36DC82286DD7F100CA28EC /* BleApplicationDelegate.h */,
 				ED36DC95286DD7F200CA28EC /* BleApplicationDelegateImpl.mm */,
 				ED36DC8C286DD7F100CA28EC /* BleConnectionDelegate.h */,
@@ -2729,6 +2728,8 @@
 				ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */,
 				ED36DC99286DD7F200CA28EC /* DiagnosticDataProviderImpl.h */,
 				ED36DC8E286DD7F100CA28EC /* DnssdContexts.cpp */,
+				ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */,
+				ED7F9A262904312300A7CB48 /* DnssdHostNameRegistrar.h */,
 				ED36DC9B286DD7F200CA28EC /* DnssdImpl.cpp */,
 				ED36DC8B286DD7F100CA28EC /* DnssdImpl.h */,
 				ED36DC98286DD7F200CA28EC /* InetPlatformConfig.h */,
@@ -2737,6 +2738,7 @@
 				ED36DC76286DD7F100CA28EC /* Logging.cpp */,
 				ED36DC8F286DD7F100CA28EC /* MdnsError.cpp */,
 				ED36DC7B286DD7F100CA28EC /* MdnsError.h */,
+				ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */,
 				ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */,
 				ED36DC77286DD7F100CA28EC /* PlatformManagerImpl.h */,
 				ED36DC90286DD7F100CA28EC /* PosixConfig.cpp */,
