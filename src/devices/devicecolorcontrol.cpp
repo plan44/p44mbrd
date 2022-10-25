@@ -92,6 +92,7 @@ const EmberAfDeviceType gColorLightTypes[] = {
 // MARK: - DeviceColorControl
 
 DeviceColorControl::DeviceColorControl(bool aCTOnly) :
+  inherited(true), // level control for lighting
   mColorControlOptions(0), // No default options (see EmberAfColorControlOptions for choices)
   mCtOnly(aCTOnly),
   mColorMode(aCTOnly ? colormode_ct : colormode_hs),

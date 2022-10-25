@@ -33,9 +33,7 @@ class DeviceLevelControl : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceLevelControl();
-
-  virtual const char *deviceType() { return "level-control"; }
+  DeviceLevelControl(bool aLighting);
 
   virtual string description() override;
 
@@ -65,9 +63,6 @@ protected:
 
 private:
 
-  /// called to have the final leaf class declare the correct device type list
-  virtual void finalizeDeviceDeclaration() override;
-
   uint8_t mLevel;
   uint8_t mOnLevel;
   uint8_t mLevelControlOptions;
@@ -76,4 +71,39 @@ private:
 
   bool shouldExecuteLevelChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
   void dim(int8_t aDirection, uint8_t aRate);
+};
+
+
+
+class DeviceDimmableLight : public DeviceLevelControl
+{
+  typedef DeviceLevelControl inherited;
+public:
+
+  DeviceDimmableLight() : inherited(true) {};
+
+  virtual const char *deviceType() override { return "dimmable light"; }
+
+protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
+};
+
+
+class DeviceDimmablePluginUnit : public DeviceLevelControl
+{
+  typedef DeviceLevelControl inherited;
+public:
+
+  DeviceDimmablePluginUnit() : inherited(false) {};
+
+  virtual const char *deviceType() override { return "dimmable plug-in unit"; }
+
+protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
 };

@@ -51,7 +51,6 @@
 		ED36D7F2286DCDA300CA28EC /* general-commissioning-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7C2286DCDA200CA28EC /* general-commissioning-server.cpp */; };
 		ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7C4286DCDA200CA28EC /* software-diagnostics-server.cpp */; };
 		ED36D7F4286DCDA300CA28EC /* time-format-localization-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7C7286DCDA200CA28EC /* time-format-localization-server.cpp */; };
-		ED36D7F6286DCDA300CA28EC /* identify-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CD286DCDA200CA28EC /* identify-server.cpp */; };
 		ED36D7F7286DCDA300CA28EC /* user-label-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CF286DCDA200CA28EC /* user-label-server.cpp */; };
 		ED36D7F8286DCDA300CA28EC /* general-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D2286DCDA200CA28EC /* general-diagnostics-server.cpp */; };
 		ED36D7F9286DCDA300CA28EC /* wifi-network-diagnostics-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7D4286DCDA200CA28EC /* wifi-network-diagnostics-server.cpp */; };
@@ -376,6 +375,7 @@
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
+		ED7F9A2E2908143100A7CB48 /* identify-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7CD286DCDA200CA28EC /* identify-server.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F528289A84B600A82418 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F520289A84B600A82418 /* callback-stub.cpp */; };
 		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
@@ -3706,6 +3706,7 @@
 				ED36D90D286DCF5100CA28EC /* CommissioningWindowManager.cpp in Sources */,
 				ED36D889286DCDED00CA28EC /* StatusIB.cpp in Sources */,
 				ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */,
+				ED7F9A2E2908143100A7CB48 /* identify-server.cpp in Sources */,
 				ED36DCA3286DD7F200CA28EC /* DeviceInstanceInfoProviderImpl.cpp in Sources */,
 				ED36DB87286DD2CE00CA28EC /* RecordData.cpp in Sources */,
 				ED36DC15286DD57B00CA28EC /* Verhoeff16.cpp in Sources */,
@@ -3757,7 +3758,6 @@
 				ED36DC63286DD6A400CA28EC /* ExchangeMessageDispatch.cpp in Sources */,
 				ED36D8E3286DCF0B00CA28EC /* CASEClient.cpp in Sources */,
 				ED36DC1C286DD5A300CA28EC /* CHIPLogging.cpp in Sources */,
-				ED36D7F6286DCDA300CA28EC /* identify-server.cpp in Sources */,
 				ED36D786286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36D7B4286DCCBB00CA28EC /* PermissiveAccessControlDelegate.cpp in Sources */,
 				ED36D7FD286DCDA300CA28EC /* descriptor.cpp in Sources */,

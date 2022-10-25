@@ -278,15 +278,21 @@ public:
           // extract mappable devices
           DevicePtr dev;
           JsonObjectPtr outputdesc = aDeviceJSON->get("outputDescription");
+          string behaviourtype;
+          if (outputdesc->get("x-p44-behaviourType", o)) {
+            behaviourtype = o->stringValue();
+          }
           // - first check if we have a bridging hint that directly defines the mapping
           if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
             // bridging hint should determine bridged device
             string bridgeAs = o->stringValue();
             if (bridgeAs=="on-off") {
-              dev = new DeviceOnOff();
+              if (behaviourtype=="light") dev = new DeviceOnOffLight();
+              else dev = new DeviceOnOffPluginUnit();
             }
             else if (bridgeAs=="level-control") {
-              dev = new DeviceLevelControl();
+              if (behaviourtype=="light") dev = new DeviceDimmableLight();
+              else dev = new DeviceDimmablePluginUnit();
             }
             if (dev) {
               OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
@@ -298,31 +304,37 @@ public:
             // no or unknown bridging hint - derive bridged device type(s) automatically
             // First: check output
             if (outputdesc) {
-              // output device
-              if (outputdesc->get("x-p44-behaviourType", o)) {
-                if (o->stringValue()=="light") {
+              if (outputdesc->get("function", o)) {
+                int outputfunction = (int)o->int32Value();
+                // output device
+                if (behaviourtype=="light") {
                   // this is a light device
-                  if (outputdesc->get("function", o)) {
-                    int outputfunction = (int)o->int32Value();
-                    OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                    // create to-be-bridged device
-                    // outputFunction_switch = 0, ///< switch output - single channel 0..100
-                    // outputFunction_dimmer = 1, ///< effective value dimmer - single channel 0..100
-                    // outputFunction_ctdimmer = 3, ///< dimmer with color temperature - channels 1 and 4
-                    // outputFunction_colordimmer = 4, ///< full color dimmer - channels 1..6
-                    switch(outputfunction) {
-                      default:
-                      case 0: // switch output
-                        dev = new DeviceOnOff();
-                        break;
-                      case 1: // effective value dimmer - single channel 0..100
-                        dev = new DeviceLevelControl();
-                        break;
-                      case 3: // dimmer with color temperature - channels 1 and 4
-                      case 4: // full color dimmer - channels 1..6
-                        dev = new DeviceColorControl(outputfunction==3 /* ctOnly */);
-                        break;
-                    }
+                  OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  switch(outputfunction) {
+                    default:
+                    case outputFunction_switch: // switch output
+                      dev = new DeviceOnOffLight();
+                      break;
+                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
+                      dev = new DeviceDimmableLight();
+                      break;
+                    case outputFunction_ctdimmer: // dimmer with color temperature - channels 1 and 4
+                    case outputFunction_colordimmer: // full color dimmer - channels 1..6
+                      dev = new DeviceColorControl(outputfunction==outputFunction_ctdimmer /* ctOnly */);
+                      break;
+                  }
+                }
+                else {
+                  // not a light, only switched or dimmed
+                  OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  switch(outputfunction) {
+                    case outputFunction_switch: // switch output
+                      dev = new DeviceOnOffPluginUnit();
+                      break;
+                    default:
+                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
+                      dev = new DeviceDimmablePluginUnit();
+                      break;
                   }
                 }
               }

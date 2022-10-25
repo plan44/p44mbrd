@@ -42,8 +42,7 @@ using namespace Clusters;
 // =================================================================================
 
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP \
-  (EMBER_AF_LEVEL_CONTROL_FEATURE_ON_OFF|EMBER_AF_LEVEL_CONTROL_FEATURE_LIGHTING)
+#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (EMBER_AF_LEVEL_CONTROL_FEATURE_ON_OFF)
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
@@ -72,15 +71,10 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
   DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
-const EmberAfDeviceType gDimmableLightTypes[] = {
-  { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
-};
-
-
 // MARK: - DeviceLevelControl
 
-DeviceLevelControl::DeviceLevelControl() :
+DeviceLevelControl::DeviceLevelControl(bool aLighting) :
+  inherited(aLighting),
   // Attribute defaults
   mLevel(0),
   mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // FIXME: later, get this from preset1 scene brightness, maybe?
@@ -90,11 +84,6 @@ DeviceLevelControl::DeviceLevelControl() :
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
-}
-
-void DeviceLevelControl::finalizeDeviceDeclaration()
-{
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
 }
 
 
@@ -459,7 +448,7 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_REVISION);
     }
     if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP);
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? EMBER_AF_LEVEL_CONTROL_FEATURE_LIGHTING : 0));
     }
   }
   // let base class try
@@ -498,3 +487,30 @@ string DeviceLevelControl::description()
   string_format_append(s, "\n- DimRate: %d", mDefaultMoveRateUnitsPerS);
   return s;
 }
+
+
+// MARK: - DeviceDimmableLight
+
+const EmberAfDeviceType gDimmableLightTypes[] = {
+  { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+void DeviceDimmableLight::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
+}
+
+
+// MARK: - DeviceDimmablePluginUnit
+
+const EmberAfDeviceType gDimmablePluginTypes[] = {
+  { DEVICE_TYPE_MA_DIMMABLE_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+void DeviceDimmablePluginUnit::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmablePluginTypes));
+}
+

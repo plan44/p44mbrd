@@ -27,16 +27,16 @@
 using namespace chip;
 
 
-class DeviceOnOff : public Device
+class DeviceOnOff : public IdentifiableDevice
 {
-  typedef Device inherited;
+  typedef IdentifiableDevice inherited;
 public:
 
-  DeviceOnOff();
-
-  virtual const char *deviceType() { return "on-off"; }
+  DeviceOnOff(bool aLighting);
 
   virtual string description() override;
+
+  virtual uint8_t identifyType() override;
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
 
@@ -55,9 +55,6 @@ public:
 
 protected:
 
-  /// called to have the final leaf class declare the correct device type list
-  virtual void finalizeDeviceDeclaration() override;
-
   virtual void changeOnOff_impl(bool aOn);
 
   /// Utility for derived classes
@@ -66,6 +63,42 @@ protected:
   /// the default channel ID
   string mDefaultChannelId;
 
+  bool mLighting; // lighting feature
+
 private:
   bool mOn;
+};
+
+
+class DeviceOnOffLight : public DeviceOnOff
+{
+  typedef DeviceOnOff inherited;
+public:
+
+  DeviceOnOffLight() : inherited(true) {};
+
+  virtual const char *deviceType() override { return "on-off light"; }
+
+protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
+};
+
+
+class DeviceOnOffPluginUnit : public DeviceOnOff
+{
+  typedef DeviceOnOff inherited;
+public:
+
+  DeviceOnOffPluginUnit() : inherited(false) {};
+
+  virtual const char *deviceType() override { return "on-off plug-in unit"; }
+
+protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+
 };

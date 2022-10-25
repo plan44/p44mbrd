@@ -31,6 +31,8 @@
 
 #include "device_impl.h"
 
+using namespace Clusters;
+
 // MARK: - bridged device common declarations
 
 // REVISION DEFINITIONS:
@@ -389,6 +391,102 @@ string Device::description()
 {
   return string_format("device status:\n- reachable: %d", mReachable);
 }
+
+
+// MARK: - IdentifiableDevice
+
+
+// REVISION DEFINITIONS:
+// TODO: move these to a better place, probably into the devices that actually handle them, or
+//   try to extract them from ZAP-generated defs
+// =================================================================================
+
+#define ZCL_IDENTIFY_CLUSTER_REVISION (4u)
+#define ZCL_IDENTIFY_CLUSTER_FEATURE_MAP (0) // no QRY
+
+// Declare cluster attributes
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(identifyAttrs)
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_IDENTIFY_TIME_ATTRIBUTE_ID, INT16U, 2, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_IDENTIFY_TYPE_ATTRIBUTE_ID, ENUM8, 1, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0), /* feature map */
+DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
+
+// Declare cluster commands
+// TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
+constexpr CommandId onOffIncomingCommands[] = {
+  app::Clusters::Identify::Commands::Identify::Id,
+  kInvalidCommandId,
+};
+
+DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(identifiableDeviceClusters)
+  DECLARE_DYNAMIC_CLUSTER(ZCL_IDENTIFY_CLUSTER_ID, identifyAttrs, onOffIncomingCommands, nullptr),
+DECLARE_DYNAMIC_CLUSTER_LIST_END;
+
+
+IdentifiableDevice::IdentifiableDevice() :
+  mIdentifyTime(0)
+{
+  // - declare identify cluster
+  addClusterDeclarations(Span<EmberAfCluster>(identifiableDeviceClusters));
+}
+
+
+IdentifiableDevice::~IdentifiableDevice()
+{
+}
+
+
+void IdentifiableDevice::identify(int aSeconds)
+{
+  // identify on the bridged device
+  JsonObjectPtr params = JsonObject::newObj();
+  // 0 = default duration, <0 = stop, >0 = duration
+  if (aSeconds!=0) params->add("duration", JsonObject::newDouble(aSeconds));
+  notify("identify", params);
+}
+
+
+EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+{
+  if (clusterId==ZCL_IDENTIFY_CLUSTER_ID) {
+    if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mIdentifyTime);
+    }
+    if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, identifyType());
+    }
+    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_IDENTIFY_CLUSTER_FEATURE_MAP);
+    }
+  }
+  // let base class try
+  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+}
+
+
+EmberAfStatus IdentifiableDevice::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+{
+  if (clusterId==ZCL_IDENTIFY_CLUSTER_ID) {
+    if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
+      uint16_t prevIdentifyTime = mIdentifyTime;
+      EmberAfStatus sta = setAttr(mIdentifyTime, buffer);
+      if (sta==EMBER_ZCL_STATUS_SUCCESS) {
+        if (mIdentifyTime==0) {
+          // stop
+          identify(-1);
+        }
+        else if (prevIdentifyTime<mIdentifyTime) {
+          // increased identify time: start identifying
+          identify(mIdentifyTime);
+        }
+      }
+      return sta;
+    }
+  }
+  // let base class try
+  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+}
+
 
 
 // MARK: - ComposedDevice

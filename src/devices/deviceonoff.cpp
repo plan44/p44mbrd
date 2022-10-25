@@ -39,18 +39,17 @@
 // =================================================================================
 
 #define ZCL_ON_OFF_CLUSTER_REVISION (4u)
-#define ZCL_ON_OFF_CLUSTER_FEATURE_MAP (EMBER_AF_ON_OFF_FEATURE_LIGHTING)
 
 // MARK: onOff cluster declarations
 
+// Declare cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0), /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
-// Declare Cluster List for Bridged Light endpoint
-// TODO: It's not clear whether it would be better to get the command lists from
-// the ZAP config on our last fixed endpoint instead.
+// Declare cluster commands
+// TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
 constexpr CommandId onOffIncomingCommands[] = {
   app::Clusters::OnOff::Commands::Off::Id,
   app::Clusters::OnOff::Commands::On::Id,
@@ -65,26 +64,24 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
   DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
-const EmberAfDeviceType gOnOffLightTypes[] = {
-  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
-};
-
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff() :
-  mOn(false)
+DeviceOnOff::DeviceOnOff(bool aLighting) :
+  mOn(false),
+  mLighting(aLighting)
 {
   // - declare onoff device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
 }
 
 
-void DeviceOnOff::finalizeDeviceDeclaration()
+uint8_t DeviceOnOff::identifyType()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
+  // Lights identify via light, others somehow operate the actuator (blinds, clicking relay etc.)
+  return mLighting ? EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_VISIBLE_LIGHT : EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_ACTUATOR;
 }
+
 
 
 void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
@@ -203,7 +200,7 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
     }
     if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_FEATURE_MAP);
+      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? EMBER_AF_ON_OFF_FEATURE_LIGHTING : 0);
     }
   }
   // let base class try
@@ -232,3 +229,32 @@ string DeviceOnOff::description()
   string_format_append(s, "\n- OnOff: %d", mOn);
   return s;
 }
+
+
+// MARK: - DeviceOnOffLight
+
+const EmberAfDeviceType gOnOffLightTypes[] = {
+  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+void DeviceOnOffLight::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
+}
+
+
+// MARK: - DeviceOnOffPluginUnit
+
+const EmberAfDeviceType gOnOffPluginTypes[] = {
+  { DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+void DeviceOnOffPluginUnit::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffPluginTypes));
+}
+
+
+

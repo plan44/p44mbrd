@@ -41,7 +41,7 @@ public:
 
   DeviceColorControl(bool aCTOnly);
 
-  virtual const char *deviceType() { return "color-control"; }
+  virtual const char *deviceType() override { return "color-control"; }
 
   virtual string description() override;
 

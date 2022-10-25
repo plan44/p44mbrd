@@ -41,6 +41,7 @@
 #include "logger.hpp"
 
 using namespace chip;
+using namespace app;
 using namespace std;
 using namespace p44;
 
@@ -227,6 +228,31 @@ protected:
 };
 
 
+class IdentifiableDevice : public Device
+{
+  typedef Device inherited;
+
+  uint16_t mIdentifyTime;
+
+public:
+
+  IdentifiableDevice();
+  virtual ~IdentifiableDevice();
+
+  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+
+protected:
+
+  virtual uint8_t identifyType() { return EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_NONE; }
+
+private:
+
+  void identify(int aSeconds);
+
+};
+
+
 class ComposedDevice : public Device
 {
   typedef Device inherited;
@@ -236,7 +262,7 @@ public:
   ComposedDevice();
   virtual ~ComposedDevice();
 
-  virtual const char *deviceType() { return "composed"; }
+  virtual const char *deviceType() override { return "composed"; }
 
   virtual string description() override;
 

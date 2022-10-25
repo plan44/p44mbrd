@@ -47,12 +47,15 @@ const int kDescriptorAttributeArraySize = 254;
 // (taken from third_party/zap/repo/zcl-builtin/matter/matter-devices.xml)
 #define DEVICE_TYPE_MA_BRIDGED_DEVICE 0x0013
 #define DEVICE_TYPE_MA_ON_OFF_LIGHT 0x0100
+#define DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT 0x010A
 #define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
+#define DEVICE_TYPE_MA_DIMMABLE_PLUGIN_UNIT 0x010B
 #define DEVICE_TYPE_MA_CT_LIGHT 0x010C
 #define DEVICE_TYPE_MA_COLOR_LIGHT 0x010D
 #define DEVICE_TYPE_MA_TEMP_SENSOR 0x0302
 #define DEVICE_TYPE_MA_ILLUM_SENSOR 0x0106
 #define DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR 0x0307
+
 
 // Device Version for dynamic endpoints:
 #define DEVICE_VERSION_DEFAULT 1
