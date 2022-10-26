@@ -1689,6 +1689,16 @@ endpoint 2 {
   device type anonymousEndpointType = 269;
   binding cluster Binding;
 
+  server cluster Identify {
+    ram      attribute identifyTime;
+    ram      attribute identifyType;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
+    ram      attribute featureMap;
+    ram      attribute clusterRevision default = 4;
+  }
+
   server cluster OnOff {
     callback attribute onOff;
     ram      attribute globalSceneControl default = 1;
@@ -1744,9 +1754,9 @@ endpoint 2 {
 
   server cluster BooleanState {
     ram      attribute stateValue;
-    ram      attribute generatedCommandList;
-    ram      attribute acceptedCommandList;
-    ram      attribute attributeList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
     ram      attribute featureMap;
     ram      attribute clusterRevision default = 1;
   }
@@ -1784,9 +1794,9 @@ endpoint 2 {
     ram      attribute measuredValue;
     ram      attribute minMeasuredValue;
     ram      attribute maxMeasuredValue;
-    ram      attribute generatedCommandList;
-    ram      attribute acceptedCommandList;
-    ram      attribute attributeList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
     ram      attribute featureMap;
     ram      attribute clusterRevision default = 3;
   }
@@ -1795,9 +1805,9 @@ endpoint 2 {
     ram      attribute measuredValue;
     ram      attribute minMeasuredValue default = 0x8000;
     ram      attribute maxMeasuredValue default = 0x8000;
-    ram      attribute generatedCommandList;
-    ram      attribute acceptedCommandList;
-    ram      attribute attributeList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
     ram      attribute featureMap;
     ram      attribute clusterRevision default = 1;
   }
@@ -1806,9 +1816,9 @@ endpoint 2 {
     ram      attribute measuredValue;
     ram      attribute minMeasuredValue;
     ram      attribute maxMeasuredValue;
-    ram      attribute generatedCommandList;
-    ram      attribute acceptedCommandList;
-    ram      attribute attributeList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
     ram      attribute featureMap;
     ram      attribute clusterRevision default = 3;
   }
@@ -1817,9 +1827,9 @@ endpoint 2 {
     ram      attribute occupancy;
     ram      attribute occupancySensorType;
     ram      attribute occupancySensorTypeBitmap;
-    ram      attribute generatedCommandList;
-    ram      attribute acceptedCommandList;
-    ram      attribute attributeList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
     ram      attribute featureMap;
     ram      attribute clusterRevision default = 2;
   }

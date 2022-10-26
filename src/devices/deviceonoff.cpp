@@ -68,8 +68,8 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 // MARK: - DeviceOnOff
 
 DeviceOnOff::DeviceOnOff(bool aLighting) :
-  mOn(false),
-  mLighting(aLighting)
+  mLighting(aLighting),
+  mOn(false)
 {
   // - declare onoff device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));

@@ -413,13 +413,13 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare cluster commands
 // TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
-constexpr CommandId onOffIncomingCommands[] = {
+constexpr CommandId identifyIncomingCommands[] = {
   app::Clusters::Identify::Commands::Identify::Id,
   kInvalidCommandId,
 };
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(identifiableDeviceClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_IDENTIFY_CLUSTER_ID, identifyAttrs, onOffIncomingCommands, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(ZCL_IDENTIFY_CLUSTER_ID, identifyAttrs, identifyIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
