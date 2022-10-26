@@ -146,7 +146,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       params->add("channel", JsonObject::newInt32(0)); // default channel
       params->add("relative", JsonObject::newBool(aDirection!=0));
       params->add("value", JsonObject::newDouble((double)aAmount*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL*(aDirection<0 ? -1 : 1)));
-      if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble(aTransitionTimeDs/10));
+      if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
       params->add("apply_now", JsonObject::newBool(true));
       notify("setOutputChannelValue", params);
     }
