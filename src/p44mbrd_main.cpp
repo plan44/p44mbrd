@@ -234,7 +234,8 @@ public:
   // MARK: query and setup bridgeable devices
 
   #define NEEDED_DEVICE_PROPERTIES \
-    "{\"dSUID\":null, \"name\":null, \"outputDescription\":null, \"function\": null, \"x-p44-zonename\": null, " \
+    "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
+    "\"outputDescription\":null, \"outputSettings\": null, " \
     "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
     "\"channelStates\":null, \"channelDescriptions\":null, " \
     "\"sensorDescriptions\":null, \"sensorStates\":null, " \
@@ -279,8 +280,12 @@ public:
           DevicePtr dev;
           JsonObjectPtr outputdesc = aDeviceJSON->get("outputDescription");
           string behaviourtype;
-          if (outputdesc->get("x-p44-behaviourType", o)) {
+          JsonObjectPtr groups;
+          if (outputdesc && outputdesc->get("x-p44-behaviourType", o)) {
             behaviourtype = o->stringValue();
+            if (aDeviceJSON->get("outputSettings", o)) {
+              groups = o->get("groups");
+            }
           }
           // - first check if we have a bridging hint that directly defines the mapping
           if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
@@ -307,7 +312,7 @@ public:
               if (outputdesc->get("function", o)) {
                 int outputfunction = (int)o->int32Value();
                 // output device
-                if (behaviourtype=="light") {
+                if (behaviourtype=="light" && groups && groups->get("1")) {
                   // this is a light device
                   OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                   switch(outputfunction) {
