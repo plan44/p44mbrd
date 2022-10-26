@@ -292,11 +292,11 @@ public:
             // bridging hint should determine bridged device
             string bridgeAs = o->stringValue();
             if (bridgeAs=="on-off") {
-              if (behaviourtype=="light") dev = new DeviceOnOffLight();
+              if (behaviourtype=="light" && groups && groups->get("1")) dev = new DeviceOnOffLight();
               else dev = new DeviceOnOffPluginUnit();
             }
             else if (bridgeAs=="level-control") {
-              if (behaviourtype=="light") dev = new DeviceDimmableLight();
+              if (behaviourtype=="light" && groups && groups->get("1")) dev = new DeviceDimmableLight();
               else dev = new DeviceDimmablePluginUnit();
             }
             if (dev) {
