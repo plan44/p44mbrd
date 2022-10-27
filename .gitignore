@@ -1,7 +1,6 @@
-zap-tests/
 p44mbrd.bbprojectd/
 out/
 .cache
 *.xcuserstate
-chip_kvs_xcode_working
 p44mbrd.xcodeproj/xcuserdata/*.xcuserdatad
+compile_commands.json
