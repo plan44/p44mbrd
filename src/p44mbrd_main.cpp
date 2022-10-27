@@ -1154,6 +1154,9 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
       POLOG(dev, LOG_ERR, "Attribute read not handled!");
     }
+    else {
+      POLOG(dev, LOG_NOTICE, "- result = %s", dataToHexString(buffer, maxReadLength, ' ').c_str());
+    }
   }
   return ret;
 }
@@ -1168,6 +1171,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
     POLOG(dev, LOG_NOTICE, "write external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
+    POLOG(dev, LOG_NOTICE, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
     ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
       POLOG(dev, LOG_ERR, "Attribute write not handled!");
