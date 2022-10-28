@@ -83,9 +83,6 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
      case ZCL_NETWORK_COMMISSIONING_CLUSTER_ID :
         emberAfNetworkCommissioningClusterInitCallback(endpoint);
         break;
-     case ZCL_OCCUPANCY_SENSING_CLUSTER_ID :
-        emberAfOccupancySensingClusterInitCallback(endpoint);
-        break;
      case ZCL_ON_OFF_CLUSTER_ID :
         emberAfOnOffClusterInitCallback(endpoint);
         break;
@@ -202,11 +199,6 @@ void __attribute__((weak)) emberAfLocalizationConfigurationClusterInitCallback(E
     (void) endpoint;
 }
 void __attribute__((weak)) emberAfNetworkCommissioningClusterInitCallback(EndpointId endpoint)
-{
-    // To prevent warning
-    (void) endpoint;
-}
-void __attribute__((weak)) emberAfOccupancySensingClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;
