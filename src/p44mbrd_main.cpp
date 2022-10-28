@@ -49,6 +49,15 @@
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
 
+// Network commissioning cluster support
+#include <app/clusters/network-commissioning/network-commissioning.h>
+#if CHIP_DEVICE_LAYER_TARGET_LINUX
+#include <platform/Linux/NetworkCommissioningDriver.h>
+#endif
+#if CHIP_DEVICE_LAYER_TARGET_DARWIN
+#include <platform/Darwin/NetworkCommissioningDriver.h>
+#endif
+
 #include <pthread.h>
 #include <sys/ioctl.h>
 
@@ -99,6 +108,9 @@ using namespace chip::app::Clusters;
 
 using namespace p44;
 
+
+// MARK: - P44mbrd class
+
 #define DEFAULT_BRIDGE_SERVICE "4444"
 #define DEFAULT_BRIDGE_HOST "127.0.0.1"
 
@@ -121,11 +133,22 @@ class P44mbrd : public CmdLineApp
   char mDynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
   EndpointId mNumDynamicEndPoints;
 
+  // Network commissioning
+  #if CHIP_DEVICE_LAYER_TARGET_LINUX
+  chip::DeviceLayer::NetworkCommissioning::LinuxEthernetDriver mEthernetDriver;
+  #endif // CHIP_DEVICE_LAYER_TARGET_LINUX
+  #if CHIP_DEVICE_LAYER_TARGET_DARWIN
+  chip::DeviceLayer::NetworkCommissioning::DarwinEthernetDriver mEthernetDriver;
+  #endif // CHIP_DEVICE_LAYER_TARGET_DARWIN
+  chip::app::Clusters::NetworkCommissioning::Instance mEthernetNetworkCommissioningInstance;
+
+
 public:
 
   P44mbrd() :
     mChipAppInitialized(false),
-    mNumDynamicEndPoints(0)
+    mNumDynamicEndPoints(0),
+    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
   {
   }
 
@@ -1028,8 +1051,8 @@ public:
 //    err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
 //    SuccessOrExit(err);
 
+    // Show device config
     ConfigurationMgr().LogDeviceConfig();
-
     OLOG(LOG_NOTICE, "==== Onboarding payload for %s Commissioning Flow ====",
       onBoardingPayload.commissioningFlow == chip::CommissioningFlow::kStandard ? "STANDARD" : "USER-ACTION or CUSTOM"
     );
@@ -1043,6 +1066,9 @@ public:
       // FIXME: figure out if actually commissionable or not
       BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(true));
     }
+
+    // init the network commissioning instance (which is needed by the Network Commissioning Cluster)
+    mEthernetNetworkCommissioningInstance.Init();
 
     #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
     const char *s;
