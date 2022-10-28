@@ -1,8 +1,8 @@
 [submodule "src/third_party/connectedhomeip"]
 	path = src/third_party/connectedhomeip
-	url = /Users/luz/Code/looking_at_external_stuff/connectedhomeip
+	url = ../connectedhomeip
 	branch = luz_p44mbrd
 [submodule "src/p44utils"]
 	path = src/p44utils
-	url = ssh://plan44@plan44.ch/home/plan44/sharedgit/p44utils.git
+	url = ../p44utils.git
 	branch = luz

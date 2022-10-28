@@ -1,0 +1,8 @@
+Unless noted otherwise, all files are licensed GPLv3 (see LICENSE.GPLv3)
+
+For a commercial license, please contact luz@plan44.ch
+
+Files in the following directories are under a different license:
+
+src/thirdparty/connectedhomeip : Apache License Version 2.0
+src/p44utils/thirdparty/*      : various licenses compatible with GPLv3, such as MIT, BSD
