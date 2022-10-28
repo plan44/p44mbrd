@@ -28,8 +28,8 @@
 #define FOCUSLOGLEVEL 5
 
 
+#include "device_impl.h" // include as first file!
 #include "devicelevelcontrol.h"
-#include "device_impl.h"
 
 using namespace app;
 using namespace Clusters;

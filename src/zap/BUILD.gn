@@ -18,7 +18,7 @@ import("${chip_root}/src/app/chip_data_model.gni")
 
 chip_data_model("zap") {
   zap_file = "p44mbrd.zap"
-  zap_clusters_with_custom_implementation = [ "level-control", "color-control-server" ]
+  zap_clusters_with_custom_implementation = [ "level-control", "color-control-server", "identify-server" ]
 
   zap_pregenerated_dir = "//zap-generated"
   is_server = true

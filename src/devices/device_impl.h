@@ -25,6 +25,8 @@
 
 #include <cstdio>
 
+#include <app-common/zap-generated/callback.h>
+
 #include <platform/CHIPDeviceLayer.h>
 #include <lib/support/ZclString.h>
 

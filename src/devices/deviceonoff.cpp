@@ -27,9 +27,8 @@
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
 
-
+#include "device_impl.h" // include as first file!
 #include "deviceonoff.h"
-#include "device_impl.h"
 
 // MARK: - OnOff Device specific declarations
 
@@ -148,7 +147,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 {
   if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "updating onOff to %s - updatemode=0x%x", aOn ? "ON" : "OFF", aUpdateMode.Raw());
-    mOn  = aOn;
+    mOn = aOn;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       changeOnOff_impl(mOn);
     }
@@ -192,14 +191,14 @@ bool DeviceOnOff::shouldExecuteWithFlag(bool aWithOnOff, uint8_t aOptionMask, ui
 EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if ((attributeId == ZCL_ON_OFF_ATTRIBUTE_ID)) {
+    if (attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, isOn());
     }
     // common attributes
-    if ((attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) && (maxReadLength == 2)) {
+    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
     }
-    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
       return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? EMBER_AF_ON_OFF_FEATURE_LIGHTING : 0);
     }
   }

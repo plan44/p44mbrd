@@ -28,8 +28,7 @@
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
 
-
-#include "device_impl.h"
+#include "device_impl.h" // include as first file!
 
 using namespace Clusters;
 
@@ -395,6 +394,7 @@ string Device::description()
 
 // MARK: - IdentifiableDevice
 
+using namespace Identify;
 
 // REVISION DEFINITIONS:
 // TODO: move these to a better place, probably into the devices that actually handle them, or
@@ -413,6 +413,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare cluster commands
 // TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
+// Note: we only implement "Identify", the only mandatory command when QRY feature is not present
 constexpr CommandId identifyIncomingCommands[] = {
   app::Clusters::Identify::Commands::Identify::Id,
   kInvalidCommandId,
@@ -436,14 +437,43 @@ IdentifiableDevice::~IdentifiableDevice()
 }
 
 
-void IdentifiableDevice::identify(int aSeconds)
+bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode)
 {
-  // identify on the bridged device
-  JsonObjectPtr params = JsonObject::newObj();
-  // 0 = default duration, <0 = stop, >0 = duration
-  if (aSeconds!=0) params->add("duration", JsonObject::newDouble(aSeconds));
-  notify("identify", params);
+  if (aIdentifyTime!=mIdentifyTime || aUpdateMode.Has(UpdateFlags::forced)) {
+    OLOG(LOG_INFO, "updating identifyTime to %hu - updatemode=0x%x", aIdentifyTime, aUpdateMode.Raw());
+    mIdentifyTime = aIdentifyTime;
+    if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      // (re)start or stop identify in the bridged device
+      mIdentifyTickTimer.cancel();
+      JsonObjectPtr params = JsonObject::newObj();
+      // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
+      params->add("duration", JsonObject::newDouble(mIdentifyTime<=0 ? -1 : mIdentifyTime));
+      notify("identify", params);
+      if (mIdentifyTime>0) {
+        // start ticker
+        identifyTick(mIdentifyTime);
+      }
+    }
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_IDENTIFY_CLUSTER_ID, ZCL_IDENTIFY_TIME_ATTRIBUTE_ID);
+    }
+    return true; // changed
+  }
+  return false; // unchanged
 }
+
+
+void IdentifiableDevice::identifyTick(uint16_t aRemainingSeconds)
+{
+  if (aRemainingSeconds<mIdentifyTime) {
+    // update
+    updateIdentifyTime(aRemainingSeconds, UpdateMode(UpdateFlags::matter));
+  }
+  if (mIdentifyTime>0) {
+    mIdentifyTickTimer.executeOnce(boost::bind(&IdentifiableDevice::identifyTick, this, (uint16_t)(mIdentifyTime-1)), 1*Second);
+  }
+}
+
 
 
 EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
@@ -468,25 +498,51 @@ EmberAfStatus IdentifiableDevice::HandleWriteAttribute(ClusterId clusterId, chip
 {
   if (clusterId==ZCL_IDENTIFY_CLUSTER_ID) {
     if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
-      uint16_t prevIdentifyTime = mIdentifyTime;
-      EmberAfStatus sta = setAttr(mIdentifyTime, buffer);
-      if (sta==EMBER_ZCL_STATUS_SUCCESS) {
-        if (mIdentifyTime==0) {
-          // stop
-          identify(-1);
-        }
-        else if (prevIdentifyTime<mIdentifyTime) {
-          // increased identify time: start identifying
-          identify(mIdentifyTime);
-        }
-      }
-      return sta;
+      updateIdentifyTime(*((uint16_t*)buffer), UpdateMode(UpdateFlags::bridged));
+      return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
 }
 
+// MARK: callbacks
+
+void MatterIdentifyPluginServerInitCallback()
+{
+  /* NOP */
+}
+
+
+void emberAfIdentifyClusterServerInitCallback(EndpointId aEndpoint)
+{
+  /* NOP */
+}
+
+
+void MatterIdentifyClusterServerAttributeChangedCallback(const chip::app::ConcreteAttributePath & attributePath)
+{
+  /* NOP */
+}
+
+
+bool emberAfIdentifyClusterIdentifyCallback(
+  CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+  const Commands::Identify::DecodableType & commandData
+)
+{
+  auto dev = DeviceEndpoints::getDevice<IdentifiableDevice>(commandPath.mEndpointId);
+  if (!dev) return false;
+  dev->updateIdentifyTime(commandData.identifyTime, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  return true;
+}
+
+
+bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chip::app::ConcreteCommandPath const&, chip::app::Clusters::Identify::Commands::TriggerEffect::DecodableType const&)
+{
+  // needs to be here because it is referenced from a dispatcher outside the cluster implementation
+  return false; // we do not implement this
+}
 
 
 // MARK: - ComposedDevice

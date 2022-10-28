@@ -27,9 +27,8 @@
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
 
-
+#include "device_impl.h" // include as first file!
 #include "sensordevices.h"
-#include "device_impl.h"
 
 #include <math.h>
 

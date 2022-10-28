@@ -27,9 +27,8 @@
 //   Note: must be before including "logger.hpp" (or anything that includes "logger.hpp")
 #define FOCUSLOGLEVEL 5
 
-
+#include "device_impl.h" // include as first file!
 #include "devicecolorcontrol.h"
-#include "device_impl.h"
 
 using namespace app;
 using namespace Clusters;

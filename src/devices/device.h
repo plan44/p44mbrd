@@ -233,6 +233,7 @@ class IdentifiableDevice : public Device
   typedef Device inherited;
 
   uint16_t mIdentifyTime;
+  MLTicket mIdentifyTickTimer;
 
 public:
 
@@ -242,13 +243,15 @@ public:
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
+  bool updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode);
+
 protected:
 
   virtual uint8_t identifyType() { return EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_NONE; }
 
 private:
 
-  void identify(int aSeconds);
+  void identifyTick(uint16_t aRemainingSeconds);
 
 };
 
