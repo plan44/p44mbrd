@@ -32,12 +32,13 @@ class DeviceColorControl : public DeviceLevelControl
 public:
 
   /// @note: enum values are from matter specs
-  typedef enum {
+  enum {
     colormode_hs = 0,
     colormode_xy = 1,
     colormode_ct = 2,
     colormode_unknown = 0xFF
-  } ColorMode;
+  };
+  typedef uint8_t ColorMode;
 
   DeviceColorControl(bool aCTOnly);
 
