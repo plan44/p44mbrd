@@ -58,23 +58,24 @@ If that's a problem for your particular application, I am open to provide a comm
 
 ### try it out
 
-- plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain a complete OpenWrt, with vdcd and p44mbrd installed and fully configured as a digitalSTROM bridge or a standalone light controller with matter support. You can download these from [https://plan44.ch/automation/p44-dsb-x.php](https://plan44.ch/automation/p44-dsb-x.php), copy it to a SD Card and use it with a RPi B, B+, 2,3 and 4.
+plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain a complete OpenWrt, with vdcd and p44mbrd installed and fully configured as a digitalSTROM bridge or a standalone light controller with matter support. You can download these from [https://plan44.ch/automation/p44-dsb-x.php](https://plan44.ch/automation/p44-dsb-x.php), copy it to a SD Card and use it with a RPi B, B+, 2,3 and 4. Note that the downloaded images are not always the most current version, so use the built-in "check for update" to get the latest version. Also note that at the time of writing this (October 2022) the matter enabled FW is on request, so you need to send an email first (details see https://plan44.ch/p44-techdocs/en/matter/beta_readme/).
 
 ### build it
 
-- you can build *p44mbrd* using the `gn`/`ninja` build system the same way you build any example from the *connectedhomeip* repository, e.g. as described for the bridge-app example in `src/third_party/connectedhomeip/examples/bridge-app/linux/README.md`
+You can build *p44mbrd* using the `gn`/`ninja` build system the same way you build any example from the *connectedhomeip* repository, e.g. as described for the bridge-app example in `src/third_party/connectedhomeip/examples/bridge-app/linux/README.md`
 
 ### run it
 
-- on a Linux or macOS host, you can run *p44mbrd* with
+On a Linux or macOS host, you can run *p44mbrd* with
 
-    ```bash
+```bash
 ${OUT_DIR}/p44mbrd --payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3842 --KVS /file/to/store/data --chiploglevel 2 --loglevel 5
-    ```
-  Note that at this time, all this **is not certified by the csa-iot** so must use `vendor-id` and `product-id` as shown above. These are the test vendor and bridge-app product ids from the SDK.
-  The `discriminator` should be set to a device-unique value to allow commissioning in a network with multiple bridge-app or p44mbrd instances.
+```
+
+Note that at this time, all this **is not certified by the csa-iot** so must use `vendor-id` and `product-id` as shown above. These are the test vendor and bridge-app product ids from the SDK.
+The `discriminator` should be set to a device-unique value to allow commissioning in a network with multiple bridge-app or p44mbrd instances.
   
-- you also need to have a *vdcd* running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--bridgeapihost` and `bridgeapiport` where to look for the bridge API.
+You also need to have a *vdcd* running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--bridgeapihost` and `bridgeapiport` where to look for the bridge API.
 
 ## Supporting p44mbrd
 
