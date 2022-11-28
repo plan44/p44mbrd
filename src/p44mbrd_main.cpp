@@ -392,7 +392,7 @@ public:
                           // Temperature sensor
                           case sensorType_temperature: dev = new DeviceTemperature(); break;
                           case sensorType_humidity: dev = new DeviceHumidity(); break;
-                          case sensorType_illumination: dev = new DeviceHumidity(); break;
+                          case sensorType_illumination: dev = new DeviceIlluminance(); break;
                         }
                       }
                       break;
