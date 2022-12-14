@@ -28,7 +28,7 @@
 CHIP_ERROR P44DeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < sizeof(P44_VENDOR_NAME), CHIP_ERROR_BUFFER_TOO_SMALL);
-  strcpy(buf, P44_VENDOR_NAME);
+  strncpy(buf, P44_VENDOR_NAME, bufSize);
   return CHIP_NO_ERROR;
 }
 
@@ -42,7 +42,7 @@ CHIP_ERROR P44DeviceInfoProvider::GetVendorId(uint16_t & vendorId)
 CHIP_ERROR P44DeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mProductName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
-  strcpy(buf, mProductName.c_str());
+  strncpy(buf, mProductName.c_str(), bufSize);
   return CHIP_NO_ERROR;
 }
 
@@ -54,36 +54,56 @@ CHIP_ERROR P44DeviceInfoProvider::GetProductId(uint16_t & productId)
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
-{
-  ReturnErrorCodeIf(bufSize < mSerial.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
-  strcpy(buf, mSerial.c_str());
-  return CHIP_NO_ERROR;
-}
-
-
-CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
-{
-  // FIXME: testing
-  year = 2022;
-  month = 10;
-  day = 04;
-  return CHIP_NO_ERROR;
-}
-
-
 CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
 {
-  hardwareVersion = 0; // FIXME: testing
+  hardwareVersion = 1; // FIXME: testing
   return CHIP_NO_ERROR;
 }
 
 
 CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
 {
-  *buf = 0; // FIXME: testing, no version
+  uint16_t hwv;
+  GetHardwareVersion(hwv);
+  snprintf(buf, bufSize, "v%hd", hwv);
   return CHIP_NO_ERROR;
 }
+
+
+
+
+CHIP_ERROR P44DeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
+  // Optional: Human readable Part Number (same ProductID may have different packages, colors etc.)
+  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+}
+
+
+CHIP_ERROR P44DeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
+  // Optional: Product Website URL
+  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+}
+
+
+CHIP_ERROR P44DeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
+  // Optional: More user-friendly version of ProductName, not containing VendorName
+  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+}
+
+
+CHIP_ERROR P44DeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
+{
+  ReturnErrorCodeIf(bufSize < mSerial.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  strncpy(buf, mSerial.c_str(), bufSize);
+  return CHIP_NO_ERROR;
+}
+
+
+CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
+{
+  // Optional: when the node was manufactured, ISO8601 date in the first 8 chars
+  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+}
+
 
 
 CHIP_ERROR P44DeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
