@@ -133,6 +133,8 @@ server cluster LevelControl = 8 {
 
   readonly attribute nullable int8u currentLevel = 0;
   readonly attribute int16u remainingTime = 1;
+  readonly attribute int8u minLevel = 2;
+  readonly attribute int8u maxLevel = 3;
   attribute LevelControlOptions options = 15;
   attribute int16u onOffTransitionTime = 16;
   attribute nullable int8u onLevel = 17;
@@ -1709,6 +1711,8 @@ endpoint 2 {
   server cluster LevelControl {
     callback attribute currentLevel;
     ram      attribute remainingTime;
+    ram      attribute minLevel;
+    ram      attribute maxLevel default = 0xFE;
     ram      attribute options;
     callback attribute onOffTransitionTime default = 5;
     ram      attribute onLevel default = 0xFE;

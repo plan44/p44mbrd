@@ -82,6 +82,8 @@ private:
   MLMicroSeconds mEndOfLatestTransition; ///< point in time when latest transition will end (or already has ended)
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
+  uint8_t minLevel(); ///< return minimum level (different for generic and lighting cases)
+  uint8_t maxLevel(); ///< return maximum level
   bool shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void dim(int8_t aDirection, uint8_t aRate);
 };

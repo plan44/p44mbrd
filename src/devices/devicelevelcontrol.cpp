@@ -42,6 +42,8 @@
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
 #define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (EMBER_AF_LEVEL_CONTROL_FEATURE_ON_OFF)
 
+#define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
+
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* current level */
@@ -49,6 +51,8 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_LEVEL_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* level for fully on */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_OPTIONS_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* default move/dim rate */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_MAXIMUM_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* max level */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_MINIMUM_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* min level */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
@@ -124,8 +128,9 @@ void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
-      // handle switching off separately
-      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), 0, 0, false, aUpdateMode);
+      // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
+      // Note: updating on/off attribute is handled separately (in deviceonoff), don't do it here
+      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*(maxLevel()-minLevel()))+minLevel(), 0, 0, false, aUpdateMode);
     }
   }
 }
@@ -137,26 +142,38 @@ void DeviceLevelControl::changeOnOff_impl(bool aOn)
 }
 
 
+uint8_t DeviceLevelControl::minLevel()
+{
+  // minimum level is different in general case and for lighting
+  return mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : EMBER_AF_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL;
+}
+
+uint8_t DeviceLevelControl::maxLevel()
+{
+  return EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL;
+}
+
+
 bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode)
 {
   // handle relative movement
   int level = aAmount;
   if (aDirection!=0) level = (int)mLevel + (aDirection>0 ? aAmount : -aAmount);
-  if (level>EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) level = EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL;
-  if (level<0) level = 0;
+  if (level>maxLevel()) level = maxLevel();
+  if (level<minLevel()) level = minLevel();
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=0x%x", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     uint8_t previousLevel = mLevel;
-    if ((previousLevel==0 || aUpdateMode.Has(UpdateFlags::forced)) && level>0) {
-      // level is zero and becomes non-null: also set OnOff when enabled
+    if ((previousLevel<=minLevel() || aUpdateMode.Has(UpdateFlags::forced)) && level>minLevel()) {
+      // level is minimum and becomes non-minimum: also set OnOff when enabled
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
     }
-    else if (level==0) {
-      // level is not zero and should becomes zero: prevent or clear OnOff
+    else if (level<=minLevel()) {
+      // level is not minimum and should become minimum: prevent or clear OnOff
       if (aWithOnOff) updateOnOff(false, aUpdateMode);
-      else if (previousLevel==1) return false; // already at minimum: no change
-      else level = 1; // set to minimum, but not to off
+      else if (previousLevel==minLevel()) return false; // already at minimum: no change
+      else level = minLevel(); // set to minimum, but not to off
     }
     mLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -170,7 +187,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       JsonObjectPtr params = JsonObject::newObj();
       params->add("channel", JsonObject::newInt32(0)); // default channel
       params->add("relative", JsonObject::newBool(aDirection!=0));
-      params->add("value", JsonObject::newDouble((double)aAmount*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL*(aDirection<0 ? -1 : 1)));
+      params->add("value", JsonObject::newDouble((double)(aAmount-minLevel())/(maxLevel()-minLevel())*(aDirection<0 ? -100 : 100))); // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
       params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
       params->add("apply_now", JsonObject::newBool(true));
       notify("setOutputChannelValue", params);
@@ -242,6 +259,7 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataMod
     else {
       transitionTime = aTransitionTime.Value();
     }
+    bool wasOn = isOn();
     updateCurrentLevel(aAmount, aDirection, transitionTime, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
     // Support for global scene for last state before getting switched off
     // - The GlobalSceneControl attribute is defined in order to prevent a second off command storing the
@@ -250,14 +268,8 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataMod
     // - The GlobalSceneControl attribute SHALL be set to TRUE after the reception of a command which causes the OnOff
     //   attribute to be set to TRUE, such as a standard On command, a **Move to level (with on/off) command**, a Recall
     //   scene command or a On with recall global scene command.
-    if (aWithOnOff) {
-      uint32_t featureMap;
-      if (
-        Attributes::FeatureMap::Get(GetEndpointId(), &featureMap) == EMBER_ZCL_STATUS_SUCCESS &&
-        READBITS(featureMap, EMBER_AF_LEVEL_CONTROL_FEATURE_LIGHTING)
-      ) {
-        OnOff::Attributes::GlobalSceneControl::Set(GetEndpointId(), true);
-      }
+    if (aWithOnOff && !wasOn && isOn() && mLighting) {
+      OnOff::Attributes::GlobalSceneControl::Set(GetEndpointId(), true);
     }
   }
   // send response
@@ -512,6 +524,15 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
     if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, mDefaultMoveRateUnitsPerS);
+    }
+    if (attributeId == ZCL_MINIMUM_LEVEL_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, minLevel());
+    }
+    if (attributeId == ZCL_MAXIMUM_LEVEL_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, maxLevel());
+    }
+    if (attributeId == ZCL_START_UP_CURRENT_LEVEL_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, minLevel()); // TODO: default to off, check if this matches intentions
     }
     // common attributes
     if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
