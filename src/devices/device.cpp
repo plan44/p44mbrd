@@ -366,6 +366,11 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       return getAttr<uint32_t>(buffer, maxReadLength, ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP);
     }
   }
+  // always implement an empty feature map, seems to be mandatory (according to ZAP tool, not specs)
+  if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
+    FOCUSOLOG("reading generic empty feature map (endpoint does not have a specific one)");
+    return getAttr<uint32_t>(buffer, maxReadLength, 0);
+  }
   return EMBER_ZCL_STATUS_FAILURE;
 }
 

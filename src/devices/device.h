@@ -107,6 +107,7 @@ public:
   /// @return a short name for the type of device
   virtual const char *deviceType() = 0;
 
+  /// @return a description of the device, usually including current state
   virtual string description();
 
   /// init device with information from bridge query results

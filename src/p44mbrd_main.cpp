@@ -74,6 +74,7 @@
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
 #include "sensordevices.h"
+#include "booleaninputdevices.h"
 
 #include <app/server/Server.h>
 
@@ -389,7 +390,6 @@ public:
                         int sensorType = o->int32Value();
                         // determine sensor type
                         switch(sensorType) {
-                          // Temperature sensor
                           case sensorType_temperature: dev = new DeviceTemperature(); break;
                           case sensorType_humidity: dev = new DeviceHumidity(); break;
                           case sensorType_illumination: dev = new DeviceIlluminance(); break;
@@ -397,7 +397,27 @@ public:
                       }
                       break;
                     }
-                    case input: // TODO: handle
+                    case input:
+                      if (inputdesc->get("inputType", o)) {
+                        int inputType = o->int32Value();
+                        // determine input type
+                        switch(inputType) {
+                          case binInpType_presence:
+                          case binInpType_presenceInDarkness:
+                          case binInpType_motion:
+                          case binInpType_motionInDarkness:
+                            // TODO: map to Occupancy Sensing Cluster
+                            // for now: not handled
+                            break;
+                          default:
+                            // all others: create simple ContactSensors
+                            dev = new ContactSensorDevice();
+                            break;
+                        }
+                      }
+                      break;
+
+
                     case button: // TODO: maybe handle seperately, multiple button definitions in one device are usually coupled
                     default:
                       break;

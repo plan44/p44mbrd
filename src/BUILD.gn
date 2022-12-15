@@ -35,6 +35,8 @@ executable("p44mbrd") {
     "devices/device.h",
     "devices/sensordevices.cpp",
     "devices/sensordevices.h",
+    "devices/booleaninputdevices.cpp",
+    "devices/booleaninputdevices.h",
     "devices/deviceonoff.cpp",
     "devices/deviceonoff.h",
     "devices/devicelevelcontrol.cpp",

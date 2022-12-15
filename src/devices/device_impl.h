@@ -57,6 +57,7 @@ const int kDescriptorAttributeArraySize = 254;
 #define DEVICE_TYPE_MA_TEMP_SENSOR 0x0302
 #define DEVICE_TYPE_MA_ILLUM_SENSOR 0x0106
 #define DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR 0x0307
+#define DEVICE_TYPE_MA_CONTACT_SENSOR 0x0015
 
 
 // Device Version for dynamic endpoints:
