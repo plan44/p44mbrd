@@ -260,6 +260,7 @@ public:
   #define NEEDED_DEVICE_PROPERTIES \
     "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
     "\"outputDescription\":null, \"outputSettings\": null, " \
+    "\"scenes\": { \"0\":null, \"5\":null }, " \
     "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
     "\"channelStates\":null, \"channelDescriptions\":null, " \
     "\"sensorDescriptions\":null, \"sensorStates\":null, " \

@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
-		ED0B92DA2949DDFF00FA3B04 /* LoggingImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */; };
 		ED0B92DB2949DDFF00FA3B04 /* Logging.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED0B92D92949DDFF00FA3B04 /* Logging.mm */; };
 		ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */; };
 		ED14F42A294B76B8001C9D2E /* booleaninputdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */; };
+		ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */; };
 		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
 		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
@@ -407,6 +407,7 @@
 		ED14F426294A2E4D001C9D2E /* IPAddressSorter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPAddressSorter.h; sourceTree = "<group>"; };
 		ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = booleaninputdevices.cpp; sourceTree = "<group>"; };
 		ED14F429294B76B8001C9D2E /* booleaninputdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = booleaninputdevices.h; sourceTree = "<group>"; };
+		ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = darwinlogger.cpp; sourceTree = "<group>"; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
 		ED2330112886A1C500D934D7 /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
 		ED2330122886A1C500D934D7 /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
@@ -1492,6 +1493,7 @@
 				ED24BDBA28A6709E0025CC14 /* devices */,
 				ED24BDE528A812E00025CC14 /* bridgeapi */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
+				ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */,
 				ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */,
 				ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */,
 			);
@@ -3546,6 +3548,7 @@
 				ED2330242886A69700D934D7 /* utils.cpp in Sources */,
 				ED36DDC4286DDA0300CA28EC /* SecureMessageCodec.cpp in Sources */,
 				ED36DCFB286DD8A000CA28EC /* CASEServer.cpp in Sources */,
+				ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */,
 				ED36DC64286DD6A400CA28EC /* ApplicationExchangeDispatch.cpp in Sources */,
 				EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D7FE286DCDA300CA28EC /* diagnostic-logs-server.cpp in Sources */,
@@ -3845,7 +3848,6 @@
 				ED36DCAA286DD7F200CA28EC /* SystemTimeSupport.cpp in Sources */,
 				ED36DB9C286DD42300CA28EC /* Engine.cpp in Sources */,
 				ED36DD6E286DD9A400CA28EC /* WakeEvent.cpp in Sources */,
-				ED0B92DA2949DDFF00FA3B04 /* LoggingImpl.cpp in Sources */,
 				ED36D8F1286DCF0B00CA28EC /* CASESessionManager.cpp in Sources */,
 				ED24BDD328A673130025CC14 /* deviceinfoprovider.cpp in Sources */,
 				ED36DADB286DD27200CA28EC /* TCPEndPointImplSockets.cpp in Sources */,
