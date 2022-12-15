@@ -100,7 +100,7 @@ void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPt
   if (aDeviceInfo->get("outputDescription", o)) {
     if (o->get("x-p44-recommendedTransitionTime", o2)) {
       // adjust current
-      mRecommendedTransitionTimeDS = static_cast<uint16_t>(o2->doubleValue()/(Second*0.1));
+      mRecommendedTransitionTimeDS = static_cast<uint16_t>(o2->doubleValue()/0.1); // how many 1/10 seconds?
       mOnOffTransitionTimeDS = mRecommendedTransitionTimeDS; // also use as on/off default
     }
   }
@@ -110,7 +110,7 @@ void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPt
       if (o2->get("channels", o2)) {
         if (o2->get(mDefaultChannelId.c_str(), o2)) {
           if (o2->get("value", o2)) {
-            mOnLevel = static_cast<uint8_t>(o2->doubleValue()*EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+            mOnLevel = static_cast<uint8_t>(o2->doubleValue()/100*(maxLevel()-minLevel()))+minLevel();
           }
         }
       }
