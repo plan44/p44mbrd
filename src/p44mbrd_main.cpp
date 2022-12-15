@@ -597,10 +597,10 @@ public:
     EndpointId dynamicEndpointIdx = kInvalidEndpointId;
     chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (chiperr==CHIP_NO_ERROR) {
-      // try to re-use the endpoint ID for this dSUID
+      // This dSUID was already assigned to an endpoint earlier - try to re-use the endpoint ID for this dSUID
       // - sanity check
       if (dynamicEndpointIdx>=mNumDynamicEndPoints || mDynamicEndPointMap[dynamicEndpointIdx]!='d') {
-        POLOG(dev, LOG_ERR, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use by this device", dynamicEndpointIdx);
+        POLOG(dev, LOG_WARNING, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use, but isn't -> repair", dynamicEndpointIdx);
       }
       if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
         POLOG(dev, LOG_ERR, "Dynamic endpoint #%d for device exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx);
@@ -613,7 +613,9 @@ public:
           mDynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
         }
         else {
-          // should not happen normally, but when dynamicEndPointMap gets cleared, but device dSUID/endpoint mappings remain, it can happen.
+          // should not happen normally, but when dynamicEndPointMap gets cleared or
+          // was not saved correctly while device dSUID/endpoint mappings remains, it can happen.
+          // - repair the endpoint map
           for (size_t i = mNumDynamicEndPoints; i<dynamicEndpointIdx; i++) mDynamicEndPointMap[i]=' ';
           mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
           mDynamicEndPointMap[dynamicEndpointIdx+1] = 0;
@@ -630,26 +632,39 @@ public:
     // update and possibly extend endpoint map
     if (dynamicEndpointIdx==kInvalidEndpointId) {
       // this device needs a new endpoint
-      for (EndpointId i=0; i<mNumDynamicEndPoints; i++) {
-        if (mDynamicEndPointMap[i]==' ') {
-          // use the gap
-          dynamicEndpointIdx = i;
-          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-          POLOG(dev, LOG_NOTICE, "mapping device to free gap in dynamic endpoints at #%d", dynamicEndpointIdx);
+      // Note: Specs demand ever increasing endpoint indices (may wrap only after 0xFFFF).
+      //   Current ember/zcl implementations do not cover that, we can't have static arrays with 64k elements.
+      //   But as a first approximation, do NOT RE-USE gaps as long as we *can* use an increased id
+      // - try to append the new endpoint
+      if (mNumDynamicEndPoints+1<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+        // there is still room
+        dynamicEndpointIdx = mNumDynamicEndPoints++;
+        mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+        POLOG(dev, LOG_NOTICE, "mapping device to end of free dynamic endpoints at #%d", dynamicEndpointIdx);
+      }
+      else {
+        // cannot add more endpoints, wrap around
+        // FIXME: although specs say that should not happen before endpoint id reaches 0xFFFF
+        //   we need to wrap around now
+        POLOG(dev, LOG_WARNING, "max number of dynamic endpoints exhausted - need to wrap around and start filling gaps");
+        for (EndpointId i=0; i<mNumDynamicEndPoints; i++) {
+          if (mDynamicEndPointMap[i]==' ') {
+            // use the gap
+            dynamicEndpointIdx = i;
+            mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
+            POLOG(dev, LOG_NOTICE, "mapping device to free gap in dynamic endpoints at #%d", dynamicEndpointIdx);
+            break;
+          }
         }
       }
       if (dynamicEndpointIdx==kInvalidEndpointId) {
-        if (mNumDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-          POLOG(dev, LOG_ERR, "Max number of dynamic endpoints (%d) exhausted -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
-        }
-        else {
-          dynamicEndpointIdx = mNumDynamicEndPoints++;
-          POLOG(dev, LOG_NOTICE, "mapping device to end of free dynamic endpoints at #%d", dynamicEndpointIdx);
-          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-          // save in KVS
-          chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
-          LogErrorOnFailure(chiperr);
-        }
+        POLOG(dev, LOG_ERR, "No free endpoint available - all %d dynamic endpoints are occupied -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
+        chiperr = CHIP_ERROR_NO_ENDPOINT;
+      }
+      else {
+        // new endpoint was assigned to the device -> save dSUID<->endpoint relation
+        chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
+        LogErrorOnFailure(chiperr);
       }
     }
     // assign to dynamic endpoint array
@@ -722,7 +737,6 @@ public:
     // save updated endpoint map
     chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
     LogErrorOnFailure(chiperr);
-
     // Add the devices as dynamic endpoints
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
       if (mDevices[i]) {
