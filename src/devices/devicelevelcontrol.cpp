@@ -31,8 +31,6 @@
 #include "device_impl.h" // include as first file!
 #include "devicelevelcontrol.h"
 
-using namespace app;
-using namespace Clusters;
 
 // MARK: - LevelControl Device specific declarations
 
@@ -77,10 +75,12 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting) :
   inherited(aLighting),
   // Attribute defaults
   mLevel(0),
-  mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // FIXME: later, get this from preset1 scene brightness, maybe?
+  mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // will be updated from ROOM_ON value when available
   mLevelControlOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
-  mOnOffTransitionTimeDS(5), // FIXME: this is just the dS default of 0.5 sec, report actual value later
-  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7) // FIXME: just dS default of full range in 7 seconds
+  mOnOffTransitionTimeDS(5), // default is 0.5 Seconds for transitions (approx dS default)
+  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7), // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
+  mRecommendedTransitionTimeDS(5), // FIXME: just dS default of full range in 7 seconds
+  mEndOfLatestTransition(Never)
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
@@ -90,7 +90,28 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting) :
 void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
 {
   inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // no extra info at this level so far -> NOP
+  // level coontrol devices should know the recommended transition time for the output
+  JsonObjectPtr o;
+  JsonObjectPtr o2;
+  if (aDeviceInfo->get("outputDescription", o)) {
+    if (o->get("x-p44-recommendedTransitionTime", o2)) {
+      // adjust current
+      mRecommendedTransitionTimeDS = static_cast<uint16_t>(o2->doubleValue()/(Second*0.1));
+      mOnOffTransitionTimeDS = mRecommendedTransitionTimeDS; // also use as on/off default
+    }
+  }
+  // get default on level (level of preset1 scene)
+  if (aDeviceInfo->get("scenes", o)) {
+    if (o->get("5", o2)) {
+      if (o2->get("channels", o2)) {
+        if (o2->get(mDefaultChannelId.c_str(), o2)) {
+          if (o2->get("value", o2)) {
+            mOnLevel = static_cast<uint8_t>(o2->doubleValue()*EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+          }
+        }
+      }
+    }
+  }
 }
 
 
@@ -139,6 +160,10 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     }
     mLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      if (aTransitionTimeDs==0xFFFF) {
+        // means using default of the device, so we take the recommended transition time
+        aTransitionTimeDs = mRecommendedTransitionTimeDS;
+      }
       // adjust default channel
       // Note: transmit relative changes as such, although we already calculate the outcome above,
       //   but non-standard channels might arrive at another value (e.g. wrap around)
@@ -146,9 +171,11 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       params->add("channel", JsonObject::newInt32(0)); // default channel
       params->add("relative", JsonObject::newBool(aDirection!=0));
       params->add("value", JsonObject::newDouble((double)aAmount*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL*(aDirection<0 ? -1 : 1)));
-      if (aTransitionTimeDs!=0xFFFF) params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
+      params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
       params->add("apply_now", JsonObject::newBool(true));
       notify("setOutputChannelValue", params);
+      // calculate time when transition will be done
+      mEndOfLatestTransition = MainLoop::now()+aTransitionTimeDs*(Second/10);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
@@ -159,18 +186,46 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
 }
 
 
+uint16_t DeviceLevelControl::remainingTimeDS()
+{
+  if (mEndOfLatestTransition==Never) return 0;
+  MLMicroSeconds tr = mEndOfLatestTransition-MainLoop::now();
+  if (tr<0) return 0; // no transition running
+  return static_cast<uint16_t>(tr/(Second/10)); // return as decisecond
+}
+
+
 // MARK: levelControl cluster command implementation callbacks
 
 using namespace LevelControl;
 
 
-bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
-  return shouldExecuteWithFlag(aWithOnOff, aOptionMask, aOptionOverride, mLevelControlOptions, EMBER_ZCL_LEVEL_CONTROL_OPTIONS_EXECUTE_IF_OFF);
+  // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
+  //   "Command execution SHALL NOT continue beyond the Options processing if
+  //    all of these criteria are true:
+  //      - The command is one of the ‘without On/Off’ commands: Move, Move to
+  //        Level, Stop, or Step.
+  //      - The On/Off cluster exists on the same endpoint as this cluster.
+  //      - The OnOff attribute of the On/Off cluster, on this endpoint, is 0x00
+  //        (FALSE).
+  //      - The value of the ExecuteIfOff bit is 0."
+  if (aWithOnOff) {
+    // command includes On/Off -> always execute
+    return true;
+  }
+  if (isOn()) {
+    // is already on -> execute anyway
+    return true;
+  }
+  // now the options bit decides about executing or not
+  return (mLevelControlOptions & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
 }
 
 
-void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+
+void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, OptType aOptionMask,OptType aOptionOverride)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
@@ -278,7 +333,7 @@ void DeviceLevelControl::dim(int8_t aDirection, uint8_t aRate)
 }
 
 
-void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
@@ -303,7 +358,7 @@ void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate,
         dim(-1, rate);
         break;
       default:
-        status = EMBER_ZCL_STATUS_INVALID_FIELD;
+        status = EMBER_ZCL_STATUS_INVALID_COMMAND;
         break;
     }
   }
@@ -335,7 +390,7 @@ bool emberAfLevelControlClusterMoveWithOnOffCallback(
 }
 
 
-void DeviceLevelControl::stop(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+void DeviceLevelControl::stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
@@ -423,6 +478,18 @@ void emberAfLevelControlClusterServerInitCallback(EndpointId endpoint)
 void MatterLevelControlPluginServerInitCallback() {}
 
 
+
+// Note: copied from original levelcontrol implementation, needed by on-off
+bool LevelControlHasFeature(EndpointId endpoint, LevelControlFeature feature)
+{
+  bool success;
+  uint32_t featureMap;
+  success = (Attributes::FeatureMap::Get(endpoint, &featureMap) == EMBER_ZCL_STATUS_SUCCESS);
+
+  return success ? ((featureMap & to_underlying(feature)) != 0) : false;
+}
+
+
 // MARK: attribute access
 
 EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
@@ -430,6 +497,9 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
   if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, currentLevel());
+    }
+    if (attributeId == ZCL_LEVEL_CONTROL_REMAINING_TIME_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, remainingTimeDS());
     }
     if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, mOnOffTransitionTimeDS);

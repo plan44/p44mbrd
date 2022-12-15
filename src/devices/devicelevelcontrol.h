@@ -26,11 +26,17 @@
 
 using namespace chip;
 using namespace app;
+using namespace Clusters;
 
 
 class DeviceLevelControl : public DeviceOnOff
 {
   typedef DeviceOnOff inherited;
+
+protected:
+
+  typedef chip::BitMask<LevelControl::LevelControlOptions> OptType;
+
 public:
 
   DeviceLevelControl(bool aLighting);
@@ -51,25 +57,32 @@ public:
 
   /// @name handlers for command implementations
   /// @{
-  void moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
-  void move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
-  void stop(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  void moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  void move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  void stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void effect(bool aNewValue);
 
   /// @}
 
 protected:
+
   virtual void changeOnOff_impl(bool aOn) override;
 
 private:
 
+  // attributes
   uint8_t mLevel;
   uint8_t mOnLevel;
   uint8_t mLevelControlOptions;
   uint16_t mOnOffTransitionTimeDS;
   uint8_t mDefaultMoveRateUnitsPerS;
 
-  bool shouldExecuteLevelChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  // internal
+  uint16_t mRecommendedTransitionTimeDS; ///< the recommended transition time (usually provided by the bridge)
+  MLMicroSeconds mEndOfLatestTransition; ///< point in time when latest transition will end (or already has ended)
+
+  uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
+  bool shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void dim(int8_t aDirection, uint8_t aRate);
 };
 
