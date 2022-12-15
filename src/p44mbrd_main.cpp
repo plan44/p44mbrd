@@ -373,7 +373,7 @@ public:
               }
             }
             // Second: check inputs
-            typedef enum { sensor, input, button, numInputTypes } InputTypes;
+            enum { sensor, input, button, numInputTypes };
             const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "button" };
             for (int inputType = sensor; inputType<numInputTypes; inputType++) {
               JsonObjectPtr inputdescs;

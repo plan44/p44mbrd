@@ -160,32 +160,6 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 }
 
 
-// MARK: Utilities for derived classes
-
-bool DeviceOnOff::shouldExecuteWithFlag(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride, uint8_t aOptionsAttribute, uint8_t aExecuteIfOffFlag)
-{
-  // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
-  //   "Command execution SHALL NOT continue beyond the Options processing if
-  //    all of these criteria are true:
-  //      - The command is one of the ‘without On/Off’ commands: Move, Move to
-  //        Level, Stop, or Step.
-  //      - The On/Off cluster exists on the same endpoint as this cluster.
-  //      - The OnOff attribute of the On/Off cluster, on this endpoint, is 0x00
-  //        (FALSE).
-  //      - The value of the ExecuteIfOff bit is 0."
-  if (aWithOnOff) {
-    // command includes On/Off -> always execute
-    return true;
-  }
-  if (isOn()) {
-    // is already on -> execute anyway
-    return true;
-  }
-  // now the options bit decides about executing or not
-  return (aOptionsAttribute & (uint8_t)(~aOptionMask)) | (aOptionOverride & aOptionMask);
-}
-
-
 // MARK: Attribute access
 
 EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)

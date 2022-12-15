@@ -341,9 +341,27 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
 
 using namespace ColorControl;
 
-bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride)
+bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
-  return shouldExecuteWithFlag(aWithOnOff, aOptionMask, aOptionOverride, mColorControlOptions, EMBER_ZCL_COLOR_CONTROL_OPTIONS_EXECUTE_IF_OFF);
+  // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
+  //   "Command execution SHALL NOT continue beyond the Options processing if
+  //    all of these criteria are true:
+  //      - The command is one of the ‘without On/Off’ commands: Move, Move to
+  //        Level, Stop, or Step.
+  //      - The On/Off cluster exists on the same endpoint as this cluster.
+  //      - The OnOff attribute of the On/Off cluster, on this endpoint, is 0x00
+  //        (FALSE).
+  //      - The value of the ExecuteIfOff bit is 0."
+  if (aWithOnOff) {
+    // command includes On/Off -> always execute
+    return true;
+  }
+  if (isOn()) {
+    // is already on -> execute anyway
+    return true;
+  }
+  // now the options bit decides about executing or not
+  return (mColorControlOptions & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
 }
 
 
@@ -550,7 +568,7 @@ void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
 /**
  * @brief Callback for temperature update when timer is finished
  *
- * @param endpoint
+ * @param endpoint endpointId
  */
 void emberAfPluginColorControlServerTempTransitionEventHandler(EndpointId endpoint)
 {
@@ -562,7 +580,7 @@ void emberAfPluginColorControlServerTempTransitionEventHandler(EndpointId endpoi
 /**
  * @brief Callback for color update when timer is finished
  *
- * @param endpoint
+ * @param endpoint endpointId
  */
 void emberAfPluginColorControlServerXyTransitionEventHandler(EndpointId endpoint)
 {
@@ -574,7 +592,7 @@ void emberAfPluginColorControlServerXyTransitionEventHandler(EndpointId endpoint
 /**
  * @brief Callback for color hue and saturation update when timer is finished
  *
- * @param endpoint
+ * @param endpoint endpointId
  */
 void emberAfPluginColorControlServerHueSatTransitionEventHandler(EndpointId endpoint)
 {

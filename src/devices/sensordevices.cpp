@@ -191,10 +191,10 @@ void SignedSensorDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPt
   inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
   JsonObjectPtr o;
   if (aDeviceComponentInfo->get("min", o)) {
-    mMin = (uint16_t)bridgeToMatter(o->doubleValue());
+    mMin = (int16_t)bridgeToMatter(o->doubleValue());
   }
   if (aDeviceComponentInfo->get("max", o)) {
-    mMax = (uint16_t)bridgeToMatter(o->doubleValue());
+    mMax = (int16_t)bridgeToMatter(o->doubleValue());
   }
 }
 
@@ -255,7 +255,7 @@ EmberAfStatus SignedSensorDevice::HandleReadAttribute(ClusterId clusterId, chip:
 #endif
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(temperatureSensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_TEMP_MEASUREMENT_CLUSTER_ID, commonSensorAttrsSigned, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(ZCL_TEMPERATURE_MEASUREMENT_CLUSTER_ID, commonSensorAttrsSigned, nullptr, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gTemperatureSensorTypes[] = {
@@ -285,7 +285,7 @@ int32_t DeviceTemperature::bridgeToMatter(double aBridgeValue)
 
 ClusterId DeviceTemperature::sensorSpecificClusterId()
 {
-  return ZCL_TEMP_MEASUREMENT_CLUSTER_ID;
+  return ZCL_TEMPERATURE_MEASUREMENT_CLUSTER_ID;
 }
 
 uint16_t DeviceTemperature::sensorSpecificClusterRevision()

@@ -71,7 +71,7 @@ public:
 
 private:
 
-  bool shouldExecuteColorChange(bool aWithOnOff, uint8_t aOptionMask, uint8_t aOptionOverride);
+  bool shouldExecuteColorChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
 
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() override;

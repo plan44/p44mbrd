@@ -89,7 +89,7 @@ public:
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 protected:
-  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode);
+  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
   virtual string description() override;
 private:
   /// @name common attributes in all unsigned measurement clusters
@@ -110,7 +110,7 @@ public:
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 protected:
-  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode);
+  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
   virtual string description() override;
 private:
   /// @name common attributes in all signed measurement clusters
@@ -130,7 +130,7 @@ class DeviceTemperature : public SignedSensorDevice
   typedef SignedSensorDevice inherited;
 public:
   DeviceTemperature();
-  virtual const char *deviceType() { return "temperature sensor"; }
+  virtual const char *deviceType() override { return "temperature sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;
@@ -146,7 +146,7 @@ class DeviceIlluminance : public UnsignedSensorDevice
   typedef SensorDevice inherited;
 public:
   DeviceIlluminance();
-  virtual const char *deviceType() { return "illuminance sensor"; }
+  virtual const char *deviceType() override { return "illuminance sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;
@@ -162,7 +162,7 @@ class DeviceHumidity : public UnsignedSensorDevice
   typedef SensorDevice inherited;
 public:
   DeviceHumidity();
-  virtual const char *deviceType() { return "humidity sensor"; }
+  virtual const char *deviceType() override { return "humidity sensor"; }
   virtual int32_t bridgeToMatter(double aBridgeValue) override;
   virtual ClusterId sensorSpecificClusterId() override;
   uint16_t sensorSpecificClusterRevision() override;
