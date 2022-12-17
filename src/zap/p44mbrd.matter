@@ -133,8 +133,6 @@ server cluster LevelControl = 8 {
 
   readonly attribute nullable int8u currentLevel = 0;
   readonly attribute int16u remainingTime = 1;
-  readonly attribute int8u minLevel = 2;
-  readonly attribute int8u maxLevel = 3;
   attribute LevelControlOptions options = 15;
   attribute int16u onOffTransitionTime = 16;
   attribute nullable int8u onLevel = 17;
@@ -1219,20 +1217,13 @@ server cluster ColorControl = 768 {
 
   readonly nosubscribe attribute int8u currentHue = 0;
   readonly nosubscribe attribute int8u currentSaturation = 1;
-  readonly attribute int16u remainingTime = 2;
   readonly nosubscribe attribute int16u currentX = 3;
   readonly nosubscribe attribute int16u currentY = 4;
   readonly nosubscribe attribute int16u colorTemperatureMireds = 7;
   readonly attribute enum8 colorMode = 8;
   attribute bitmap8 options = 15;
   readonly attribute nullable int8u numberOfPrimaries = 16;
-  readonly attribute int16u enhancedCurrentHue = 16384;
   readonly attribute enum8 enhancedColorMode = 16385;
-  readonly attribute int8u colorLoopActive = 16386;
-  readonly attribute int8u colorLoopDirection = 16387;
-  readonly attribute int16u colorLoopTime = 16388;
-  readonly attribute int16u colorLoopStartEnhancedHue = 16389;
-  readonly attribute int16u colorLoopStoredEnhancedHue = 16390;
   readonly attribute bitmap16 colorCapabilities = 16394;
   readonly attribute int16u colorTempPhysicalMinMireds = 16395;
   readonly attribute int16u colorTempPhysicalMaxMireds = 16396;
@@ -1710,18 +1701,16 @@ endpoint 2 {
 
   server cluster LevelControl {
     callback attribute currentLevel;
-    ram      attribute remainingTime;
-    ram      attribute minLevel;
-    ram      attribute maxLevel default = 0xFE;
-    ram      attribute options;
+    callback attribute remainingTime;
+    callback attribute options;
     callback attribute onOffTransitionTime default = 5;
-    ram      attribute onLevel default = 0xFE;
-    ram      attribute startUpCurrentLevel;
+    callback attribute onLevel default = 0xFE;
+    callback attribute startUpCurrentLevel default = 0xFE;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;
-    ram      attribute featureMap;
-    ram      attribute clusterRevision default = 5;
+    callback attribute featureMap;
+    callback attribute clusterRevision default = 5;
   }
 
   server cluster Descriptor {
@@ -1762,29 +1751,22 @@ endpoint 2 {
   server cluster ColorControl {
     callback attribute currentHue;
     callback attribute currentSaturation;
-    ram      attribute remainingTime;
     ram      attribute currentX default = 0x616B;
     ram      attribute currentY default = 0x607D;
     callback attribute colorTemperatureMireds default = 0x00FA;
     callback attribute colorMode default = 0x01;
     callback attribute options;
     callback attribute numberOfPrimaries;
-    callback attribute enhancedCurrentHue;
     callback attribute enhancedColorMode default = 0x01;
-    ram      attribute colorLoopActive;
-    ram      attribute colorLoopDirection;
-    ram      attribute colorLoopTime default = 0x0019;
-    ram      attribute colorLoopStartEnhancedHue default = 0x2300;
-    ram      attribute colorLoopStoredEnhancedHue;
     callback attribute colorCapabilities;
-    ram      attribute colorTempPhysicalMinMireds;
-    ram      attribute colorTempPhysicalMaxMireds default = 0xFEFF;
-    ram      attribute coupleColorTempToLevelMinMireds;
-    ram      attribute startUpColorTemperatureMireds;
+    callback attribute colorTempPhysicalMinMireds;
+    callback attribute colorTempPhysicalMaxMireds default = 0xFEFF;
+    callback attribute coupleColorTempToLevelMinMireds;
+    callback attribute startUpColorTemperatureMireds default = 0xFEFF;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;
-    ram      attribute featureMap;
+    callback attribute featureMap;
     callback attribute clusterRevision default = 5;
   }
 

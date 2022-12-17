@@ -97,7 +97,7 @@
 
 #define ZAP_ATTRIBUTE_MASK(mask) ATTRIBUTE_MASK_##mask
 // This is an array of EmberAfAttributeMetadata structures.
-#define GENERATED_ATTRIBUTE_COUNT 202
+#define GENERATED_ATTRIBUTE_COUNT 193
 #define GENERATED_ATTRIBUTES                                                   \
   {                                                                            \
                                                                                \
@@ -480,28 +480,30 @@
         {0x00000000, ZAP_TYPE(INT8U), 1,                                       \
          ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),  \
          ZAP_EMPTY_DEFAULT()}, /* CurrentLevel */                              \
-        {0x00000001, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x0000)}, /* RemainingTime */                      \
-        {0x00000002, ZAP_TYPE(INT8U), 1, 0,                                    \
-         ZAP_SIMPLE_DEFAULT(0x00)}, /* MinLevel */                             \
-        {0x00000003, ZAP_TYPE(INT8U), 1, 0,                                    \
-         ZAP_SIMPLE_DEFAULT(0xFE)}, /* MaxLevel */                             \
+        {0x00000001, ZAP_TYPE(INT16U), 2,                                      \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* RemainingTime */                             \
         {0x0000000F, ZAP_TYPE(BITMAP8), 1,                                     \
-         ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(WRITABLE),           \
+         ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) |  \
+             ZAP_ATTRIBUTE_MASK(WRITABLE),                                     \
          ZAP_MIN_MAX_DEFAULTS_INDEX(3)}, /* Options */                         \
         {0x00000010, ZAP_TYPE(INT16U), 2,                                      \
          ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE),  \
          ZAP_EMPTY_DEFAULT()}, /* OnOffTransitionTime */                       \
         {0x00000011, ZAP_TYPE(INT8U), 1,                                       \
-         ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
-         ZAP_SIMPLE_DEFAULT(0xFE)}, /* OnLevel */                              \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE) | \
+             ZAP_ATTRIBUTE_MASK(NULLABLE),                                     \
+         ZAP_EMPTY_DEFAULT()}, /* OnLevel */                                   \
         {0x00004000, ZAP_TYPE(INT8U), 1,                                       \
-         ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE) | \
+             ZAP_ATTRIBUTE_MASK(NULLABLE),                                     \
          ZAP_EMPTY_DEFAULT()}, /* StartUpCurrentLevel */                       \
-        {0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0,                                 \
-         ZAP_SIMPLE_DEFAULT(0)}, /* FeatureMap */                              \
-        {0x0000FFFD, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(5)}, /* ClusterRevision */                         \
+        {0x0000FFFC, ZAP_TYPE(BITMAP32), 4,                                    \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* FeatureMap */                                \
+        {0x0000FFFD, ZAP_TYPE(INT16U), 2,                                      \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* ClusterRevision */                           \
                                                                                \
         /* Endpoint: 2, Cluster: Descriptor (server) */                        \
         {0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), \
@@ -548,8 +550,6 @@
          ZAP_EMPTY_DEFAULT()}, /* CurrentHue */                                \
         {0x00000001, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), \
          ZAP_EMPTY_DEFAULT()}, /* CurrentSaturation */                         \
-        {0x00000002, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x0000)}, /* RemainingTime */                      \
         {0x00000003, ZAP_TYPE(INT16U), 2, 0,                                   \
          ZAP_SIMPLE_DEFAULT(0x616B)}, /* CurrentX */                           \
         {0x00000004, ZAP_TYPE(INT16U), 2, 0,                                   \
@@ -565,36 +565,27 @@
         {0x00000010, ZAP_TYPE(INT8U), 1,                                       \
          ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),  \
          ZAP_EMPTY_DEFAULT()}, /* NumberOfPrimaries */                         \
-        {0x00004000, ZAP_TYPE(INT16U), 2,                                      \
-         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
-         ZAP_EMPTY_DEFAULT()}, /* EnhancedCurrentHue */                        \
         {0x00004001, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), \
          ZAP_EMPTY_DEFAULT()}, /* EnhancedColorMode */                         \
-        {0x00004002, ZAP_TYPE(INT8U), 1, 0,                                    \
-         ZAP_SIMPLE_DEFAULT(0x00)}, /* ColorLoopActive */                      \
-        {0x00004003, ZAP_TYPE(INT8U), 1, 0,                                    \
-         ZAP_SIMPLE_DEFAULT(0x00)}, /* ColorLoopDirection */                   \
-        {0x00004004, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x0019)}, /* ColorLoopTime */                      \
-        {0x00004005, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x2300)}, /* ColorLoopStartEnhancedHue */          \
-        {0x00004006, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x0000)}, /* ColorLoopStoredEnhancedHue */         \
         {0x0000400A, ZAP_TYPE(BITMAP16), 2,                                    \
          ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
          ZAP_EMPTY_DEFAULT()}, /* ColorCapabilities */                         \
-        {0x0000400B, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0x0000)}, /* ColorTempPhysicalMinMireds */         \
-        {0x0000400C, ZAP_TYPE(INT16U), 2, 0,                                   \
-         ZAP_SIMPLE_DEFAULT(0xFEFF)}, /* ColorTempPhysicalMaxMireds */         \
-        {0x0000400D, ZAP_TYPE(INT16U), 2, 0,                                   \
+        {0x0000400B, ZAP_TYPE(INT16U), 2,                                      \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* ColorTempPhysicalMinMireds */                \
+        {0x0000400C, ZAP_TYPE(INT16U), 2,                                      \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* ColorTempPhysicalMaxMireds */                \
+        {0x0000400D, ZAP_TYPE(INT16U), 2,                                      \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
          ZAP_EMPTY_DEFAULT()}, /* CoupleColorTempToLevelMinMireds */           \
         {0x00004010, ZAP_TYPE(INT16U), 2,                                      \
-         ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(WRITABLE) |          \
-             ZAP_ATTRIBUTE_MASK(NULLABLE),                                     \
+         ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) |  \
+             ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE),      \
          ZAP_MIN_MAX_DEFAULTS_INDEX(4)}, /* StartUpColorTemperatureMireds */   \
-        {0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0,                                 \
-         ZAP_SIMPLE_DEFAULT(0)}, /* FeatureMap */                              \
+        {0x0000FFFC, ZAP_TYPE(BITMAP32), 4,                                    \
+         ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
+         ZAP_EMPTY_DEFAULT()}, /* FeatureMap */                                \
         {0x0000FFFD, ZAP_TYPE(INT16U), 2,                                      \
          ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                 \
          ZAP_EMPTY_DEFAULT()}, /* ClusterRevision */                           \
@@ -1067,8 +1058,8 @@
       /* Endpoint: 2, Cluster: Level Control (server) */ \
       .clusterId = 0x00000008,  \
       .attributes = ZAP_ATTRIBUTE_INDEX(137), \
-      .attributeCount = 10, \
-      .clusterSize = 13, \
+      .attributeCount = 8, \
+      .clusterSize = 0, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
       .functions = chipFuncArrayLevelControlServer, \
       .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 67 ) ,\
@@ -1077,7 +1068,7 @@
   { \
       /* Endpoint: 2, Cluster: Descriptor (server) */ \
       .clusterId = 0x0000001D,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(147), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(145), \
       .attributeCount = 6, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1088,7 +1079,7 @@
   { \
       /* Endpoint: 2, Cluster: Binding (client) */ \
       .clusterId = 0x0000001E,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(153), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(151), \
       .attributeCount = 0, \
       .clusterSize = 0, \
       .mask = ZAP_CLUSTER_MASK(CLIENT), \
@@ -1099,7 +1090,7 @@
   { \
       /* Endpoint: 2, Cluster: Bridged Device Basic (server) */ \
       .clusterId = 0x00000039,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(153), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(151), \
       .attributeCount = 8, \
       .clusterSize = 397, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
@@ -1110,7 +1101,7 @@
   { \
       /* Endpoint: 2, Cluster: Boolean State (server) */ \
       .clusterId = 0x00000045,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(161), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(159), \
       .attributeCount = 3, \
       .clusterSize = 7, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1121,9 +1112,9 @@
   { \
       /* Endpoint: 2, Cluster: Color Control (server) */ \
       .clusterId = 0x00000300,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(164), \
-      .attributeCount = 23, \
-      .clusterSize = 26, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(162), \
+      .attributeCount = 16, \
+      .clusterSize = 4, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
       .functions = chipFuncArrayColorControlServer, \
       .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 76 ) ,\
@@ -1132,7 +1123,7 @@
   { \
       /* Endpoint: 2, Cluster: Illuminance Measurement (server) */ \
       .clusterId = 0x00000400,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(187), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(178), \
       .attributeCount = 5, \
       .clusterSize = 12, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1143,7 +1134,7 @@
   { \
       /* Endpoint: 2, Cluster: Temperature Measurement (server) */ \
       .clusterId = 0x00000402,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(192), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(183), \
       .attributeCount = 5, \
       .clusterSize = 12, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1154,7 +1145,7 @@
   { \
       /* Endpoint: 2, Cluster: Relative Humidity Measurement (server) */ \
       .clusterId = 0x00000405,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(197), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(188), \
       .attributeCount = 5, \
       .clusterSize = 12, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1174,7 +1165,7 @@
 #define GENERATED_ENDPOINT_TYPES                                               \
   {                                                                            \
     {ZAP_CLUSTER_INDEX(0), 17, 218}, {ZAP_CLUSTER_INDEX(17), 3, 15},           \
-        {ZAP_CLUSTER_INDEX(20), 11, 506},                                      \
+        {ZAP_CLUSTER_INDEX(20), 11, 471},                                      \
   }
 
 // Largest attribute size is needed for various buffers
@@ -1187,7 +1178,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (37)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (739)
+#define ATTRIBUTE_MAX_SIZE (704)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)
