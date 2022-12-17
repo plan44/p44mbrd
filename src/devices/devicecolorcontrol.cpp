@@ -41,8 +41,8 @@ using namespace Clusters;
 // =================================================================================
 
 #define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP \
-  (EMBER_AF_COLOR_CONTROL_FEATURE_HUE_AND_SATURATION|EMBER_AF_COLOR_CONTROL_FEATURE_XY|EMBER_AF_COLOR_CONTROL_FEATURE_COLOR_TEMPERATURE)
+#define ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP (EMBER_AF_COLOR_CONTROL_FEATURE_COLOR_TEMPERATURE)
+#define ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES (EMBER_AF_COLOR_CONTROL_FEATURE_HUE_AND_SATURATION|EMBER_AF_COLOR_CONTROL_FEATURE_XY)
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
@@ -647,7 +647,10 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_COLOR_CONTROL_CLUSTER_REVISION);
     }
     if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_COLOR_CONTROL_CLUSTER_FEATURE_MAP);
+      return getAttr<uint32_t>(
+        buffer, maxReadLength,
+        ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP | (mCtOnly ? 0 : ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES)
+      );
     }
   }
   // let base class try
