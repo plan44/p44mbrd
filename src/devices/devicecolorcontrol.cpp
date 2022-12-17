@@ -51,12 +51,11 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID, INT16U, 2, 0), /* current X */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID, INT16U, 2, 0), /* current Y */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID, BITMAP16, 2, 0), /* (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp) */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: see ColorMode enum */
-//    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode: 0=HS, 1=XY, 2=Colortemp */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode (legcacy): see ColorMode enum */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_COLOR_MODE_ATTRIBUTE_ID, ENUM8, 1, 0), /* current color mode (enhanced hue included): see ColorMode enum */
+//    DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_ENHANCED_CURRENT_HUE_ATTRIBUTE_ID, INT16U, 2, 0), /* enhanced 16bit non XY equidistant hue */ // TODO: implement
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-// TODO: other important capabilities
-// ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID type MAP16 (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp)
 
 constexpr CommandId colorControlIncomingCommands[] = {
   app::Clusters::ColorControl::Commands::MoveToHue::Id,
@@ -611,6 +610,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
 {
   if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID) {
+      // Bit0=HS, Bit1=EnhancedHue, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp
       return getAttr<uint16_t>(
         buffer, maxReadLength,
         EMBER_AF_COLOR_CAPABILITIES_COLOR_TEMPERATURE_SUPPORTED |
@@ -618,8 +618,13 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
       );
     }
     if (attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) {
-      // color mode: 0=HS, 1=XY, 2=Colortemp
-      return getAttr(buffer, maxReadLength, mColorMode);
+      // color mode: 0=Hue+Sat (normal and enhanced!), 1=XY, 2=Colortemp
+      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode==colormode_EnhancedHs ? colormode_hs : mColorMode);
+    }
+    if (attributeId == ZCL_COLOR_CONTROL_ENHANCED_COLOR_MODE_ATTRIBUTE_ID) {
+      // TODO: this is already prepared for EnhancedHue, which is not yet implemented itself
+      // color mode: 0=Hue+Sat, 1=XY, 2=Colortemp, 3=EnhancedHue+Sat
+      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode);
     }
     if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, currentHue());

@@ -36,6 +36,7 @@ public:
     colormode_hs = 0,
     colormode_xy = 1,
     colormode_ct = 2,
+    colormode_EnhancedHs = 3, // TODO: not yet implemented, is optional
     colormode_unknown = 0xFF
   };
   typedef uint8_t ColorMode;
