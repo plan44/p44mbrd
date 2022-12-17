@@ -235,6 +235,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set hue to %d - updatemode=0x%x", aHue, aUpdateMode.Raw());
     mHue = aHue;
+    aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -260,6 +261,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set saturation to %d - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
+    aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
       // color mode has not changed, must separately update saturation (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -287,6 +289,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     mColorTemp = aColortemp;
     if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
     else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
+    aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -312,6 +315,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set X to %d - updatemode=0x%x", aX, aUpdateMode.Raw());
     mX = aX;
+    aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -337,6 +341,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set Y to %d - updatemode=0x%x", aY, aUpdateMode.Raw());
     mY = aY;
+    aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
       // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
