@@ -65,14 +65,14 @@ public:
   bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode);
   bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode);
 
+  bool shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride);
+
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 private:
-
-  bool shouldExecuteColorChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
 
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() override;

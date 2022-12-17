@@ -193,7 +193,7 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
 {
   bool changed = aColorMode!=mColorMode;
   if (changed || (aUpdateMode.Has(UpdateFlags::forced) && !aUpdateMode.Has(UpdateFlags::chained))) {
-    OLOG(LOG_INFO, "color mode set to %d - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set color mode to %d - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       JsonObjectPtr params = JsonObject::newObj();
@@ -359,7 +359,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
 
 using namespace ColorControl;
 
-bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+bool DeviceColorControl::shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride)
 {
   // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
   //   "Command execution SHALL NOT continue beyond the Options processing if
@@ -370,10 +370,6 @@ bool DeviceColorControl::shouldExecuteColorChange(bool aWithOnOff, OptType aOpti
   //      - The OnOff attribute of the On/Off cluster, on this endpoint, is 0x00
   //        (FALSE).
   //      - The value of the ExecuteIfOff bit is 0."
-  if (aWithOnOff) {
-    // command includes On/Off -> always execute
-    return true;
-  }
   if (isOn()) {
     // is already on -> execute anyway
     return true;
@@ -389,6 +385,7 @@ bool emberAfColorControlClusterMoveHueCallback(app::CommandHandler * commandObj,
                                                const Commands::MoveHue::DecodableType & commandData)
 {
   // FIXME: implement
+  FOCUSLOG("=== Received MoveHue Command - NOT IMPLEMENTED YET");
   return false;
 //  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
 //                                                         commandData.optionsMask, commandData.optionsOverride, false);
@@ -399,6 +396,7 @@ bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * comm
                                                       const Commands::MoveSaturation::DecodableType & commandData)
 {
   // FIXME: implement
+  FOCUSLOG("=== Received MoveSaturation Command - NOT IMPLEMENTED YET");
   return false;
 //  return ColorControlServer::Instance().moveSaturationCommand(commandPath, commandData);
 }
@@ -407,10 +405,13 @@ bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * comm
 bool emberAfColorControlClusterMoveToHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                  const Commands::MoveToHue::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received MoveToHue Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
-  dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  // FIXME: completely basic implementation, no transition time
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  }
   return true;
 }
 
@@ -418,10 +419,13 @@ bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * co
                                                         const app::ConcreteCommandPath & commandPath,
                                                         const Commands::MoveToSaturation::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received MoveToSaturation Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
-  dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  // FIXME: completely basic implementation, no transition time
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  }
   return true;
 }
 
@@ -429,17 +433,22 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandle
                                                               const app::ConcreteCommandPath & commandPath,
                                                               const Commands::MoveToHueAndSaturation::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received MoveToHueAndSaturation Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
-  dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
-  dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  // FIXME: completely basic implementation, no transition time
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
+    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  }
   return true;
 }
 
 bool emberAfColorControlClusterStepHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                const Commands::StepHue::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received StepHue Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
 //                                                         commandData.transitionTime, commandData.optionsMask,
@@ -450,6 +459,8 @@ bool emberAfColorControlClusterStepSaturationCallback(app::CommandHandler * comm
                                                       const app::ConcreteCommandPath & commandPath,
                                                       const Commands::StepSaturation::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received StepSaturation Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stepSaturationCommand(commandPath, commandData);
 }
@@ -458,6 +469,8 @@ bool emberAfColorControlClusterEnhancedMoveHueCallback(app::CommandHandler * com
                                                        const app::ConcreteCommandPath & commandPath,
                                                        const Commands::EnhancedMoveHue::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received EnhancedMoveHue Command - NOT IMPLEMENTED YET");
   return false;
 //  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
 //                                                         commandData.optionsMask, commandData.optionsOverride, true);
@@ -467,6 +480,8 @@ bool emberAfColorControlClusterEnhancedMoveToHueCallback(app::CommandHandler * c
                                                          const app::ConcreteCommandPath & commandPath,
                                                          const Commands::EnhancedMoveToHue::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received EnhancedMoveToHue Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().moveToHueCommand(commandPath.mEndpointId, commandData.enhancedHue, commandData.direction,
 //                                                           commandData.transitionTime, commandData.optionsMask,
@@ -477,6 +492,8 @@ bool emberAfColorControlClusterEnhancedMoveToHueAndSaturationCallback(
     app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
     const Commands::EnhancedMoveToHueAndSaturation::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received EnhancedMoveToHueAndSaturation Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().moveToHueAndSaturationCommand(commandPath.mEndpointId, commandData.enhancedHue,
 //                                                                        commandData.saturation, commandData.transitionTime,
@@ -487,6 +504,8 @@ bool emberAfColorControlClusterEnhancedStepHueCallback(app::CommandHandler * com
                                                        const app::ConcreteCommandPath & commandPath,
                                                        const Commands::EnhancedStepHue::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received EnhancedStepHue Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
 //                                                         commandData.transitionTime, commandData.optionsMask,
@@ -496,6 +515,7 @@ bool emberAfColorControlClusterEnhancedStepHueCallback(app::CommandHandler * com
 bool emberAfColorControlClusterColorLoopSetCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                     const Commands::ColorLoopSet::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received ColorLoopSet Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().colorLoopCommand(commandPath, commandData);
 }
@@ -509,15 +529,19 @@ bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * command
 {
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
-  dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
-  dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  // FIXME: completely basic implementation, no transition time
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
+    dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+  }
   return true;
 }
 
 bool emberAfColorControlClusterMoveColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                  const Commands::MoveColor::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received MoveColor Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().moveColorCommand(commandPath, commandData);
 }
@@ -525,6 +549,8 @@ bool emberAfColorControlClusterMoveColorCallback(app::CommandHandler * commandOb
 bool emberAfColorControlClusterStepColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                  const Commands::StepColor::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received StepColor Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stepColorCommand(commandPath, commandData);
 }
@@ -537,10 +563,13 @@ bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandle
                                                               const app::ConcreteCommandPath & commandPath,
                                                               const Commands::MoveToColorTemperature::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received MoveToColorTemperature Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time, no shouldExecute checking
-  dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  // FIXME: completely basic implementation, no transition time
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  }
   return true;
 }
 
@@ -548,6 +577,8 @@ bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler 
                                                             const app::ConcreteCommandPath & commandPath,
                                                             const Commands::MoveColorTemperature::DecodableType & commandData)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received MoveColorTemperature Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().moveColorTempCommand(commandPath, commandData);
 }
@@ -556,12 +587,15 @@ bool emberAfColorControlClusterStepColorTemperatureCallback(app::CommandHandler 
                                                             const app::ConcreteCommandPath & commandPath,
                                                             const Commands::StepColorTemperature::DecodableType & commandData)
 {
+  FOCUSLOG("=== Received StepColorTemperature Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stepColorTempCommand(commandPath, commandData);
 }
 
 void emberAfPluginLevelControlCoupledColorTempChangeCallback(EndpointId endpoint)
 {
+  // FIXME: implement
+  FOCUSLOG("=== Received emberAfPluginLevelControlCoupledColorTempChangeCallback - NOT IMPLEMENTED YET");
   // TODO: implement
 //    ColorControlServer::Instance().levelControlColorTempChangeCommand(endpoint);
 }
@@ -572,6 +606,7 @@ bool emberAfColorControlClusterStopMoveStepCallback(app::CommandHandler * comman
                                                     const Commands::StopMoveStep::DecodableType & commandData)
 {
   // FIXME: implement as soon as we have move commands!!
+  FOCUSLOG("=== Received StopMoveStep Command - NOT IMPLEMENTED YET");
   return false;
 //    return ColorControlServer::Instance().stopMoveStepCommand(commandPath.mEndpointId, commandData.optionsMask,
 //                                                              commandData.optionsOverride);
