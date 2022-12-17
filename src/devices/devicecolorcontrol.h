@@ -87,5 +87,6 @@ private:
   uint16_t mColorTemp;
   uint16_t mX;
   uint16_t mY;
+  uint16_t mStartupColorTemp;
 };
 

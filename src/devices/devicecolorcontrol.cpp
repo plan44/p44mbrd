@@ -44,10 +44,19 @@ using namespace Clusters;
 #define ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP (EMBER_AF_COLOR_CONTROL_FEATURE_COLOR_TEMPERATURE)
 #define ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES (EMBER_AF_COLOR_CONTROL_FEATURE_HUE_AND_SATURATION|EMBER_AF_COLOR_CONTROL_FEATURE_XY)
 
+// TODO: maybe get this from bridge, now 100..1000 is the range the P44-DSB/LC UI offers
+#define COLOR_TEMP_PHYSICAL_MIN (100)
+#define COLOR_TEMP_PHYSICAL_MAX (1000)
+#define COLOR_TEMP_DEFAULT (370) // 2500K = warm white
+
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, INT8U, 1, 0), /* current hue */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, INT8U, 1, 0), /* current saturation */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID, INT16U, 2, 0), /* current color temperature */
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMP_PHYSICAL_MAX_ATTRIBUTE_ID, INT16U, 2, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_TEMP_PHYSICAL_MIN_ATTRIBUTE_ID, INT16U, 2, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_TEMPERATURE_LEVEL_MIN_MIREDS_ATTRIBUTE_ID, INT16U, 2, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_START_UP_COLOR_TEMPERATURE_MIREDS_ATTRIBUTE_ID, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID, INT16U, 2, 0), /* current X */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID, INT16U, 2, 0), /* current Y */
   DECLARE_DYNAMIC_ATTRIBUTE(ZCL_COLOR_CONTROL_COLOR_CAPABILITIES_ATTRIBUTE_ID, BITMAP16, 2, 0), /* (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp) */
@@ -97,7 +106,8 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly) :
   mColorMode(aCTOnly ? colormode_ct : colormode_hs),
   mHue(0),
   mSaturation(0),
-  mColorTemp(0)
+  mColorTemp(COLOR_TEMP_DEFAULT),
+  mStartupColorTemp(COLOR_TEMP_DEFAULT)
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(colorLightClusters));
@@ -274,6 +284,8 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set colortemp to %d - updatemode=0x%x", aColortemp, aUpdateMode.Raw());
     mColorTemp = aColortemp;
+    if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
+    else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
     if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
@@ -649,9 +661,23 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     if (attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, mColorControlOptions);
     }
+    if (attributeId == ZCL_START_UP_COLOR_TEMPERATURE_MIREDS_ATTRIBUTE_ID) {
+      return getAttr(buffer, maxReadLength, mStartupColorTemp);
+    }
     // constants
+    if (attributeId == ZCL_COLOR_CONTROL_TEMPERATURE_LEVEL_MIN_MIREDS_ATTRIBUTE_ID) {
+      // this is the level that corresponds to max level when CT is coupled to level
+      // TODO: level coupling is not yet implemented, maybe make this variable later
+      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MIN);
+    }
     if (attributeId == ZCL_COLOR_CONTROL_NUMBER_OF_PRIMARIES_ATTRIBUTE_ID) {
       return getAttr<uint8_t>(buffer, maxReadLength, 0);
+    }
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMP_PHYSICAL_MIN_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MIN);
+    }
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMP_PHYSICAL_MIN_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MAX);
     }
     // common
     if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
@@ -674,6 +700,9 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
   if (clusterId==ZCL_COLOR_CONTROL_CLUSTER_ID) {
     if (attributeId == ZCL_COLOR_CONTROL_OPTIONS_ATTRIBUTE_ID) {
       return setAttr(mColorControlOptions, buffer);
+    }
+    if (attributeId == ZCL_START_UP_COLOR_TEMPERATURE_MIREDS_ATTRIBUTE_ID) {
+      return setAttr(mStartupColorTemp, buffer);
     }
   }
   // let base class try
