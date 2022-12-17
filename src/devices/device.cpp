@@ -487,8 +487,12 @@ EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip:
     if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, mIdentifyTime);
     }
-    if (attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID) {
+    if (attributeId == ZCL_IDENTIFY_TYPE_ATTRIBUTE_ID) {
       return getAttr(buffer, maxReadLength, identifyType());
+    }
+    // common
+    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_IDENTIFY_CLUSTER_REVISION);
     }
     if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
       return getAttr<uint32_t>(buffer, maxReadLength, ZCL_IDENTIFY_CLUSTER_FEATURE_MAP);
