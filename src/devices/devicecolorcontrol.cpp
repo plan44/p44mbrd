@@ -188,21 +188,26 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
       JsonObjectPtr params = JsonObject::newObj();
       switch (mColorMode) {
         case colormode_hs:
+        case colormode_EnhancedHs: // TODO: separate when we actually have EnhancedHue
+          FOCUSOLOG("changing colormode to HS");
           updateCurrentHue(mHue, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
           updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
           break;
         case colormode_xy:
+          FOCUSOLOG("changing colormode to XY");
           updateCurrentX(mX, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
           updateCurrentY(mY, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
           break;
         default:
         case colormode_ct:
+          FOCUSOLOG("changing colormode to CT");
           updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
           break;
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
+      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_ENHANCED_COLOR_MODE_ATTRIBUTE_ID);
     }
     return true;
   }
@@ -619,7 +624,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
     if (attributeId == ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID) {
       // color mode: 0=Hue+Sat (normal and enhanced!), 1=XY, 2=Colortemp
-      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode==colormode_EnhancedHs ? colormode_hs : mColorMode);
+      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode==colormode_EnhancedHs ? (uint8_t)colormode_hs : mColorMode);
     }
     if (attributeId == ZCL_COLOR_CONTROL_ENHANCED_COLOR_MODE_ATTRIBUTE_ID) {
       // TODO: this is already prepared for EnhancedHue, which is not yet implemented itself
