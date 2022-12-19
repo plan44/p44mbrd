@@ -217,8 +217,10 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting colormode attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_MODE_ATTRIBUTE_ID);
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_ENHANCED_COLOR_MODE_ATTRIBUTE_ID);
+      FOCUSOLOG("reported colormode attribute change to matter");
     }
     return true;
   }
@@ -247,7 +249,9 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting hue attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID);
+      FOCUSOLOG("reported hue attribute change to matter");
     }
     return true; // changed
   }
@@ -273,7 +277,9 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting saturation attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID);
+      FOCUSOLOG("reported saturation attribute change to matter");
     }
     return true; // changed
   }
@@ -301,7 +307,9 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting colortemperature attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID);
+      FOCUSOLOG("reported colortemperature attribute change to matter");
     }
     return true; // changed
   }
@@ -327,7 +335,9 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting X attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_X_ATTRIBUTE_ID);
+      FOCUSOLOG("reported X attribute change to matter");
     }
     return true; // changed
   }
@@ -353,7 +363,9 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting Y attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_Y_ATTRIBUTE_ID);
+      FOCUSOLOG("reported Y attribute change to matter");
     }
     return true; // changed
   }

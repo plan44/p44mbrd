@@ -460,7 +460,9 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
       }
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
+      FOCUSOLOG("reporting IdentifyTime attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_IDENTIFY_CLUSTER_ID, ZCL_IDENTIFY_TIME_ATTRIBUTE_ID);
+      FOCUSOLOG("reported IdentifyTime attribute change to matter");
     }
     return true; // changed
   }
