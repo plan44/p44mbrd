@@ -143,7 +143,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
     if ((relevant = o->get("age", vo, true))) colorMode = colormode_ct; // age is non-null -> component detemines colormode
     if (o->get("value", vo, true)) {
       // scaling: ct is directly in mired
-      updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==colormode_ct ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
+      updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==colormode_ct ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
     }
   }
   if (!mCtOnly) {
@@ -153,7 +153,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: hue is 0..360 degrees mapped to 0..0xFE
-        updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
+        updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("saturation", o)) {
@@ -162,7 +162,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: saturation is 0..100% mapped to 0..0xFE
-        updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
+        updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("x", o)) {
@@ -171,7 +171,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
+        updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("y", o)) {
@@ -180,16 +180,16 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
+        updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
   }
   // now actually update resulting color mode
-  updateCurrentColorMode(colorMode, aUpdateMode);
+  updateCurrentColorMode(colorMode, aUpdateMode, 0);
 }
 
 
-bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aColorMode!=mColorMode;
   if (
@@ -204,18 +204,18 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
         case colormode_hs:
         case colormode_EnhancedHs: // TODO: separate when we actually have EnhancedHue
           FOCUSOLOG("changing colormode to HS");
-          updateCurrentHue(mHue, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
-          updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
+          updateCurrentHue(mHue, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
+          updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
         case colormode_xy:
           FOCUSOLOG("changing colormode to XY");
-          updateCurrentX(mX, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply));
-          updateCurrentY(mY, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
+          updateCurrentX(mX, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
+          updateCurrentY(mY, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
         default:
         case colormode_ct:
           FOCUSOLOG("changing colormode to CT");
-          updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged));
+          updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
       }
     }
@@ -234,19 +234,20 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
 
 
 
-bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aHue!=mHue;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set hue to %d - updatemode=0x%x", aHue, aUpdateMode.Raw());
     mHue = aHue;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
+    if (!updateCurrentColorMode(colormode_hs, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         JsonObjectPtr params = JsonObject::newObj();
         params->add("channelId", JsonObject::newString("hue"));
         params->add("value", JsonObject::newDouble((double)mHue*360/0xFE));
+        params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
         params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
         notify("setOutputChannelValue", params);
       }
@@ -262,19 +263,20 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode)
 }
 
 
-bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aSaturation!=mSaturation;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set saturation to %d - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_hs, aUpdateMode)) {
+    if (!updateCurrentColorMode(colormode_hs, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update saturation (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         JsonObjectPtr params = JsonObject::newObj();
         params->add("channelId", JsonObject::newString("saturation"));
         params->add("value", JsonObject::newDouble((double)mSaturation*100/0xFE));
+        params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
         params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
         notify("setOutputChannelValue", params);
       }
@@ -290,7 +292,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 }
 
 
-bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aColortemp!=mColorTemp;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
@@ -299,12 +301,13 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
     else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_ct, aUpdateMode)) {
+    if (!updateCurrentColorMode(colormode_ct, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         JsonObjectPtr params = JsonObject::newObj();
         params->add("channelId", JsonObject::newString("colortemp"));
         params->add("value", JsonObject::newDouble(mColorTemp)); // is in mireds
+        params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
         params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
         notify("setOutputChannelValue", params);
       }
@@ -320,19 +323,20 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 }
 
 
-bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aX!=mX;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set X to %d - updatemode=0x%x", aX, aUpdateMode.Raw());
     mX = aX;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
+    if (!updateCurrentColorMode(colormode_xy, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         JsonObjectPtr params = JsonObject::newObj();
         params->add("channelId", JsonObject::newString("x"));
         params->add("value", JsonObject::newDouble((double)mX/0xFFFE));
+        params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
         params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
         notify("setOutputChannelValue", params);
       }
@@ -348,19 +352,20 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode)
 }
 
 
-bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode)
+bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aY!=mY;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set Y to %d - updatemode=0x%x", aY, aUpdateMode.Raw());
     mY = aY;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_xy, aUpdateMode)) {
+    if (!updateCurrentColorMode(colormode_xy, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         JsonObjectPtr params = JsonObject::newObj();
         params->add("channelId", JsonObject::newString("y"));
         params->add("value", JsonObject::newDouble((double)mY/0xFFFE));
+        params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
         params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
         notify("setOutputChannelValue", params);
       }
@@ -428,9 +433,10 @@ bool emberAfColorControlClusterMoveToHueCallback(app::CommandHandler * commandOb
   FOCUSLOG("=== Received MoveToHue Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time
+
+
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -445,7 +451,7 @@ bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * co
   if (!dev) return false;
   // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -460,8 +466,8 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandle
   if (!dev) return false;
   // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
-    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced), commandData.transitionTime);
+    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced), commandData.transitionTime);
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -554,8 +560,8 @@ bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * command
   if (!dev) return false;
   // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
-    dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
+    dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced), commandData.transitionTime);
+    dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced), commandData.transitionTime);
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -592,7 +598,7 @@ bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandle
   if (!dev) return false;
   // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+    dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;

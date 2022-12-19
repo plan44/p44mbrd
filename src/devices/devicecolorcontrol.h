@@ -58,12 +58,12 @@ public:
   uint16_t currentX() { return mX; };
   uint16_t currentY() { return mX; };
 
-  bool updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode);
-  bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode);
-  bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode);
-  bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode);
-  bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode);
-  bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode);
+  bool updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
 
   bool shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride);
 
