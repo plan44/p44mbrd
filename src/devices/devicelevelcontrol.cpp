@@ -197,7 +197,6 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting currentLevel attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
-      FOCUSOLOG("reported currentLevel attribute change to matter");
     }
     return true; // changed or forced
   }

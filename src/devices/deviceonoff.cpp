@@ -154,7 +154,6 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting onOff attribute change to matter");
       MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID);
-      FOCUSOLOG("reported onOff attribute change to matter");
     }
     return true; // changed
   }
