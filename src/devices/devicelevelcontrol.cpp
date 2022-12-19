@@ -186,8 +186,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       //   but non-standard channels might arrive at another value (e.g. wrap around)
       JsonObjectPtr params = JsonObject::newObj();
       params->add("channel", JsonObject::newInt32(0)); // default channel
-      params->add("relative", JsonObject::newBool(aDirection!=0));
-      params->add("value", JsonObject::newDouble((double)(aAmount-minLevel())/(maxLevel()-minLevel())*(aDirection<0 ? -100 : 100))); // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
+      params->add("value", JsonObject::newDouble((double)(level-minLevel())/(maxLevel()-minLevel())*100)); // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
       params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
       params->add("apply_now", JsonObject::newBool(true));
       notify("setOutputChannelValue", params);
