@@ -143,7 +143,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
     if ((relevant = o->get("age", vo, true))) colorMode = colormode_ct; // age is non-null -> component detemines colormode
     if (o->get("value", vo, true)) {
       // scaling: ct is directly in mired
-      updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==colormode_ct ? aUpdateMode : UpdateMode());
+      updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==colormode_ct ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
     }
   }
   if (!mCtOnly) {
@@ -153,7 +153,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: hue is 0..360 degrees mapped to 0..0xFE
-        updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+        updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
       }
     }
     if (aChannelStates->get("saturation", o)) {
@@ -162,7 +162,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: saturation is 0..100% mapped to 0..0xFE
-        updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode());
+        updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
       }
     }
     if (aChannelStates->get("x", o)) {
@@ -171,7 +171,7 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+        updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
       }
     }
     if (aChannelStates->get("y", o)) {
@@ -180,11 +180,11 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode());
+        updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive));
       }
     }
   }
-  // now update color mode
+  // now actually update resulting color mode
   updateCurrentColorMode(colorMode, aUpdateMode);
 }
 
@@ -192,7 +192,10 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
 bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode)
 {
   bool changed = aColorMode!=mColorMode;
-  if (changed || (aUpdateMode.Has(UpdateFlags::forced) && !aUpdateMode.Has(UpdateFlags::chained))) {
+  if (
+    !aUpdateMode.Has(UpdateFlags::noderive) &&
+    (changed || (aUpdateMode.Has(UpdateFlags::forced) && !aUpdateMode.Has(UpdateFlags::chained)))
+  ) {
     OLOG(LOG_INFO, "set color mode to %d - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
