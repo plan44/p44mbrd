@@ -432,6 +432,7 @@ bool emberAfColorControlClusterMoveToHueCallback(app::CommandHandler * commandOb
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
   }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
@@ -446,6 +447,7 @@ bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * co
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
   }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
@@ -461,6 +463,7 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandle
     dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
     dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
   }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
@@ -554,6 +557,7 @@ bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * command
     dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced));
     dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced));
   }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
@@ -590,6 +594,7 @@ bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandle
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentColortemp(commandData.colorTemperature, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
   }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
