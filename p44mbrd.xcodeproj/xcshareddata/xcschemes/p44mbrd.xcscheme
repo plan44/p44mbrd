@@ -60,6 +60,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--trace_file /tmp/chip_trace"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/p44mbr_xcode_mixwerk_kvs"
             isEnabled = "YES">
          </CommandLineArgument>
@@ -81,7 +85,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--trace_log --trace_decode"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--help"

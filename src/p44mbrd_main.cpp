@@ -273,6 +273,7 @@ public:
   {
     // first update (reset) bridge status
     BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
+    BridgeApi::api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(""));
     BridgeApi::api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(false));
     BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(false));
     // query devices
@@ -1096,8 +1097,12 @@ public:
     // let the bridged app know
     char payloadBuffer[chip::QRCodeBasicSetupPayloadGenerator::kMaxQRCodeBase38RepresentationLength + 1];
     chip::MutableCharSpan qrCode(payloadBuffer);
+    chip::MutableCharSpan manualPairingCode(payloadBuffer);
     if (GetQRCode(qrCode, onBoardingPayload) == CHIP_NO_ERROR) {
       BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(qrCode.data()));
+      if (GetManualPairingCode(manualPairingCode, onBoardingPayload) == CHIP_NO_ERROR) {
+        BridgeApi::api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(manualPairingCode.data()));
+      }
       // FIXME: figure out if actually commissionable or not
       BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(true));
     }

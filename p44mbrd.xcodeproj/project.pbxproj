@@ -1405,7 +1405,6 @@
 		EDF3F4F92893EC9700A82418 /* CHIPDeviceError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceError.h; sourceTree = "<group>"; };
 		EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
 		EDF3F51E289A84B600A82418 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
-		EDF3F51F289A84B600A82418 /* Clusters.matter */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Clusters.matter; sourceTree = "<group>"; };
 		EDF3F520289A84B600A82418 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
 		EDF3F521289A84B600A82418 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
 		EDF3F522289A84B600A82418 /* gen_tokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_tokens.h; sourceTree = "<group>"; };
@@ -3408,7 +3407,6 @@
 				EDF3F520289A84B600A82418 /* callback-stub.cpp */,
 				EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */,
 				EDF3F521289A84B600A82418 /* CHIPClusters.h */,
-				EDF3F51F289A84B600A82418 /* Clusters.matter */,
 				EDF3F51E289A84B600A82418 /* endpoint_config.h */,
 				EDF3F527289A84B600A82418 /* gen_config.h */,
 				EDF3F522289A84B600A82418 /* gen_tokens.h */,
