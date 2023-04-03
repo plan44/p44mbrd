@@ -30,22 +30,18 @@
 namespace chip {
 namespace Controller {
 
-class DLL_EXPORT BindingCluster : public ClusterBase {
+class DLL_EXPORT BindingCluster : public ClusterBase
+{
 public:
-  BindingCluster(Messaging::ExchangeManager &exchangeManager,
-                 const SessionHandle &session, EndpointId endpoint)
-      : ClusterBase(exchangeManager, session, app::Clusters::Binding::Id,
-                    endpoint) {}
-  ~BindingCluster() {}
+    BindingCluster(Messaging::ExchangeManager & exchangeManager, const SessionHandle & session, EndpointId endpoint) : ClusterBase(exchangeManager, session, endpoint) {}
+    ~BindingCluster() {}
 };
 
-class DLL_EXPORT AccessControlCluster : public ClusterBase {
+class DLL_EXPORT AccessControlCluster : public ClusterBase
+{
 public:
-  AccessControlCluster(Messaging::ExchangeManager &exchangeManager,
-                       const SessionHandle &session, EndpointId endpoint)
-      : ClusterBase(exchangeManager, session, app::Clusters::AccessControl::Id,
-                    endpoint) {}
-  ~AccessControlCluster() {}
+    AccessControlCluster(Messaging::ExchangeManager & exchangeManager, const SessionHandle & session, EndpointId endpoint) : ClusterBase(exchangeManager, session, endpoint) {}
+    ~AccessControlCluster() {}
 };
 
 } // namespace Controller
