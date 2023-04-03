@@ -32,6 +32,8 @@
 
 #include <math.h>
 
+using namespace Clusters;
+
 // MARK: - SensorDevice, common base class for sensors
 
 SensorDevice::SensorDevice()
@@ -60,10 +62,10 @@ EmberAfStatus SensorDevice::HandleReadAttribute(ClusterId clusterId, chip::Attri
       return getAttr(buffer, maxReadLength, mTolerance);
     }
     // common attributes
-    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
       return getAttr(buffer, maxReadLength, sensorSpecificClusterRevision());
     }
-    if ((attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) && (maxReadLength == 4)) {
+    if ((attributeId == Globals::Attributes::FeatureMap::Id) && (maxReadLength == 4)) {
       return getAttr(buffer, maxReadLength, sensorSpecificFeatureMap());
     }
   }
@@ -245,17 +247,8 @@ EmberAfStatus SignedSensorDevice::HandleReadAttribute(ClusterId clusterId, chip:
 // TODO: try to extract revision definitions from ZAP-generated defs
 #define ZCL_TEMP_MEASUREMENT_CLUSTER_REVISION (3u)
 
-// Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-//   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-#if ZCL_TEMP_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_TEMP_MIN_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_TEMP_MAX_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_TEMP_TOLERANCE_ATTRIBUTE_ID!=SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-#error Attribute ID mismatch - specific attributes do no longer match common ids.
-#endif
-
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(temperatureSensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_TEMPERATURE_MEASUREMENT_CLUSTER_ID, commonSensorAttrsSigned, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(TemperatureMeasurement::Id, commonSensorAttrsSigned, nullptr, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gTemperatureSensorTypes[] = {
@@ -266,6 +259,14 @@ const EmberAfDeviceType gTemperatureSensorTypes[] = {
 
 DeviceTemperature::DeviceTemperature()
 {
+  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
+  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
+  assert(
+    TemperatureMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
+    TemperatureMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
+    TemperatureMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
+    TemperatureMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
+  );
   // - declare device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(temperatureSensorClusters));
 }
@@ -285,7 +286,7 @@ int32_t DeviceTemperature::bridgeToMatter(double aBridgeValue)
 
 ClusterId DeviceTemperature::sensorSpecificClusterId()
 {
-  return ZCL_TEMPERATURE_MEASUREMENT_CLUSTER_ID;
+  return TemperatureMeasurement::Id;
 }
 
 uint16_t DeviceTemperature::sensorSpecificClusterRevision()
@@ -298,17 +299,8 @@ uint16_t DeviceTemperature::sensorSpecificClusterRevision()
 // TODO: try to extract revision definitions from ZAP-generated defs
 #define ZCL_ILLUM_MEASUREMENT_CLUSTER_REVISION (3u)
 
-// Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-//   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-#if ZCL_ILLUM_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_ILLUM_MIN_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_ILLUM_MAX_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_ILLUM_TOLERANCE_ATTRIBUTE_ID!=SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-#error Attribute ID mismatch - specific attributes do no longer match common ids.
-#endif
-
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(illuminanceSensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_ILLUMINANCE_MEASUREMENT_CLUSTER_ID, commonSensorAttrsUnsigned, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(IlluminanceMeasurement::Id, commonSensorAttrsUnsigned, nullptr, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gIlluminanceSensorTypes[] = {
@@ -319,6 +311,14 @@ const EmberAfDeviceType gIlluminanceSensorTypes[] = {
 
 DeviceIlluminance::DeviceIlluminance()
 {
+  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
+  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
+  assert(
+    IlluminanceMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
+    IlluminanceMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
+    IlluminanceMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
+    IlluminanceMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
+  );
   // - declare device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(illuminanceSensorClusters));
 }
@@ -339,7 +339,7 @@ int32_t DeviceIlluminance::bridgeToMatter(double aBridgeValue)
 
 ClusterId DeviceIlluminance::sensorSpecificClusterId()
 {
-  return ZCL_ILLUMINANCE_MEASUREMENT_CLUSTER_ID;
+  return IlluminanceMeasurement::Id;
 }
 
 uint16_t DeviceIlluminance::sensorSpecificClusterRevision()
@@ -352,17 +352,8 @@ uint16_t DeviceIlluminance::sensorSpecificClusterRevision()
 // TODO: try to extract revision definitions from ZAP-generated defs
 #define ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_REVISION (3u)
 
-// Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-//   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-#if ZCL_RELATIVE_HUMIDITY_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_RELATIVE_HUMIDITY_MIN_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_RELATIVE_HUMIDITY_MAX_MEASURED_VALUE_ATTRIBUTE_ID!=SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID \
- || ZCL_RELATIVE_HUMIDITY_TOLERANCE_ATTRIBUTE_ID!=SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-#error Attribute ID mismatch - specific attributes do no longer match common ids.
-#endif
-
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(relativeHumiditySensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_ID, commonSensorAttrsUnsigned, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(RelativeHumidityMeasurement::Id, commonSensorAttrsUnsigned, nullptr, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
@@ -373,6 +364,14 @@ const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
 
 DeviceHumidity::DeviceHumidity()
 {
+  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
+  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
+  assert(
+    RelativeHumidityMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
+    RelativeHumidityMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
+    RelativeHumidityMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
+    RelativeHumidityMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
+  );
   // - declare device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(relativeHumiditySensorClusters));
 }
@@ -393,7 +392,7 @@ int32_t DeviceHumidity::bridgeToMatter(double aBridgeValue)
 
 ClusterId DeviceHumidity::sensorSpecificClusterId()
 {
-  return ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_ID;
+  return RelativeHumidityMeasurement::Id;
 }
 
 uint16_t DeviceHumidity::sensorSpecificClusterRevision()

@@ -31,12 +31,13 @@ using namespace app;
 // MARK: - SensorDevice, common base class for sensors
 
 /// Generic attribute IDs used for supposedly common attributes at this device's level
-/// @note these should be checked at compile time in concrete sensor classes against
+/// @note these should be checked at compile/instantiation time in concrete sensor classes against
 ///   ZCL definitions
-#define SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID (0x0000)
-#define SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID (0x0001)
-#define SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID (0x0002)
-#define SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID (0x0003)
+/// @note we take these from temperature measurement here, so checking in DeviceTemperature is redundant
+#define SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID (Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Id)
+#define SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID (Clusters::TemperatureMeasurement::Attributes::MinMeasuredValue::Id)
+#define SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID (Clusters::TemperatureMeasurement::Attributes::MaxMeasuredValue::Id)
+#define SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID (Clusters::TemperatureMeasurement::Attributes::Tolerance::Id)
 
 
 class SensorDevice : public InputDevice

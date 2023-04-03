@@ -32,6 +32,8 @@
 
 #include <math.h>
 
+using namespace Clusters;
+
 // MARK: - BooleanState specific declarations
 
 // REVISION DEFINITIONS:
@@ -42,11 +44,11 @@
 #define ZCL_BOOLEAN_STATE_CLUSTER_REVISION (1u)
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(booleanStateAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_STATE_VALUE_ATTRIBUTE_ID, BOOLEAN, 1, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(BooleanState::Attributes::StateValue::Id, BOOLEAN, 1, 0),
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(booleanStateClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_BOOLEAN_STATE_CLUSTER_ID, booleanStateAttrs, nullptr, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(BooleanState::Id, booleanStateAttrs, nullptr, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
@@ -97,7 +99,7 @@ void BooleanInputDevice::parseInputValue(JsonObjectPtr aProperties, UpdateMode a
         NumericAttributeTraits<bool>::SetNull(mState);
       }
       if (aUpdateMode.Has(UpdateFlags::matter)) {
-        MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_BOOLEAN_STATE_CLUSTER_ID, ZCL_STATE_VALUE_ATTRIBUTE_ID);
+        MatterReportingAttributeChangeCallback(GetEndpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
       }
     }
   }
@@ -106,12 +108,12 @@ void BooleanInputDevice::parseInputValue(JsonObjectPtr aProperties, UpdateMode a
 
 EmberAfStatus BooleanInputDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if (clusterId==ZCL_BOOLEAN_STATE_CLUSTER_ID) {
-    if (attributeId == ZCL_STATE_VALUE_ATTRIBUTE_ID) {
+  if (clusterId==BooleanState::Id) {
+    if (attributeId == BooleanState::Attributes::StateValue::Id) {
       return getAttr(buffer, maxReadLength, mState);
     }
     // common attributes
-    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
       return getAttr(buffer, maxReadLength, ZCL_BOOLEAN_STATE_CLUSTER_REVISION);
     }
   }

@@ -28,7 +28,6 @@ using namespace chip;
 using namespace app;
 using namespace Clusters;
 
-
 class DeviceLevelControl : public DeviceOnOff
 {
   typedef DeviceOnOff inherited;
@@ -57,9 +56,9 @@ public:
 
   /// @name handlers for command implementations
   /// @{
-  void moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
-  void move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
-  void stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  Status moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  Status move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  Status stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void effect(bool aNewValue);
 
   /// @}

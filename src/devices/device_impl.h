@@ -30,9 +30,14 @@
 #include <platform/CHIPDeviceLayer.h>
 #include <lib/support/ZclString.h>
 
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/cluster-id.h>
+#include <app-common/zap-generated/ids/Attributes.h>
+#include <app-common/zap-generated/ids/Clusters.h>
+
 #include <app-common/zap-generated/attributes/Accessors.h>
+
+#include <app-common/zap-generated/cluster-enums.h>
+#include <app-common/zap-generated/cluster-objects.h>
+#include <app-common/zap-generated/enums.h>
 
 #include <app/reporting/reporting.h>
 #include <app/util/util.h>

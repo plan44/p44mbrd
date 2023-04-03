@@ -40,37 +40,37 @@
 // =================================================================================
 
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (EMBER_AF_LEVEL_CONTROL_FEATURE_ON_OFF)
+#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (to_underlying(LevelControl::LevelControlFeature::kOnOff))
 
 #define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
   // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* current level */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* onoff transition time */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_LEVEL_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* level for fully on */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_OPTIONS_ATTRIBUTE_ID, BITMAP8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* default move/dim rate */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_MAXIMUM_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* max level */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_MINIMUM_LEVEL_ATTRIBUTE_ID, INT8U, 1, 0), /* min level */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0),     /* feature map */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::CurrentLevel::Id, INT8U, 1, 0), /* current level */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::OnOffTransitionTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* onoff transition time */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::OnLevel::Id, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* level for fully on */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::Options::Id, BITMAP8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::DefaultMoveRate::Id, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* default move/dim rate */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::MaxLevel::Id, INT8U, 1, 0), /* max level */
+  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::MinLevel::Id, INT8U, 1, 0), /* min level */
+  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0),     /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 constexpr CommandId levelControlIncomingCommands[] = {
-  app::Clusters::LevelControl::Commands::MoveToLevel::Id,
-  app::Clusters::LevelControl::Commands::Move::Id,
-  app::Clusters::LevelControl::Commands::Step::Id,
-  app::Clusters::LevelControl::Commands::Stop::Id,
-  app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::Id,
-  app::Clusters::LevelControl::Commands::MoveWithOnOff::Id,
-  app::Clusters::LevelControl::Commands::StepWithOnOff::Id,
-  app::Clusters::LevelControl::Commands::StopWithOnOff::Id,
-//  app::Clusters::LevelControl::Commands::MoveToClosestFrequency::Id,
+  LevelControl::Commands::MoveToLevel::Id,
+  LevelControl::Commands::Move::Id,
+  LevelControl::Commands::Step::Id,
+  LevelControl::Commands::Stop::Id,
+  LevelControl::Commands::MoveToLevelWithOnOff::Id,
+  LevelControl::Commands::MoveWithOnOff::Id,
+  LevelControl::Commands::StepWithOnOff::Id,
+  LevelControl::Commands::StopWithOnOff::Id,
+//  LevelControl::Commands::MoveToClosestFrequency::Id,
   kInvalidCommandId,
 };
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_LEVEL_CONTROL_CLUSTER_ID, levelControlAttrs, levelControlIncomingCommands, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(LevelControl::Id, levelControlAttrs, levelControlIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // MARK: - DeviceLevelControl
@@ -195,7 +195,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting currentLevel attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID);
+      MatterReportingAttributeChangeCallback(GetEndpointId(), LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
     }
     return true; // changed or forced
   }
@@ -242,12 +242,12 @@ bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOpti
 
 
 
-void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, OptType aOptionMask,OptType aOptionOverride)
+Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, OptType aOptionMask,OptType aOptionOverride)
 {
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+  Status status = Status::Success;
 
   if (aAmount > EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) {
-    status = EMBER_ZCL_STATUS_INVALID_COMMAND;
+    status = Status::InvalidCommand;
   }
   else if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     // OnOff status and options do allow executing
@@ -272,8 +272,7 @@ void DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataMod
       OnOff::Attributes::GlobalSceneControl::Set(GetEndpointId(), true);
     }
   }
-  // send response
-  emberAfSendImmediateDefaultResponse(status);
+  return status;
 }
 
 
@@ -284,7 +283,7 @@ bool emberAfLevelControlClusterMoveToLevelCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->moveToLevel(commandData.level, 0, commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride);
+  commandObj->AddStatus(commandPath, dev->moveToLevel(commandData.level, 0, commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride));
   return true;
 }
 
@@ -345,9 +344,9 @@ void DeviceLevelControl::dim(int8_t aDirection, uint8_t aRate)
 }
 
 
-void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+  Status status = Status::Success;
 
   uint8_t rate;
   if (aRate.IsNull()) {
@@ -370,12 +369,11 @@ void DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate,
         dim(-1, rate);
         break;
       default:
-        status = EMBER_ZCL_STATUS_INVALID_COMMAND;
+        status = Status::InvalidCommand;
         break;
     }
   }
-  // send response
-  emberAfSendImmediateDefaultResponse(status);
+  return status;
 }
 
 
@@ -386,7 +384,7 @@ bool emberAfLevelControlClusterMoveCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->move(commandData.moveMode, commandData.rate, false, commandData.optionsMask, commandData.optionsOverride);
+  commandObj->AddStatus(commandPath, dev->move(commandData.moveMode, commandData.rate, false, commandData.optionsMask, commandData.optionsOverride));
   return true;
 }
 
@@ -397,20 +395,19 @@ bool emberAfLevelControlClusterMoveWithOnOffCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->move(commandData.moveMode, commandData.rate, true, 0, 0);
+  commandObj->AddStatus(commandPath, dev->move(commandData.moveMode, commandData.rate, true, 0, 0));
   return true;
 }
 
 
-void DeviceLevelControl::stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+Status DeviceLevelControl::stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+  Status status = Status::Success;
 
   if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     dim(0,0); // stop dimming
   }
-  // send response
-  emberAfSendImmediateDefaultResponse(status);
+  return status;
 }
 
 
@@ -422,7 +419,7 @@ bool emberAfLevelControlClusterStopCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->stop(false, commandData.optionsMask, commandData.optionsOverride);
+  commandObj->AddStatus(commandPath, dev->stop(false, commandData.optionsMask, commandData.optionsOverride));
   return true;
 }
 
@@ -433,7 +430,7 @@ bool emberAfLevelControlClusterStopWithOnOffCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->stop(true, 0, 0);
+  commandObj->AddStatus(commandPath, dev->stop(true, 0, 0));
   return true;
 }
 
@@ -487,7 +484,16 @@ void emberAfLevelControlClusterServerInitCallback(EndpointId endpoint)
   // NOP for now
 }
 
-void MatterLevelControlPluginServerInitCallback() {}
+void MatterLevelControlPluginServerInitCallback()
+{
+  // NOP for now
+}
+
+
+void MatterLevelControlClusterServerShutdownCallback(EndpointId endpoint)
+{
+  // NOP for now
+}
 
 
 
@@ -506,40 +512,40 @@ bool LevelControlHasFeature(EndpointId endpoint, LevelControlFeature feature)
 
 EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
-    if (attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID) {
+  if (clusterId==LevelControl::Id) {
+    if (attributeId == LevelControl::Attributes::CurrentLevel::Id) {
       return getAttr(buffer, maxReadLength, currentLevel());
     }
-    if (attributeId == ZCL_LEVEL_CONTROL_REMAINING_TIME_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::RemainingTime::Id) {
       return getAttr(buffer, maxReadLength, remainingTimeDS());
     }
-    if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::OnOffTransitionTime::Id) {
       return getAttr(buffer, maxReadLength, mOnOffTransitionTimeDS);
     }
-    if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::OnLevel::Id) {
       return getAttr(buffer, maxReadLength, mOnLevel);
     }
-    if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::Options::Id) {
       return getAttr(buffer, maxReadLength, mLevelControlOptions);
     }
-    if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::DefaultMoveRate::Id) {
       return getAttr(buffer, maxReadLength, mDefaultMoveRateUnitsPerS);
     }
-    if (attributeId == ZCL_MINIMUM_LEVEL_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::MinLevel::Id) {
       return getAttr(buffer, maxReadLength, minLevel());
     }
-    if (attributeId == ZCL_MAXIMUM_LEVEL_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::MaxLevel::Id) {
       return getAttr(buffer, maxReadLength, maxLevel());
     }
-    if (attributeId == ZCL_START_UP_CURRENT_LEVEL_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::StartUpCurrentLevel::Id) {
       return getAttr(buffer, maxReadLength, minLevel()); // TODO: default to off, check if this matches intentions
     }
     // common attributes
-    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_REVISION);
     }
-    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? EMBER_AF_LEVEL_CONTROL_FEATURE_LIGHTING : 0));
+    if (attributeId == Globals::Attributes::FeatureMap::Id) {
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? to_underlying(LevelControl::LevelControlFeature::kLighting) : 0));
     }
   }
   // let base class try
@@ -549,17 +555,17 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
 
 EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
-  if (clusterId==ZCL_LEVEL_CONTROL_CLUSTER_ID) {
-    if (attributeId == ZCL_ON_OFF_TRANSITION_TIME_ATTRIBUTE_ID) {
+  if (clusterId==LevelControl::Id) {
+    if (attributeId == LevelControl::Attributes::OnOffTransitionTime::Id) {
       return setAttr(mOnOffTransitionTimeDS, buffer);
     }
-    if (attributeId == ZCL_ON_LEVEL_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::OnLevel::Id) {
       return setAttr(mOnLevel, buffer);
     }
-    if (attributeId == ZCL_OPTIONS_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::Options::Id) {
       return setAttr(mLevelControlOptions, buffer);
     }
-    if (attributeId == ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID) {
+    if (attributeId == LevelControl::Attributes::DefaultMoveRate::Id) {
       return setAttr(mDefaultMoveRateUnitsPerS, buffer);
     }
   }

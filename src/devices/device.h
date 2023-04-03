@@ -45,6 +45,8 @@ using namespace app;
 using namespace std;
 using namespace p44;
 
+using Status = Protocols::InteractionModel::Status;
+
 class Device;
 typedef boost::intrusive_ptr<Device> DevicePtr;
 

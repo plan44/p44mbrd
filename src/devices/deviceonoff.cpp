@@ -30,6 +30,8 @@
 #include "device_impl.h" // include as first file!
 #include "deviceonoff.h"
 
+using namespace Clusters;
+
 // MARK: - OnOff Device specific declarations
 
 // REVISION DEFINITIONS:
@@ -43,8 +45,8 @@
 
 // Declare cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_ON_OFF_ATTRIBUTE_ID, BOOLEAN, 1, 0), /* on/off */
-  DECLARE_DYNAMIC_ATTRIBUTE(ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID, BITMAP32, 4, 0), /* feature map */
+  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnOff::Id, BOOLEAN, 1, 0), /* on/off */
+  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0), /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 // Declare cluster commands
@@ -60,7 +62,7 @@ constexpr CommandId onOffIncomingCommands[] = {
 };
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(ZCL_ON_OFF_CLUSTER_ID, onOffAttrs, onOffIncomingCommands, nullptr),
+  DECLARE_DYNAMIC_CLUSTER(OnOff::Id, onOffAttrs, onOffIncomingCommands, nullptr),
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
@@ -153,7 +155,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting onOff attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID);
+      MatterReportingAttributeChangeCallback(GetEndpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
     }
     return true; // changed
   }
@@ -165,16 +167,16 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 
 EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
-  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    if (attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) {
+  if (clusterId==OnOff::Id) {
+    if (attributeId == OnOff::Attributes::OnOff::Id) {
       return getAttr(buffer, maxReadLength, isOn());
     }
     // common attributes
-    if (attributeId == ZCL_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID) {
+    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
     }
-    if (attributeId == ZCL_FEATURE_MAP_SERVER_ATTRIBUTE_ID) {
-      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? EMBER_AF_ON_OFF_FEATURE_LIGHTING : 0);
+    if (attributeId == Globals::Attributes::FeatureMap::Id) {
+      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? to_underlying(OnOff::OnOffFeature::kLighting) : 0);
     }
   }
   // let base class try
@@ -185,9 +187,9 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
 
 EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
-  if (clusterId==ZCL_ON_OFF_CLUSTER_ID) {
-    // Non-writable from outside, but written by standard OnOff cluster implementation  
-    if (attributeId == ZCL_ON_OFF_ATTRIBUTE_ID) {
+  if (clusterId==OnOff::Id) {
+    // Non-writable from outside, but written by standard OnOff cluster implementation
+    if (attributeId == OnOff::Attributes::OnOff::Id) {
       updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
