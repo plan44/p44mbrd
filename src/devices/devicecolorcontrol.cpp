@@ -745,7 +745,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     if (attributeId == ColorControl::Attributes::ColorTempPhysicalMinMireds::Id) {
       return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MIN);
     }
-    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMP_PHYSICAL_MIN_ATTRIBUTE_ID) {
+    if (attributeId == ColorControl::Attributes::ColorTempPhysicalMaxMireds::Id) {
       return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MAX);
     }
     // common
