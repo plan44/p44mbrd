@@ -32,6 +32,9 @@ treat_warnings_as_errors = true
 # p44utils needs things like dynamic_cast<>
 enable_rtti = true
 
+# we want to use avahi (=Linux platform dns-sd, not minimal-mdns)
+chip_mdns = "platform"
+
 # we do not want BLE
 chip_config_network_layer_ble = false
 
