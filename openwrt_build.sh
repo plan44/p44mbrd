@@ -4,8 +4,14 @@
 CHIPAPP_NAME="p44mbrd"
 OPENWRT_WRAPPER_PACKAGE="feeds/p44i/p44mbrd"
 
+FOR_DEBUG=0
+if [[ $# > 1 && "$1"=="--debug" ]]; then
+  FOR_DEBUG=1
+  shift
+fi
+
 if [[ $# < 1 || $# > 2 ]]; then
-  echo "Usage: $0 <openwrt buildroot path> [<OpenWrt .config file>]"
+  echo "Usage: $0 [--debug] <openwrt buildroot path> [<OpenWrt .config file>]"
   echo "  builds '${CHIPAPP_NAME}' app from current dir"
   exit 1
 fi
@@ -74,15 +80,24 @@ export TOOLCHAIN_PREFIX="${STAGING_DIR}/toolchain-${TOOLCHAIN_ARCH}_${TARGET_COM
 # - only needed for finding strip-new
 BUILT_TOOLS="${BUILDROOT}/build_dir/toolchain-${TOOLCHAIN_ARCH}_${TARGET_COMPILER}_${TARGET_LIBC}"
 
-# check wrapper package prebuilt_bin dir in openwrt feed
-PREBUILT_BIN="${BUILDROOT}/${OPENWRT_WRAPPER_PACKAGE}/prebuilt_bin/${TARGET_ARCH_PACKAGES}"
-if [ ! -d "${PREBUILT_BIN}" ]; then
-  echo "Wrapper package prebuilt_bin missing: ${PREBUILT_BIN}"
-  exit 1
-fi
+PREBUILT_BIN=
+EXTRA_GN_ARGS=
 
 # build dir for gn/ninja
-OUT_DIR="out/openwrt/${TARGET_ARCH_PACKAGES}/release"
+if [[ ${FOR_DEBUG} -ne 0 ]]; then
+  # just build, do not create prebuilt-bin
+  OUT_DIR="out/openwrt/${TARGET_ARCH_PACKAGES}/debug"
+  #EXTRA_GN_ARGS="target_cflags=[\"-ggdb3\"] chip_enable_schema_check=true chip_enable_transport_trace=true"
+  EXTRA_GN_ARGS="target_cflags=[\"-ggdb3\"]"
+else
+  OUT_DIR="out/openwrt/${TARGET_ARCH_PACKAGES}/release"
+  # check wrapper package prebuilt_bin dir in openwrt feed
+  PREBUILT_BIN="${BUILDROOT}/${OPENWRT_WRAPPER_PACKAGE}/prebuilt_bin/${TARGET_ARCH_PACKAGES}"
+  if [ ! -d "${PREBUILT_BIN}" ]; then
+    echo "Wrapper package prebuilt_bin missing: ${PREBUILT_BIN}"
+    exit 1
+  fi
+fi
 
 #### Now build
 cd "${CHIPAPP_ROOT}"
@@ -93,11 +108,13 @@ echo "     staging_dir : ${STAGING_DIR}"
 echo "         sysroot : ${SYSROOT}"
 echo "toolchain_prefix : ${TOOLCHAIN_PREFIX}"
 echo "     built_tools : ${BUILT_TOOLS}"
-echo "    prebuilt_bin : ${PREBUILT_BIN}"
+if [ ${FOR_DEBUG} -eq 0 -a -d "${PREBUILT_BIN}" ]; then
+  echo "    prebuilt_bin : ${PREBUILT_BIN}"
+fi
 
 #exit 1
 
-# prep matter
+# prep matter ?
 #source third_party/connectedhomeip/scripts/activate.sh
 
 # gn gen
@@ -107,7 +124,7 @@ gn gen \
     --fail-on-unused-args \
     --export-compile-commands \
     --root=$CHIPAPP_ROOT \
-    "--args=target_os=\"openwrt\" openwrt_sdk_root=\"$BUILDROOT\" openwrt_sdk_sysroot=\"$SYSROOT\" openwrt_toolchain_prefix=\"$TOOLCHAIN_PREFIX\" target_cpu=\"$TARGET_CPU\" chip_device_platform=\"linux\" chip_enable_openthread=false chip_enable_wifi=false" \
+    "--args=target_os=\"openwrt\" ${EXTRA_GN_ARGS} openwrt_sdk_root=\"$BUILDROOT\" openwrt_sdk_sysroot=\"$SYSROOT\" openwrt_toolchain_prefix=\"$TOOLCHAIN_PREFIX\" target_cpu=\"$TARGET_CPU\" chip_device_platform=\"linux\" chip_enable_openthread=false chip_enable_wifi=false" \
     $OUT_DIR
 if [[ $? != 0 ]]; then
   echo "# gn FAILED"
@@ -123,12 +140,32 @@ if [[ $? != 0 ]]; then
 fi
 
 # store into files of wrapper package in openwrt
-if [ -d "${PREBUILT_BIN}" ]; then
+if [ ${FOR_DEBUG} -eq 0 -a -d "${PREBUILT_BIN}" ]; then
   "${BUILT_TOOLS}/binutils/binutils/strip-new" -o "${PREBUILT_BIN}/${CHIPAPP_NAME}" "${OUT_DIR}/${CHIPAPP_NAME}"
   echo "copied executable to: ${PREBUILT_BIN}"
   # also save info about the source VERSION we built that binary from
   git describe HEAD >"${PREBUILT_BIN}/git_version"
   git rev-parse HEAD >"${PREBUILT_BIN}/git_rev"
   echo "saved version/rev along with executable in: ${PREBUILT_BIN}"
+else
+  # debugging
+  if [ -z ${TARGET_HOST} ]; then
+    echo "# TARGET_HOST is not defined, need to define it"
+    # provide symbolically
+    echo "export TARGET_HOST=192.168.x.x"
+    TARGET_HOST='${TARGET_HOST}'
+  fi
+  pushd ${OUT_DIR}
+    _APP=$(pwd)/${CHIPAPP_NAME}
+  popd
+  echo ""
+  echo "# debug target executable built as ${_APP}"
+  echo "# - send ${CHIPAPP_NAME} to target as debugtarget:"
+  echo "pushd ${BUILDROOT}"
+  echo "p44b send -s ${_APP}"
+  echo "popd"
+  echo "# - start debugging ${CHIPAPP_NAME}:"
+  echo "${BUILDROOT}/scripts/remote-gdb ${TARGET_HOST}:9000 ${_APP}"
+
 fi
 
