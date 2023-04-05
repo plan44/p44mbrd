@@ -136,7 +136,8 @@ void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceCom
   // - initial reachability
   mReachable = false;
   if (aDeviceInfo->get("active", o)) {
-    mReachable = o->boolValue();
+    mActive = o->boolValue();
+    updateReachable(IsReachable(), UpdateMode());
   }
 }
 

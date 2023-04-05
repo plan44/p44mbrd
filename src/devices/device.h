@@ -86,7 +86,7 @@ class Device : public p44::P44LoggingObj
   EndpointId mDynamicEndpointIdx;
 
   // runtime variable attributes
-  bool mReachable;
+  bool mReachable; ///< note: this is only the currently reported state, derived from mBridgeable and mActive
   string mName;
   string mZone;
 
