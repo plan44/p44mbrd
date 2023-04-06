@@ -5,7 +5,7 @@ CHIPAPP_NAME="p44mbrd"
 OPENWRT_WRAPPER_PACKAGE="feeds/p44i/p44mbrd"
 
 FOR_DEBUG=0
-if [[ $# > 1 && "$1"=="--debug" ]]; then
+if [[ $# > 1 && "$1" == "--debug" ]]; then
   FOR_DEBUG=1
   shift
 fi
