@@ -179,7 +179,7 @@ public:
       { 0, "spake2p-iterations",  true, "iterations;Number of PBKDF iterations to use." },
       { 0, "matter-tcp-port",     true, "port;matter TCP port (secured)" },
       { 0, "matter-udp-port",     true, "arg;matter UDP port (unsecured)" },
-      { 0, "interface-id",        true, "interfaceid;A interface id to advertise on" },
+      { 0, "interface",           true, "interface name;The network interface name to advertise on. Must have IPv6 link local address. If not set, first network interface with Ipv6 link local is used." },
       { 0, "PICS",                true, "filepath;A file containing PICS items" },
       { 0, "KVS",                 true, "filepath;A file to store Key Value Store items" },
       #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
@@ -1146,7 +1146,10 @@ public:
     serverInitParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
     if (getIntOption("matter-tcp-port", i)) serverInitParams.operationalServicePort = (uint16_t)i;
     if (getIntOption("matter-udp-port", i)) serverInitParams.userDirectedCommissioningPort = (uint16_t)i;
-    if (getIntOption("interface-id", i)) serverInitParams.interfaceId = Inet::InterfaceId(static_cast<chip::Inet::InterfaceId::PlatformType>(i));
+    const char* ifname;
+    if (getStringOption("interface", ifname)) {
+      VerifyOrDie(Inet::InterfaceId::InterfaceNameToId(ifname, serverInitParams.interfaceId) == CHIP_NO_ERROR);
+    }
 
     // We need to set DeviceInfoProvider before Server::Init to setup the storage of DeviceInfoProvider properly.
     DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
