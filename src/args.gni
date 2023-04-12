@@ -35,8 +35,8 @@ enable_rtti = true
 # we want to use avahi (=Linux platform dns-sd, not minimal-mdns)
 chip_mdns = "platform"
 
-# matter stack should not set/modify the avahi hostname
-chip_config_platform_dnssd_do_not_set_hostname = true
+# matter stack should not set/modify the avahi hostname, but create a separate host for matter
+chip_config_platform_dnssd_avahi_separate_hostname = true
 
 # we do not want BLE
 chip_config_network_layer_ble = false
