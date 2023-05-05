@@ -294,7 +294,7 @@ bool emberAfLevelControlClusterMoveToLevelWithOnOffCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->moveToLevel(commandData.level, 0, commandData.transitionTime, true, 0, 0);
+  commandObj->AddStatus(commandPath, dev->moveToLevel(commandData.level, 0, commandData.transitionTime, true, 0, 0));
   return true;
 }
 
@@ -306,11 +306,11 @@ bool emberAfLevelControlClusterStepCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->moveToLevel(
+  commandObj->AddStatus(commandPath, dev->moveToLevel(
     commandData.stepSize,
     commandData.stepMode==EMBER_ZCL_STEP_MODE_UP ? 1 : -1,
     commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride
-  );
+  ));
   return true;
 }
 
@@ -321,11 +321,11 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->moveToLevel(
+  commandObj->AddStatus(commandPath, dev->moveToLevel(
     commandData.stepSize,
     commandData.stepMode==EMBER_ZCL_STEP_MODE_UP ? 1 : -1,
     commandData.transitionTime, true, 0, 0
-  );
+  ));
   return true;
 }
 
