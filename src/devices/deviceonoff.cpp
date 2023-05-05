@@ -46,6 +46,10 @@ using namespace Clusters;
 // Declare cluster attributes
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
   DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnOff::Id, BOOLEAN, 1, 0), /* on/off */
+  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::GlobalSceneControl::Id, BOOLEAN, 1, 0),
+  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
+  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OffWaitTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
+  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::StartUpOnOff::Id, ENUM8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)),
   DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0), /* feature map */
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
@@ -70,7 +74,11 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DeviceOnOff::DeviceOnOff(bool aLighting) :
   mLighting(aLighting),
-  mOn(false)
+  mOn(false),
+  mGlobalSceneControl(false),
+  mOnTime(0),
+  mOffWaitTime(0),
+  mStartUpOnOff(to_underlying(OnOff::OnOffStartUpOnOff::kOff))
 {
   // - declare onoff device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
@@ -171,6 +179,18 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
     if (attributeId == OnOff::Attributes::OnOff::Id) {
       return getAttr(buffer, maxReadLength, isOn());
     }
+    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
+      return getAttr(buffer, maxReadLength, mGlobalSceneControl);
+    }
+    if (attributeId == OnOff::Attributes::OnTime::Id) {
+      return getAttr(buffer, maxReadLength, mOnTime);
+    }
+    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
+      return getAttr(buffer, maxReadLength, mOffWaitTime);
+    }
+    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
+      return getAttr(buffer, maxReadLength, mStartUpOnOff);
+    }
     // common attributes
     if (attributeId == Globals::Attributes::ClusterRevision::Id) {
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
@@ -192,6 +212,18 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
     if (attributeId == OnOff::Attributes::OnOff::Id) {
       updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
       return EMBER_ZCL_STATUS_SUCCESS;
+    }
+    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
+      return setAttr(mGlobalSceneControl, buffer);
+    }
+    if (attributeId == OnOff::Attributes::OnTime::Id) {
+      return setAttr(mOnTime, buffer);
+    }
+    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
+      return setAttr(mOffWaitTime, buffer);
+    }
+    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
+      return setAttr(mStartUpOnOff, buffer);
     }
   }
   // let base class try

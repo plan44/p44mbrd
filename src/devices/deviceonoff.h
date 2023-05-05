@@ -64,6 +64,13 @@ protected:
 
 private:
   bool mOn;
+
+  // additional storage for onoff cluster
+  bool mGlobalSceneControl;
+  uint16_t mOnTime;
+  uint16_t mOffWaitTime;
+  uint8_t mStartUpOnOff;
+
 };
 
 
