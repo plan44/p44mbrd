@@ -147,6 +147,9 @@ if [ ${FOR_DEBUG} -eq 0 -a -d "${PREBUILT_BIN}" ]; then
   git describe HEAD >"${PREBUILT_BIN}/git_version"
   git rev-parse HEAD >"${PREBUILT_BIN}/git_rev"
   echo "saved version/rev along with executable in: ${PREBUILT_BIN}"
+  echo "# - copy ${CHIPAPP_NAME} to a target's /tmp for testing, stripped:"
+  echo "\"${BUILT_TOOLS}/binutils/binutils/strip-new\" -o \"/tmp/${CHIPAPP_NAME}\" \"${OUT_DIR}/${CHIPAPP_NAME}\""
+  echo "scp \"/tmp/${CHIPAPP_NAME}\" root@\${TARGET_HOST}:/tmp"
 else
   # debugging
   if [ -z ${TARGET_HOST} ]; then

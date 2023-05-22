@@ -401,9 +401,9 @@ public:
                     }
                     case input:
                       if (inputdesc->get("inputType", o)) {
-                        int inputType = o->int32Value();
+                        int binInpType = o->int32Value();
                         // determine input type
-                        switch(inputType) {
+                        switch(binInpType) {
                           case binInpType_presence:
                           case binInpType_presenceInDarkness:
                           case binInpType_motion:

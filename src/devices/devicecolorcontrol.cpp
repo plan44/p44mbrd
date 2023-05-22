@@ -148,7 +148,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
   }
   if (!mCtOnly) {
     if (aChannelStates->get("hue", o)) {
-      JsonObjectPtr vo;
       if ((relevant = o->get("age", vo, true))) colorMode = colormode_hs; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
@@ -157,7 +156,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       }
     }
     if (aChannelStates->get("saturation", o)) {
-      JsonObjectPtr vo;
       if ((relevant = o->get("age", vo, true))) colorMode = colormode_hs; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
@@ -166,7 +164,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       }
     }
     if (aChannelStates->get("x", o)) {
-      JsonObjectPtr vo;
       if ((relevant = o->get("age", vo, true))) colorMode = colormode_xy; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
@@ -175,7 +172,6 @@ void DeviceColorControl::parseChannelStates(JsonObjectPtr aChannelStates, Update
       }
     }
     if (aChannelStates->get("y", o)) {
-      JsonObjectPtr vo;
       if ((relevant = o->get("age", vo, true))) colorMode = colormode_xy; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode

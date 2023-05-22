@@ -12,6 +12,7 @@
 		ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */; };
 		ED14F42A294B76B8001C9D2E /* booleaninputdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */; };
 		ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */; };
+		ED1EDDF92A0672AA00FD93B5 /* DnssdImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */; };
 		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
 		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
@@ -408,6 +409,8 @@
 		ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = booleaninputdevices.cpp; sourceTree = "<group>"; };
 		ED14F429294B76B8001C9D2E /* booleaninputdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = booleaninputdevices.h; sourceTree = "<group>"; };
 		ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = darwinlogger.cpp; sourceTree = "<group>"; };
+		ED1EDDF52A04F71700FD93B5 /* DnssdImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = DnssdImpl.h; sourceTree = "<group>"; tabWidth = 4; };
+		ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdImpl.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
 		ED2330112886A1C500D934D7 /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
 		ED2330122886A1C500D934D7 /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
@@ -1443,6 +1446,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED1EDDF42A04F6BD00FD93B5 /* Linux */ = {
+			isa = PBXGroup;
+			children = (
+				ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */,
+				ED1EDDF52A04F71700FD93B5 /* DnssdImpl.h */,
+			);
+			path = Linux;
+			sourceTree = "<group>";
+		};
 		ED23300F2886A18300D934D7 /* p44utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -2675,6 +2687,7 @@
 		ED36DC68286DD6B900CA28EC /* platform */ = {
 			isa = PBXGroup;
 			children = (
+				ED1EDDF42A04F6BD00FD93B5 /* Linux */,
 				ED36DE91286E043500CA28EC /* CommissionableDataProvider.cpp */,
 				ED36DC74286DD72B00CA28EC /* Darwin */,
 				ED36DE98286E043500CA28EC /* DeviceControlServer.cpp */,
@@ -3654,6 +3667,7 @@
 				ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */,
 				ED36DBAC286DD48C00CA28EC /* OnboardingCodes.cpp in Sources */,
 				ED36DE02286DDBCA00CA28EC /* cluster-objects.cpp in Sources */,
+				ED1EDDF92A0672AA00FD93B5 /* DnssdImpl.cpp in Sources */,
 				ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */,
 				ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
@@ -3905,6 +3919,7 @@
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -3962,6 +3977,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
