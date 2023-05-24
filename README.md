@@ -1,7 +1,7 @@
 p44mbrd
 =======
 
-*[[if you want to support p44mbrd development, please consider to sponsor plan44]](https://github.com/sponsors/plan44)* 
+*[[if you want to support p44mbrd development, please consider to sponsor plan44]](https://github.com/sponsors/plan44)*
 
 *p44mbrd* (plan44 matter bridge daemon) is a free (opensource, GPLv3) *matter* bridge daemon, intended as a companion to the [**vdcd**](https://github.com/plan44/vdcd) home automation controller.
 
@@ -23,12 +23,12 @@ For the implementation of the matter standard, *p44mbrd* uses the official Apach
 
 In particular, *p44mbrd* was evolved out of the *bridge-app* example in CHIP.
 
-The *connectedhomeip* is included as a submodule, but **using a plan44 forked github repository**. 
+The *connectedhomeip* is included as a submodule, but **using a plan44 forked github repository**.
 
 The forked version is currently needed because things like build support for OpenWrt or the libev based mainloop are not yet part of upstream *connectedhomeip*. In addition, the forked version omits a lot of very footprint heavy submodules (gigabytes!) containing SDKs for various embedded hardware not relevant to a Linux/Posix based bridge project.
 
 However, the plan44 fork is not a real fork and will not diverge from *connectedhomeip* a lot. It's just a set of commits on top of *connectedhomeip* that will be rebased from time to time to new upstream releases, and hopefully over time get integrated into the SDK itself.
- 
+
 Work on *p44mbrd* has produced a few contributions already accepted to matter mainline:
 
 - [make compatible with time64](https://github.com/project-chip/connectedhomeip/pull/19985)
@@ -38,8 +38,8 @@ Work on *p44mbrd* has produced a few contributions already accepted to matter ma
 And two pending (at the time of writing this) PRs:
 
 - [Support for libev based mainloop](https://github.com/project-chip/connectedhomeip/pull/24232)
-- [Fix Avahi based dns-sd implementation](https://github.com/project-chip/connectedhomeip/pull/26397) 
- 
+- [Fix Avahi based dns-sd implementation](https://github.com/project-chip/connectedhomeip/pull/26397)
+
 ### p44utils
 
 p44mbrd is also based on a set of generic C++ utility classes called [*p44utils*](https://github.com/plan44/p44utils), which provides basic mechanisms for mainloop-based, nonblocking I/O driven automation daemons, as well as a script language, [*p44script*](https://plan44.ch/p44-techdocs/en/#topics). p44utils is included as a submodule into this project.
@@ -100,7 +100,7 @@ On a debian 11 system with sudo, git, build-essential already installed:
 
 ```bash
 sudo apt install ninja-build python3-venv python3-dev python3-gevent python3-pip
-sudo apt install unzip libgirepository1.0-dev 
+sudo apt install unzip libgirepository1.0-dev
 sudo apt install libgirepository-1.0-1 python3-gevent
 sudo apt install libev-dev
 sudo apt install libssl-dev libdbus-1-dev libglib2.0-dev libavahi-client-dev
@@ -143,7 +143,13 @@ gn gen \
     --root=${CHIPAPP_ROOT}/src \
     "--args=chip_enable_openthread=false chip_enable_wifi=false" \
     ${OUT_DIR}
-ninja -C ${OUT_DIR} ${CHIPAPP_NAME}    
+ninja -C ${OUT_DIR} ${CHIPAPP_NAME}
+```
+
+If build fails with error complaining about wrong zap-cli version, a full re-run of the matter activation (=bootstrap) might help. This should cause cipd to download and install the correct zap version (but takes a long time).
+
+```bash
+source third_party/connectedhomeip/scripts/bootstrap.sh
 ```
 
 ## run it
@@ -162,8 +168,8 @@ ${OUT_DIR}/p44mbrd --payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --s
 
 Note that at this time, all this **is not certified by the csa-iot** so must use `vendor-id` and `product-id` as shown above. These are the test vendor and bridge-app product ids from the SDK.
 The `discriminator` should be set to a device-unique value to allow commissioning in a network with multiple bridge-app or p44mbrd instances.
-  
-You also need to have a [*vdcd*](https://github.com/plan44/vdcd) running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--bridgeapihost` and `bridgeapiport` where to look for the bridge API.
+
+You also need to have a [*vdcd*](https://github.com/plan44/vdcd) running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--bridgeapihost` and `--bridgeapiport` where to look for the bridge API.
 
 ## Support p44mbrd
 
