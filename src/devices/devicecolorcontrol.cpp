@@ -41,8 +41,8 @@ using namespace Clusters;
 // =================================================================================
 
 #define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP (to_underlying(ColorControl::ColorControlFeature::kColorTemperature))
-#define ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES (to_underlying(ColorControl::ColorControlFeature::kHueAndSaturation)|to_underlying(ColorControl::ColorControlFeature::kXy))
+#define ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP (to_underlying(ColorControl::Feature::kColorTemperature))
+#define ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES (to_underlying(ColorControl::Feature::kHueAndSaturation)|to_underlying(ColorControl::Feature::kXy))
 
 // TODO: maybe get this from bridge, now 100..1000 is the range the P44-DSB/LC UI offers
 #define COLOR_TEMP_PHYSICAL_MIN (100)

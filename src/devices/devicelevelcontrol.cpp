@@ -40,7 +40,7 @@
 // =================================================================================
 
 #define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (to_underlying(LevelControl::LevelControlFeature::kOnOff))
+#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (to_underlying(LevelControl::Feature::kOnOff))
 
 #define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
 
@@ -498,7 +498,7 @@ void MatterLevelControlClusterServerShutdownCallback(EndpointId endpoint)
 
 
 // Note: copied from original levelcontrol implementation, needed by on-off
-bool LevelControlHasFeature(EndpointId endpoint, LevelControlFeature feature)
+bool LevelControlHasFeature(EndpointId endpoint, LevelControl::Feature feature)
 {
   bool success;
   uint32_t featureMap;
@@ -545,7 +545,7 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_REVISION);
     }
     if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? to_underlying(LevelControl::LevelControlFeature::kLighting) : 0));
+      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? to_underlying(LevelControl::Feature::kLighting) : 0));
     }
   }
   // let base class try

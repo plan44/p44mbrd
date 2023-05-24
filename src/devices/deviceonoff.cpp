@@ -196,7 +196,7 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
       return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
     }
     if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? to_underlying(OnOff::OnOffFeature::kLighting) : 0);
+      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? to_underlying(OnOff::Feature::kLighting) : 0);
     }
   }
   // let base class try
