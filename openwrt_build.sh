@@ -2,7 +2,8 @@
 
 # the name of the app
 CHIPAPP_NAME="p44mbrd"
-OPENWRT_WRAPPER_PACKAGE="feeds/p44i/p44mbrd"
+# the name of the openwrt package
+OPENWRT_PACKAGE_NAME="${CHIPAPP_NAME}"
 
 FOR_DEBUG=0
 if [[ $# > 1 && "$1" == "--debug" ]]; then
@@ -41,7 +42,7 @@ source "${CONFIGFILE}" 2>/dev/null
 
 # OpenWrt config                Definitions we need
 # ===========================   =========================================
-# <case statemnet>							TARGET_CPU=mips
+# <case statement>							TARGET_CPU=mips
 # CONFIG_CPU_TYPE					      TARGET_CPU_TYPE=24kc
 # CONFIG_TARGET_ARCH_PACKAGES 	TARGET_ARCH_PACKAGES=mipsel_24kc
 # CONFIG_ARCH                 	TARGET_ARCH=mipsel
@@ -91,6 +92,13 @@ if [[ ${FOR_DEBUG} -ne 0 ]]; then
   EXTRA_GN_ARGS="target_cflags=[\"-ggdb3\"]"
 else
   OUT_DIR="out/openwrt/${TARGET_ARCH_PACKAGES}/release"
+  # find the feed of the openwrt wrapper package
+  OPENWRT_FEED=$(${BUILDROOT}/scripts/feeds search "${OPENWRT_PACKAGE_NAME}" | sed -n -E -e "/Search/s/Search results in feed '(.*)'.*/\1/p")
+  if [ -z "${OPENWRT_FEED}" ]; then
+    echo "no openwrt feed found containing package ${OPENWRT_PACKAGE_NAME}"
+    exit 1
+  fi
+  OPENWRT_WRAPPER_PACKAGE="feeds/${OPENWRT_FEED}/${OPENWRT_PACKAGE_NAME}"
   # check wrapper package prebuilt_bin dir in openwrt feed
   PREBUILT_BIN="${BUILDROOT}/${OPENWRT_WRAPPER_PACKAGE}/prebuilt_bin/${TARGET_ARCH_PACKAGES}"
   if [ ! -d "${PREBUILT_BIN}" ]; then
