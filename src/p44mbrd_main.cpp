@@ -189,7 +189,7 @@ public:
       #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
       // p44mbrd command line args
       { 0, "bridgeapihost",       true, "host;host of the bridge API, default is " DEFAULT_BRIDGE_HOST },
-      { 0, "bridgeapiport",       true, "port;port of the bridge API, default is " DEFAULT_BRIDGE_SERVICE },
+      { 0, "bridgeapiservice",    true, "port;port of the bridge API, default is " DEFAULT_BRIDGE_SERVICE },
       #if CHIP_LOG_FILTERING
       { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
       #endif // CHIP_LOG_FILTERING
