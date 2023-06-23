@@ -65,6 +65,18 @@ public:
 
 typedef std::list<DevicePtr> DevicesList;
 
+
+
+// @brief delegate for obtaining device information
+class DeviceInfoDelegate
+{
+  virtual string getVendorName() = 0;
+  virtual string getModelName() = 0;
+  virtual string getConfigUrl() = 0;
+}
+
+
+
 class Device : public p44::P44LoggingObj
 {
   // info for instantiating
@@ -73,14 +85,8 @@ class Device : public p44::P44LoggingObj
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
   std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info
 
-  // device info for bridged device
-  string mVendorName;
-  string mModelName;
-  string mConfigUrl;
-
   // constant after init
-  string mBridgedDSUID; ///< ID of the bridge-side device
-  bool mPartOfComposedDevice; ///< if set, endpointDSUID is suffixed with endPointDSUIDSuffix()
+  bool mPartOfComposedDevice;
   EndpointId mParentEndpointId;
   EndpointId mDynamicEndpointBase;
   EndpointId mDynamicEndpointIdx;
@@ -94,6 +100,9 @@ class Device : public p44::P44LoggingObj
   bool mBridgeable;
   bool mActive;
 
+  // delegate
+  DeviceInfoDelegate& mDeviceInfoDelegate;
+
 protected:
 
   // possible subdevices
@@ -101,7 +110,7 @@ protected:
 
 public:
 
-  Device();
+  Device(DeviceInfoDelegate& aDeviceInfoDelegate);
   virtual ~Device();
 
   virtual string logContextPrefix() override;
@@ -111,19 +120,6 @@ public:
 
   /// @return a description of the device, usually including current state
   virtual string description();
-
-  /// init device with information from bridge query results
-  /// @param aDeviceInfo the JSON object for the entire bridge-side device
-  /// @param aDeviceComponentInfo the JSON description object for the output or input that should be handled
-  /// @param aInputType the name of the input type (sensor, binaryInput, button), or NULL if device is not an input device
-  /// @param aInputId the name of the input ID within the input type, or NULL if device not an input device
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr);
-
-  /// @return the dSUID of the bridged device
-  const string bridgedDSUID() { return mBridgedDSUID; };
-
-  /// @return the pseudo-dSUID (dSUID + suffix if this is a subdevice) of this endpoint
-  const string endpointDSUID();
 
   /// @return list of subdevices, non-empty if this is a composed device
   DevicesList& subDevices() { return mSubdevices; };
@@ -172,21 +168,6 @@ public:
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
 
-  /// @name bridge API helpers
-  /// @{
-
-  void notify(const string aNotification, JsonObjectPtr aParams);
-  void call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
-
-  /// called to handle notifications from bridge
-  bool handleBridgeNotification(const string aNotification, JsonObjectPtr aParams);
-
-  /// called to handle pushed properties coming from bridge
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties);
-
-  /// @}
-
-
 protected:
 
   /// return suffix for endpointDSUID() for when this device is installed as a subdevice
@@ -232,16 +213,30 @@ protected:
 };
 
 
-class IdentifiableDevice : public Device
+/// @brief delegate for making a device identify itself
+class IdentifyDelegate
+{
+  /// start or stop identification of the device
+  /// @param aDurationS >0: number of seconds the identification action
+  ///   on the hardware device should perform, such as blinking or beeping.
+  ///   0: use default duration of hardware device
+  ///   <0: stop ongoing identification
+  virtual identify(int aDurationS) = 0;
+}
+
+
+class IdentifiableDevice : public Device, public IdentifyInterface
 {
   typedef Device inherited;
 
   uint16_t mIdentifyTime;
   MLTicket mIdentifyTickTimer;
 
+  IdentifyDelegate& mIdentifyDelegate;
+
 public:
 
-  IdentifiableDevice();
+  IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
   virtual ~IdentifiableDevice();
 
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
@@ -259,6 +254,8 @@ private:
 
 };
 
+
+#if COMPLETE
 
 class ComposedDevice : public Device
 {
@@ -306,3 +303,4 @@ protected:
 
 };
 
+#endif

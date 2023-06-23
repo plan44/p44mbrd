@@ -430,7 +430,9 @@ DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(identifiableDeviceClusters)
 DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 
-IdentifiableDevice::IdentifiableDevice() :
+IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  Device(aDeviceInfoDelegate),
+  mIdentifyDelegate(aIdentifyDelegate),
   mIdentifyTime(0)
 {
   // - declare identify cluster
@@ -449,12 +451,8 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
     OLOG(LOG_INFO, "updating identifyTime to %hu - updatemode=0x%x", aIdentifyTime, aUpdateMode.Raw());
     mIdentifyTime = aIdentifyTime;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
-      // (re)start or stop identify in the bridged device
-      mIdentifyTickTimer.cancel();
-      JsonObjectPtr params = JsonObject::newObj();
       // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
-      params->add("duration", JsonObject::newDouble(mIdentifyTime<=0 ? -1 : mIdentifyTime));
-      notify("identify", params);
+      mIdentifyDelegate.identify(mIdentifyTime<=0 ? -1 : mIdentifyTime);
       if (mIdentifyTime>0) {
         // start ticker
         identifyTick(mIdentifyTime);
@@ -557,6 +555,8 @@ bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chi
 }
 
 
+#if COMPLETE
+
 // MARK: - ComposedDevice
 
 const EmberAfDeviceType gComposedDeviceTypes[] = {
@@ -619,3 +619,5 @@ void InputDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDevi
   mInputId = aInputId;
   inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
 }
+
+#endif

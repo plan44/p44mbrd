@@ -72,7 +72,9 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff(bool aLighting) :
+DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  IdentifiableDevice(aIdentifyDelegate, aDeviceInfoDelegate),
+  mOnOffDelegate(aOnOffDelegate),
   mLighting(aLighting),
   mOn(false),
   mGlobalSceneControl(false),
@@ -143,13 +145,7 @@ void DeviceOnOff::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aU
 
 void DeviceOnOff::changeOnOff_impl(bool aOn)
 {
-  // call preset1 or off on the bridged device
-  JsonObjectPtr params = JsonObject::newObj();
-  params->add("channel", JsonObject::newInt32(0)); // default channel
-  params->add("value", JsonObject::newDouble(aOn ? 100 : 0));
-  params->add("transitionTime", JsonObject::newDouble(0));
-  params->add("apply_now", JsonObject::newBool(true));
-  notify("setOutputChannelValue", params);
+  mOnOffDelegate.setOnOffState(aOn);
 }
 
 

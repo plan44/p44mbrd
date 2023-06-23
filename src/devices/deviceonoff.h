@@ -27,12 +27,24 @@
 using namespace chip;
 
 
+/// @brief delegate for switching a device on and off
+class OnOffDelegate
+{
+  /// Set device to on or off
+  /// @param aOn state to switch to
+  virtual void setOnOffState(bool aOn) = 0;
+}
+
+
 class DeviceOnOff : public IdentifiableDevice
 {
   typedef IdentifiableDevice inherited;
+
+  OnOffDelegate& mOnOffDelegate;
+
 public:
 
-  DeviceOnOff(bool aLighting);
+  DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual string description() override;
 
@@ -49,9 +61,6 @@ public:
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
-
-  /// called to handle pushed properties coming from bridge
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 protected:
 
