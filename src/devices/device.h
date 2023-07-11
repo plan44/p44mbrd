@@ -70,49 +70,91 @@ typedef std::list<DevicePtr> DevicesList;
 // @brief delegate for obtaining device information
 class DeviceInfoDelegate
 {
-  virtual string getVendorName() = 0;
-  virtual string getModelName() = 0;
-  virtual string getConfigUrl() = 0;
-}
+public:
+
+  virtual ~DeviceInfoDelegate() = default;
+
+  /// @return unique identifier for the (part of a) bridged device that is represented by the
+  ///   matter device this object is the device info delegate of.
+  /// @note the identifier is defined by the device adapter implementation such that it allows
+  ///   the adapter to identify a the correct bridged device (or, in case of composed device, part of the
+  ///   device) when presented with this ID.
+  virtual const string endpointUID() const = 0;
+
+  /// @return vendor name (human readable)
+  virtual string vendorName() const = 0;
+
+  /// @return model name or number (human readable)
+  virtual string modelName() const = 0;
+
+  /// @return URL to reach the configuration web interface of the bridged device, if any - empty string otherwise
+  virtual string configUrl() const = 0;
+
+  /// @return hardware device serial number (human readable/understandable)
+  virtual string serialNo() const = 0;
+
+  /// @return true if the device hardware is reachable at this time
+  virtual bool isReachable() const = 0;
+
+  /// @return name of the device as in use at the far end of the bridge
+  /// @note this may or may not be in sync with the nodeLabel as used by matter. Usually, this serves
+  ///   as a suggestion for naming devices at commissioning (depending on the commissioner implementation)
+  virtual string name() const = 0;
+
+  /// Request to change the bridged device's name
+  /// @note this is called when matter side receives a nodeLabel change. Implementation can reject the change.
+  /// @return true if name could be changed in the bridged device
+  virtual bool changeName(const string aNewName) { return false; /* not changeable from matter side by default */ }
+
+  /// @return name of the zone (area, room) the device is in as seen at the far end of the bridge
+  virtual string zone() const = 0;
+
+  /// Request to change the zone
+  /// @return true if zone could be changed in the bridged device
+  virtual bool changeZone(const string aNewZone) { return false; /* not changeable from matter side by default */ }
+
+};
 
 
-
+/// @brief Base class for all devices represented in matter by the bridge
 class Device : public p44::P44LoggingObj
 {
-  // info for instantiating
+  /// device info delegate
+  DeviceInfoDelegate& mDeviceInfoDelegate;
+
+  /// @name matter device and cluster representations
+  /// @{
   Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
   EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
   std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info
+  /// @}
 
-  // constant after init
-  bool mPartOfComposedDevice;
-  EndpointId mParentEndpointId;
-  EndpointId mDynamicEndpointBase;
-  EndpointId mDynamicEndpointIdx;
+  /// @name matter endpointIds and device structure
+  /// constant after init
+  /// @{
+  bool mPartOfComposedDevice; ///< set if this device is (or needs to become) part of a composed device
+  DevicesList mSubdevices; ///< subdevices of this device (in case it is a composed device)
+  EndpointId mParentEndpointId; ///< endpointId of the parent (composed device or bridge itself)
+  EndpointId mDynamicEndpointBase; ///< first dynamic endpointId
+  EndpointId mDynamicEndpointIdx; ///< device index relative to mDynamicEndpointBase
+  /// @}
 
-  // runtime variable attributes
-  bool mReachable; ///< note: this is only the currently reported state, derived from mBridgeable and mActive
-  string mName;
+  /// @name runtime variable attributes
+  /// @{
+  bool mReachable; ///< currently reported reachable state, usually synchronized with actual hardware device reachability state
+  string mNodeLabel; ///< currently reported node label, usually synchronized with actual device name
   string mZone;
-
-  // internal state
-  bool mBridgeable;
-  bool mActive;
-
-  // delegate
-  DeviceInfoDelegate& mDeviceInfoDelegate;
-
-protected:
-
-  // possible subdevices
-  DevicesList mSubdevices;
+  /// @}
 
 public:
 
+  /// @param aDeviceInfoDelegate object reference for implementation of device info handling
   Device(DeviceInfoDelegate& aDeviceInfoDelegate);
+
   virtual ~Device();
 
+  /// @return a prefix string identifying the device for log messages issued via the OLOG macro
   virtual string logContextPrefix() override;
 
   /// @return a short name for the type of device
@@ -124,36 +166,72 @@ public:
   /// @return list of subdevices, non-empty if this is a composed device
   DevicesList& subDevices() { return mSubdevices; };
 
-  /// Set this device to behave as part of a composed device
-  inline void flagAsPartOfComposedDevice() { mPartOfComposedDevice = true; };
+  /// @return the device info delegate (needed by composed devices' delegates internally)
+  inline DeviceInfoDelegate& deviceInfoDelegate() { return mDeviceInfoDelegate; }
 
-  bool IsReachable();
-  inline chip::EndpointId GetEndpointId() { return mDynamicEndpointBase+mDynamicEndpointIdx; };
-  inline chip::EndpointId GetParentEndpointId() { return mParentEndpointId; };
-  inline string GetName() { return mName; };
-  inline string GetZone() { return mZone; };
+  /// @name matter-side endpoint identification
+  /// endpointIds are semi-stable "id"s (actually 16-bit indexes). The standard mandates not reusing indexes but
+  /// always assigning incremented indexes for new devices, until wrap-around at 0xFFFF->0.
+  /// @note This is not actually feasible with the current SDK implementation, which assumes endpointIds mostly
+  ///   as something defined at compile time and thus immutable - not considering the bridge case at all.
+  /// @{
 
+  /// @return the endpointId of this device (can be part of a composed device)
+  /// @note valid only after device setup is complete and device is operational
+  inline chip::EndpointId GetEndpointId() const { return mDynamicEndpointBase+mDynamicEndpointIdx; };
+
+  /// @return the parentId of this device (can be a composed device or the bridge itself)
+  /// @note valid only after device setup is complete and device is operational
+  inline chip::EndpointId GetParentEndpointId() const { return mParentEndpointId; };
+
+  /// @return true when this device endpoint is part of a composed device
+  inline bool isPartOfComposedDevice() const { return mPartOfComposedDevice; };
+
+  /// @}
+
+
+  /// @name operational propagating setters
+  /// These can be called while the device is active to propagate changes according to UpdateMode
+  /// @{
+
+  /// @brief update mode flags
+  /// These control the propagation of changes towards matter and the bridged devices.
   enum class UpdateFlags : uint8_t
   {
     bridged = 0x01, ///< update state in bridge (send change notification/call)
     matter = 0x02, ///< update state in matter (report attribute as changed)
     noderive = 0x10, ///< do not derive anything from this change
     chained = 0x20, ///< this update was triggered by another update (prevent recursion)
-    noapply = 0x40, ///< do not apply right now when updating bridge (i.e. color components)
+    noapply = 0x40, ///< do not apply to hardware right now when updating bridge (i.e. color components)
     forced = 0x80 ///< perform updates even when cached state has not changed
   };
-  using UpdateMode = BitFlags<UpdateFlags>;
+  using UpdateMode = BitFlags<UpdateFlags>; ///< update mode consisting of zero or more UpdateFlags
 
-  // propagating setters
+  /// @brief update the reachable status.
+  /// Device adapters should call this when detecting reachability changes
   void updateReachable(bool aReachable, UpdateMode aUpdateMode);
-  void updateName(const string aDeviceName, UpdateMode aUpdateMode);
 
-  // setup setters
+  /// @brief update the node label.
+  /// Device adapters managing a name string that should be in sync with the node label may call this
+  void updateNodeLabel(const string aNodeLabel, UpdateMode aUpdateMode);
+
+  /// @}
+
+
+  /// @name setup setters
+  /// These must ONLY be called during setup of a device, but NOT while a device is already operational.
+  /// @{
+
   inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
   inline void SetDynamicEndpointBase(EndpointId aDynamicEndpointBase) { mDynamicEndpointBase = aDynamicEndpointBase; };
-  inline void initName(const string aName) { mName = aName; };
+  inline void initNodeLabel(const string aName) { mNodeLabel = aName; };
   inline void initZone(string aZone) { mZone = aZone; };
+
+  /// @brief Set this device to behave as part of a composed device
+  inline void flagAsPartOfComposedDevice() { mPartOfComposedDevice = true; };
+
+  /// @}
 
 
   /// add the device using the previously set cluster info (and parent endpoint ID)
@@ -169,9 +247,6 @@ public:
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
 
 protected:
-
-  /// return suffix for endpointDSUID() for when this device is installed as a subdevice
-  virtual const string endPointDSUIDSuffix() { return "output"; }
 
   /// Add a cluster declaration during device setup
   /// @note preferably this should be called from ctor, to have general cluster defs first
@@ -192,6 +267,7 @@ protected:
     *((T*)aBuffer) = aValue;
   }
 
+  /// utility for extracting attribute data in HandleReadAttribute implementations
   template <typename T> static inline EmberAfStatus getAttr(uint8_t* aBuffer, uint16_t aMaxReadLength, T aValue)
   {
     using ST = typename app::NumericAttributeTraits<T>::StorageType;
@@ -204,6 +280,7 @@ protected:
     }
   }
 
+  /// utility for preparing attribute data in HandleWriteAttribute implementations
   template <typename T> static inline EmberAfStatus setAttr(T &aValue, uint8_t* aBuffer)
   {
     aValue = *((T*)aBuffer);
@@ -216,32 +293,42 @@ protected:
 /// @brief delegate for making a device identify itself
 class IdentifyDelegate
 {
+public:
+
+  virtual ~IdentifyDelegate() = default;
+
   /// start or stop identification of the device
   /// @param aDurationS >0: number of seconds the identification action
   ///   on the hardware device should perform, such as blinking or beeping.
   ///   0: use default duration of hardware device
   ///   <0: stop ongoing identification
-  virtual identify(int aDurationS) = 0;
-}
+  virtual void identify(int aDurationS) = 0;
+};
 
 
-class IdentifiableDevice : public Device, public IdentifyInterface
+/// @brief base class for (usually output) devices which have a means to identify themselves to the user
+class IdentifiableDevice : public Device
 {
   typedef Device inherited;
+
+  /// identify delegate
+  IdentifyDelegate& mIdentifyDelegate;
 
   uint16_t mIdentifyTime;
   MLTicket mIdentifyTickTimer;
 
-  IdentifyDelegate& mIdentifyDelegate;
-
 public:
 
+  /// @param aIdentifyDelegate object reference for implementation of device identification (sound, blinking etc.)
+  /// @param aDeviceInfoDelegate object reference for implementation of device info handling
   IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+
   virtual ~IdentifiableDevice();
 
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
+  /// interface for identify cluster command implementations
   bool updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode);
 
 protected:
@@ -255,24 +342,22 @@ private:
 };
 
 
-#if COMPLETE
-
+/// @brief representation for a composed device with no functionality of its own, but just grouping some actual devices
 class ComposedDevice : public Device
 {
   typedef Device inherited;
 
 public:
 
-  ComposedDevice();
-  virtual ~ComposedDevice();
+  /// @param aDeviceInfoDelegate object reference for implementation of device info handling
+  ComposedDevice(DeviceInfoDelegate& aDeviceInfoDelegate) : Device(aDeviceInfoDelegate) {};
 
   virtual const char *deviceType() override { return "composed"; }
 
   virtual string description() override;
 
+  /// @param aSubDevice device to add as part of this composed device
   void addSubdevice(DevicePtr aSubDevice);
-
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 protected:
 
@@ -281,26 +366,8 @@ protected:
 };
 
 
+/// @brief representation for a input device
 class InputDevice : public Device
 {
   typedef Device inherited;
-
-protected:
-
-  string mInputType;
-  string mInputId;
-
-public:
-
-  InputDevice();
-  virtual ~InputDevice();
-
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-
-protected:
-
-  virtual const string endPointDSUIDSuffix() override { return mInputType + "_" + mInputId; }
-
 };
-
-#endif

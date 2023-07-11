@@ -73,11 +73,10 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // MARK: - Device
 
-Device::Device() :
+Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  mDeviceInfoDelegate(aDeviceInfoDelegate),
   mPartOfComposedDevice(false),
-  mReachable(false),
-  mBridgeable(true), // assume bridgeable, otherwise device wouldn't be instantiated
-  mActive(false)
+  mReachable(false)
 {
   // matter side init
   mDynamicEndpointIdx = kInvalidEndpointId;
@@ -102,91 +101,11 @@ string Device::logContextPrefix()
     "%s %sdevice '%s'%s%s",
     deviceType(),
     mPartOfComposedDevice ? "sub" : "",
-    mName.c_str(),
+    mNodeLabel.c_str(),
     ep.c_str(),
     pep.c_str()
   );
 }
-
-
-void Device::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
-{
-  // parse common info from bridge
-  JsonObjectPtr o = aDeviceInfo->get("dSUID");
-  assert(o);
-  mBridgedDSUID = o->stringValue();
-  // - optionals
-  if (aDeviceInfo->get("vendorName", o)) {
-    mVendorName = o->stringValue();
-  }
-  if (aDeviceInfo->get("model", o)) {
-    mModelName = o->stringValue();
-  }
-  if (aDeviceInfo->get("configURL", o)) {
-    mConfigUrl = o->stringValue();
-  }
-  // - default name
-  if (aDeviceInfo->get("name", o)) {
-    mName = o->stringValue();
-  }
-  // - default zone name
-  if (aDeviceInfo->get("x-p44-zonename", o)) {
-    mZone = o->stringValue();
-  }
-  // - initial reachability
-  mReachable = false;
-  if (aDeviceInfo->get("active", o)) {
-    mActive = o->boolValue();
-    updateReachable(IsReachable(), UpdateMode());
-  }
-}
-
-
-const string Device::endpointDSUID()
-{
-  if (!mPartOfComposedDevice) return mBridgedDSUID; // is the base device for the dSUID
-  // device is a subdevice, must add suffix to dSUID to uniquely identify endpoint
-  return mBridgedDSUID + "_" + endPointDSUIDSuffix();
-}
-
-
-bool Device::handleBridgeNotification(const string aNotification, JsonObjectPtr aParams)
-{
-  if (aNotification=="pushNotification") {
-    JsonObjectPtr props;
-    if (aParams->get("changedproperties", props, true)) {
-      handleBridgePushProperties(props);
-      return true;
-    }
-  }
-  else if (aNotification=="vanish") {
-    // device got removed, make unreachable
-    mBridgeable = false;
-    mActive = false;
-    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
-    return true;
-  }
-  return false; // not handled
-}
-
-
-void Device::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
-{
-  JsonObjectPtr o;
-  if (aChangedProperties->get("active", o)) {
-    mActive = o->boolValue();
-    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
-  }
-  if (aChangedProperties->get("name", o)) {
-    updateName(o->stringValue(), UpdateMode(UpdateFlags::matter));
-  }
-  if (aChangedProperties->get("x-p44-bridgeable", o)) {
-    // note: non-bridgeable status just makes device unreachable
-    mBridgeable = o->boolValue();
-    updateReachable(IsReachable(), UpdateMode(UpdateFlags::matter));
-  }
-}
-
 
 
 Device::~Device()
@@ -264,56 +183,33 @@ void Device::inChipInit()
 
 // MARK: functionality
 
-bool Device::IsReachable()
-{
-  return mActive && mBridgeable;
-}
-
 void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
 {
   if (mReachable!=aReachable || aUpdateMode.Has(UpdateFlags::forced)) {
     mReachable = aReachable;
-    OLOG(LOG_INFO, "Updating reachable to %s (bridgeable=%d, active=%d) - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", mBridgeable, mActive, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "Updating reachable to %s - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", aUpdateMode.Raw());
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::Reachable::Id);
     }
   }
 }
 
-void Device::updateName(const string aDeviceName, UpdateMode aUpdateMode)
+void Device::updateNodeLabel(const string aNodeLabel, UpdateMode aUpdateMode)
 {
-  if (mName!=aDeviceName || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "Updating name to '%s' - updatemode=%d", aDeviceName.c_str(), aUpdateMode.Raw());
-    mName = aDeviceName;
+  if (mNodeLabel!=aNodeLabel || aUpdateMode.Has(UpdateFlags::forced)) {
+    OLOG(LOG_INFO, "Updating node label to '%s' - updatemode=%d", aNodeLabel.c_str(), aUpdateMode.Raw());
+    mNodeLabel = aNodeLabel;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       // propagate to native device
-      JsonObjectPtr params = JsonObject::newObj();
-      params->add("dSUID", JsonObject::newString(mBridgedDSUID));
-      JsonObjectPtr props = JsonObject::newObj();
-      props->add("name", JsonObject::newString(mName));
-      params->add("properties", props);
-      BridgeApi::api().call("setProperty", params, NoOP);
+      if (!mDeviceInfoDelegate.changeName(mNodeLabel)) {
+        // cannot propagate
+        OLOG(LOG_WARNING, "cannot set bridged device's name to nodeLabel");
+      }
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       MatterReportingAttributeChangeCallback(GetEndpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::NodeLabel::Id);
     }
   }
-}
-
-void Device::notify(const string aNotification, JsonObjectPtr aParams)
-{
-  if (!aParams) aParams = JsonObject::newObj();
-  OLOG(LOG_NOTICE, "mbr -> vdcd: sending notification '%s': %s", aNotification.c_str(), aParams->json_c_str());
-  aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
-  BridgeApi::api().notify(aNotification, aParams);
-}
-
-void Device::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
-{
-  if (!aParams) aParams = JsonObject::newObj();
-  OLOG(LOG_NOTICE, "mbr -> vdcd: calling method '%s': %s", aMethod.c_str(), aParams->json_c_str());
-  aParams->add("dSUID", JsonObject::newString(mBridgedDSUID));
-  BridgeApi::api().call(aMethod, aParams, aResponseCB);
 }
 
 // MARK: Attribute access
@@ -325,38 +221,38 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
   }
   else if (clusterId==BridgedDeviceBasicInformation::Id) {
     if (attributeId == BridgedDeviceBasicInformation::Attributes::Reachable::Id) {
-      return getAttr(buffer, maxReadLength, IsReachable());
+      return getAttr(buffer, maxReadLength, mDeviceInfoDelegate.isReachable());
     }
     // Writable Node Label
     if ((attributeId == BridgedDeviceBasicInformation::Attributes::NodeLabel::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading node label: %s", mName.c_str());
+      FOCUSOLOG("reading node label: %s", mNodeLabel.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mName.substr(0,maxReadLength-1).c_str());
+      MakeZclCharString(zclNameSpan, mNodeLabel.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     // Device Information attributes
     if ((attributeId == BridgedDeviceBasicInformation::Attributes::VendorName::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading vendor name: %s", mVendorName.c_str());
+      FOCUSOLOG("reading vendor name: %s", mDeviceInfoDelegate.vendorName().c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mVendorName.substr(0,maxReadLength-1).c_str());
+      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.vendorName().substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == BridgedDeviceBasicInformation::Attributes::ProductName::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading product name: %s", mModelName.c_str());
+      FOCUSOLOG("reading product name: %s", mDeviceInfoDelegate.modelName().c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mModelName.substr(0,maxReadLength-1).c_str());
+      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.modelName().substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == BridgedDeviceBasicInformation::Attributes::ProductURL::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading product url: %s", mConfigUrl.c_str());
+      FOCUSOLOG("reading product url: %s", mDeviceInfoDelegate.configUrl().c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mConfigUrl.substr(0,maxReadLength-1).c_str());
+      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.configUrl().substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     if ((attributeId == BridgedDeviceBasicInformation::Attributes::SerialNumber::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading serial number: %s", mBridgedDSUID.c_str());
+      FOCUSOLOG("reading serial number: %s", mDeviceInfoDelegate.serialNo().c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mBridgedDSUID.c_str());
+      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.serialNo().c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
     // common attributes
@@ -384,7 +280,7 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
     if (attributeId == BridgedDeviceBasicInformation::Attributes::NodeLabel::Id) {
       string newName((const char*)buffer+1, (size_t)buffer[0]);
       FOCUSOLOG("writing nodel label: new label = '%s'", newName.c_str());
-      updateName(newName, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+      updateNodeLabel(newName, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
@@ -451,6 +347,7 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
     OLOG(LOG_INFO, "updating identifyTime to %hu - updatemode=0x%x", aIdentifyTime, aUpdateMode.Raw());
     mIdentifyTime = aIdentifyTime;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      mIdentifyTickTimer.cancel();
       // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
       mIdentifyDelegate.identify(mIdentifyTime<=0 ? -1 : mIdentifyTime);
       if (mIdentifyTime>0) {
@@ -555,8 +452,6 @@ bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chi
 }
 
 
-#if COMPLETE
-
 // MARK: - ComposedDevice
 
 const EmberAfDeviceType gComposedDeviceTypes[] = {
@@ -564,28 +459,17 @@ const EmberAfDeviceType gComposedDeviceTypes[] = {
 };
 
 
-ComposedDevice::ComposedDevice()
-{
-  // - no additional clusters, just common bridged device clusters
-}
-
-
-ComposedDevice::~ComposedDevice()
-{
-}
-
-
 string ComposedDevice::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- Composed of %lu subdevices", mSubdevices.size());
+  string_format_append(s, "\n- Composed of %lu subdevices", subDevices().size());
   return s;
 }
 
 
 void ComposedDevice::addSubdevice(DevicePtr aSubDevice)
 {
-  mSubdevices.push_back(aSubDevice);
+  subDevices().push_back(aSubDevice);
 }
 
 
@@ -595,29 +479,6 @@ void ComposedDevice::finalizeDeviceDeclaration()
 }
 
 
-void ComposedDevice::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
-{
-  for (DevicesList::iterator pos = mSubdevices.begin(); pos!=mSubdevices.end(); ++pos) {
-    (*pos)->handleBridgePushProperties(aChangedProperties);
-  }
-}
-
-
 // MARK: - InputDevice
 
-InputDevice::InputDevice()
-{
-}
-
-InputDevice::~InputDevice()
-{
-}
-
-void InputDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
-{
-  mInputType = aInputType;
-  mInputId = aInputId;
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-}
-
-#endif
+// For now - nothing here, is just an empty subclass

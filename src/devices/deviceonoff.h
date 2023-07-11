@@ -30,10 +30,15 @@ using namespace chip;
 /// @brief delegate for switching a device on and off
 class OnOffDelegate
 {
+public:
+
+  virtual ~OnOffDelegate() = default;
+
   /// Set device to on or off
   /// @param aOn state to switch to
   virtual void setOnOffState(bool aOn) = 0;
-}
+
+};
 
 
 class DeviceOnOff : public IdentifiableDevice
@@ -50,10 +55,6 @@ public:
 
   virtual uint8_t identifyType() override;
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);
-
   bool isOn() { return mOn; }
   bool updateOnOff(bool aOn, UpdateMode aUpdateMode);
 
@@ -65,9 +66,6 @@ public:
 protected:
 
   virtual void changeOnOff_impl(bool aOn);
-
-  /// the default channel ID
-  string mDefaultChannelId;
 
   bool mLighting; // lighting feature
 
@@ -88,7 +86,8 @@ class DeviceOnOffLight : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceOnOffLight() : inherited(true) {};
+  DeviceOnOffLight(OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(true, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate) {};
 
   virtual const char *deviceType() override { return "on-off light"; }
 
@@ -105,7 +104,8 @@ class DeviceOnOffPluginUnit : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceOnOffPluginUnit() : inherited(false) {};
+  DeviceOnOffPluginUnit(OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(false, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate) {};
 
   virtual const char *deviceType() override { return "on-off plug-in unit"; }
 

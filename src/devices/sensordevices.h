@@ -47,13 +47,8 @@ public:
 
   SensorDevice();
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-
-  /// called to handle pushed properties coming from bridge
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 protected:
 
@@ -87,10 +82,10 @@ class UnsignedSensorDevice : public SensorDevice
   typedef SensorDevice inherited;
 public:
   UnsignedSensorDevice();
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  // TODO: move to adapter: virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 protected:
-  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
+  // TODO: move to adapter: virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
   virtual string description() override;
 private:
   /// @name common attributes in all unsigned measurement clusters
@@ -108,10 +103,10 @@ class SignedSensorDevice : public SensorDevice
   typedef SensorDevice inherited;
 public:
   SignedSensorDevice();
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  // TODO: move to adapter: virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 protected:
-  virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
+  // TODO: move to adapter: virtual void parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode) override;
   virtual string description() override;
 private:
   /// @name common attributes in all signed measurement clusters

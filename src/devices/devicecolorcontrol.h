@@ -47,10 +47,6 @@ public:
 
   virtual string description() override;
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
-
   ColorMode currentColorMode() { return mColorMode; };
   uint8_t currentHue() { return mHue; };
   uint8_t currentSaturation() { return mSaturation; };

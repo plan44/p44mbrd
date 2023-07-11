@@ -40,11 +40,6 @@ public:
 
   virtual string description() override;
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-
-  /// called to handle pushed properties coming from bridge
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
-
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 

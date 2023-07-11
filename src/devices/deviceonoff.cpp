@@ -94,55 +94,6 @@ uint8_t DeviceOnOff::identifyType()
 }
 
 
-
-void DeviceOnOff::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
-{
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // output devices should know which one is the default channel
-  JsonObjectPtr o = aDeviceInfo->get("channelDescriptions");
-  o->resetKeyIteration();
-  string cid;
-  JsonObjectPtr co;
-  while(o->nextKeyValue(cid, co)) {
-    JsonObjectPtr o2;
-    if (co->get("dsIndex", o2)) {
-      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
-    }
-//    if (co->get("channelType", o2)) {
-//      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
-//    }
-  }
-  // output devices should examine the channel states
-  o = aDeviceInfo->get("channelStates");
-  if (o) {
-    parseChannelStates(o, UpdateMode());
-  }
-}
-
-
-void DeviceOnOff::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
-{
-  inherited::handleBridgePushProperties(aChangedProperties);
-  JsonObjectPtr channelStates;
-  if (aChangedProperties->get("channelStates", channelStates, true)) {
-    parseChannelStates(channelStates, UpdateMode(UpdateFlags::matter));
-  }
-}
-
-
-
-void DeviceOnOff::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
-{
-  JsonObjectPtr o;
-  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
-    JsonObjectPtr vo;
-    if (o->get("value", vo, true)) {
-      updateOnOff(vo->doubleValue()>0, aUpdateMode);
-    }
-  }
-}
-
-
 void DeviceOnOff::changeOnOff_impl(bool aOn)
 {
   mOnOffDelegate.setOnOffState(aOn);

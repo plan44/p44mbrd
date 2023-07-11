@@ -1345,6 +1345,7 @@
 		EDB388F429E6F2AC00BDAED4 /* endpoint-config-defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "endpoint-config-defines.h"; sourceTree = "<group>"; };
 		EDB388F529E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClientMonitoringRegistrationTable.h; sourceTree = "<group>"; };
 		EDB388F629E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ClientMonitoringRegistrationTable.cpp; sourceTree = "<group>"; };
+		EDC58B4E2A5EA75B00F48DEF /* adapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = adapter.h; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -1450,6 +1451,7 @@
 			children = (
 				ED1A3CA22A45A2AC009746B8 /* bridgeadapter.cpp */,
 				ED1A3CA32A45A2AC009746B8 /* bridgeadapter.h */,
+				EDC58B4E2A5EA75B00F48DEF /* adapter.h */,
 			);
 			path = adapters;
 			sourceTree = "<group>";
@@ -3477,7 +3479,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1400;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					ED690B51286DC79500069215 = {
 						CreatedOnToolsVersion = 14.0;
@@ -3915,6 +3917,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -3988,6 +3991,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -4021,6 +4025,7 @@
 		ED690B5A286DC79500069215 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
@@ -4068,6 +4073,7 @@
 		ED690B5B286DC79500069215 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",

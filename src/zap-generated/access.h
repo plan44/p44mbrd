@@ -30,7 +30,6 @@
 // Parallel array data (*cluster*, attribute, privilege) for read attribute
 #define GENERATED_ACCESS_READ_ATTRIBUTE__CLUSTER { \
     /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: view */ \
-    /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: view */ \
     0x0000001F, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     0x0000001F, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     /* Cluster: Access Control, Attribute: SubjectsPerAccessControlEntry, Privilege: view */ \
@@ -49,13 +48,11 @@
     0x0000003E, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 // Parallel array data (cluster, *attribute*, privilege) for read attribute
 #define GENERATED_ACCESS_READ_ATTRIBUTE__ATTRIBUTE { \
     /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: view */ \
-    /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: view */ \
     0x00000000, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     0x00000001, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     /* Cluster: Access Control, Attribute: SubjectsPerAccessControlEntry, Privilege: view */ \
@@ -74,13 +71,11 @@
     0x00000000, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 // Parallel array data (cluster, attribute, *privilege*) for read attribute
 #define GENERATED_ACCESS_READ_ATTRIBUTE__PRIVILEGE { \
     /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: view */ \
-    /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: view */ \
     kMatterAccessPrivilegeAdminister, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     kMatterAccessPrivilegeAdminister, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     /* Cluster: Access Control, Attribute: SubjectsPerAccessControlEntry, Privilege: view */ \
@@ -99,7 +94,6 @@
     kMatterAccessPrivilegeAdminister, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +101,6 @@
 // Parallel array data (*cluster*, attribute, privilege) for write attribute
 #define GENERATED_ACCESS_WRITE_ATTRIBUTE__CLUSTER { \
     0x00000006, /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: manage */ \
-    0x00000008, /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: manage */ \
     0x0000001F, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     0x0000001F, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     0x00000028, /* Cluster: Basic Information, Attribute: NodeLabel, Privilege: manage */ \
@@ -117,13 +110,11 @@
     0x00000031, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     0x0000003F, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     0x00000041, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
-    0x00000300, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 
 // Parallel array data (cluster, *attribute*, privilege) for write attribute
 #define GENERATED_ACCESS_WRITE_ATTRIBUTE__ATTRIBUTE { \
     0x00004003, /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: manage */ \
-    0x00004000, /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: manage */ \
     0x00000000, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     0x00000001, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     0x00000005, /* Cluster: Basic Information, Attribute: NodeLabel, Privilege: manage */ \
@@ -133,13 +124,11 @@
     0x00000004, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     0x00000000, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     0x00000000, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
-    0x00004010, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 
 // Parallel array data (cluster, attribute, *privilege*) for write attribute
 #define GENERATED_ACCESS_WRITE_ATTRIBUTE__PRIVILEGE { \
     kMatterAccessPrivilegeManage, /* Cluster: On/Off, Attribute: StartUpOnOff, Privilege: manage */ \
-    kMatterAccessPrivilegeManage, /* Cluster: Level Control, Attribute: StartUpCurrentLevel, Privilege: manage */ \
     kMatterAccessPrivilegeAdminister, /* Cluster: Access Control, Attribute: ACL, Privilege: administer */ \
     kMatterAccessPrivilegeAdminister, /* Cluster: Access Control, Attribute: Extension, Privilege: administer */ \
     kMatterAccessPrivilegeManage, /* Cluster: Basic Information, Attribute: NodeLabel, Privilege: manage */ \
@@ -149,7 +138,6 @@
     kMatterAccessPrivilegeAdminister, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     kMatterAccessPrivilegeManage, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     kMatterAccessPrivilegeManage, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
-    kMatterAccessPrivilegeManage, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 
 ////////////////////////////////////////////////////////////////////////////////

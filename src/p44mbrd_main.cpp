@@ -65,6 +65,8 @@
 
 // plan44
 #include "bridgeapi.h"
+#include "bridgeadapter.h"
+
 #include "p44mbrd_main.h"
 #include "chip_glue/chip_error.h"
 #include "chip_glue/deviceinfoprovider.h"
@@ -318,16 +320,18 @@ public:
             // bridging hint should determine bridged device
             string bridgeAs = o->stringValue();
             if (bridgeAs=="on-off") {
-              if (behaviourtype=="light" && groups && groups->get("1")) dev = new DeviceOnOffLight();
-              else dev = new DeviceOnOffPluginUnit();
+              if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_OnOffLightDevice();
+              else dev = new P44_OnOffPluginUnitDevice();
             }
+            #if COMPLETE
             else if (bridgeAs=="level-control") {
               if (behaviourtype=="light" && groups && groups->get("1")) dev = new DeviceDimmableLight();
               else dev = new DeviceDimmablePluginUnit();
             }
+            #endif // COMPLETE
             if (dev) {
               OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
-              dev->initBridgedInfo(aDeviceJSON, outputdesc);
+              P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
               devices.push_back(dev);
             }
           }
@@ -344,8 +348,9 @@ public:
                   switch(outputfunction) {
                     default:
                     case outputFunction_switch: // switch output
-                      dev = new DeviceOnOffLight();
+                      dev = new P44_OnOffLightDevice();
                       break;
+                    #if COMPLETE
                     case outputFunction_dimmer: // effective value dimmer - single channel 0..100
                       dev = new DeviceDimmableLight();
                       break;
@@ -353,6 +358,7 @@ public:
                     case outputFunction_colordimmer: // full color dimmer - channels 1..6
                       dev = new DeviceColorControl(outputfunction==outputFunction_ctdimmer /* ctOnly */);
                       break;
+                    #endif // COMPLETE
                   }
                 }
                 else {
@@ -360,17 +366,19 @@ public:
                   OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                   switch(outputfunction) {
                     case outputFunction_switch: // switch output
-                      dev = new DeviceOnOffPluginUnit();
+                      dev = new P44_OnOffPluginUnitDevice();
                       break;
+                    #if COMPLETE
                     default:
                     case outputFunction_dimmer: // effective value dimmer - single channel 0..100
                       dev = new DeviceDimmablePluginUnit();
                       break;
+                    #endif // COMPLETE
                   }
                 }
               }
               if (dev) {
-                dev->initBridgedInfo(aDeviceJSON, outputdesc);
+                P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
                 devices.push_back(dev);
                 dev.reset();
               }
@@ -392,9 +400,11 @@ public:
                         int sensorType = o->int32Value();
                         // determine sensor type
                         switch(sensorType) {
+                          #if COMPLETE
                           case sensorType_temperature: dev = new DeviceTemperature(); break;
                           case sensorType_humidity: dev = new DeviceHumidity(); break;
                           case sensorType_illumination: dev = new DeviceIlluminance(); break;
+                          #endif // COMPLETE
                         }
                       }
                       break;
@@ -425,7 +435,7 @@ public:
                       break;
                   }
                   if (dev) {
-                    dev->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
+                    P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
                     devices.push_back(dev);
                     dev.reset();
                   }
@@ -442,14 +452,14 @@ public:
             }
             else {
               // we need a composed device to represent the multiple devices we have in matter
-              ComposedDevice *composedDevice = new ComposedDevice();
+              ComposedDevice *composedDevice = new P44_ComposedDevice();
               mainDevice = DevicePtr(composedDevice);
-              mainDevice->initBridgedInfo(aDeviceJSON); // needs to have the infos, too
+              P44_DeviceImpl::impl(mainDevice)->initBridgedInfo(aDeviceJSON); // needs to have the infos, too
               // add the subdevices
               while(!devices.empty()) {
-                DevicePtr dev = devices.front();
+                DevicePtr subdev = devices.front();
                 devices.pop_front();
-                composedDevice->addSubdevice(dev);
+                composedDevice->addSubdevice(subdev);
               }
             }
           }
@@ -615,7 +625,7 @@ public:
   {
     CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-    string key = kP44mbrNamespace "devices/"; key += dev->endpointDSUID(); // note: real dSUID for single devices, dSUID_inputtype_inputid or dSSUID_output for parts of composed ones
+    string key = kP44mbrNamespace "devices/"; key += dev->deviceInfoDelegate().endpointUID(); // note: real dSUID for single devices, dSUID_inputtype_inputid or dSSUID_output for parts of composed ones
     EndpointId dynamicEndpointIdx = kInvalidEndpointId;
     chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (chiperr==CHIP_NO_ERROR) {
@@ -787,7 +797,7 @@ public:
           if (aJsonMsg->get("notification", o, true)) {
             string notification = o->stringValue();
             POLOG(devpos->second, LOG_INFO, "Notification '%s' received: %s", notification.c_str(), JsonObject::text(aJsonMsg));
-            bool handled = devpos->second->handleBridgeNotification(notification, aJsonMsg);
+            bool handled = P44_DeviceImpl::impl(devpos->second)->handleBridgeNotification(notification, aJsonMsg);
             if (handled) {
               POLOG(devpos->second, LOG_INFO, "processed notification");
             }
