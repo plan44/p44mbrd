@@ -422,8 +422,10 @@ public:
                             // for now: not handled
                             break;
                           default:
+                            #if COMPLETE
                             // all others: create simple ContactSensors
                             dev = new ContactSensorDevice();
+                            #endif // COMPLETE
                             break;
                         }
                       }

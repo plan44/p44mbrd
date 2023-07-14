@@ -12,7 +12,6 @@
 		ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */; };
 		ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */; };
 		ED1A3CA42A45A2AC009746B8 /* bridgeadapter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1A3CA22A45A2AC009746B8 /* bridgeadapter.cpp */; };
-		ED1EDDF92A0672AA00FD93B5 /* DnssdImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */; };
 		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
 		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
@@ -313,7 +312,6 @@
 		ED36DDC6286DDA0300CA28EC /* TransportMgrBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD81286DDA0200CA28EC /* TransportMgrBase.cpp */; };
 		ED36DDC7286DDA0300CA28EC /* GroupPeerMessageCounter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD83286DDA0200CA28EC /* GroupPeerMessageCounter.cpp */; };
 		ED36DDC8286DDA0300CA28EC /* SessionHolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD86286DDA0200CA28EC /* SessionHolder.cpp */; };
-		ED36DDC9286DDA0300CA28EC /* SessionHandle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD87286DDA0200CA28EC /* SessionHandle.cpp */; };
 		ED36DDD0286DDA0300CA28EC /* Session.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD96286DDA0300CA28EC /* Session.cpp */; };
 		ED36DDD1286DDA0300CA28EC /* SecureSessionTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD97286DDA0300CA28EC /* SecureSessionTable.cpp */; };
 		ED36DDD2286DDA0300CA28EC /* TraceMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DD98286DDA0300CA28EC /* TraceMessage.cpp */; };
@@ -1167,7 +1165,6 @@
 		ED36DD84286DDA0200CA28EC /* MessageCounterManagerInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageCounterManagerInterface.h; sourceTree = "<group>"; };
 		ED36DD85286DDA0200CA28EC /* UnauthenticatedSessionTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnauthenticatedSessionTable.h; sourceTree = "<group>"; };
 		ED36DD86286DDA0200CA28EC /* SessionHolder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SessionHolder.cpp; sourceTree = "<group>"; };
-		ED36DD87286DDA0200CA28EC /* SessionHandle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SessionHandle.cpp; sourceTree = "<group>"; };
 		ED36DD88286DDA0200CA28EC /* GroupPeerMessageCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupPeerMessageCounter.h; sourceTree = "<group>"; };
 		ED36DD92286DDA0200CA28EC /* GroupSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupSession.h; sourceTree = "<group>"; };
 		ED36DD93286DDA0200CA28EC /* CryptoContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptoContext.h; sourceTree = "<group>"; };
@@ -1180,7 +1177,6 @@
 		ED36DD9A286DDA0300CA28EC /* SessionMessageDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SessionMessageDelegate.h; sourceTree = "<group>"; };
 		ED36DDA3286DDA0300CA28EC /* SecureSessionTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecureSessionTable.h; sourceTree = "<group>"; };
 		ED36DDA4286DDA0300CA28EC /* SessionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SessionDelegate.h; sourceTree = "<group>"; };
-		ED36DDA5286DDA0300CA28EC /* SessionHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SessionHandle.h; sourceTree = "<group>"; };
 		ED36DDA6286DDA0300CA28EC /* MessageCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageCounter.h; sourceTree = "<group>"; };
 		ED36DDA7286DDA0300CA28EC /* CryptoContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoContext.cpp; sourceTree = "<group>"; };
 		ED36DDA8286DDA0300CA28EC /* TraceMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceMessage.h; sourceTree = "<group>"; };
@@ -2963,8 +2959,6 @@
 				ED36DD96286DDA0300CA28EC /* Session.cpp */,
 				ED36DD95286DDA0300CA28EC /* Session.h */,
 				ED36DDA4286DDA0300CA28EC /* SessionDelegate.h */,
-				ED36DD87286DDA0200CA28EC /* SessionHandle.cpp */,
-				ED36DDA5286DDA0300CA28EC /* SessionHandle.h */,
 				ED36DD86286DDA0200CA28EC /* SessionHolder.cpp */,
 				ED36DD99286DDA0300CA28EC /* SessionHolder.h */,
 				ED36DDAA286DDA0300CA28EC /* SessionManager.cpp */,
@@ -3570,7 +3564,6 @@
 				EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D7FE286DCDA300CA28EC /* diagnostic-logs-server.cpp in Sources */,
 				ED36D8F0286DCF0B00CA28EC /* ChunkedWriteCallback.cpp in Sources */,
-				ED36DDC9286DDA0300CA28EC /* SessionHandle.cpp in Sources */,
 				ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */,
 				ED36DB88286DD2CE00CA28EC /* Parser.cpp in Sources */,
 				EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */,
@@ -3679,7 +3672,6 @@
 				ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */,
 				ED36DBAC286DD48C00CA28EC /* OnboardingCodes.cpp in Sources */,
 				ED36DE02286DDBCA00CA28EC /* cluster-objects.cpp in Sources */,
-				ED1EDDF92A0672AA00FD93B5 /* DnssdImpl.cpp in Sources */,
 				ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */,
 				ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
@@ -4029,6 +4021,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
+					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",
@@ -4077,6 +4070,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
+					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",

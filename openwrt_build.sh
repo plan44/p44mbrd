@@ -5,14 +5,20 @@ CHIPAPP_NAME="p44mbrd"
 # the name of the openwrt package
 OPENWRT_PACKAGE_NAME="${CHIPAPP_NAME}"
 
+# process and consume leading option arguments
 FOR_DEBUG=0
-if [[ $# > 1 && "$1" == "--debug" ]]; then
-  FOR_DEBUG=1
-  shift
-fi
+NINJA_OPTS=""
+while [[ $# -ge 1 ]]; do
+  case "$1" in
+    "-d"|"--debug") FOR_DEBUG=1;shift;;
+    "-v"|"--verbose") NINJA_OPTS="${NINJA_OPTS} -v";shift;;
+    *) break;;
+  esac
+done
 
+# process remaining arguments
 if [[ $# < 1 || $# > 2 ]]; then
-  echo "Usage: $0 [--debug] <openwrt buildroot path> [<OpenWrt .config file>]"
+  echo "Usage: $0 [--debug | --verbose] <openwrt buildroot path> [<OpenWrt .config file>]"
   echo "  builds '${CHIPAPP_NAME}' app from current dir"
   exit 1
 fi
@@ -139,8 +145,15 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
+# zap gen
+${CHIPAPP_ROOT}/third_party/connectedhomeip/scripts/tools/zap/generate.py ${CHIPAPP_ROOT}/zap/p44mbrd.zap
+if [[ $? != 0 ]]; then
+  echo "# generating .matter file FAILED"
+  exit 1
+fi
+
 # build with ninja (only the app, not other stuff like address-resolve-tool)
-ninja -C ${OUT_DIR} ${CHIPAPP_NAME}
+ninja ${NINJA_OPTS} -C ${OUT_DIR} ${CHIPAPP_NAME}
 if [[ $? != 0 ]]; then
   echo "# ninja build FAILED - can be repeated with:"
   echo "ninja -C ${OUT_DIR} ${CHIPAPP_NAME}"
