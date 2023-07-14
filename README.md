@@ -152,6 +152,12 @@ If build fails with error complaining about wrong zap-cli version, a full re-run
 source third_party/connectedhomeip/scripts/bootstrap.sh
 ```
 
+**Temporary Hack:** If the build fails because of missing `src/zap/p44mbrd.matter` file: This should be generated from the .zap file. For some reason, the current gn build setup (probably bug in our BUILD.gn) does *not generate that file automatically*. Thus, for now, `p44mbrd.matter` is included in the repo, but when it is missing or .zap has been modified, it needs to be regenerated:
+
+```bash
+${CHIPAPP_ROOT}/src/third_party/connectedhomeip/scripts/tools/zap/generate.py ${CHIPAPP_ROOT}/src/zap/p44mbrd.zap
+```
+
 ## run it
 
 Test if it loads ok (all libraries there):
