@@ -8,10 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
+		ED072C052A67E7CA007BBF71 /* cc51devices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072C022A67E7CA007BBF71 /* cc51devices.cpp */; };
+		ED072C062A67E7CA007BBF71 /* cc51bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072C032A67E7CA007BBF71 /* cc51bridge.cpp */; };
+		ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1A3C9F2A434872009746B8 /* jsonrpccomm.cpp */; };
 		ED0B92DB2949DDFF00FA3B04 /* Logging.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED0B92D92949DDFF00FA3B04 /* Logging.mm */; };
 		ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */; };
 		ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */; };
-		ED1A3CA42A45A2AC009746B8 /* bridgeadapter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1A3CA22A45A2AC009746B8 /* bridgeadapter.cpp */; };
 		ED2330142886A1C500D934D7 /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330112886A1C500D934D7 /* p44obj.cpp */; };
 		ED2330152886A1C500D934D7 /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2330132886A1C500D934D7 /* jsonobject.cpp */; };
 		ED2330222886A69700D934D7 /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23301A2886A69700D934D7 /* error.cpp */; };
@@ -26,7 +28,7 @@
 		ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD928A68AE20025CC14 /* jsoncomm.cpp */; };
 		ED24BDE228A68AE20025CC14 /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDDD28A68AE20025CC14 /* application.cpp */; };
 		ED24BDE428A6ADA70025CC14 /* libev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED24BDE328A6ADA70025CC14 /* libev.a */; };
-		ED24BDE828A812E00025CC14 /* bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* bridgeapi.cpp */; };
+		ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */; };
 		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
 		ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
@@ -374,8 +376,14 @@
 		EDB388F129E6EF8E00BDAED4 /* TLVCircularBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388EB29E6EF8E00BDAED4 /* TLVCircularBuffer.cpp */; };
 		EDB388F729E6F2AC00BDAED4 /* generic-callback-stubs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388F329E6F2AC00BDAED4 /* generic-callback-stubs.cpp */; };
 		EDB388F829E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388F629E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.cpp */; };
+		EDC58B572A65ADF300F48DEF /* p44bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDC58B532A65ADF300F48DEF /* p44bridge.cpp */; };
+		EDC58B582A65ADF300F48DEF /* p44devices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDC58B552A65ADF300F48DEF /* p44devices.cpp */; };
+		EDC58B592A65B0F000F48DEF /* devicelevelcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */; };
+		EDC58B5D2A65CA4100F48DEF /* adapters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDC58B522A65A99C00F48DEF /* adapters.cpp */; };
+		EDC58B5E2A66946A00F48DEF /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */; };
+		EDC58B682A66CA6400F48DEF /* sensordevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */; };
+		EDC58B692A66E26D00F48DEF /* booleaninputdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
-		EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
 		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
 		EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */; };
@@ -396,6 +404,10 @@
 
 /* Begin PBXFileReference section */
 		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		ED072C012A67E7CA007BBF71 /* cc51bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc51bridge.h; sourceTree = "<group>"; };
+		ED072C022A67E7CA007BBF71 /* cc51devices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc51devices.cpp; sourceTree = "<group>"; };
+		ED072C032A67E7CA007BBF71 /* cc51bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc51bridge.cpp; sourceTree = "<group>"; };
+		ED072C042A67E7CA007BBF71 /* cc51devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc51devices.h; sourceTree = "<group>"; };
 		ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoggingImpl.cpp; sourceTree = "<group>"; };
 		ED0B92D92949DDFF00FA3B04 /* Logging.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Logging.mm; sourceTree = "<group>"; };
 		ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPAddressSorter.cpp; sourceTree = "<group>"; };
@@ -406,8 +418,6 @@
 		ED1A3C9D2A4346B0009746B8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		ED1A3C9E2A434872009746B8 /* jsonrpccomm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jsonrpccomm.hpp; sourceTree = "<group>"; };
 		ED1A3C9F2A434872009746B8 /* jsonrpccomm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jsonrpccomm.cpp; sourceTree = "<group>"; };
-		ED1A3CA22A45A2AC009746B8 /* bridgeadapter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bridgeadapter.cpp; sourceTree = "<group>"; };
-		ED1A3CA32A45A2AC009746B8 /* bridgeadapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridgeadapter.h; sourceTree = "<group>"; };
 		ED1EDDF52A04F71700FD93B5 /* DnssdImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = DnssdImpl.h; sourceTree = "<group>"; tabWidth = 4; };
 		ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdImpl.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
@@ -446,8 +456,8 @@
 		ED24BDDC28A68AE20025CC14 /* socketcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = socketcomm.hpp; sourceTree = "<group>"; };
 		ED24BDDD28A68AE20025CC14 /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
 		ED24BDE328A6ADA70025CC14 /* libev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libev.a; path = ../../../../../../usr/local/Cellar/libev/4.33/lib/libev.a; sourceTree = "<group>"; };
-		ED24BDE628A812E00025CC14 /* bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeapi.h; sourceTree = "<group>"; };
-		ED24BDE728A812E00025CC14 /* bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bridgeapi.cpp; sourceTree = "<group>"; };
+		ED24BDE628A812E00025CC14 /* p44bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44bridgeapi.h; sourceTree = "<group>"; };
+		ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44bridgeapi.cpp; sourceTree = "<group>"; };
 		ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44mbrd_main.h; sourceTree = "<group>"; };
 		ED24BDF028ACE3E10025CC14 /* p44utils_defs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_defs.hpp; sourceTree = "<group>"; };
 		ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_common.hpp; sourceTree = "<group>"; };
@@ -1309,7 +1319,7 @@
 		ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44mbrd_main.cpp; sourceTree = "<group>"; };
 		ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensordevices.cpp; sourceTree = "<group>"; };
 		ED7F9A1D2902C31B00A7CB48 /* sensordevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensordevices.h; sourceTree = "<group>"; };
-		ED7F9A222902DE5C00A7CB48 /* bridgeapi_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridgeapi_defs.h; sourceTree = "<group>"; };
+		ED7F9A222902DE5C00A7CB48 /* p44bridgeapi_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44bridgeapi_defs.h; sourceTree = "<group>"; };
 		ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdHostNameRegistrar.cpp; sourceTree = "<group>"; };
 		ED7F9A262904312300A7CB48 /* DnssdHostNameRegistrar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DnssdHostNameRegistrar.h; sourceTree = "<group>"; };
 		ED7F9A282904328F00A7CB48 /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Protocols.h; sourceTree = "<group>"; };
@@ -1341,7 +1351,14 @@
 		EDB388F429E6F2AC00BDAED4 /* endpoint-config-defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "endpoint-config-defines.h"; sourceTree = "<group>"; };
 		EDB388F529E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClientMonitoringRegistrationTable.h; sourceTree = "<group>"; };
 		EDB388F629E6F2AC00BDAED4 /* ClientMonitoringRegistrationTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ClientMonitoringRegistrationTable.cpp; sourceTree = "<group>"; };
-		EDC58B4E2A5EA75B00F48DEF /* adapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = adapter.h; sourceTree = "<group>"; };
+		EDC58B4E2A5EA75B00F48DEF /* adapters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = adapters.h; sourceTree = "<group>"; };
+		EDC58B512A653E9E00F48DEF /* p44mbrd_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44mbrd_common.h; sourceTree = "<group>"; };
+		EDC58B522A65A99C00F48DEF /* adapters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = adapters.cpp; sourceTree = "<group>"; };
+		EDC58B532A65ADF300F48DEF /* p44bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44bridge.cpp; sourceTree = "<group>"; };
+		EDC58B542A65ADF300F48DEF /* p44bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44bridge.h; sourceTree = "<group>"; };
+		EDC58B552A65ADF300F48DEF /* p44devices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44devices.cpp; sourceTree = "<group>"; };
+		EDC58B562A65ADF300F48DEF /* p44devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44devices.h; sourceTree = "<group>"; };
+		EDC58B672A66C64100F48DEF /* gen-copy */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "gen-copy"; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -1401,12 +1418,6 @@
 		EDF3F4F72893EC9700A82418 /* ThreadStackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadStackManager.h; sourceTree = "<group>"; };
 		EDF3F4F82893EC9700A82418 /* TestOnlyCommissionableDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestOnlyCommissionableDataProvider.h; sourceTree = "<group>"; };
 		EDF3F4F92893EC9700A82418 /* CHIPDeviceError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPDeviceError.h; sourceTree = "<group>"; };
-		EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
-		EDF3F51E289A84B600A82418 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
-		EDF3F521289A84B600A82418 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
-		EDF3F523289A84B600A82418 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
-		EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
-		EDF3F527289A84B600A82418 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
 		EDF3F52C289AA96000A82418 /* groups-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "groups-server.h"; sourceTree = "<group>"; };
 		EDF3F52D289AA96000A82418 /* groups-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "groups-server.cpp"; sourceTree = "<group>"; };
 		EDF3F52F289AA96000A82418 /* scenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scenes.h; sourceTree = "<group>"; };
@@ -1445,9 +1456,10 @@
 		ED1A3CA12A45A275009746B8 /* adapters */ = {
 			isa = PBXGroup;
 			children = (
-				ED1A3CA22A45A2AC009746B8 /* bridgeadapter.cpp */,
-				ED1A3CA32A45A2AC009746B8 /* bridgeadapter.h */,
-				EDC58B4E2A5EA75B00F48DEF /* adapter.h */,
+				EDC58B502A65383500F48DEF /* cc51 */,
+				EDC58B4F2A65380300F48DEF /* p44 */,
+				EDC58B4E2A5EA75B00F48DEF /* adapters.h */,
+				EDC58B522A65A99C00F48DEF /* adapters.cpp */,
 			);
 			path = adapters;
 			sourceTree = "<group>";
@@ -1503,15 +1515,14 @@
 				ED690B65286DC80800069215 /* connectedhomeip */,
 				ED23300F2886A18300D934D7 /* p44utils */,
 				ED24BDC828A670DB0025CC14 /* zap */,
-				EDF3F51C289A84B600A82418 /* zap-generated */,
 				ED60FD0128BF888E00FE950E /* chip_glue */,
 				ED24BDBA28A6709E0025CC14 /* devices */,
 				ED1A3CA12A45A275009746B8 /* adapters */,
-				ED24BDE528A812E00025CC14 /* bridgeapi */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */,
 				ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */,
 				ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */,
+				EDC58B512A653E9E00F48DEF /* p44mbrd_common.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -1552,16 +1563,6 @@
 				ED24BDCB28A670DB0025CC14 /* CHIPProjectAppConfig.h */,
 			);
 			path = include;
-			sourceTree = "<group>";
-		};
-		ED24BDE528A812E00025CC14 /* bridgeapi */ = {
-			isa = PBXGroup;
-			children = (
-				ED7F9A222902DE5C00A7CB48 /* bridgeapi_defs.h */,
-				ED24BDE628A812E00025CC14 /* bridgeapi.h */,
-				ED24BDE728A812E00025CC14 /* bridgeapi.cpp */,
-			);
-			path = bridgeapi;
 			sourceTree = "<group>";
 		};
 		ED24BDF328AF8F670025CC14 /* bridged-device-basic-information-server */ = {
@@ -3298,6 +3299,7 @@
 			children = (
 				ED1A3C9D2A4346B0009746B8 /* README.md */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
+				EDC58B672A66C64100F48DEF /* gen-copy */,
 				ED24BDB928A670570025CC14 /* src */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
 				ED690B53286DC79500069215 /* Products */,
@@ -3333,6 +3335,31 @@
 				EDB388D829E6EF2700BDAED4 /* basic-information.cpp */,
 			);
 			path = "basic-information";
+			sourceTree = "<group>";
+		};
+		EDC58B4F2A65380300F48DEF /* p44 */ = {
+			isa = PBXGroup;
+			children = (
+				ED7F9A222902DE5C00A7CB48 /* p44bridgeapi_defs.h */,
+				ED24BDE628A812E00025CC14 /* p44bridgeapi.h */,
+				ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */,
+				EDC58B532A65ADF300F48DEF /* p44bridge.cpp */,
+				EDC58B542A65ADF300F48DEF /* p44bridge.h */,
+				EDC58B552A65ADF300F48DEF /* p44devices.cpp */,
+				EDC58B562A65ADF300F48DEF /* p44devices.h */,
+			);
+			path = p44;
+			sourceTree = "<group>";
+		};
+		EDC58B502A65383500F48DEF /* cc51 */ = {
+			isa = PBXGroup;
+			children = (
+				ED072C032A67E7CA007BBF71 /* cc51bridge.cpp */,
+				ED072C012A67E7CA007BBF71 /* cc51bridge.h */,
+				ED072C022A67E7CA007BBF71 /* cc51devices.cpp */,
+				ED072C042A67E7CA007BBF71 /* cc51devices.h */,
+			);
+			path = cc51;
 			sourceTree = "<group>";
 		};
 		EDF3F4BD2893EC9700A82418 /* platform */ = {
@@ -3412,19 +3439,6 @@
 				EDF3F4DC2893EC9700A82418 /* ConfigUnitTest.h */,
 			);
 			path = testing;
-			sourceTree = "<group>";
-		};
-		EDF3F51C289A84B600A82418 /* zap-generated */ = {
-			isa = PBXGroup;
-			children = (
-				EDF3F523289A84B600A82418 /* access.h */,
-				EDF3F51D289A84B600A82418 /* CHIPClientCallbacks.h */,
-				EDF3F521289A84B600A82418 /* CHIPClusters.h */,
-				EDF3F51E289A84B600A82418 /* endpoint_config.h */,
-				EDF3F527289A84B600A82418 /* gen_config.h */,
-				EDF3F525289A84B600A82418 /* IMClusterCommandHandler.cpp */,
-			);
-			path = "zap-generated";
 			sourceTree = "<group>";
 		};
 		EDF3F52B289AA96000A82418 /* groups-server */ = {
@@ -3509,11 +3523,13 @@
 				ED36DE9F286E043500CA28EC /* CommissionableDataProvider.cpp in Sources */,
 				ED36DA0F286DCFC600CA28EC /* CHIPDeviceControllerFactory.cpp in Sources */,
 				ED24BDC628A6709E0025CC14 /* deviceonoff.cpp in Sources */,
+				EDC58B582A65ADF300F48DEF /* p44devices.cpp in Sources */,
 				ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */,
 				ED36D86B286DCDED00CA28EC /* AttributeDataIBs.cpp in Sources */,
 				ED36DAA2286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp in Sources */,
 				EDB388F029E6EF8E00BDAED4 /* TLVWriter.cpp in Sources */,
 				ED36D8E6286DCF0B00CA28EC /* ReadHandler.cpp in Sources */,
+				EDC58B592A65B0F000F48DEF /* devicelevelcontrol.cpp in Sources */,
 				ED36D878286DCDED00CA28EC /* Builder.cpp in Sources */,
 				ED36D879286DCDED00CA28EC /* AttributePathIBs.cpp in Sources */,
 				ED36DC0A286DD57B00CA28EC /* PrivateHeap.cpp in Sources */,
@@ -3561,7 +3577,6 @@
 				ED36DCFB286DD8A000CA28EC /* CASEServer.cpp in Sources */,
 				ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */,
 				ED36DC64286DD6A400CA28EC /* ApplicationExchangeDispatch.cpp in Sources */,
-				EDF3F529289A84B600A82418 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D7FE286DCDA300CA28EC /* diagnostic-logs-server.cpp in Sources */,
 				ED36D8F0286DCF0B00CA28EC /* ChunkedWriteCallback.cpp in Sources */,
 				ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */,
@@ -3618,7 +3633,6 @@
 				ED36DD7C286DD9D800CA28EC /* trace.cpp in Sources */,
 				ED36D875286DCDED00CA28EC /* EventReportIB.cpp in Sources */,
 				ED36DEA0286E043500CA28EC /* GeneralUtils.cpp in Sources */,
-				ED1A3CA42A45A2AC009746B8 /* bridgeadapter.cpp in Sources */,
 				ED36D7B3286DCCBB00CA28EC /* AccessControl.cpp in Sources */,
 				ED36D86E286DCDED00CA28EC /* StatusResponseMessage.cpp in Sources */,
 				ED36D870286DCDED00CA28EC /* AttributeStatusIBs.cpp in Sources */,
@@ -3685,6 +3699,7 @@
 				ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */,
 				ED36D8E9286DCF0B00CA28EC /* AttributeAccessInterface.cpp in Sources */,
 				ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */,
+				ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */,
 				ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */,
 				ED36DA89286DD14F00CA28EC /* CHIPCertFromX509.cpp in Sources */,
 				ED36D87E286DCDED00CA28EC /* InvokeResponseIB.cpp in Sources */,
@@ -3692,6 +3707,7 @@
 				ED36DDD5286DDA0300CA28EC /* CryptoContext.cpp in Sources */,
 				ED36DC17286DD57B00CA28EC /* CHIPMem-Malloc.cpp in Sources */,
 				ED36DC67286DD6A400CA28EC /* ReliableMessageContext.cpp in Sources */,
+				EDC58B572A65ADF300F48DEF /* p44bridge.cpp in Sources */,
 				ED36DD06286DD8A000CA28EC /* SessionEstablishmentExchangeDispatch.cpp in Sources */,
 				ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */,
 				ED36DCF9286DD8A000CA28EC /* EchoServer.cpp in Sources */,
@@ -3705,6 +3721,7 @@
 				ED36DA85286DD14F00CA28EC /* DeviceAttestationCredsProvider.cpp in Sources */,
 				ED36DC4C286DD65900CA28EC /* OTAImageHeader.cpp in Sources */,
 				ED36D7F7286DCDA300CA28EC /* user-label-server.cpp in Sources */,
+				ED072C052A67E7CA007BBF71 /* cc51devices.cpp in Sources */,
 				ED36D88E286DCDED00CA28EC /* StructParser.cpp in Sources */,
 				ED36DD6F286DD9A400CA28EC /* SystemPacketBuffer.cpp in Sources */,
 				ED36DDD8286DDA0300CA28EC /* TCP.cpp in Sources */,
@@ -3716,9 +3733,12 @@
 				ED36D891286DCDED00CA28EC /* MessageDefHelper.cpp in Sources */,
 				ED36DD11286DD8A000CA28EC /* BdxTransferSession.cpp in Sources */,
 				ED36DCFD286DD8A000CA28EC /* DefaultSessionResumptionStorage.cpp in Sources */,
+				EDC58B5E2A66946A00F48DEF /* devicecolorcontrol.cpp in Sources */,
 				ED36DAA1286DD17F00CA28EC /* ExamplePAI.cpp in Sources */,
 				ED24BDC528A6709E0025CC14 /* device.cpp in Sources */,
+				EDC58B5D2A65CA4100F48DEF /* adapters.cpp in Sources */,
 				EDB388F729E6F2AC00BDAED4 /* generic-callback-stubs.cpp in Sources */,
+				EDC58B692A66E26D00F48DEF /* booleaninputdevices.cpp in Sources */,
 				ED36D78C286DCB8A00CA28EC /* Log.cpp in Sources */,
 				ED36DEA5286E043600CA28EC /* DeviceInfoProvider.cpp in Sources */,
 				ED36D90D286DCF5100CA28EC /* CommissioningWindowManager.cpp in Sources */,
@@ -3802,12 +3822,13 @@
 				ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */,
 				ED36DD72286DD9A400CA28EC /* SystemLayerImplSelect.cpp in Sources */,
 				ED36DDE9286DDAF300CA28EC /* json_reader.cpp in Sources */,
+				ED072C062A67E7CA007BBF71 /* cc51bridge.cpp in Sources */,
 				ED36DD12286DD8A000CA28EC /* TransferFacilitator.cpp in Sources */,
 				ED36DCFE286DD8A000CA28EC /* PairingSession.cpp in Sources */,
 				ED36DD0C286DD8A000CA28EC /* BdxUri.cpp in Sources */,
 				ED36DE83286E02CD00CA28EC /* error-mapping.cpp in Sources */,
 				ED36DE7F286E02CD00CA28EC /* util.cpp in Sources */,
-				ED24BDE828A812E00025CC14 /* bridgeapi.cpp in Sources */,
+				ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */,
 				ED36D872286DCDED00CA28EC /* TimedRequestMessage.cpp in Sources */,
 				ED36D90A286DCF5100CA28EC /* EchoHandler.cpp in Sources */,
 				ED36D865286DCDED00CA28EC /* ReadRequestMessage.cpp in Sources */,
@@ -3840,6 +3861,7 @@
 				ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */,
 				ED36D7EF286DCDA300CA28EC /* operational-credentials-server.cpp in Sources */,
 				ED36DB92286DD2CE00CA28EC /* ASN1OID.cpp in Sources */,
+				EDC58B682A66CA6400F48DEF /* sensordevices.cpp in Sources */,
 				ED36DA30286DCFC600CA28EC /* CommissioneeDeviceProxy.cpp in Sources */,
 				ED36D8DF286DCF0B00CA28EC /* DefaultAttributePersistenceProvider.cpp in Sources */,
 				ED36D788286DCB8A00CA28EC /* Decoder.cpp in Sources */,
@@ -4039,6 +4061,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/gen-copy/zap/zapgen",
+					"$(PROJECT_DIR)/gen-copy/zap",
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
@@ -4088,6 +4112,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/gen-copy/zap/zapgen",
+					"$(PROJECT_DIR)/gen-copy/zap",
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",

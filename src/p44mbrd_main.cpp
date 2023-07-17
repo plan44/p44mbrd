@@ -21,12 +21,10 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-//#include <AppMain.h>
+
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/PlatformManager.h>
-
-//#include <app-common/zap-generated/af-structs.h>
 
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
@@ -52,10 +50,10 @@
 // Network commissioning cluster support
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #if CHIP_DEVICE_LAYER_TARGET_LINUX
-#include <platform/Linux/NetworkCommissioningDriver.h>
+  #include <platform/Linux/NetworkCommissioningDriver.h>
 #endif
 #if CHIP_DEVICE_LAYER_TARGET_DARWIN
-#include <platform/Darwin/NetworkCommissioningDriver.h>
+  #include <platform/Darwin/NetworkCommissioningDriver.h>
 #endif
 
 #include <pthread.h>
@@ -63,11 +61,9 @@
 
 #include <CommissionableInit.h>
 
-// plan44
-#include "bridgeapi.h"
-#include "bridgeadapter.h"
-
 #include "p44mbrd_main.h"
+
+// p44mbrd specific includes
 #include "chip_glue/chip_error.h"
 #include "chip_glue/deviceinfoprovider.h"
 
@@ -83,6 +79,15 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+
+// Device implementation adapters
+#if P44_ADAPTERS
+  #include "adapters/p44/p44bridge.h"
+#endif // P44_ADAPTERS
+#if CC51_ADAPTERS
+  #include "adapters/cc51/cc51bridge.h"
+#endif // CC51_ADAPTERS
+
 
 using namespace chip;
 using namespace chip::Credentials;
@@ -112,10 +117,11 @@ using namespace chip::app::Clusters;
 using namespace p44;
 
 
-// MARK: - P44mbrd class
+// MARK: - P44mbrd Application based on p44utils CmdLineApp
 
-#define DEFAULT_BRIDGE_SERVICE "4444"
-#define DEFAULT_BRIDGE_HOST "127.0.0.1"
+#define P44_DEFAULT_BRIDGE_SERVICE "4444"
+#define CC51_DEFAULT_BRIDGE_SERVICE "4343"
+
 
 /// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
 class P44mbrd : public CmdLineApp
@@ -126,13 +132,11 @@ class P44mbrd : public CmdLineApp
   bool mChipAppInitialized;
   LinuxCommissionableDataProvider mCommissionableDataProvider;
   chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: example? do we need our own?
-  P44DeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
+  P44mbrdDeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
 
   // Bridged devices info
   EndpointId mFirstDynamicEndpointId;
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
-  typedef std::map<string, DevicePtr> DeviceDSUIDMap;
-  DeviceDSUIDMap mDeviceDSUIDMap;
   char mDynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
   EndpointId mNumDynamicEndPoints;
 
@@ -145,6 +149,10 @@ class P44mbrd : public CmdLineApp
   #endif // CHIP_DEVICE_LAYER_TARGET_DARWIN
   chip::app::Clusters::NetworkCommissioning::Instance mEthernetNetworkCommissioningInstance;
 
+  // implementation adapters
+  typedef std::list<BridgeAdapter*> BridgeAdaptersList;
+  BridgeAdaptersList mAdapters;
+  int mUnstartedAdapters;
 
 public:
 
@@ -154,6 +162,7 @@ public:
     mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
   {
   }
+
 
   string logContextPrefix() override
   {
@@ -190,8 +199,13 @@ public:
       { 0, "trace_decode",        false, "enables traces decoding" },
       #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
       // p44mbrd command line args
-      { 0, "bridgeapihost",       true, "host;host of the bridge API, default is " DEFAULT_BRIDGE_HOST },
-      { 0, "bridgeapiservice",    true, "port;port of the bridge API, default is " DEFAULT_BRIDGE_SERVICE },
+      // - P44 device implementations
+      { 0, "bridgeapihost",       true, "host;host of the p44 bridge API" },
+      { 0, "bridgeapiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
+      // - CC51 device implementations
+      { 0, "cc51apihost",         true, "host;host of the bridge API" },
+      { 0, "cc51apiservice",      true, "port;port of the bridge API, default is " CC51_DEFAULT_BRIDGE_SERVICE },
+
       #if CHIP_LOG_FILTERING
       { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
       #endif // CHIP_LOG_FILTERING
@@ -215,326 +229,81 @@ public:
 
   virtual void cleanup(int aExitCode) override
   {
-    // close bridge API connection
-    BridgeApi::api().closeConnection();
+    // close bridge API connections
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->cleanup();
+    }
     // cleanup chip app
     chipAppCleanup();
   }
 
 
-  virtual void initialize() override
+  void initAdapters()
   {
-    OLOG(LOG_NOTICE, "p44: p44utils mainloop started");
-    connectBridgeApi();
-  }
-
-
-  // MARK: bridge API
-
-  void connectBridgeApi()
-  {
-    const char* bridgeapihost = DEFAULT_BRIDGE_HOST;
-    const char* bridgeapiservice = DEFAULT_BRIDGE_SERVICE;
-    getStringOption("bridgeapihost", bridgeapihost);
-    getStringOption("bridgeapiservice", bridgeapiservice);
-    BridgeApi::api().setConnectionParams(bridgeapihost, bridgeapiservice, SOCK_STREAM);
-    BridgeApi::api().setNotificationHandler(boost::bind(&P44mbrd::bridgeApiNotificationHandler, this, _1, _2));
-    BridgeApi::api().connectBridgeApi(boost::bind(&P44mbrd::bridgeApiConnectedHandler, this, _1));
-  }
-
-
-  void bridgeApiConnectedHandler(ErrorPtr aStatus)
-  {
-    if (Error::notOK(aStatus)) {
-      OLOG(LOG_WARNING, "bridge API connection error: %s", aStatus->text());
-      // TODO: better handling
-      OLOG(LOG_WARNING, "(re)connected bridge API, device info might be stale");
-      return;
+    #if P44_ADAPTERS
+    const char* p44apihost = nullptr;
+    const char* p44apiservice = P44_DEFAULT_BRIDGE_SERVICE;
+    getStringOption("bridgeapihost", p44apihost);
+    getStringOption("bridgeapiservice", p44apiservice);
+    if (p44apihost) {
+      P44_BridgeImpl* p44bridgeP = &P44_BridgeImpl::adapter();
+      p44bridgeP->setAPIParams(p44apihost, p44apiservice);
+      mAdapters.push_back(p44bridgeP);
     }
-    else {
-      // connection established
-      queryBridge();
+    #endif // P44_ADAPTERS
+    #if CC51_ADAPTERS
+    const char* cc51apihost = nullptr;
+    const char* cc51apiservice = CC51_DEFAULT_BRIDGE_SERVICE;
+    getStringOption("cc51apihost", cc51apihost);
+    getStringOption("cc51apiservice", cc51apiservice);
+    if (cc51apihost) {
+      auto cc51bridge = CC51_BridgeImpl::adapter();
+      cc51bridge.setAPIParams(p44apihost, p44apiservice);
+      mAdapters.push_back(&cc51bridge);
+    }
+    #endif // CC51_ADAPTERS
+  }
+
+
+  void updateCommissionableStatus(bool aIsCommissionable)
+  {
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->setCommissionable(aIsCommissionable);
     }
   }
 
-  // MARK: query and setup bridgeable devices
 
-  #define NEEDED_DEVICE_PROPERTIES \
-    "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
-    "\"outputDescription\":null, \"outputSettings\": null, " \
-    "\"scenes\": { \"0\":null, \"5\":null }, " \
-    "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
-    "\"channelStates\":null, \"channelDescriptions\":null, " \
-    "\"sensorDescriptions\":null, \"sensorStates\":null, " \
-    "\"inputDescriptions\":null, \"inputStates\":null, " \
-    "\"buttonDescriptions\":null, \"buttonStates\":null, " \
-    "\"active\":null, " \
-    "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
-
-  void queryBridge()
+  void updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
   {
-    // first update (reset) bridge status
-    BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
-    BridgeApi::api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(""));
-    BridgeApi::api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(false));
-    BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(false));
-    // query devices
-    JsonObjectPtr params = JsonObject::objFromText(
-      "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
-      "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, "
-      "\"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
-      NEEDED_DEVICE_PROPERTIES
-      "} }} }}"
-    );
-    BridgeApi::api().call("getProperty", params, boost::bind(&P44mbrd::bridgeApiCollectQueryHandler, this, _1, _2));
-  }
-
-
-  DevicePtr bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
-  {
-    JsonObjectPtr o;
-    DevicePtr mainDevice;
-    if (aDeviceJSON->get("x-p44-bridgeable", o)) {
-      if (o->boolValue()) {
-        // bridgeable device
-        if (aDeviceJSON->get("dSUID", o)) {
-          // with dSUID. Now find out what device structure to map towards matter
-          std::list<DevicePtr> devices;
-          // determine basic parameters for single or composed device
-          string dsuid = o->stringValue();
-          string name;
-          if (aDeviceJSON->get("name", o)) name = o->stringValue(); // optional
-          // extract mappable devices
-          DevicePtr dev;
-          JsonObjectPtr outputdesc = aDeviceJSON->get("outputDescription");
-          string behaviourtype;
-          JsonObjectPtr groups;
-          if (outputdesc && outputdesc->get("x-p44-behaviourType", o)) {
-            behaviourtype = o->stringValue();
-            if (aDeviceJSON->get("outputSettings", o)) {
-              groups = o->get("groups");
-            }
-          }
-          // - first check if we have a bridging hint that directly defines the mapping
-          if (aDeviceJSON->get("x-p44-bridgeAs", o)) {
-            // bridging hint should determine bridged device
-            string bridgeAs = o->stringValue();
-            if (bridgeAs=="on-off") {
-              if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_OnOffLightDevice();
-              else dev = new P44_OnOffPluginUnitDevice();
-            }
-            #if COMPLETE
-            else if (bridgeAs=="level-control") {
-              if (behaviourtype=="light" && groups && groups->get("1")) dev = new DeviceDimmableLight();
-              else dev = new DeviceDimmablePluginUnit();
-            }
-            #endif // COMPLETE
-            if (dev) {
-              OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
-              P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
-              devices.push_back(dev);
-            }
-          }
-          if (!dev) {
-            // no or unknown bridging hint - derive bridged device type(s) automatically
-            // First: check output
-            if (outputdesc) {
-              if (outputdesc->get("function", o)) {
-                int outputfunction = (int)o->int32Value();
-                // output device
-                if (behaviourtype=="light" && groups && groups->get("1")) {
-                  // this is a light device
-                  OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                  switch(outputfunction) {
-                    default:
-                    case outputFunction_switch: // switch output
-                      dev = new P44_OnOffLightDevice();
-                      break;
-                    #if COMPLETE
-                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
-                      dev = new DeviceDimmableLight();
-                      break;
-                    case outputFunction_ctdimmer: // dimmer with color temperature - channels 1 and 4
-                    case outputFunction_colordimmer: // full color dimmer - channels 1..6
-                      dev = new DeviceColorControl(outputfunction==outputFunction_ctdimmer /* ctOnly */);
-                      break;
-                    #endif // COMPLETE
-                  }
-                }
-                else {
-                  // not a light, only switched or dimmed
-                  OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                  switch(outputfunction) {
-                    case outputFunction_switch: // switch output
-                      dev = new P44_OnOffPluginUnitDevice();
-                      break;
-                    #if COMPLETE
-                    default:
-                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
-                      dev = new DeviceDimmablePluginUnit();
-                      break;
-                    #endif // COMPLETE
-                  }
-                }
-              }
-              if (dev) {
-                P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
-                devices.push_back(dev);
-                dev.reset();
-              }
-            }
-            // Second: check inputs
-            enum { sensor, input, button, numInputTypes };
-            const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "button" };
-            for (int inputType = sensor; inputType<numInputTypes; inputType++) {
-              JsonObjectPtr inputdescs;
-              if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Descriptions").c_str(), inputdescs)) {
-                // iterate through this input type's items
-                string inputid;
-                JsonObjectPtr inputdesc;
-                inputdescs->resetKeyIteration();
-                while (inputdescs->nextKeyValue(inputid, inputdesc)) {
-                  switch (inputType) {
-                    case sensor: {
-                      if (inputdesc->get("sensorType", o)) {
-                        int sensorType = o->int32Value();
-                        // determine sensor type
-                        switch(sensorType) {
-                          #if COMPLETE
-                          case sensorType_temperature: dev = new DeviceTemperature(); break;
-                          case sensorType_humidity: dev = new DeviceHumidity(); break;
-                          case sensorType_illumination: dev = new DeviceIlluminance(); break;
-                          #endif // COMPLETE
-                        }
-                      }
-                      break;
-                    }
-                    case input:
-                      if (inputdesc->get("inputType", o)) {
-                        int binInpType = o->int32Value();
-                        // determine input type
-                        switch(binInpType) {
-                          case binInpType_presence:
-                          case binInpType_presenceInDarkness:
-                          case binInpType_motion:
-                          case binInpType_motionInDarkness:
-                            // TODO: map to Occupancy Sensing Cluster
-                            // for now: not handled
-                            break;
-                          default:
-                            #if COMPLETE
-                            // all others: create simple ContactSensors
-                            dev = new ContactSensorDevice();
-                            #endif // COMPLETE
-                            break;
-                        }
-                      }
-                      break;
-
-
-                    case button: // TODO: maybe handle seperately, multiple button definitions in one device are usually coupled
-                    default:
-                      break;
-                  }
-                  if (dev) {
-                    P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
-                    devices.push_back(dev);
-                    dev.reset();
-                  }
-                } // iterating all inputs of one type
-              }
-            } // for all input types
-          }
-          // Now we have a list of matter devices that are contained in this single briged device
-          if (!devices.empty()) {
-            // at least one
-            if (devices.size()==1) {
-              // single device, not a composed one
-              mainDevice = devices.front();
-            }
-            else {
-              // we need a composed device to represent the multiple devices we have in matter
-              ComposedDevice *composedDevice = new P44_ComposedDevice();
-              mainDevice = DevicePtr(composedDevice);
-              P44_DeviceImpl::impl(mainDevice)->initBridgedInfo(aDeviceJSON); // needs to have the infos, too
-              // add the subdevices
-              while(!devices.empty()) {
-                DevicePtr subdev = devices.front();
-                devices.pop_front();
-                composedDevice->addSubdevice(subdev);
-              }
-            }
-          }
-          if (mainDevice) {
-            // add bridge-side representing device (singular or possibly composed) to dSUID map
-            mDeviceDSUIDMap[dsuid] = mainDevice;
-            // enable it for bridging on the other side
-            JsonObjectPtr params = JsonObject::newObj();
-            params->add("dSUID", JsonObject::newString(dsuid));
-            JsonObjectPtr props = JsonObject::newObj();
-            props->add("x-p44-bridged", JsonObject::newBool(true));
-            params->add("properties", props);
-            // no callback, but will wait when bridgeapi is in standalone mode
-            BridgeApi::api().call("setProperty", params, NoOP);
-          }
-        } // has dSUID
-      } // if bridgeable
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->updateCommissioningInfo(aQRCodeData, aManualPairingCode);
     }
-    return mainDevice;
   }
 
 
-  void bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
+  void updateRunningStatus(bool aRunning)
   {
-    OLOG(LOG_INFO, "initial bridgeapi query: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
-    JsonObjectPtr o;
-    JsonObjectPtr result;
-    if (aJsonMsg && aJsonMsg->get("result", result)) {
-      // global infos
-      if (result->get("dSUID", o)) {
-        mP44dbrDeviceInstanceInfoProvider.mDSUID = o->stringValue();
-      }
-      if (result->get("name", o)) {
-        mP44dbrDeviceInstanceInfoProvider.mLabel = o->stringValue();
-      }
-      if (result->get("model", o)) {
-        mP44dbrDeviceInstanceInfoProvider.mProductName = o->stringValue();
-      }
-      if (result->get("x-p44-deviceHardwareId", o)) {
-        mP44dbrDeviceInstanceInfoProvider.mSerial = o->stringValue();
-      }
-      // process device list
-      JsonObjectPtr vdcs;
-      // devices
-      if (result->get("x-p44-vdcs", vdcs)) {
-        vdcs->resetKeyIteration();
-        string vn;
-        JsonObjectPtr vdc;
-        while(vdcs->nextKeyValue(vn, vdc)) {
-          JsonObjectPtr devices;
-          if (vdc->get("x-p44-devices", devices)) {
-            devices->resetKeyIteration();
-            string dn;
-            JsonObjectPtr device;
-            while(devices->nextKeyValue(dn, device)) {
-              // examine device
-              DevicePtr dev = bridgedDeviceFromJSON(device);
-            }
-          }
-        }
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->setBridgeRunning(aRunning);
+    }
+  }
+
+
+  CHIP_ERROR installAdaptersInitialDevices()
+  {
+    CHIP_ERROR chiperr;
+
+    for (BridgeAdaptersList::iterator apos = mAdapters.begin(); apos!=mAdapters.end(); ++apos) {
+      for (BridgeAdapter::DeviceUIDMap::iterator dpos = (*apos)->mDeviceUIDMap.begin(); dpos!=(*apos)->mDeviceUIDMap.end(); ++dpos) {
+        DevicePtr dev = dpos->second;
+        // install the device
+        chiperr = installBridgedDevice(dev, mFirstDynamicEndpointId);
       }
     }
-    // initial devices collected
-    if (mDeviceDSUIDMap.empty()) {
-      OLOG(LOG_WARNING, "Bridge has no devices yet, NOT starting CHIP now, waiting for first device to appear");
-    }
-    else {
-      // start chip only now
-      OLOG(LOG_NOTICE, "End of bridge API setup, starting CHIP now");
-      // - start but unwind call stack before
-      MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
-    }
+    return chiperr;
   }
+
+
 
 
   void installAdditionalDevice(DevicePtr aDev)
@@ -557,7 +326,7 @@ public:
         // add as new endpoint to bridge
         if (aDev->AddAsDeviceEndpoint()) {
           POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while CHIP is already up");
-          aDev->inChipInit();
+          aDev->didBecomeOperational();
           // dump status
           POLOG(aDev, LOG_INFO, "initialized from chip: %s", aDev->description().c_str());
           // also add subdevices that are part of this additional device and thus not yet present
@@ -565,7 +334,7 @@ public:
             DevicePtr subDev = *pos;
             if (subDev->AddAsDeviceEndpoint()) {
               POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
-              subDev->inChipInit();
+              subDev->didBecomeOperational();
               // dump status
               POLOG(subDev, LOG_INFO, "initialized composed device part from chip: %s", aDev->description().c_str());
             }
@@ -574,6 +343,68 @@ public:
       }
     }
   }
+
+
+
+  void adapterStarted(ErrorPtr aError, BridgeAdapter &aAdapter)
+  {
+    mUnstartedAdapters--; // count this start
+    if (Error::notOK(aError)) OLOG(LOG_WARNING, "Adapter startup error: %s", aError->text());
+    if (mUnstartedAdapters>0) {
+      OLOG(LOG_NOTICE, "Adapter started, %d remaining", mUnstartedAdapters);
+    }
+    else {
+      // all adapters have called back, so we can consider all started (or not operational at all)
+      bool startnow = false;
+      bool infoset = false;
+      for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+        // for now: assume we'll have only one adapter running for real application,
+        // which will determine the matter bridge's identification.
+        // With multiple adapters, the first instantiated will determine the device instance info
+        if (!infoset) {
+          infoset = true;
+          mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
+          mP44dbrDeviceInstanceInfoProvider.mLabel = (*pos)->label();
+          mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
+          mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
+          mP44dbrDeviceInstanceInfoProvider.mVendorName = (*pos)->vendor();
+        }
+        if ((*pos)->hasBridgeableDevices()) {
+          startnow = true;
+        }
+      }
+      // initial devices collected
+      if (!startnow) {
+        OLOG(LOG_WARNING, "Bridge has no devices yet, NOT starting CHIP now, waiting for first device to appear");
+      }
+      else {
+        // start chip only now
+        OLOG(LOG_NOTICE, "End of bridge adapter setup, starting CHIP now");
+        // - start but unwind call stack before
+        MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+      }
+    }
+  }
+
+
+  void addDevice(DevicePtr aDevice)
+  {
+    installAdditionalDevice(aDevice);
+  }
+
+
+  virtual void initialize() override
+  {
+    OLOG(LOG_NOTICE, "p44: p44utils mainloop started");
+    // Instantiate and initialize adapters
+    initAdapters();
+    // start the adapters
+    mUnstartedAdapters = (int)mAdapters.size();
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->startup(boost::bind(&P44mbrd::adapterStarted, this, _1, _2), boost::bind(&P44mbrd::addDevice, this, _1));
+    }
+  }
+
 
 
   void startChip()
@@ -590,44 +421,26 @@ public:
       terminateApp(EXIT_FAILURE);
       return;
     }
-    // update commissionable status
+    // update commissionable status in adapters
     bool commissionable = Server::GetInstance().GetFabricTable().FabricCount() == 0;
-    BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(commissionable));
+    updateCommissionableStatus(commissionable);
     // install the devices we have
     installInitiallyBridgedDevices();
+    // stack is now operational
+    stackDidBecomeOperational();
   }
-
-
-  void newDeviceGotBridgeable(string aNewDeviceDSUID)
-  {
-    JsonObjectPtr params = JsonObject::objFromText(
-      "{ \"query\": "
-      NEEDED_DEVICE_PROPERTIES
-      "}"
-    );
-    params->add("dSUID", JsonObject::newString(aNewDeviceDSUID));
-    BridgeApi::api().call("getProperty", params, boost::bind(&P44mbrd::newDeviceInfoQueryHandler, this, _1, _2));
-  }
-
-
-  void newDeviceInfoQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
-  {
-    OLOG(LOG_INFO, "bridgeapi query for additional device: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
-    JsonObjectPtr o;
-    JsonObjectPtr result;
-    if (aJsonMsg && aJsonMsg->get("result", result)) {
-      DevicePtr dev = bridgedDeviceFromJSON(result);
-      installAdditionalDevice(dev);
-    }
-  }
-
 
 
   CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId, EndpointId aDynamicEndpointBase)
   {
     CHIP_ERROR chiperr;
+
+    // signal installation to device (which, at this point, is a fully constructed class)
+    dev->willBeInstalled();
+    // now install
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-    string key = kP44mbrNamespace "devices/"; key += dev->deviceInfoDelegate().endpointUID(); // note: real dSUID for single devices, dSUID_inputtype_inputid or dSSUID_output for parts of composed ones
+    // note: endpointUID identifies the endpoint, of which one adapted device might have multiple.
+    string key = kP44mbrNamespace "devices/"; key += dev->deviceInfoDelegate().endpointUID();
     EndpointId dynamicEndpointIdx = kInvalidEndpointId;
     chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
     if (chiperr==CHIP_NO_ERROR) {
@@ -762,12 +575,8 @@ public:
     for (size_t i=0; i<mNumDynamicEndPoints; i++) {
       if (mDynamicEndPointMap[i]=='D') mDynamicEndPointMap[i]='d'; // unconfirmed device
     }
-    // process list of to-be-bridged devices
-    for (DeviceDSUIDMap::iterator pos = mDeviceDSUIDMap.begin(); pos!=mDeviceDSUIDMap.end(); ++pos) {
-      DevicePtr dev = pos->second;
-      // install the device
-      chiperr = installBridgedDevice(dev, mFirstDynamicEndpointId);
-    }
+    // process list of to-be-bridged devices of all adapters
+    chiperr = installAdaptersInitialDevices();
     // save updated endpoint map
     chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
     LogErrorOnFailure(chiperr);
@@ -783,115 +592,12 @@ public:
   }
 
 
-  void bridgeApiNotificationHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
-  {
-    if (Error::isOK(aError)) {
-      OLOG(LOG_DEBUG, "bridge API message received: %s", JsonObject::text(aJsonMsg));
-      // handle push notifications
-      JsonObjectPtr o;
-      string targetDSUID;
-      if (aJsonMsg && aJsonMsg->get("dSUID", o, true)) {
-        // request targets a device
-        targetDSUID = o->stringValue();
-        DeviceDSUIDMap::iterator devpos = mDeviceDSUIDMap.find(targetDSUID);
-        if (devpos!=mDeviceDSUIDMap.end()) {
-          // device exists, dispatch
-          if (aJsonMsg->get("notification", o, true)) {
-            string notification = o->stringValue();
-            POLOG(devpos->second, LOG_INFO, "Notification '%s' received: %s", notification.c_str(), JsonObject::text(aJsonMsg));
-            bool handled = P44_DeviceImpl::impl(devpos->second)->handleBridgeNotification(notification, aJsonMsg);
-            if (handled) {
-              POLOG(devpos->second, LOG_INFO, "processed notification");
-            }
-            else {
-              POLOG(devpos->second, LOG_ERR, "could not handle notification '%s'", notification.c_str());
-            }
-          }
-          else {
-            POLOG(devpos->second, LOG_ERR, "unknown request for device");
-          }
-        }
-        else {
-          // unknown DSUID - check if it is a change in bridgeability
-          if (aJsonMsg->get("notification", o, true)) {
-            if (o->stringValue()=="pushNotification") {
-              JsonObjectPtr props;
-              if (aJsonMsg->get("changedproperties", props, true)) {
-                if (props->get("x-p44-bridgeable", o) && o->boolValue()) {
-                  // a new device got bridgeable
-                  newDeviceGotBridgeable(targetDSUID);
-                }
-                return;
-              }
-            }
-          }
-          OLOG(LOG_ERR, "request targeting unknown device %s", targetDSUID.c_str());
-        }
-      }
-      else {
-        // global request
-        if (aJsonMsg->get("notification", o, true)) {
-          string notification = o->stringValue();
-          OLOG(LOG_NOTICE, "Global notification '%s' received: %s", notification.c_str(), JsonObject::text(aJsonMsg));
-          handleGlobalNotification(notification, aJsonMsg);
-        }
-        else {
-          OLOG(LOG_ERR, "unknown global request: %s", JsonObject::text(aJsonMsg));
-        }
-      }
-    }
-    else {
-      OLOG(LOG_ERR, "bridge API Error %s", aError->text());
-    }
-  }
-
-
-  void handleGlobalNotification(const string notification, JsonObjectPtr aJsonMsg)
-  {
-    JsonObjectPtr o;
-    if (notification=="terminate") {
-      int exitcode = EXIT_SUCCESS;
-      if ((o = aJsonMsg->get("exitcode"))) {
-        // custom exit code
-        exitcode = o->int32Value();
-      }
-      OLOG(LOG_NOTICE, "Terminating application with exitcode=%d", exitcode);
-      terminateApp(exitcode);
-    }
-    else if (notification=="loglevel") {
-      if ((o = aJsonMsg->get("app"))) {
-        int newAppLogLevel = o->int32Value();
-        if (newAppLogLevel==8) {
-          // trigger statistics
-          LOG(LOG_NOTICE, "\n========== requested showing statistics");
-          LOG(LOG_NOTICE, "\n%s", MainLoop::currentMainLoop().description().c_str());
-          MainLoop::currentMainLoop().statistics_reset();
-          LOG(LOG_NOTICE, "========== statistics shown\n");
-        }
-        else if (newAppLogLevel>=0 && newAppLogLevel<=7) {
-          int oldLevel = LOGLEVEL;
-          SETLOGLEVEL(newAppLogLevel);
-          LOG(newAppLogLevel, "\n\n========== changed log level from %d to %d ===============", oldLevel, newAppLogLevel);
-        }
-        else {
-          LOG(LOG_ERR, "invalid log level %d", newAppLogLevel);
-        }
-      }
-      if ((o = aJsonMsg->get("chip"))) {
-        int newChipLogLevel = o->int32Value();
-        LOG(LOG_NOTICE, "\n\n========== changing CHIP log level from %d to %d ===============", (int)chip::Logging::GetLogFilter(), newChipLogLevel);
-        chip::Logging::SetLogFilter((uint8_t)newChipLogLevel);
-      }
-    }
-  }
-
-
-  void whenChipMainloopStartedWork()
+  void stackDidBecomeOperational()
   {
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
       if (mDevices[i]) {
-        // give device chance to do things just after mainloop has started
-        mDevices[i]->inChipInit();
+        // give device chance to do things just after becoming operational
+        mDevices[i]->didBecomeOperational();
         // dump status
         POLOG(mDevices[i], LOG_INFO, "initialized from chip: %s", mDevices[i]->description().c_str());
       }
@@ -1111,12 +817,13 @@ public:
     chip::MutableCharSpan qrCode(payloadBuffer);
     chip::MutableCharSpan manualPairingCode(payloadBuffer);
     if (GetQRCode(qrCode, onBoardingPayload) == CHIP_NO_ERROR) {
-      BridgeApi::api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(qrCode.data()));
+      string manualParingCodeStr;
       if (GetManualPairingCode(manualPairingCode, onBoardingPayload) == CHIP_NO_ERROR) {
-        BridgeApi::api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(manualPairingCode.data()));
+        manualParingCodeStr = manualPairingCode.data();
       }
+      updateCommissioningInfo(qrCode.data(), manualParingCodeStr);
       // FIXME: figure out if actually commissionable or not
-      BridgeApi::api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(true));
+      updateCommissionableStatus(true /* fixed for now */);
     }
 
     // init the network commissioning instance (which is needed by the Network Commissioning Cluster)
@@ -1179,8 +886,8 @@ public:
 
     // done, ready to run
     mChipAppInitialized = true;
-    // let bridge API know
-    BridgeApi::api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(true));
+    // let adapters know
+    updateRunningStatus(true);
     return err;
   }
 

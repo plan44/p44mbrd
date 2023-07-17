@@ -54,24 +54,10 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // MARK: - BooleanInputDevice
 
-BooleanInputDevice::BooleanInputDevice()
+BooleanInputDevice::BooleanInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   mState = false;
-}
-
-
-void BooleanInputDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
-{
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // get current value from xxxStates
-  parseInputValue(aDeviceInfo, UpdateMode());
-}
-
-
-void BooleanInputDevice::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
-{
-  inherited::handleBridgePushProperties(aChangedProperties);
-  parseInputValue(aChangedProperties, UpdateMode(UpdateFlags::matter));
 }
 
 
@@ -80,29 +66,6 @@ string BooleanInputDevice::description()
   string s = inherited::description();
   string_format_append(s, "\n- Boolean State: %s", mState ? "true" : "false");
   return s;
-}
-
-
-void BooleanInputDevice::parseInputValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode)
-{
-  JsonObjectPtr states;
-  if (aProperties->get((mInputType+"States").c_str(), states)) {
-    JsonObjectPtr state;
-    if (states->get(mInputId.c_str(), state)) {
-      JsonObjectPtr o;
-      if (state->get("value", o, true)) {
-        // non-NULL value
-        mState = o->boolValue();
-      }
-      else {
-        // NULL value or no value contained in state at all
-        NumericAttributeTraits<bool>::SetNull(mState);
-      }
-      if (aUpdateMode.Has(UpdateFlags::matter)) {
-        MatterReportingAttributeChangeCallback(GetEndpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
-      }
-    }
-  }
 }
 
 
@@ -122,6 +85,24 @@ EmberAfStatus BooleanInputDevice::HandleReadAttribute(ClusterId clusterId, chip:
 }
 
 
+void BooleanInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
+
+{
+  if (aIsValid) {
+    // we have a state
+    mState = static_cast<bool>(aState);
+  }
+  else {
+    // state is unknown
+    NumericAttributeTraits<bool>::SetNull(mState);
+  }
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(GetEndpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+  }
+}
+
+
+
 // MARK: - ContactSensorDevice
 
 const EmberAfDeviceType gContactSensorTypes[] = {
@@ -129,7 +110,8 @@ const EmberAfDeviceType gContactSensorTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ContactSensorDevice::ContactSensorDevice()
+ContactSensorDevice::ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(booleanStateClusters));

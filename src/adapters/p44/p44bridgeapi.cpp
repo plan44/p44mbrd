@@ -21,48 +21,36 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "bridgeapi.h"
+#include "p44bridgeapi.h"
+
+#if P44_ADAPTERS
 
 using namespace p44;
 
-
-BridgeApi* gSharedBridgeApiP = nullptr;
-
-BridgeApi& BridgeApi::api()
-{
-  if (gSharedBridgeApiP==nullptr) {
-    gSharedBridgeApiP = new BridgeApi;
-    assert(gSharedBridgeApiP);
-    gSharedBridgeApiP->isMemberVariable();
-  }
-  return *gSharedBridgeApiP;
-}
-
-
-BridgeApi::BridgeApi() :
+P44BridgeApi::P44BridgeApi() :
   mBridgeCallCounter(0)
 {
 }
   
-void BridgeApi::connectBridgeApi(StatusCB aConnectedCB)
+void P44BridgeApi::connectBridgeApi(StatusCB aConnectedCB)
 {
   mConnectedCB = aConnectedCB;
   tryConnection();
 }
 
 
-void BridgeApi::tryConnection()
+void P44BridgeApi::tryConnection()
 {
-  setConnectionStatusHandler(boost::bind(&BridgeApi::connectionStatusHandler, this, _2));
-  setMessageHandler(boost::bind(&BridgeApi::messageHandler, this, _1, _2));
+  setConnectionStatusHandler(boost::bind(&P44BridgeApi::connectionStatusHandler, this, _2));
+  setMessageHandler(boost::bind(&P44BridgeApi::messageHandler, this, _1, _2));
   initiateConnection();
 }
 
-void BridgeApi::connectionStatusHandler(ErrorPtr aStatus)
+void P44BridgeApi::connectionStatusHandler(ErrorPtr aStatus)
 {
   if (Error::notOK(aStatus)) {
     LOG(LOG_WARNING, "Could not reach bridge API: %s -> trying again in 5 seconds", aStatus->text());
-    mApiRetryTicket.executeOnce(boost::bind(&BridgeApi::tryConnection, this), 5*Second);
+    mApiRetryTicket.executeOnce(boost::bind(&P44BridgeApi::tryConnection, this), 5*Second);
     return;
   }
   else {
@@ -76,7 +64,7 @@ void BridgeApi::connectionStatusHandler(ErrorPtr aStatus)
   }
 }
 
-void BridgeApi::messageHandler(ErrorPtr aError, JsonObjectPtr aJsonObject)
+void P44BridgeApi::messageHandler(ErrorPtr aError, JsonObjectPtr aJsonObject)
 {
   if (Error::isOK(aError)) {
     //LOG(LOG_DEBUG, "msg = %s", aJsonObject->json_c_str());
@@ -107,7 +95,7 @@ void BridgeApi::messageHandler(ErrorPtr aError, JsonObjectPtr aJsonObject)
 }
 
 
-void BridgeApi::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
+void P44BridgeApi::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB)
 {
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("method", JsonObject::newString(aMethod));
@@ -126,7 +114,7 @@ void BridgeApi::call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB 
 }
 
 
-void BridgeApi::setProperties(const string aDSUID, JsonObjectPtr aProperties)
+void P44BridgeApi::setProperties(const string aDSUID, JsonObjectPtr aProperties)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("dSUID", JsonObject::newString(aDSUID));
@@ -135,7 +123,7 @@ void BridgeApi::setProperties(const string aDSUID, JsonObjectPtr aProperties)
 }
 
 
-void BridgeApi::setProperty(const string aDSUID, const string aPropertyPath, JsonObjectPtr aValue)
+void P44BridgeApi::setProperty(const string aDSUID, const string aPropertyPath, JsonObjectPtr aValue)
 {
   string path = aPropertyPath;
   do {
@@ -151,7 +139,7 @@ void BridgeApi::setProperty(const string aDSUID, const string aPropertyPath, Jso
 }
 
 
-ErrorPtr BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
+ErrorPtr P44BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
 {
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("notification", JsonObject::newString(aNotification));
@@ -161,3 +149,5 @@ ErrorPtr BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
   }
   return err;
 }
+
+#endif // P44_ADAPTERS

@@ -31,25 +31,33 @@ using namespace app;
 // MARK: - BooleanInputDevice
 
 
-class BooleanInputDevice : public InputDevice
+class BooleanInputDevice : public Device
 {
-  typedef InputDevice inherited;
+  typedef Device inherited;
+
 public:
 
-  BooleanInputDevice();
+  BooleanInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual string description() override;
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
 
-protected:
+  /// @name callbacks for Sensor implementations
+  /// @{
 
-  /// Parse measured sensor value (according to InputDevice's mInputType and mInputId)
-  /// from property container
-  /// @param aProperties the root property container, either received via push or queried
-  /// @param aUpdateMode what to update
-  virtual void parseInputValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode);
+  /// @brief update input state
+  /// @note this must be called whenever the actual input reports a new state
+  ///   (or reports not having no state at all), while the device is operational
+  /// @param aState current state
+  /// @param aIsValue true if aState is an actually know state, false if the update means "we do not know the state"
+  /// @param aUpdateMode update mode for propagating the sensor value
+  void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
+
+  /// @}
+
+protected:
 
   uint8_t mState; ///< current state, NULL if currently not known
 
@@ -59,9 +67,10 @@ protected:
 class ContactSensorDevice : public BooleanInputDevice
 {
   typedef BooleanInputDevice inherited;
+  
 public:
 
-  ContactSensorDevice();
+  ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual const char *deviceType() override { return "contact sensor"; }
 

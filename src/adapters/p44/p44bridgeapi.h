@@ -23,13 +23,16 @@
 
 #pragma once
 
+#include "p44mbrd_common.h"
+
+#if P44_ADAPTERS
+
 #include "jsoncomm.hpp"
-#include "bridgeapi_defs.h"
+#include "adapters/p44/p44bridgeapi_defs.h"
 
 using namespace p44;
 
-/// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
-class BridgeApi : public JsonComm
+class P44BridgeApi : public JsonComm
 {
   MLTicket mApiRetryTicket;
   long mBridgeCallCounter;
@@ -42,11 +45,10 @@ class BridgeApi : public JsonComm
   StatusCB mConnectedCB;
   JSonMessageCB mNotificationCB;
 
-  BridgeApi();
 
 public:
 
-  static BridgeApi& api();
+  P44BridgeApi();
 
   /// connect to the bridge API
   /// @param aConnectedCB will be called when connection is established or error occurs
@@ -85,3 +87,5 @@ private:
   void messageHandler(ErrorPtr aError, JsonObjectPtr aJsonObject);
 
 };
+
+#endif // P44_ADAPTERS

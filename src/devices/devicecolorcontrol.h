@@ -26,9 +26,55 @@
 
 using namespace chip;
 
+
+class ColorControlDelegate
+{
+public:
+
+  virtual ~ColorControlDelegate() = default;
+
+  /// Set new hue. Implies device changes to HSV color mode if it natively supports color modes
+  /// @param aHue new hue
+  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
+  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
+  virtual void setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply) = 0;
+
+  /// Set new saturation. Implies device changes to HSV color mode if it natively supports color modes
+  /// @param aSaturation new saturation
+  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
+  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
+  virtual void setSaturation(uint8_t aSaturation, uint16_t aTransitionTimeDS, bool aApply) = 0;
+
+  /// Set new CIE X. Implies device changes to CIE X/Y color mode if it natively supports color modes
+  /// @param aX new CIE X color coordinate
+  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
+  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
+  virtual void setCieX(uint16_t aX, uint16_t aTransitionTimeDS, bool aApply) = 0;
+
+  /// Set new CIE Y. Implies device changes to CIE X/Y color mode if it natively supports color modes
+  /// @param aY new CIE Y color coordinate
+  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
+  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
+  virtual void setCieY(uint16_t aY, uint16_t aTransitionTimeDS, bool aApply) = 0;
+
+  /// Set new color temperature. Implies device changes color temperatur mode if it natively supports color modes
+  /// @param aColortemp new color temperature
+  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
+  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
+  virtual void setColortemp(uint16_t aColortemp, uint16_t aTransitionTimeDS, bool aApply) = 0;
+
+};
+
+
+
 class DeviceColorControl : public DeviceLevelControl
 {
   typedef DeviceLevelControl inherited;
+
+  ColorControlDelegate& mColorControlDelegate;
+
+  bool mCtOnly;
+
 public:
 
   /// @note: enum values are from matter specs
@@ -41,12 +87,13 @@ public:
   };
   typedef uint8_t ColorMode;
 
-  DeviceColorControl(bool aCTOnly);
+  DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual const char *deviceType() override { return "color-control"; }
 
   virtual string description() override;
 
+  bool ctOnly() { return mCtOnly; };
   ColorMode currentColorMode() { return mColorMode; };
   uint8_t currentHue() { return mHue; };
   uint8_t currentSaturation() { return mSaturation; };
@@ -74,8 +121,6 @@ private:
   virtual void finalizeDeviceDeclaration() override;
 
   uint8_t mColorControlOptions;
-
-  bool mCtOnly;
 
   ColorMode mColorMode;
   uint8_t mHue;

@@ -174,10 +174,15 @@ bool Device::AddAsDeviceEndpoint()
 }
 
 
-void Device::inChipInit()
+void Device::willBeInstalled()
 {
-  /// TODO: NOP for now
+  OLOG(LOG_DEBUG, "will be installed");
+}
 
+
+void Device::didBecomeOperational()
+{
+  OLOG(LOG_DEBUG, "did become operational");
 }
 
 
@@ -477,8 +482,3 @@ void ComposedDevice::finalizeDeviceDeclaration()
 {
   finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gComposedDeviceTypes));
 }
-
-
-// MARK: - InputDevice
-
-// For now - nothing here, is just an empty subclass

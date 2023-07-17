@@ -4,4 +4,3 @@ out/
 *.xcuserstate
 p44mbrd.xcodeproj/xcuserdata/*.xcuserdatad
 compile_commands.json
-src/zap-generated

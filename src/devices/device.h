@@ -36,7 +36,6 @@
 
 #include <controller/CHIPCluster.h>
 
-#include "bridgeapi.h"
 #include "p44mbrd_main.h"
 #include "logger.hpp"
 
@@ -237,8 +236,14 @@ public:
   /// add the device using the previously set cluster info (and parent endpoint ID)
   virtual bool AddAsDeviceEndpoint();
 
-  /// called when device is instantiated and registered in CHIP (and chip is running)
-  virtual void inChipInit();
+  /// @brief called just before the device gets installed
+  /// @note at this point, the device is the fully constructed final class, but is
+  ///   not yet connected to the matter stack, so e.g. does not have valid endpointIDs
+  ///   yet and cannot interoperate with the stack.
+  virtual void willBeInstalled();
+
+  /// @brief called when device has become operational within the matter stack
+  virtual void didBecomeOperational();
 
   /// handler for external attribute read access
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
@@ -363,11 +368,4 @@ protected:
 
   virtual void finalizeDeviceDeclaration() override;
 
-};
-
-
-/// @brief representation for a input device
-class InputDevice : public Device
-{
-  typedef Device inherited;
 };

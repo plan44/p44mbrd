@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  Copyright (c) 2022 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2023 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //  based on Apache v2 licensed bridge-app example code (c) 2021 Project CHIP Authors
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
@@ -21,11 +21,39 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "adapters.h"
 
-#include "p44mbrd_common.h"
+// MARK: - BridgeAdapter
 
-#include "application.hpp"
+void BridgeAdapter::startup(AdapterStartedCB aAdapterStartedCB, AddDeviceCB aAddDeviceCB)
+{
+  mAddDeviceCB = aAddDeviceCB; // needed for implementation of bridgeAdditionalDevice().
+  adapterStartup(aAdapterStartedCB);
+}
 
 
+bool BridgeAdapter::hasBridgeableDevices()
+{
+  return !mDeviceUIDMap.empty();
+}
 
+
+void BridgeAdapter::cleanup()
+{
+  mAddDeviceCB = NoOP;
+}
+
+
+void BridgeAdapter::registerInitialDevice(DevicePtr aDevice)
+{
+  mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
+}
+
+
+void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
+{
+  // add to map
+  mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
+  assert(mAddDeviceCB);
+  mAddDeviceCB(aDevice);
+}

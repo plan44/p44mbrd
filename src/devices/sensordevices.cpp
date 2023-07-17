@@ -36,23 +36,12 @@ using namespace Clusters;
 
 // MARK: - SensorDevice, common base class for sensors
 
-SensorDevice::SensorDevice()
+SensorDevice::SensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   mTolerance = 0;
 }
 
-
-void SensorDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
-{
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  JsonObjectPtr o;
-  if (aDeviceComponentInfo->get("resolution", o)) {
-    // tolerance is half of the resolution (when resolution is 1, true value might be max +/- 0.5 resolution away)
-    mTolerance = (uint16_t)(int16_t)bridgeToMatter(o->doubleValue());
-  }
-  // also get current value from xxxStates
-  parseSensorValue(aDeviceInfo, UpdateMode());
-}
 
 
 EmberAfStatus SensorDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
@@ -74,13 +63,6 @@ EmberAfStatus SensorDevice::HandleReadAttribute(ClusterId clusterId, chip::Attri
 }
 
 
-void SensorDevice::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
-{
-  inherited::handleBridgePushProperties(aChangedProperties);
-  parseSensorValue(aChangedProperties, UpdateMode(UpdateFlags::matter));
-}
-
-
 // MARK: - Unsigned Values Sensor Device
 
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(commonSensorAttrsUnsigned)
@@ -90,7 +72,8 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(commonSensorAttrsUnsigned)
   DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID, INT16U, 2, 0),
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
-UnsignedSensorDevice::UnsignedSensorDevice()
+UnsignedSensorDevice::UnsignedSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // init nullables
   using Traits = NumericAttributeTraits<uint16_t>;
@@ -107,38 +90,17 @@ string UnsignedSensorDevice::description()
 }
 
 
-void UnsignedSensorDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void UnsignedSensorDevice::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  JsonObjectPtr o;
-  if (aDeviceComponentInfo->get("min", o)) {
-    mMin = (uint16_t)bridgeToMatter(o->doubleValue());
+  if (aIsValid) {
+    mMeasuredValue = (uint16_t)bridgeToMatter(aMeasuredValue);
   }
-  if (aDeviceComponentInfo->get("max", o)) {
-    mMax = (uint16_t)bridgeToMatter(o->doubleValue());
+  else {
+    // NULL value or no value contained in state at all
+    NumericAttributeTraits<uint16_t>::SetNull(mMeasuredValue);
   }
-}
-
-
-void UnsignedSensorDevice::parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode)
-{
-  JsonObjectPtr states;
-  if (aProperties->get((mInputType+"States").c_str(), states)) {
-    JsonObjectPtr state;
-    if (states->get(mInputId.c_str(), state)) {
-      JsonObjectPtr o;
-      if (state->get("value", o, true)) {
-        // non-NULL value
-        mMeasuredValue = (uint16_t)bridgeToMatter(o->doubleValue());
-      }
-      else {
-        // NULL value or no value contained in state at all
-        NumericAttributeTraits<uint16_t>::SetNull(mMeasuredValue);
-      }
-      if (aUpdateMode.Has(UpdateFlags::matter)) {
-        MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
-      }
-    }
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
   }
 }
 
@@ -171,7 +133,8 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(commonSensorAttrsSigned)
   DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID, INT16U, 2, 0),
 DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
-SignedSensorDevice::SignedSensorDevice()
+SignedSensorDevice::SignedSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // init nullables
   using Traits = NumericAttributeTraits<int16_t>;
@@ -188,38 +151,17 @@ string SignedSensorDevice::description()
 }
 
 
-void SignedSensorDevice::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void SignedSensorDevice::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  JsonObjectPtr o;
-  if (aDeviceComponentInfo->get("min", o)) {
-    mMin = (int16_t)bridgeToMatter(o->doubleValue());
+  if (aIsValid) {
+    mMeasuredValue = (int16_t)bridgeToMatter(aMeasuredValue);
   }
-  if (aDeviceComponentInfo->get("max", o)) {
-    mMax = (int16_t)bridgeToMatter(o->doubleValue());
+  else {
+    // NULL value or no value contained in state at all
+    NumericAttributeTraits<int16_t>::SetNull(mMeasuredValue);
   }
-}
-
-
-void SignedSensorDevice::parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpdateMode)
-{
-  JsonObjectPtr states;
-  if (aProperties->get((mInputType+"States").c_str(), states)) {
-    JsonObjectPtr state;
-    if (states->get(mInputId.c_str(), state)) {
-      JsonObjectPtr o;
-      if (state->get("value", o, true)) {
-        // non-NULL value
-        mMeasuredValue = (int16_t)bridgeToMatter(o->doubleValue());
-      }
-      else {
-        // NULL value or no value contained in state at all
-        NumericAttributeTraits<int16_t>::SetNull(mMeasuredValue);
-      }
-      if (aUpdateMode.Has(UpdateFlags::matter)) {
-        MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
-      }
-    }
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
   }
 }
 
@@ -257,7 +199,8 @@ const EmberAfDeviceType gTemperatureSensorTypes[] = {
 };
 
 
-DeviceTemperature::DeviceTemperature()
+DeviceTemperature::DeviceTemperature(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
   //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
@@ -309,7 +252,8 @@ const EmberAfDeviceType gIlluminanceSensorTypes[] = {
 };
 
 
-DeviceIlluminance::DeviceIlluminance()
+DeviceIlluminance::DeviceIlluminance(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
   //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
@@ -362,7 +306,8 @@ const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
 };
 
 
-DeviceHumidity::DeviceHumidity()
+DeviceHumidity::DeviceHumidity(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
 {
   // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
   //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.

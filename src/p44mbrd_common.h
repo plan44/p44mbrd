@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  Copyright (c) 2022 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2023 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //  based on Apache v2 licensed bridge-app example code (c) 2021 Project CHIP Authors
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
@@ -23,9 +23,10 @@
 
 #pragma once
 
-#include "p44mbrd_common.h"
+#ifndef P44_ADAPTERS
+  #define P44_ADAPTERS 1
+#endif
 
-#include "application.hpp"
-
-
-
+#ifndef CC51_ADAPTERS
+  #define CC51_ADAPTERS 0
+#endif

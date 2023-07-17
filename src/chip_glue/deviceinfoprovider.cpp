@@ -25,21 +25,21 @@
 
 #define P44_VENDOR_NAME "plan44.ch"
 
-CHIP_ERROR P44DeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 {
-  ReturnErrorCodeIf(bufSize < sizeof(P44_VENDOR_NAME), CHIP_ERROR_BUFFER_TOO_SMALL);
-  strncpy(buf, P44_VENDOR_NAME, bufSize);
+  ReturnErrorCodeIf(bufSize < mVendorName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  strncpy(buf, mVendorName.c_str(), bufSize);
   return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR P44DeviceInfoProvider::GetVendorId(uint16_t & vendorId)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetVendorId(uint16_t & vendorId)
 {
   vendorId = mVendorId;
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mProductName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strncpy(buf, mProductName.c_str(), bufSize);
@@ -47,21 +47,21 @@ CHIP_ERROR P44DeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetProductId(uint16_t & productId)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductId(uint16_t & productId)
 {
   productId = mProductId;
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
 {
   hardwareVersion = 1; // FIXME: testing
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
 {
   uint16_t hwv;
   GetHardwareVersion(hwv);
@@ -72,25 +72,25 @@ CHIP_ERROR P44DeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bu
 
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
   // Optional: Human readable Part Number (same ProductID may have different packages, colors etc.)
   return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
   // Optional: Product Website URL
   return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
   // Optional: More user-friendly version of ProductName, not containing VendorName
   return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mSerial.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strncpy(buf, mSerial.c_str(), bufSize);
@@ -98,7 +98,7 @@ CHIP_ERROR P44DeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
 }
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
 {
   // Optional: when the node was manufactured, ISO8601 date in the first 8 chars
   return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
@@ -106,11 +106,11 @@ CHIP_ERROR P44DeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t 
 
 
 
-CHIP_ERROR P44DeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
+CHIP_ERROR P44mbrdDeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
 {
-  ReturnErrorCodeIf(mDSUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
-  memcpy(uniqueIdSpan.data(), mDSUID.c_str(), mDSUID.size());
-  uniqueIdSpan.reduce_size(mDSUID.size());
+  ReturnErrorCodeIf(mUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  memcpy(uniqueIdSpan.data(), mUID.c_str(), mUID.size());
+  uniqueIdSpan.reduce_size(mUID.size());
   return CHIP_NO_ERROR;
 }
 

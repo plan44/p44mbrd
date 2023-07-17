@@ -75,64 +75,26 @@ DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 // MARK: - DeviceLevelControl
 
-DeviceLevelControl::DeviceLevelControl(bool aLighting) :
-  inherited(aLighting),
+DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aLighting, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate),
+  mLevelControlDelegate(aLevelControlDelegate),
   // Attribute defaults
   mLevel(0),
   mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // will be updated from ROOM_ON value when available
   mLevelControlOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
   mOnOffTransitionTimeDS(5), // default is 0.5 Seconds for transitions (approx dS default)
-  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7), // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
-  mRecommendedTransitionTimeDS(5), // FIXME: just dS default of full range in 7 seconds
-  mEndOfLatestTransition(Never)
+  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7) // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
 {
   // - declare specific clusters
   addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
 }
 
 
-void DeviceLevelControl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void DeviceLevelControl::willBeInstalled()
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // level coontrol devices should know the recommended transition time for the output
-  JsonObjectPtr o;
-  JsonObjectPtr o2;
-  if (aDeviceInfo->get("outputDescription", o)) {
-    if (o->get("x-p44-recommendedTransitionTime", o2)) {
-      // adjust current
-      mRecommendedTransitionTimeDS = static_cast<uint16_t>(o2->doubleValue()/0.1); // how many 1/10 seconds?
-      mOnOffTransitionTimeDS = mRecommendedTransitionTimeDS; // also use as on/off default
-    }
-  }
-  // get default on level (level of preset1 scene)
-  if (aDeviceInfo->get("scenes", o)) {
-    if (o->get("5", o2)) {
-      if (o2->get("channels", o2)) {
-        if (o2->get(mDefaultChannelId.c_str(), o2)) {
-          if (o2->get("value", o2)) {
-            mOnLevel = static_cast<uint8_t>(o2->doubleValue()/100*(maxLevel()-minLevel()))+minLevel();
-          }
-        }
-      }
-    }
-  }
-}
-
-
-void DeviceLevelControl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
-{
-  // OnOff just sets on/off state when brightness>0
-  inherited::parseChannelStates(aChannelStates, aUpdateMode);
-  // init level
-  JsonObjectPtr o;
-  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
-    JsonObjectPtr vo;
-    if (o->get("value", vo, true)) {
-      // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
-      // Note: updating on/off attribute is handled separately (in deviceonoff), don't do it here
-      updateCurrentLevel(static_cast<uint8_t>(vo->doubleValue()/100*(maxLevel()-minLevel()))+minLevel(), 0, 0, false, aUpdateMode);
-    }
-  }
+  inherited::willBeInstalled();
+  // set default transition time from recommendation. TODO: this should be a persistent setting later
+  mOnOffTransitionTimeDS = mLevelControlDelegate.recommendedTransitionTimeDS();
 }
 
 
@@ -177,21 +139,10 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     }
     mLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
-      if (aTransitionTimeDs==0xFFFF) {
-        // means using default of the device, so we take the recommended transition time
-        aTransitionTimeDs = mRecommendedTransitionTimeDS;
-      }
-      // adjust default channel
-      // Note: transmit relative changes as such, although we already calculate the outcome above,
-      //   but non-standard channels might arrive at another value (e.g. wrap around)
-      JsonObjectPtr params = JsonObject::newObj();
-      params->add("channel", JsonObject::newInt32(0)); // default channel
-      params->add("value", JsonObject::newDouble((double)(level-minLevel())/(maxLevel()-minLevel())*100)); // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
-      params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDs/10));
-      params->add("apply_now", JsonObject::newBool(true));
-      notify("setOutputChannelValue", params);
-      // calculate time when transition will be done
-      mEndOfLatestTransition = MainLoop::now()+aTransitionTimeDs*(Second/10);
+      mLevelControlDelegate.setLevel(
+        (double)(level-minLevel())/(maxLevel()-minLevel())*100, // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
+        aTransitionTimeDs // in tenths of seconds, 0xFFFF for using hardware's default
+      );
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting currentLevel attribute change to matter");
@@ -205,10 +156,25 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
 
 uint16_t DeviceLevelControl::remainingTimeDS()
 {
-  if (mEndOfLatestTransition==Never) return 0;
-  MLMicroSeconds tr = mEndOfLatestTransition-MainLoop::now();
+  MLMicroSeconds endOfTransition = mLevelControlDelegate.endOfLatestTransition();
+  if (endOfTransition==Never) return 0;
+  MLMicroSeconds tr = endOfTransition-MainLoop::now();
   if (tr<0) return 0; // no transition running
   return static_cast<uint16_t>(tr/(Second/10)); // return as decisecond
+}
+
+
+// MARK: callbacks for LevelControlDelegate implementations
+
+void DeviceLevelControl::setDefaultOnLevel(double aLevelPercent)
+{
+  mOnLevel = static_cast<uint8_t>(aLevelPercent/100*(maxLevel()-minLevel()))+minLevel();
+}
+
+
+bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMode)
+{
+  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxLevel()-minLevel()))+minLevel(), 0, 0, false, aUpdateMode);
 }
 
 
@@ -331,19 +297,6 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
 
 
 
-void DeviceLevelControl::dim(int8_t aDirection, uint8_t aRate)
-{
-  // adjust default channel
-  JsonObjectPtr params = JsonObject::newObj();
-  params->add("channel", JsonObject::newInt32(0)); // default channel
-  params->add("mode", JsonObject::newInt32(aDirection));
-  params->add("autostop", JsonObject::newBool(false));
-  // matter rate is 0..0xFE units per second, p44 rate is 0..100 units per millisecond
-  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
-  notify("dimChannel", params);
-}
-
-
 Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
   Status status = Status::Success;
@@ -363,10 +316,10 @@ Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRat
           // start dimming from off level into on levels -> set onoff
           updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
-        dim(1, rate);
+        mLevelControlDelegate.dim(1, rate);
         break;
       case EMBER_ZCL_MOVE_MODE_DOWN:
-        dim(-1, rate);
+        mLevelControlDelegate.dim(-1, rate);
         break;
       default:
         status = Status::InvalidCommand;
@@ -405,7 +358,7 @@ Status DeviceLevelControl::stop(bool aWithOnOff, OptType aOptionMask, OptType aO
   Status status = Status::Success;
 
   if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
-    dim(0,0); // stop dimming
+    mLevelControlDelegate.dim(0,0); // stop dimming
   }
   return status;
 }
