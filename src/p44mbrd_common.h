@@ -28,5 +28,5 @@
 #endif
 
 #ifndef CC51_ADAPTERS
-  #define CC51_ADAPTERS 0
+  #define CC51_ADAPTERS 1
 #endif

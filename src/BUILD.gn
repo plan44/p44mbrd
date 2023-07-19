@@ -50,6 +50,10 @@ executable("p44mbrd") {
     "adapters/p44/p44bridge.h",
     "adapters/p44/p44devices.cpp",
     "adapters/p44/p44devices.h",
+    "adapters/cc51/cc51bridge.cpp",
+    "adapters/cc51/cc51bridge.h",
+    "adapters/cc51/cc51devices.cpp",
+    "adapters/cc51/cc51devices.h",
     "chip_glue/deviceinfoprovider.cpp",
     "chip_glue/deviceinfoprovider.h",
     "chip_glue/chip_error.cpp",
@@ -211,6 +215,8 @@ source_set("p44utils") {
     "p44utils/jsonobject.cpp",
     "p44utils/jsoncomm.hpp",
     "p44utils/jsoncomm.cpp",
+    "p44utils/jsonrpccomm.hpp",
+    "p44utils/jsonrpccomm.cpp",
     "p44utils/fdcomm.cpp",
     "p44utils/error.hpp"
   ]

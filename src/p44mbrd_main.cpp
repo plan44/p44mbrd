@@ -257,9 +257,9 @@ public:
     getStringOption("cc51apihost", cc51apihost);
     getStringOption("cc51apiservice", cc51apiservice);
     if (cc51apihost) {
-      auto cc51bridge = CC51_BridgeImpl::adapter();
-      cc51bridge.setAPIParams(p44apihost, p44apiservice);
-      mAdapters.push_back(&cc51bridge);
+      CC51_BridgeImpl* cc51bridgeP = &CC51_BridgeImpl::adapter();
+      cc51bridgeP->setAPIParams(cc51apihost, cc51apiservice);
+      mAdapters.push_back(cc51bridgeP);
     }
     #endif // CC51_ADAPTERS
   }
