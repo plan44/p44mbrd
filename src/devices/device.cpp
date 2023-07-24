@@ -79,8 +79,7 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
   mReachable(false)
 {
   // matter side init
-  mDynamicEndpointIdx = kInvalidEndpointId;
-  mDynamicEndpointBase = 0;
+  mEndpointId = kInvalidEndpointId;
   // - endpoint declaration info
   mEndpointDefinition.clusterCount = 0;
   mEndpointDefinition.cluster = nullptr;

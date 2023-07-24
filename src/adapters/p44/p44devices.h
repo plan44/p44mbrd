@@ -195,10 +195,6 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
 {
   typedef P44_LevelControlImpl inherited;
 
-  /// the hardware recommended transition time (usually provided by the bridged hardware)
-  uint16_t mRecommendedTransitionTimeDS;
-  MLMicroSeconds mEndOfLatestTransition;
-
   /// @name ColorControlDelegate
   /// @{
   virtual void setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply) override;

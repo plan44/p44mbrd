@@ -134,9 +134,9 @@ class Device : public p44::P44LoggingObj
   /// @{
   bool mPartOfComposedDevice; ///< set if this device is (or needs to become) part of a composed device
   DevicesList mSubdevices; ///< subdevices of this device (in case it is a composed device)
+  EndpointId mEndpointId; ///< endpoint ID
   EndpointId mParentEndpointId; ///< endpointId of the parent (composed device or bridge itself)
-  EndpointId mDynamicEndpointBase; ///< first dynamic endpointId
-  EndpointId mDynamicEndpointIdx; ///< device index relative to mDynamicEndpointBase
+  EndpointId mDynamicEndpointIdx; ///< the dynamic endpoint index to be used for this device
   /// @}
 
   /// @name runtime variable attributes
@@ -177,7 +177,7 @@ public:
 
   /// @return the endpointId of this device (can be part of a composed device)
   /// @note valid only after device setup is complete and device is operational
-  inline chip::EndpointId GetEndpointId() const { return mDynamicEndpointBase+mDynamicEndpointIdx; };
+  inline chip::EndpointId GetEndpointId() const { return mEndpointId; };
 
   /// @return the parentId of this device (can be a composed device or the bridge itself)
   /// @note valid only after device setup is complete and device is operational
@@ -221,9 +221,9 @@ public:
   /// These must ONLY be called during setup of a device, but NOT while a device is already operational.
   /// @{
 
-  inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
+  inline void SetEndpointId(chip::EndpointId aID) { mEndpointId = aID; };
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
-  inline void SetDynamicEndpointBase(EndpointId aDynamicEndpointBase) { mDynamicEndpointBase = aDynamicEndpointBase; };
+  inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
   inline void initNodeLabel(const string aName) { mNodeLabel = aName; };
   inline void initZone(string aZone) { mZone = aZone; };
 
@@ -234,7 +234,7 @@ public:
 
 
   /// add the device using the previously set cluster info (and parent endpoint ID)
-  virtual bool AddAsDeviceEndpoint();
+  bool AddAsDeviceEndpoint();
 
   /// @brief called just before the device gets installed
   /// @note at this point, the device is the fully constructed final class, but is

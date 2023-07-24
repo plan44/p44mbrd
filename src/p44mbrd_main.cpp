@@ -135,10 +135,9 @@ class P44mbrd : public CmdLineApp
   P44mbrdDeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
 
   // Bridged devices info
-  EndpointId mFirstDynamicEndpointId;
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
-  char mDynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
   EndpointId mNumDynamicEndPoints;
+  EndpointId mFirstFreeEndpointId;
 
   // Network commissioning
   #if CHIP_DEVICE_LAYER_TARGET_LINUX
@@ -159,6 +158,7 @@ public:
   P44mbrd() :
     mChipAppInitialized(false),
     mNumDynamicEndPoints(0),
+    mFirstFreeEndpointId(kInvalidEndpointId),
     mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
   {
   }
@@ -199,13 +199,16 @@ public:
       { 0, "trace_decode",        false, "enables traces decoding" },
       #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
       // p44mbrd command line args
+      #if P44_ADAPTERS
       // - P44 device implementations
       { 0, "bridgeapihost",       true, "host;host of the p44 bridge API" },
       { 0, "bridgeapiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
+      #endif
+      #if CC51_ADAPTERS
       // - CC51 device implementations
       { 0, "cc51apihost",         true, "host;host of the bridge API" },
       { 0, "cc51apiservice",      true, "port;port of the bridge API, default is " CC51_DEFAULT_BRIDGE_SERVICE },
-
+      #endif // CC51_ADAPTERS
       #if CHIP_LOG_FILTERING
       { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
       #endif // CHIP_LOG_FILTERING
@@ -297,7 +300,7 @@ public:
       for (BridgeAdapter::DeviceUIDMap::iterator dpos = (*apos)->mDeviceUIDMap.begin(); dpos!=(*apos)->mDeviceUIDMap.end(); ++dpos) {
         DevicePtr dev = dpos->second;
         // install the device
-        chiperr = installBridgedDevice(dev, mFirstDynamicEndpointId);
+        chiperr = installBridgedDevice(dev);
       }
     }
     return chiperr;
@@ -318,10 +321,10 @@ public:
       }
       else {
         // already running
-        installBridgedDevice(aDev, mFirstDynamicEndpointId);
+        installBridgedDevice(aDev);
         // save possibly modified endpoint map
         chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-        CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
+        CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
         LogErrorOnFailure(chiperr);
         // add as new endpoint to bridge
         if (aDev->AddAsDeviceEndpoint()) {
@@ -431,111 +434,123 @@ public:
   }
 
 
-  CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId, EndpointId aDynamicEndpointBase)
+  #ifndef MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
+    #define MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS 1
+  #endif
+
+  #if MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
+  static const EndpointId kLegacyFirstDynamicEndpointID = 3;
+  #endif
+
+  CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId)
   {
     CHIP_ERROR chiperr;
 
+    // check if we can add any new devices at all
+    if (mNumDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
+      POLOG(dev, LOG_ERR, "No free endpoint available - all %d dynamic endpoints are occupied -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
+      return CHIP_ERROR_NO_ENDPOINT;
+    }
     // signal installation to device (which, at this point, is a fully constructed class)
     dev->willBeInstalled();
     // now install
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
     // note: endpointUID identifies the endpoint, of which one adapted device might have multiple.
-    string key = kP44mbrNamespace "devices/"; key += dev->deviceInfoDelegate().endpointUID();
-    EndpointId dynamicEndpointIdx = kInvalidEndpointId;
-    chiperr = kvs.Get(key.c_str(), &dynamicEndpointIdx);
+    string key = kP44mbrNamespace "device_eps/"; key += dev->deviceInfoDelegate().endpointUID();
+    EndpointId endpointId = kInvalidEndpointId;
+    #if MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
+    // need to look up in the old table first
+    string legacy_key = kP44mbrNamespace "devices/"; legacy_key += dev->deviceInfoDelegate().endpointUID(); // old endpointUID -> dynamicEndpointIdx mapping
+    EndpointId legacyDynamicEndpointIdx = kInvalidEndpointId;
+    chiperr = kvs.Get(legacy_key.c_str(), &legacyDynamicEndpointIdx);
     if (chiperr==CHIP_NO_ERROR) {
-      // This dSUID was already assigned to an endpoint earlier - try to re-use the endpoint ID for this dSUID
-      // - sanity check
-      if (dynamicEndpointIdx>=mNumDynamicEndPoints || mDynamicEndPointMap[dynamicEndpointIdx]!='d') {
-        POLOG(dev, LOG_WARNING, "Inconsistent mapping info: dynamic endpoint #%d should be mapped as it is in use, but isn't -> repair", dynamicEndpointIdx);
-      }
-      if (dynamicEndpointIdx>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-        POLOG(dev, LOG_ERR, "Dynamic endpoint #%d for device exceeds max dynamic endpoint count -> try to add with new endpointId", dynamicEndpointIdx);
-        dynamicEndpointIdx = kInvalidEndpointId; // reset to not-yet-assigned
-      }
-      else {
-        // add to map
-        POLOG(dev, LOG_NOTICE, "was previously mapped to dynamic endpoint #%d -> using same endpoint again", dynamicEndpointIdx);
-        if (dynamicEndpointIdx<mNumDynamicEndPoints) {
-          mDynamicEndPointMap[dynamicEndpointIdx]='D'; // confirm this device
-        }
-        else {
-          // should not happen normally, but when dynamicEndPointMap gets cleared or
-          // was not saved correctly while device dSUID/endpoint mappings remains, it can happen.
-          // - repair the endpoint map
-          for (size_t i = mNumDynamicEndPoints; i<dynamicEndpointIdx; i++) mDynamicEndPointMap[i]=' ';
-          mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // insert as confirmed device
-          mDynamicEndPointMap[dynamicEndpointIdx+1] = 0;
-        }
-      }
+      // this device was mapped before with the fixed index/endpointID scheme
+      // calculate the endpointId
+      endpointId = legacyDynamicEndpointIdx + kLegacyFirstDynamicEndpointID;
+      // migrate kvs entry into new format
+      chiperr = kvs.Delete(legacy_key.c_str()); // delete from legacy
+      LogErrorOnFailure(chiperr);
+      chiperr = kvs.Put(key.c_str(), endpointId); // store in new
+      LogErrorOnFailure(chiperr);
+      POLOG(dev, LOG_NOTICE, "migrated KVS entry from legacy dynamicEndpointIdx (%u) to endpointId (%u)", legacyDynamicEndpointIdx, endpointId);
     }
-    else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-      // we haven't seen that dSUID+suffix yet -> need to assign it a new endpoint ID
-      POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
-    }
-    else {
+    else if (chiperr!=CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
       LogErrorOnFailure(chiperr);
     }
-    // update and possibly extend endpoint map
-    if (dynamicEndpointIdx==kInvalidEndpointId) {
-      // this device needs a new endpoint
-      // Note: Specs demand ever increasing endpoint indices (may wrap only after 0xFFFF).
-      //   Current ember/zcl implementations do not cover that, we can't have static arrays with 64k elements.
-      //   But as a first approximation, do NOT RE-USE gaps as long as we *can* use an increased id
-      // - try to append the new endpoint
-      if (mNumDynamicEndPoints+1<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-        // there is still room
-        dynamicEndpointIdx = mNumDynamicEndPoints++;
-        mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-        POLOG(dev, LOG_NOTICE, "mapping device to end of free dynamic endpoints at #%d", dynamicEndpointIdx);
+    else // not found in legacy store
+    #endif
+    {
+      // lookup previously used endpointId
+      chiperr = kvs.Get(key.c_str(), &endpointId);
+      if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+        POLOG(dev, LOG_NOTICE, "is NEW (was not previously mapped to an endpoint) -> adding to bridge");
+        endpointId = kInvalidEndpointId;
+        chiperr = CHIP_NO_ERROR;
+      }
+      LogErrorOnFailure(chiperr);
+    }
+    if (endpointId!=kInvalidEndpointId) {
+      // This UID was already assigned to an endpoint earlier - re-use the endpoint ID for this dSUID
+      // - check for no colliding with fixed endpoints (in case we increase those over time)
+      if (endpointId<emberAfFixedEndpointCount()) {
+        POLOG(dev, LOG_WARNING, "This device's former endpoint (%d) is now occupied by a fixed endpoint", endpointId);
+        endpointId = kInvalidEndpointId; // must assign a new one
       }
       else {
-        // cannot add more endpoints, wrap around
-        // FIXME: although specs say that should not happen before endpoint id reaches 0xFFFF
-        //   we need to wrap around now
-        POLOG(dev, LOG_WARNING, "max number of dynamic endpoints exhausted - need to wrap around and start filling gaps");
-        for (EndpointId i=0; i<mNumDynamicEndPoints; i++) {
-          if (mDynamicEndPointMap[i]==' ') {
-            // use the gap
-            dynamicEndpointIdx = i;
-            mDynamicEndPointMap[dynamicEndpointIdx] = 'D'; // add as confirmed device
-            POLOG(dev, LOG_NOTICE, "mapping device to free gap in dynamic endpoints at #%d", dynamicEndpointIdx);
+        // - check for being already in use by one of the devices already in the list
+        //   Note: this does not happen, normally, but CAN happen once endpointIds wrap around at 0xFFFF
+        for (size_t i=0; i<mNumDynamicEndPoints; i++) {
+          if (mDevices[i]->GetEndpointId()==mFirstFreeEndpointId) {
+            // the supposedly free next endpointID is in use
+            if (++mFirstFreeEndpointId==0xFFFF) mFirstFreeEndpointId = emberAfEndpointCount(); // increment and wraparound from 0xFFFE to first dynamic endpoont
+            POLOG(mDevices[i], LOG_WARNING, "is already using what was recorded as next free endpointID -> adjusted the latter to %d", mFirstFreeEndpointId);
+          }
+          if (mDevices[i]->GetEndpointId()==endpointId) {
+            // this endpointId is already in use, must create a new one
+            POLOG(dev, LOG_WARNING, "This device's former endpoint (%d) is already in use by '%s'", endpointId, mDevices[i]->logContextPrefix().c_str());
+            endpointId = kInvalidEndpointId; // must assign a new one
             break;
           }
         }
       }
-      if (dynamicEndpointIdx==kInvalidEndpointId) {
-        POLOG(dev, LOG_ERR, "No free endpoint available - all %d dynamic endpoints are occupied -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
-        chiperr = CHIP_ERROR_NO_ENDPOINT;
-      }
-      else {
-        // new endpoint was assigned to the device -> save dSUID<->endpoint relation
-        chiperr = kvs.Put(key.c_str(), dynamicEndpointIdx);
-        LogErrorOnFailure(chiperr);
-      }
+    }
+    if (endpointId!=kInvalidEndpointId) {
+      // has an endpoint id we can use
+      POLOG(dev, LOG_NOTICE, "was previously mapped to endpoint #%d -> using same endpoint again", endpointId);
+    }
+    else {
+      // must get a new endpointId
+      endpointId = mFirstFreeEndpointId;
+      POLOG(dev, LOG_NOTICE, "will be assigned new endpointId %d", endpointId);
+      // save new UID<->endpointId relation
+      chiperr = kvs.Put(key.c_str(), endpointId);
+      LogErrorOnFailure(chiperr);
+      // determine next free
+      if (++mFirstFreeEndpointId==0xFFFF) mFirstFreeEndpointId = emberAfEndpointCount(); // increment and wraparound from 0xFFFE to first dynamic endpoint
     }
     // assign to dynamic endpoint array
-    if (dynamicEndpointIdx!=kInvalidEndpointId) {
-      dev->SetDynamicEndpointIdx(dynamicEndpointIdx);
-      mDevices[dynamicEndpointIdx] = dev.get();
-      // also set parent endpoint id and dynamic endpoint base
+    if (endpointId!=kInvalidEndpointId) {
+      dev->SetEndpointId(endpointId);
+      dev->SetDynamicEndpointIdx(mNumDynamicEndPoints);
+      mDevices[mNumDynamicEndPoints] = dev.get();
+      mNumDynamicEndPoints++;
+      // also set parent endpoint id
       dev->SetParentEndpointId(aParentEndpointId);
-      dev->SetDynamicEndpointBase(aDynamicEndpointBase);
     }
     return chiperr;
   }
 
 
-  CHIP_ERROR installBridgedDevice(DevicePtr aDev, EndpointId aDynamicEndpointBase)
+  CHIP_ERROR installBridgedDevice(DevicePtr aDev)
   {
     CHIP_ERROR chiperr;
     // install base (or single) device
-    chiperr = installSingleBridgedDevice(aDev, MATTER_BRIDGE_ENDPOINT, aDynamicEndpointBase);
+    chiperr = installSingleBridgedDevice(aDev, MATTER_BRIDGE_ENDPOINT);
     if (chiperr==CHIP_NO_ERROR) {
       // also add subdevices AFTER the main device (if any)
       for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
         (*pos)->flagAsPartOfComposedDevice();
-        installSingleBridgedDevice(*pos, aDev->GetEndpointId(), aDynamicEndpointBase);
+        installSingleBridgedDevice(*pos, aDev->GetEndpointId());
       }
     }
     return chiperr;
@@ -545,48 +560,63 @@ public:
 
   void installInitiallyBridgedDevices()
   {
-    // Set starting endpoint id where dynamic endpoints will be assigned, which
-    // will be the next consecutive endpoint id after the last fixed endpoint.
-    mFirstDynamicEndpointId = static_cast<chip::EndpointId>(
-      static_cast<int>(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1))) + 1);
     // Disable last fixed endpoint, which is used as a placeholder for all of the
     // supported clusters so that ZAP will generated the requisite code.
     emberAfEndpointEnableDisable(emberAfEndpointFromIndex(static_cast<uint16_t>(emberAfFixedEndpointCount() - 1)), false);
     // Clear out the array of dynamic endpoints
+    mNumDynamicEndPoints = 0;
     memset(mDevices, 0, sizeof(mDevices));
     CHIP_ERROR chiperr;
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-    // get list of endpoints known in use
-    mNumDynamicEndPoints = 0;
-    size_t nde;
-    chiperr = kvs.Get(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &nde);
+    // determine highest endpointId in use
+    chiperr = kvs.Get(kP44mbrNamespace "firstFreeEndpointId", &mFirstFreeEndpointId);
     if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
-      // no endpoint map yet
+      // no highest endpoint recorded so far
+      #if MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
+      // - obtain from legacy map
+      char legacyDynamicEndPointMap[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT+1];
+      size_t nde;
+      chiperr = kvs.Get(kP44mbrNamespace "endPointMap", legacyDynamicEndPointMap, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT, &nde);
+      if (chiperr==CHIP_NO_ERROR) {
+        // legacy endpoint map (still) exists, find highest index used
+        mFirstFreeEndpointId = emberAfFixedEndpointCount();
+        for (size_t i=0; i<nde; i++) {
+          if (legacyDynamicEndPointMap[i]!=' ') {
+            if (i>=mFirstFreeEndpointId-kLegacyFirstDynamicEndpointID) {
+              mFirstFreeEndpointId = i+kLegacyFirstDynamicEndpointID+1;
+            }
+          }
+        }
+        // forget the legacy map
+        OLOG(LOG_NOTICE, "migrated endpoint kvs: determined first free endpointId as %d", mFirstFreeEndpointId);
+        kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId); // safety saving, in case something goes wrong below before it is saved again
+        kvs.Delete(kP44mbrNamespace "endPointMap");
+      }
+      else if (chiperr==CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
+        // that's ok
+        chiperr = CHIP_NO_ERROR;
+      }
+      else {
+        LogErrorOnFailure(chiperr);
+      }
+      #endif // MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
     }
-    else if (chiperr==CHIP_NO_ERROR){
-      mNumDynamicEndPoints = static_cast<EndpointId>(nde);
-    }
-    else {
-      LogErrorOnFailure(chiperr);
-    }
-    mDynamicEndPointMap[mNumDynamicEndPoints]=0; // null terminate for easy debug printing as string
-    OLOG(LOG_INFO,"DynamicEndpointMap: %s", mDynamicEndPointMap);
-    // revert all endpoint map markers to "unconfimed"
-    for (size_t i=0; i<mNumDynamicEndPoints; i++) {
-      if (mDynamicEndPointMap[i]=='D') mDynamicEndPointMap[i]='d'; // unconfirmed device
+    // validate
+    if (mFirstFreeEndpointId==kInvalidEndpointId || mFirstFreeEndpointId<emberAfFixedEndpointCount()) {
+      // none recorded or is invalid - reset and store
+      mFirstFreeEndpointId = emberAfFixedEndpointCount(); // use first possible endpointId.
+      kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
+      OLOG(LOG_NOTICE, "reset first free endpointID to: %d", mFirstFreeEndpointId);
     }
     // process list of to-be-bridged devices of all adapters
     chiperr = installAdaptersInitialDevices();
-    // save updated endpoint map
-    chiperr = kvs.Put(kP44mbrNamespace "endPointMap", mDynamicEndPointMap, mNumDynamicEndPoints);
+    // save updated next free endpoint
+    chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
     LogErrorOnFailure(chiperr);
     // Add the devices as dynamic endpoints
-    for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
-      if (mDevices[i]) {
-        // there is a device at this dynamic endpoint
-        if (mDevices[i]->AddAsDeviceEndpoint()) {
-          POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
-        }
+    for (size_t i=0; i<mNumDynamicEndPoints; i++) {
+      if (mDevices[i]->AddAsDeviceEndpoint()) {
+        POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
       }
     }
   }
