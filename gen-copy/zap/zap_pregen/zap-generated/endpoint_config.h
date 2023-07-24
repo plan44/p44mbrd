@@ -65,7 +65,7 @@
 #define GENERATED_DEFAULTS_COUNT (2)
 
 // This is an array of EmberAfAttributeMinMaxValue structures.
-#define GENERATED_MIN_MAX_DEFAULT_COUNT 5
+#define GENERATED_MIN_MAX_DEFAULT_COUNT 6
 #define GENERATED_MIN_MAX_DEFAULTS { \
 \
   /* Endpoint: 0, Cluster: Time Format Localization (server) */ \
@@ -80,13 +80,16 @@
   /* Endpoint: 2, Cluster: Level Control (server) */ \
   { (uint16_t)0x0, (uint16_t)0x0, (uint16_t)0x3 }, /* Options */ \
 \
+  /* Endpoint: 2, Cluster: Window Covering (server) */ \
+  { (uint16_t)0x0, (uint16_t)0x0, (uint16_t)0xF }, /* Mode */ \
+\
   /* Endpoint: 2, Cluster: Color Control (server) */ \
   { (uint16_t)0x0, (uint16_t)0x0, (uint16_t)0xFEFF } /* StartUpColorTemperatureMireds */ \
 }
 
 
 // This is an array of EmberAfAttributeMetadata structures.
-#define GENERATED_ATTRIBUTE_COUNT 178
+#define GENERATED_ATTRIBUTE_COUNT 200
 #define GENERATED_ATTRIBUTES { \
 \
   /* Endpoint: 0, Cluster: Descriptor (server) */ \
@@ -299,6 +302,15 @@
   { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
   { ZAP_SIMPLE_DEFAULT(1), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
 \
+  /* Endpoint: 2, Cluster: Window Covering (server) */ \
+  { ZAP_SIMPLE_DEFAULT(0x00), 0x00000000, 1, ZAP_TYPE(ENUM8), 0 }, /* Type */  \
+  { ZAP_SIMPLE_DEFAULT(0x03), 0x00000007, 1, ZAP_TYPE(BITMAP8), 0 }, /* ConfigStatus */  \
+  { ZAP_SIMPLE_DEFAULT(0x00), 0x0000000A, 1, ZAP_TYPE(BITMAP8), 0 }, /* OperationalStatus */  \
+  { ZAP_SIMPLE_DEFAULT(0x00), 0x0000000D, 1, ZAP_TYPE(ENUM8), 0 }, /* EndProductType */  \
+  { ZAP_MIN_MAX_DEFAULTS_INDEX(4), 0x00000017, 1, ZAP_TYPE(BITMAP8), ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(WRITABLE) }, /* Mode */  \
+  { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
+  { ZAP_SIMPLE_DEFAULT(5), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
+\
   /* Endpoint: 2, Cluster: Color Control (server) */ \
   { ZAP_EMPTY_DEFAULT(), 0x00000000, 1, ZAP_TYPE(INT8U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* CurrentHue */  \
   { ZAP_EMPTY_DEFAULT(), 0x00000001, 1, ZAP_TYPE(INT8U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* CurrentSaturation */  \
@@ -313,9 +325,30 @@
   { ZAP_EMPTY_DEFAULT(), 0x0000400B, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* ColorTempPhysicalMinMireds */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000400C, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* ColorTempPhysicalMaxMireds */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000400D, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* CoupleColorTempToLevelMinMireds */  \
-  { ZAP_MIN_MAX_DEFAULTS_INDEX(4), 0x00004010, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* StartUpColorTemperatureMireds */  \
+  { ZAP_MIN_MAX_DEFAULTS_INDEX(5), 0x00004010, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(MIN_MAX) | ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE) | ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* StartUpColorTemperatureMireds */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* FeatureMap */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000FFFD, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* ClusterRevision */  \
+\
+  /* Endpoint: 2, Cluster: Illuminance Measurement (server) */ \
+  { ZAP_SIMPLE_DEFAULT(0x0000), 0x00000000, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MeasuredValue */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000001, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MinMeasuredValue */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000002, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MaxMeasuredValue */  \
+  { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
+  { ZAP_SIMPLE_DEFAULT(3), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
+\
+  /* Endpoint: 2, Cluster: Temperature Measurement (server) */ \
+  { ZAP_EMPTY_DEFAULT(), 0x00000000, 2, ZAP_TYPE(INT16S), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MeasuredValue */  \
+  { ZAP_SIMPLE_DEFAULT(0x8000), 0x00000001, 2, ZAP_TYPE(INT16S), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MinMeasuredValue */  \
+  { ZAP_SIMPLE_DEFAULT(0x8000), 0x00000002, 2, ZAP_TYPE(INT16S), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MaxMeasuredValue */  \
+  { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
+  { ZAP_SIMPLE_DEFAULT(1), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
+\
+  /* Endpoint: 2, Cluster: Relative Humidity Measurement (server) */ \
+  { ZAP_EMPTY_DEFAULT(), 0x00000000, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MeasuredValue */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000001, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MinMeasuredValue */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000002, 2, ZAP_TYPE(INT16U), ZAP_ATTRIBUTE_MASK(NULLABLE) }, /* MaxMeasuredValue */  \
+  { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
+  { ZAP_SIMPLE_DEFAULT(3), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
 }
 
 
@@ -347,6 +380,9 @@ const EmberAfGenericClusterFunction chipFuncArrayOnOffServer[] = {\
 const EmberAfGenericClusterFunction chipFuncArrayLevelControlServer[] = {\
   (EmberAfGenericClusterFunction) emberAfLevelControlClusterServerInitCallback,\
   (EmberAfGenericClusterFunction) MatterLevelControlClusterServerShutdownCallback,\
+};\
+const EmberAfGenericClusterFunction chipFuncArrayWindowCoveringServer[] = {\
+  (EmberAfGenericClusterFunction) MatterWindowCoveringClusterServerAttributeChangedCallback,\
 };\
 const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
   (EmberAfGenericClusterFunction) emberAfColorControlClusterServerInitCallback,\
@@ -489,7 +525,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
 // clang-format on
 
 // This is an array of EmberAfCluster structures.
-#define GENERATED_CLUSTER_COUNT 28
+#define GENERATED_CLUSTER_COUNT 32
 // clang-format off
 #define GENERATED_CLUSTERS { \
   { \
@@ -844,9 +880,22 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
       .eventCount = 0, \
     },\
   { \
+      /* Endpoint: 2, Cluster: Window Covering (server) */ \
+      .clusterId = 0x00000102, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(162), \
+      .attributeCount = 7, \
+      .clusterSize = 11, \
+      .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
+      .functions = chipFuncArrayWindowCoveringServer, \
+      .acceptedCommandList = nullptr, \
+      .generatedCommandList = nullptr, \
+      .eventList = nullptr, \
+      .eventCount = 0, \
+    },\
+  { \
       /* Endpoint: 2, Cluster: Color Control (server) */ \
       .clusterId = 0x00000300, \
-      .attributes = ZAP_ATTRIBUTE_INDEX(162), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(169), \
       .attributeCount = 16, \
       .clusterSize = 4, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION) | ZAP_CLUSTER_MASK(SHUTDOWN_FUNCTION), \
@@ -856,17 +905,56 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
       .eventList = nullptr, \
       .eventCount = 0, \
     },\
+  { \
+      /* Endpoint: 2, Cluster: Illuminance Measurement (server) */ \
+      .clusterId = 0x00000400, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(185), \
+      .attributeCount = 5, \
+      .clusterSize = 12, \
+      .mask = ZAP_CLUSTER_MASK(SERVER), \
+      .functions = NULL, \
+      .acceptedCommandList = nullptr, \
+      .generatedCommandList = nullptr, \
+      .eventList = nullptr, \
+      .eventCount = 0, \
+    },\
+  { \
+      /* Endpoint: 2, Cluster: Temperature Measurement (server) */ \
+      .clusterId = 0x00000402, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(190), \
+      .attributeCount = 5, \
+      .clusterSize = 12, \
+      .mask = ZAP_CLUSTER_MASK(SERVER), \
+      .functions = NULL, \
+      .acceptedCommandList = nullptr, \
+      .generatedCommandList = nullptr, \
+      .eventList = nullptr, \
+      .eventCount = 0, \
+    },\
+  { \
+      /* Endpoint: 2, Cluster: Relative Humidity Measurement (server) */ \
+      .clusterId = 0x00000405, \
+      .attributes = ZAP_ATTRIBUTE_INDEX(195), \
+      .attributeCount = 5, \
+      .clusterSize = 12, \
+      .mask = ZAP_CLUSTER_MASK(SERVER), \
+      .functions = NULL, \
+      .acceptedCommandList = nullptr, \
+      .generatedCommandList = nullptr, \
+      .eventList = nullptr, \
+      .eventCount = 0, \
+    },\
 }
 
 // clang-format on
 
-#define ZAP_FIXED_ENDPOINT_DATA_VERSION_COUNT 25
+#define ZAP_FIXED_ENDPOINT_DATA_VERSION_COUNT 29
 
 // This is an array of EmberAfEndpointType structures.
 #define GENERATED_ENDPOINT_TYPES { \
   { ZAP_CLUSTER_INDEX(0), 17, 218 }, \
   { ZAP_CLUSTER_INDEX(17), 3, 15 }, \
-  { ZAP_CLUSTER_INDEX(20), 8, 435 }, \
+  { ZAP_CLUSTER_INDEX(20), 12, 482 }, \
 }
 
 
@@ -881,7 +969,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (37)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (668)
+#define ATTRIBUTE_MAX_SIZE (715)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)

@@ -11,6 +11,7 @@
 		ED072C052A67E7CA007BBF71 /* cc51devices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072C022A67E7CA007BBF71 /* cc51devices.cpp */; };
 		ED072C062A67E7CA007BBF71 /* cc51bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072C032A67E7CA007BBF71 /* cc51bridge.cpp */; };
 		ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1A3C9F2A434872009746B8 /* jsonrpccomm.cpp */; };
+		ED072F672A69BBD6007BBF71 /* window-covering-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */; };
 		ED0B92DB2949DDFF00FA3B04 /* Logging.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED0B92D92949DDFF00FA3B04 /* Logging.mm */; };
 		ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */; };
 		ED14F42C294B8E11001C9D2E /* darwinlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */; };
@@ -27,7 +28,6 @@
 		ED24BDE028A68AE20025CC14 /* fdcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD828A68AE20025CC14 /* fdcomm.cpp */; };
 		ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD928A68AE20025CC14 /* jsoncomm.cpp */; };
 		ED24BDE228A68AE20025CC14 /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDDD28A68AE20025CC14 /* application.cpp */; };
-		ED24BDE428A6ADA70025CC14 /* libev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED24BDE328A6ADA70025CC14 /* libev.a */; };
 		ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */; };
 		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
 		ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */; };
@@ -328,8 +328,6 @@
 		ED36DDEE286DDB7700CA28EC /* Accessors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DDEC286DDB7700CA28EC /* Accessors.cpp */; };
 		ED36DE02286DDBCA00CA28EC /* cluster-objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DDF0286DDBC900CA28EC /* cluster-objects.cpp */; };
 		ED36DE46286DFE9F00CA28EC /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE45286DFE9F00CA28EC /* CoreBluetooth.framework */; };
-		ED36DE47286DFF5300CA28EC /* libssl.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE41286DFE6100CA28EC /* libssl.1.1.dylib */; };
-		ED36DE48286DFF5300CA28EC /* libcrypto.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE42286DFE6100CA28EC /* libcrypto.1.1.dylib */; };
 		ED36DE4A286E000600CA28EC /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE49286E000600CA28EC /* CoreFoundation.framework */; };
 		ED36DE4C286E002000CA28EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE4B286E002000CA28EC /* Foundation.framework */; };
 		ED36DE4E286E01E700CA28EC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED36DE4D286E01E700CA28EC /* IOKit.framework */; };
@@ -367,6 +365,13 @@
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
+		ED98458A2A6ED63F0057C0D8 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845742A6ED6030057C0D8 /* callback-stub.cpp */; };
+		ED98458D2A6ED6D70057C0D8 /* CurrentFabricRemover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98458B2A6ED6C10057C0D8 /* CurrentFabricRemover.cpp */; };
+		ED98458E2A6ED70F0057C0D8 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98457E2A6ED6030057C0D8 /* IMClusterCommandHandler.cpp */; };
+		ED9845972A6ED77E0057C0D8 /* RawKeySessionKeystore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845942A6ED77D0057C0D8 /* RawKeySessionKeystore.cpp */; };
+		ED98459A2A6ED9200057C0D8 /* libssl.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9845982A6ED9200057C0D8 /* libssl.3.dylib */; };
+		ED98459B2A6ED9200057C0D8 /* libcrypto.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */; };
+		ED98459D2A6ED9FB0057C0D8 /* libev.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */; };
 		EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388D829E6EF2700BDAED4 /* basic-information.cpp */; };
 		EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */; };
 		EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */; };
@@ -408,6 +413,11 @@
 		ED072C022A67E7CA007BBF71 /* cc51devices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc51devices.cpp; sourceTree = "<group>"; };
 		ED072C032A67E7CA007BBF71 /* cc51bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc51bridge.cpp; sourceTree = "<group>"; };
 		ED072C042A67E7CA007BBF71 /* cc51devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc51devices.h; sourceTree = "<group>"; };
+		ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = devicewindowcovering.cpp; sourceTree = "<group>"; };
+		ED072F612A69BA22007BBF71 /* devicewindowcovering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devicewindowcovering.h; sourceTree = "<group>"; };
+		ED072F642A69BBD6007BBF71 /* window-covering-delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-delegate.h"; sourceTree = "<group>"; };
+		ED072F652A69BBD6007BBF71 /* window-covering-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-server.h"; sourceTree = "<group>"; };
+		ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "window-covering-server.cpp"; sourceTree = "<group>"; };
 		ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoggingImpl.cpp; sourceTree = "<group>"; };
 		ED0B92D92949DDFF00FA3B04 /* Logging.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Logging.mm; sourceTree = "<group>"; };
 		ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPAddressSorter.cpp; sourceTree = "<group>"; };
@@ -455,7 +465,6 @@
 		ED24BDDB28A68AE20025CC14 /* mainloop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mainloop.hpp; sourceTree = "<group>"; };
 		ED24BDDC28A68AE20025CC14 /* socketcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = socketcomm.hpp; sourceTree = "<group>"; };
 		ED24BDDD28A68AE20025CC14 /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
-		ED24BDE328A6ADA70025CC14 /* libev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libev.a; path = ../../../../../../usr/local/Cellar/libev/4.33/lib/libev.a; sourceTree = "<group>"; };
 		ED24BDE628A812E00025CC14 /* p44bridgeapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44bridgeapi.h; sourceTree = "<group>"; };
 		ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44bridgeapi.cpp; sourceTree = "<group>"; };
 		ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44mbrd_main.h; sourceTree = "<group>"; };
@@ -1248,8 +1257,6 @@
 		ED36DE3D286DDECD00CA28EC /* writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
 		ED36DE3E286DDECD00CA28EC /* json_features.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json_features.h; sourceTree = "<group>"; };
 		ED36DE3F286DDECD00CA28EC /* forwards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forwards.h; sourceTree = "<group>"; };
-		ED36DE41286DFE6100CA28EC /* libssl.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.1.1.dylib; path = "../../../../../../usr/local/Cellar/openssl@1.1/1.1.1o/lib/libssl.1.1.dylib"; sourceTree = "<group>"; };
-		ED36DE42286DFE6100CA28EC /* libcrypto.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.1.dylib; path = "../../../../../../usr/local/Cellar/openssl@1.1/1.1.1o/lib/libcrypto.1.1.dylib"; sourceTree = "<group>"; };
 		ED36DE45286DFE9F00CA28EC /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		ED36DE49286E000600CA28EC /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		ED36DE4B286E002000CA28EC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -1326,6 +1333,21 @@
 		ED7F9A292904328F00A7CB48 /* Protocols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Protocols.cpp; sourceTree = "<group>"; };
 		ED7F9A2B290433FB00A7CB48 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioningDriver.h; sourceTree = "<group>"; };
+		ED9845742A6ED6030057C0D8 /* callback-stub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
+		ED9845752A6ED6030057C0D8 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
+		ED98457A2A6ED6030057C0D8 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
+		ED98457B2A6ED6030057C0D8 /* endpoint_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
+		ED98457C2A6ED6030057C0D8 /* CHIPClusters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
+		ED98457D2A6ED6030057C0D8 /* access.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
+		ED98457E2A6ED6030057C0D8 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
+		ED98457F2A6ED6030057C0D8 /* gen_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
+		ED98458B2A6ED6C10057C0D8 /* CurrentFabricRemover.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CurrentFabricRemover.cpp; sourceTree = "<group>"; };
+		ED98458C2A6ED6C10057C0D8 /* CurrentFabricRemover.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurrentFabricRemover.h; sourceTree = "<group>"; };
+		ED9845902A6ED77D0057C0D8 /* RawKeySessionKeystore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawKeySessionKeystore.h; sourceTree = "<group>"; };
+		ED9845942A6ED77D0057C0D8 /* RawKeySessionKeystore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawKeySessionKeystore.cpp; sourceTree = "<group>"; };
+		ED9845982A6ED9200057C0D8 /* libssl.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libssl.3.dylib"; sourceTree = "<group>"; };
+		ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libcrypto.3.dylib"; sourceTree = "<group>"; };
+		ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libev.4.dylib; path = ../../../../../../opt/homebrew/Cellar/libev/4.33/lib/libev.4.dylib; sourceTree = "<group>"; };
 		EDB388D729E6EF2700BDAED4 /* basic-information.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "basic-information.h"; sourceTree = "<group>"; };
 		EDB388D829E6EF2700BDAED4 /* basic-information.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "basic-information.cpp"; sourceTree = "<group>"; };
 		EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLVBackingStore.h; sourceTree = "<group>"; };
@@ -1358,7 +1380,6 @@
 		EDC58B542A65ADF300F48DEF /* p44bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44bridge.h; sourceTree = "<group>"; };
 		EDC58B552A65ADF300F48DEF /* p44devices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44devices.cpp; sourceTree = "<group>"; };
 		EDC58B562A65ADF300F48DEF /* p44devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44devices.h; sourceTree = "<group>"; };
-		EDC58B672A66C64100F48DEF /* gen-copy */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "gen-copy"; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
@@ -1437,15 +1458,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED98459D2A6ED9FB0057C0D8 /* libev.4.dylib in Frameworks */,
 				ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */,
-				ED24BDE428A6ADA70025CC14 /* libev.a in Frameworks */,
 				ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */,
 				ED36DEA8286E04A100CA28EC /* CoreData.framework in Frameworks */,
 				ED36DE4E286E01E700CA28EC /* IOKit.framework in Frameworks */,
 				ED36DE4C286E002000CA28EC /* Foundation.framework in Frameworks */,
 				ED36DE4A286E000600CA28EC /* CoreFoundation.framework in Frameworks */,
-				ED36DE47286DFF5300CA28EC /* libssl.1.1.dylib in Frameworks */,
-				ED36DE48286DFF5300CA28EC /* libcrypto.1.1.dylib in Frameworks */,
+				ED98459A2A6ED9200057C0D8 /* libssl.3.dylib in Frameworks */,
+				ED98459B2A6ED9200057C0D8 /* libcrypto.3.dylib in Frameworks */,
 				ED36DE46286DFE9F00CA28EC /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1453,6 +1474,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED072F632A69BBD6007BBF71 /* window-covering-server */ = {
+			isa = PBXGroup;
+			children = (
+				ED072F642A69BBD6007BBF71 /* window-covering-delegate.h */,
+				ED072F652A69BBD6007BBF71 /* window-covering-server.h */,
+				ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */,
+			);
+			path = "window-covering-server";
+			sourceTree = "<group>";
+		};
 		ED1A3CA12A45A275009746B8 /* adapters */ = {
 			isa = PBXGroup;
 			children = (
@@ -1539,6 +1570,8 @@
 				ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */,
 				ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */,
 				ED24BDC228A6709E0025CC14 /* devicecolorcontrol.h */,
+				ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */,
+				ED072F612A69BA22007BBF71 /* devicewindowcovering.h */,
 				ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */,
 				ED7F9A1D2902C31B00A7CB48 /* sensordevices.h */,
 				ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */,
@@ -1840,6 +1873,7 @@
 		ED36D7B6286DCD0900CA28EC /* clusters */ = {
 			isa = PBXGroup;
 			children = (
+				ED072F632A69BBD6007BBF71 /* window-covering-server */,
 				EDB388D629E6EF2700BDAED4 /* basic-information */,
 				ED24BDF328AF8F670025CC14 /* bridged-device-basic-information-server */,
 				ED36D7D8286DCDA300CA28EC /* access-control-server */,
@@ -2184,6 +2218,8 @@
 		ED36D90F286DCFC500CA28EC /* controller */ = {
 			isa = PBXGroup;
 			children = (
+				ED98458B2A6ED6C10057C0D8 /* CurrentFabricRemover.cpp */,
+				ED98458C2A6ED6C10057C0D8 /* CurrentFabricRemover.h */,
 				ED36D9F7286DCFC500CA28EC /* AbstractDnssdDiscoveryController.cpp */,
 				ED36D9FD286DCFC500CA28EC /* AbstractDnssdDiscoveryController.h */,
 				ED36D919286DCFC500CA28EC /* AutoCommissioner.cpp */,
@@ -2298,6 +2334,8 @@
 		ED36DAAA286DD1DE00CA28EC /* crypto */ = {
 			isa = PBXGroup;
 			children = (
+				ED9845942A6ED77D0057C0D8 /* RawKeySessionKeystore.cpp */,
+				ED9845902A6ED77D0057C0D8 /* RawKeySessionKeystore.h */,
 				ED36DAAE286DD20600CA28EC /* CHIPCryptoPAL.cpp */,
 				ED36DAAD286DD20600CA28EC /* CHIPCryptoPAL.h */,
 				ED36DAAC286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp */,
@@ -3215,16 +3253,16 @@
 		ED36DE40286DFE6100CA28EC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */,
+				ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */,
+				ED9845982A6ED9200057C0D8 /* libssl.3.dylib */,
 				ED7F9A2B290433FB00A7CB48 /* Network.framework */,
-				ED24BDE328A6ADA70025CC14 /* libev.a */,
 				ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */,
 				ED36DEA7286E04A100CA28EC /* CoreData.framework */,
 				ED36DE4D286E01E700CA28EC /* IOKit.framework */,
 				ED36DE4B286E002000CA28EC /* Foundation.framework */,
 				ED36DE49286E000600CA28EC /* CoreFoundation.framework */,
 				ED36DE45286DFE9F00CA28EC /* CoreBluetooth.framework */,
-				ED36DE42286DFE6100CA28EC /* libcrypto.1.1.dylib */,
-				ED36DE41286DFE6100CA28EC /* libssl.1.1.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -3299,7 +3337,7 @@
 			children = (
 				ED1A3C9D2A4346B0009746B8 /* README.md */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
-				EDC58B672A66C64100F48DEF /* gen-copy */,
+				ED9845702A6ED6030057C0D8 /* gen-copy */,
 				ED24BDB928A670570025CC14 /* src */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
 				ED690B53286DC79500069215 /* Products */,
@@ -3326,6 +3364,53 @@
 			);
 			name = connectedhomeip;
 			path = third_party/connectedhomeip;
+			sourceTree = "<group>";
+		};
+		ED9845702A6ED6030057C0D8 /* gen-copy */ = {
+			isa = PBXGroup;
+			children = (
+				ED9845712A6ED6030057C0D8 /* zap */,
+			);
+			path = "gen-copy";
+			sourceTree = "<group>";
+		};
+		ED9845712A6ED6030057C0D8 /* zap */ = {
+			isa = PBXGroup;
+			children = (
+				ED9845732A6ED6030057C0D8 /* app */,
+				ED9845782A6ED6030057C0D8 /* zapgen */,
+			);
+			path = zap;
+			sourceTree = "<group>";
+		};
+		ED9845732A6ED6030057C0D8 /* app */ = {
+			isa = PBXGroup;
+			children = (
+				ED9845742A6ED6030057C0D8 /* callback-stub.cpp */,
+				ED9845752A6ED6030057C0D8 /* PluginApplicationCallbacks.h */,
+			);
+			path = app;
+			sourceTree = "<group>";
+		};
+		ED9845782A6ED6030057C0D8 /* zapgen */ = {
+			isa = PBXGroup;
+			children = (
+				ED9845792A6ED6030057C0D8 /* zap-generated */,
+			);
+			path = zapgen;
+			sourceTree = "<group>";
+		};
+		ED9845792A6ED6030057C0D8 /* zap-generated */ = {
+			isa = PBXGroup;
+			children = (
+				ED98457A2A6ED6030057C0D8 /* CHIPClientCallbacks.h */,
+				ED98457B2A6ED6030057C0D8 /* endpoint_config.h */,
+				ED98457C2A6ED6030057C0D8 /* CHIPClusters.h */,
+				ED98457D2A6ED6030057C0D8 /* access.h */,
+				ED98457E2A6ED6030057C0D8 /* IMClusterCommandHandler.cpp */,
+				ED98457F2A6ED6030057C0D8 /* gen_config.h */,
+			);
+			path = "zap-generated";
 			sourceTree = "<group>";
 		};
 		EDB388D629E6EF2700BDAED4 /* basic-information */ = {
@@ -3558,6 +3643,7 @@
 				ED36D87D286DCDED00CA28EC /* AttributePathIB.cpp in Sources */,
 				ED36DB8F286DD2CE00CA28EC /* ASN1Reader.cpp in Sources */,
 				ED36DC03286DD57B00CA28EC /* BufferReader.cpp in Sources */,
+				ED98458E2A6ED70F0057C0D8 /* IMClusterCommandHandler.cpp in Sources */,
 				EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */,
 				ED60FD0B28BFCA9C00FE950E /* AddressPolicy.cpp in Sources */,
 				ED36DAD1286DD27200CA28EC /* TCPEndPoint.cpp in Sources */,
@@ -3699,6 +3785,7 @@
 				ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */,
 				ED36D8E9286DCF0B00CA28EC /* AttributeAccessInterface.cpp in Sources */,
 				ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */,
+				ED072F672A69BBD6007BBF71 /* window-covering-server.cpp in Sources */,
 				ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */,
 				ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */,
 				ED36DA89286DD14F00CA28EC /* CHIPCertFromX509.cpp in Sources */,
@@ -3714,6 +3801,7 @@
 				ED36D8E5286DCF0B00CA28EC /* ClusterStateCache.cpp in Sources */,
 				ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */,
 				ED36D874286DCDED00CA28EC /* AttributeStatusIB.cpp in Sources */,
+				ED98458A2A6ED63F0057C0D8 /* callback-stub.cpp in Sources */,
 				ED36DDE8286DDAF300CA28EC /* json_writer.cpp in Sources */,
 				ED36D871286DCDED00CA28EC /* EventPathIBs.cpp in Sources */,
 				ED36DD10286DD8A000CA28EC /* BdxMessages.cpp in Sources */,
@@ -3769,6 +3857,7 @@
 				EDF3F54928A528E700A82418 /* ASN1Time.cpp in Sources */,
 				ED36DD77286DD9A400CA28EC /* SystemStats.cpp in Sources */,
 				ED36D8EA286DCF0B00CA28EC /* BufferedReadCallback.cpp in Sources */,
+				ED9845972A6ED77E0057C0D8 /* RawKeySessionKeystore.cpp in Sources */,
 				ED36DAA0286DD17F00CA28EC /* ExampleDACs.cpp in Sources */,
 				ED36DB6B286DD2CE00CA28EC /* ServiceNaming.cpp in Sources */,
 				ED36DD73286DD9A400CA28EC /* TLVPacketBufferBackingStore.cpp in Sources */,
@@ -3792,6 +3881,7 @@
 				ED36DC63286DD6A400CA28EC /* ExchangeMessageDispatch.cpp in Sources */,
 				ED36D8E3286DCF0B00CA28EC /* CASEClient.cpp in Sources */,
 				ED36DC1C286DD5A300CA28EC /* CHIPLogging.cpp in Sources */,
+				ED98458D2A6ED6D70057C0D8 /* CurrentFabricRemover.cpp in Sources */,
 				ED36D786286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36D7B4286DCCBB00CA28EC /* PermissiveAccessControlDelegate.cpp in Sources */,
 				ED36D7FD286DCDA300CA28EC /* descriptor.cpp in Sources */,
@@ -4054,9 +4144,11 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@1.1/lib",
+					"$(BREW_PREFIX)/opt/openssl@3/lib",
 					"$(BREW_PREFIX)/opt/libev/lib",
 					"$(BREW_PREFIX)/Cellar/libev/4.33/lib",
+					"/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib",
+					/opt/homebrew/Cellar/libev/4.33/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4082,7 +4174,7 @@
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@1.1/include",
+					"$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Debug;
@@ -4105,9 +4197,11 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@1.1/lib",
+					"$(BREW_PREFIX)/opt/openssl@3/lib",
 					"$(BREW_PREFIX)/opt/libev/lib",
 					"$(BREW_PREFIX)/Cellar/libev/4.33/lib",
+					"/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib",
+					/opt/homebrew/Cellar/libev/4.33/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4133,7 +4227,7 @@
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
 					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
 					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@1.1/include",
+					"$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Release;

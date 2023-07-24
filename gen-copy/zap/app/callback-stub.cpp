@@ -52,6 +52,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case app::Clusters::Identify::Id:
         emberAfIdentifyClusterInitCallback(endpoint);
         break;
+    case app::Clusters::IlluminanceMeasurement::Id:
+        emberAfIlluminanceMeasurementClusterInitCallback(endpoint);
+        break;
     case app::Clusters::LevelControl::Id:
         emberAfLevelControlClusterInitCallback(endpoint);
         break;
@@ -67,8 +70,14 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case app::Clusters::OperationalCredentials::Id:
         emberAfOperationalCredentialsClusterInitCallback(endpoint);
         break;
+    case app::Clusters::RelativeHumidityMeasurement::Id:
+        emberAfRelativeHumidityMeasurementClusterInitCallback(endpoint);
+        break;
     case app::Clusters::SoftwareDiagnostics::Id:
         emberAfSoftwareDiagnosticsClusterInitCallback(endpoint);
+        break;
+    case app::Clusters::TemperatureMeasurement::Id:
+        emberAfTemperatureMeasurementClusterInitCallback(endpoint);
         break;
     case app::Clusters::TimeFormatLocalization::Id:
         emberAfTimeFormatLocalizationClusterInitCallback(endpoint);
@@ -78,6 +87,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
         break;
     case app::Clusters::UserLabel::Id:
         emberAfUserLabelClusterInitCallback(endpoint);
+        break;
+    case app::Clusters::WindowCovering::Id:
+        emberAfWindowCoveringClusterInitCallback(endpoint);
         break;
     default:
         // Unrecognized cluster ID
@@ -154,6 +166,11 @@ void __attribute__((weak)) emberAfIdentifyClusterInitCallback(EndpointId endpoin
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfIlluminanceMeasurementClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfLevelControlClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -179,7 +196,17 @@ void __attribute__((weak)) emberAfOperationalCredentialsClusterInitCallback(Endp
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfRelativeHumidityMeasurementClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfSoftwareDiagnosticsClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
+void __attribute__((weak)) emberAfTemperatureMeasurementClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;
@@ -195,6 +222,11 @@ void __attribute__((weak)) emberAfUnitLocalizationClusterInitCallback(EndpointId
     (void) endpoint;
 }
 void __attribute__((weak)) emberAfUserLabelClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
+void __attribute__((weak)) emberAfWindowCoveringClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
     (void) endpoint;

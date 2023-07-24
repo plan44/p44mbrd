@@ -12,15 +12,19 @@ void MatterGeneralCommissioningPluginServerInitCallback();
 void MatterGeneralDiagnosticsPluginServerInitCallback();
 void MatterGroupKeyManagementPluginServerInitCallback();
 void MatterIdentifyPluginServerInitCallback();
+void MatterIlluminanceMeasurementPluginServerInitCallback();
 void MatterLevelControlPluginServerInitCallback();
 void MatterLocalizationConfigurationPluginServerInitCallback();
 void MatterNetworkCommissioningPluginServerInitCallback();
 void MatterOnOffPluginServerInitCallback();
 void MatterOperationalCredentialsPluginServerInitCallback();
+void MatterRelativeHumidityMeasurementPluginServerInitCallback();
 void MatterSoftwareDiagnosticsPluginServerInitCallback();
+void MatterTemperatureMeasurementPluginServerInitCallback();
 void MatterTimeFormatLocalizationPluginServerInitCallback();
 void MatterUnitLocalizationPluginServerInitCallback();
 void MatterUserLabelPluginServerInitCallback();
+void MatterWindowCoveringPluginServerInitCallback();
 
 #define MATTER_PLUGINS_INIT \
     MatterAccessControlPluginServerInitCallback(); \
@@ -36,13 +40,17 @@ void MatterUserLabelPluginServerInitCallback();
     MatterGeneralDiagnosticsPluginServerInitCallback(); \
     MatterGroupKeyManagementPluginServerInitCallback(); \
     MatterIdentifyPluginServerInitCallback(); \
+    MatterIlluminanceMeasurementPluginServerInitCallback(); \
     MatterLevelControlPluginServerInitCallback(); \
     MatterLocalizationConfigurationPluginServerInitCallback(); \
     MatterNetworkCommissioningPluginServerInitCallback(); \
     MatterOnOffPluginServerInitCallback(); \
     MatterOperationalCredentialsPluginServerInitCallback(); \
+    MatterRelativeHumidityMeasurementPluginServerInitCallback(); \
     MatterSoftwareDiagnosticsPluginServerInitCallback(); \
+    MatterTemperatureMeasurementPluginServerInitCallback(); \
     MatterTimeFormatLocalizationPluginServerInitCallback(); \
     MatterUnitLocalizationPluginServerInitCallback(); \
-    MatterUserLabelPluginServerInitCallback();
+    MatterUserLabelPluginServerInitCallback(); \
+    MatterWindowCoveringPluginServerInitCallback();
 

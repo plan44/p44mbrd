@@ -49,6 +49,7 @@
     0x0000003E, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
+    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
@@ -74,6 +75,7 @@
     0x00000000, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
+    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
@@ -99,6 +101,7 @@
     kMatterAccessPrivilegeAdminister, /* Cluster: Operational Credentials, Attribute: NOCs, Privilege: administer */ \
     /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: view */ \
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
+    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
@@ -117,6 +120,7 @@
     0x00000031, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     0x0000003F, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     0x00000041, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
+    0x00000102, /* Cluster: Window Covering, Attribute: Mode, Privilege: manage */ \
     0x00000300, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 
@@ -133,6 +137,7 @@
     0x00000004, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     0x00000000, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     0x00000000, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
+    0x00000017, /* Cluster: Window Covering, Attribute: Mode, Privilege: manage */ \
     0x00004010, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 
@@ -149,6 +154,7 @@
     kMatterAccessPrivilegeAdminister, /* Cluster: Network Commissioning, Attribute: InterfaceEnabled, Privilege: administer */ \
     kMatterAccessPrivilegeManage, /* Cluster: Group Key Management, Attribute: GroupKeyMap, Privilege: manage */ \
     kMatterAccessPrivilegeManage, /* Cluster: User Label, Attribute: LabelList, Privilege: manage */ \
+    kMatterAccessPrivilegeManage, /* Cluster: Window Covering, Attribute: Mode, Privilege: manage */ \
     kMatterAccessPrivilegeManage, /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: manage */ \
 }
 

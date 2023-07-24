@@ -52,6 +52,10 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
+            argument = "--bridgeapihost 127.0.0.1"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3840"
             isEnabled = "YES">
          </CommandLineArgument>
