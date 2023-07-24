@@ -322,7 +322,7 @@ public:
       else {
         // already running
         installBridgedDevice(aDev);
-        // save possibly modified endpoint map
+        // save possibly modified first free endpointID (increased when previously unknown devices have been added) 
         chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
         CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
         LogErrorOnFailure(chiperr);
@@ -580,7 +580,7 @@ public:
       if (chiperr==CHIP_NO_ERROR) {
         // legacy endpoint map (still) exists, find highest index used
         mFirstFreeEndpointId = emberAfFixedEndpointCount();
-        for (size_t i=0; i<nde; i++) {
+        for (EndpointId i=0; i<nde; i++) {
           if (legacyDynamicEndPointMap[i]!=' ') {
             if (i>=mFirstFreeEndpointId-kLegacyFirstDynamicEndpointID) {
               mFirstFreeEndpointId = i+kLegacyFirstDynamicEndpointID+1;
