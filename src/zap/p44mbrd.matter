@@ -1315,6 +1315,109 @@ server cluster BooleanState = 69 {
   readonly attribute int16u clusterRevision = 65533;
 }
 
+/** Provides an interface for controlling and adjusting automatic window coverings. */
+server cluster WindowCovering = 258 {
+  enum EndProductType : ENUM8 {
+    kRollerShade = 0;
+    kRomanShade = 1;
+    kBalloonShade = 2;
+    kWovenWood = 3;
+    kPleatedShade = 4;
+    kCellularShade = 5;
+    kLayeredShade = 6;
+    kLayeredShade2D = 7;
+    kSheerShade = 8;
+    kTiltOnlyInteriorBlind = 9;
+    kInteriorBlind = 10;
+    kVerticalBlindStripCurtain = 11;
+    kInteriorVenetianBlind = 12;
+    kExteriorVenetianBlind = 13;
+    kLateralLeftCurtain = 14;
+    kLateralRightCurtain = 15;
+    kCentralCurtain = 16;
+    kRollerShutter = 17;
+    kExteriorVerticalScreen = 18;
+    kAwningTerracePatio = 19;
+    kAwningVerticalScreen = 20;
+    kTiltOnlyPergola = 21;
+    kSwingingShutter = 22;
+    kSlidingShutter = 23;
+    kUnknown = 255;
+  }
+
+  enum Type : ENUM8 {
+    kRollerShade = 0;
+    kRollerShade2Motor = 1;
+    kRollerShadeExterior = 2;
+    kRollerShadeExterior2Motor = 3;
+    kDrapery = 4;
+    kAwning = 5;
+    kShutter = 6;
+    kTiltBlindTiltOnly = 7;
+    kTiltBlindLiftAndTilt = 8;
+    kProjectorScreen = 9;
+    kUnknown = 255;
+  }
+
+  bitmap ConfigStatus : BITMAP8 {
+    kOperational = 0x1;
+    kOnlineReserved = 0x2;
+    kLiftMovementReversed = 0x4;
+    kLiftPositionAware = 0x8;
+    kTiltPositionAware = 0x10;
+    kLiftEncoderControlled = 0x20;
+    kTiltEncoderControlled = 0x40;
+  }
+
+  bitmap Feature : BITMAP32 {
+    kLift = 0x1;
+    kTilt = 0x2;
+    kPositionAwareLift = 0x4;
+    kAbsolutePosition = 0x8;
+    kPositionAwareTilt = 0x10;
+  }
+
+  bitmap Mode : BITMAP8 {
+    kMotorDirectionReversed = 0x1;
+    kCalibrationMode = 0x2;
+    kMaintenanceMode = 0x4;
+    kLedFeedback = 0x8;
+  }
+
+  bitmap OperationalStatus : BITMAP8 {
+    kGlobal = 0x3;
+    kLift = 0xC;
+    kTilt = 0x30;
+  }
+
+  bitmap SafetyStatus : BITMAP16 {
+    kRemoteLockout = 0x1;
+    kTamperDetection = 0x2;
+    kFailedCommunication = 0x4;
+    kPositionFailure = 0x8;
+    kThermalProtection = 0x10;
+    kObstacleDetected = 0x20;
+    kPower = 0x40;
+    kStopInput = 0x80;
+    kMotorJammed = 0x100;
+    kHardwareFailure = 0x200;
+    kManualOperation = 0x400;
+    kProtection = 0x800;
+  }
+
+  readonly attribute Type type = 0;
+  readonly attribute ConfigStatus configStatus = 7;
+  readonly attribute OperationalStatus operationalStatus = 10;
+  readonly attribute EndProductType endProductType = 13;
+  attribute access(write: manage) Mode mode = 23;
+  readonly attribute command_id generatedCommandList[] = 65528;
+  readonly attribute command_id acceptedCommandList[] = 65529;
+  readonly attribute event_id eventList[] = 65530;
+  readonly attribute attrib_id attributeList[] = 65531;
+  readonly attribute bitmap32 featureMap = 65532;
+  readonly attribute int16u clusterRevision = 65533;
+}
+
 /** Attributes and commands for controlling the color properties of a color-capable light. */
 server cluster ColorControl = 768 {
   enum ColorLoopAction : ENUM8 {
@@ -1927,6 +2030,20 @@ endpoint 2 {
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 1;
+  }
+
+  server cluster WindowCovering {
+    ram      attribute type default = 0x00;
+    ram      attribute configStatus default = 0x03;
+    ram      attribute operationalStatus default = 0x00;
+    ram      attribute endProductType default = 0x00;
+    ram      attribute mode default = 0x00;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 5;
   }
 
   server cluster ColorControl {
