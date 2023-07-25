@@ -56,12 +56,12 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 // Declare cluster commands
 // TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
 constexpr CommandId onOffIncomingCommands[] = {
-  app::Clusters::OnOff::Commands::Off::Id,
-  app::Clusters::OnOff::Commands::On::Id,
-  app::Clusters::OnOff::Commands::Toggle::Id,
-  app::Clusters::OnOff::Commands::OffWithEffect::Id,
-  app::Clusters::OnOff::Commands::OnWithRecallGlobalScene::Id,
-  app::Clusters::OnOff::Commands::OnWithTimedOff::Id,
+  OnOff::Commands::Off::Id,
+  OnOff::Commands::On::Id,
+  OnOff::Commands::Toggle::Id,
+  OnOff::Commands::OffWithEffect::Id,
+  OnOff::Commands::OnWithRecallGlobalScene::Id,
+  OnOff::Commands::OnWithTimedOff::Id,
   kInvalidCommandId,
 };
 
@@ -90,7 +90,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
 uint8_t DeviceOnOff::identifyType()
 {
   // Lights identify via light, others somehow operate the actuator (blinds, clicking relay etc.)
-  return mLighting ? EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_VISIBLE_LIGHT : EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_ACTUATOR;
+  return to_underlying<Identify::IdentifyTypeEnum>(mLighting ? Identify::IdentifyTypeEnum::kLightOutput : Identify::IdentifyTypeEnum::kActuator);
 }
 
 

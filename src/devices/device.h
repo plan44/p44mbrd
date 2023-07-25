@@ -41,6 +41,7 @@
 
 using namespace chip;
 using namespace app;
+using namespace Clusters;
 using namespace std;
 using namespace p44;
 
@@ -338,7 +339,7 @@ public:
 
 protected:
 
-  virtual uint8_t identifyType() { return EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_NONE; }
+  virtual uint8_t identifyType() { return to_underlying<Identify::IdentifyTypeEnum>(Identify::IdentifyTypeEnum::kNone); }
 
 private:
 
