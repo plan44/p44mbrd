@@ -32,7 +32,8 @@ using namespace p44;
 
 // MARK: - CC51_DeviceImpl
 
-CC51_DeviceImpl::CC51_DeviceImpl()
+CC51_DeviceImpl::CC51_DeviceImpl(int _item_id) :
+    item_id (_item_id)
 {
 }
 
@@ -42,8 +43,7 @@ CC51_DeviceImpl::CC51_DeviceImpl()
 
 const string CC51_DeviceImpl::endpointUID() const
 {
-  // TODO: return a sensible value
-  return "THIS_MUST_BE_A_UUID";
+  return string_format("cc51_id_%d", item_id);
 }
 
 
@@ -91,12 +91,13 @@ string CC51_DeviceImpl::name() const
 bool CC51_DeviceImpl::changeName(const string aNewName)
 {
   if (aNewName!=mName) {
+    mName = aNewName;
     // TODO: forward new name
 
     // probably something like
     // {"jsonrpc":"2.0","id":"26", "method":"deviced_get_group_names","params":{"room_id":1}}
     JsonObjectPtr params = JsonObject::newObj();
-    params->add("item_id", JsonObject::newInt32(42));
+    params->add("item_id", JsonObject::newInt32(CC51_DeviceImpl::get_item_id ()));
     params->add("name", JsonObject::newString(aNewName));
     CC51_BridgeImpl::adapter().api().sendRequest("item_set_name", params);
 
@@ -108,6 +109,12 @@ bool CC51_DeviceImpl::changeName(const string aNewName)
 string CC51_DeviceImpl::zone() const
 {
   return mZone;
+}
+
+
+int CC51_DeviceImpl::get_item_id()
+{
+  return item_id;
 }
 
 
@@ -140,8 +147,10 @@ void CC51_OnOffImpl::setOnOffState(bool aOn)
 
   // probably something like
   JsonObjectPtr params = JsonObject::newObj();
-  params->add("someting", JsonObject::newInt32(3));
-  CC51_BridgeImpl::adapter().api().sendRequest("some_method", params);
+  params->add("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add("command", JsonObject::newString ("switch"));
+  params->add("value", JsonObject::newInt32 (aOn ? 1 : 0));
+  CC51_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params);
 
 }
 

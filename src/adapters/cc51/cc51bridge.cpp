@@ -137,8 +137,8 @@ void CC51_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
     // probably something like
     // {"jsonrpc":"2.0","id":"26", "method":"deviced_get_group_names","params":{"room_id":1}}
     JsonObjectPtr params = JsonObject::newObj();
-    params->add("room_id", JsonObject::newInt32(1));
-    mJsonRpcAPI.sendRequest("deviced_get_group_names", params, boost::bind(&CC51_BridgeImpl::deviceListReceived, this, _1, _2, _3));
+    params->add("name", JsonObject::newString("p44mbrd"));
+    mJsonRpcAPI.sendRequest("rpc_client_register", params, boost::bind(&CC51_BridgeImpl::client_registered, this, _1, _2, _3));
     // processing will continue at deviceListReceived via callback
     return;
   }
@@ -152,18 +152,65 @@ void CC51_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
 }
 
 
+void CC51_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+{
+  if (Error::isOK(aStatus)) {
+    // request ok
+
+    /* start discovery */
+
+    JsonObjectPtr params = JsonObject::newObj();
+    mJsonRpcAPI.sendRequest("deviced.deviced_get_items_info", params, boost::bind(&CC51_BridgeImpl::deviceListReceived, this, _1, _2, _3));
+  }
+  else {
+    OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
+  }
+  // Assume discovery done at this point, so fire the callback
+  mAdapterStartedCB(aStatus, *this);
+}
+
 void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
 {
+  JsonObjectPtr ilist;
+
   if (Error::isOK(aStatus)) {
     // request ok
 
     // assuming we have a list of devices to be bridged here:
     // TODO: implement device instantiation
 
-    // For now: always instantiate a dummy OnOff device
-    DevicePtr dev = new CC51_OnOffPluginUnitDevice();
-    // register it
-    registerInitialDevice(dev);
+    ilist = aResultOrErrorData->get ("item_list");
+    if (ilist && ilist->arrayLength() > 0) {
+      int i;
+
+      for (i = 0; i < ilist->arrayLength(); i++)
+        {
+          JsonObjectPtr item;
+
+          item = ilist->arrayGet (i);
+
+          OLOG(LOG_WARNING, "item: %s", item->getCString ("name"));
+
+          if (!strcmp (item->getCString ("type"), "group") &&
+              !strcmp (item->getCString ("device_type"), "switch"))
+            {
+              OLOG (LOG_WARNING, "... registering onoff device for switch");
+
+              JsonObjectPtr o;
+              if (item->get("item_id", o)) {
+                int item_id = o->int32Value();
+                // For now: always instantiate a dummy OnOff device
+                DevicePtr dev = new CC51_OnOffPluginUnitDevice(item_id);
+                // set name if exists
+                if (item->get("name", o)) {
+                  CC51_DeviceImpl::impl(dev)->initialize_name(o->stringValue());
+                }
+                // register it
+                registerInitialDevice(dev);
+              }
+            }
+        }
+    }
 
   }
   else {

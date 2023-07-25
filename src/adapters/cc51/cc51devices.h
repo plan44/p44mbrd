@@ -58,7 +58,7 @@ class CC51_DeviceImpl :
 
 public:
 
-  CC51_DeviceImpl();
+  CC51_DeviceImpl(int item_id);
 
   /// @name DeviceInfoDelegate
   /// @{
@@ -85,6 +85,11 @@ public:
   /// @return `CC51_DeviceImpl` pointer from DevicePtr
   inline static CC51_DeviceImpl* impl(DevicePtr aDevice) { return static_cast<CC51_DeviceImpl*>(&(aDevice->deviceInfoDelegate())); } // we *know* the delegate *is* a CC51_DeviceImpl
 
+  int item_id;
+  int get_item_id ();
+
+  void initialize_name(const string _name) { mName = _name; }
+
   /// @}
 
 };
@@ -94,6 +99,10 @@ public:
 class CC51_IdentifiableImpl : public CC51_DeviceImpl, public IdentifyDelegate
 {
   typedef CC51_DeviceImpl inherited;
+
+protected:
+
+  CC51_IdentifiableImpl(int _item_id) : inherited(_item_id) { /* NOP so far */ }
 
   /// @name IdentifyDelegate
   /// @{
@@ -109,6 +118,8 @@ class CC51_OnOffImpl : public CC51_IdentifiableImpl, public OnOffDelegate
   typedef CC51_IdentifiableImpl inherited;
 
 protected:
+
+  CC51_OnOffImpl(int _item_id) : inherited(_item_id) { /* NOP so far */ }
 
   /// the default channel ID
   string mDefaultChannelId;
@@ -131,8 +142,10 @@ class CC51_ComposedDevice final :
   public ComposedDevice, // the matter side device
   public CC51_DeviceImpl // the CC51 side delegate implementation
 {
+  typedef CC51_DeviceImpl inherited;
+
 public:
-  CC51_ComposedDevice() : ComposedDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  CC51_ComposedDevice(int _item_id) : ComposedDevice(DG(DeviceInfo)), inherited(_item_id) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -143,8 +156,12 @@ class CC51_OnOffLightDevice final :
   public DeviceOnOffLight, // the matter side device
   public CC51_OnOffImpl // the CC51 side delegate implementation
 {
+  typedef CC51_OnOffImpl inherited;
 public:
-  CC51_OnOffLightDevice() : DeviceOnOffLight(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  CC51_OnOffLightDevice(int _item_id) :
+      DeviceOnOffLight(DG(OnOff), DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -153,8 +170,12 @@ class CC51_OnOffPluginUnitDevice final :
   public DeviceOnOffPluginUnit, // the matter side device
   public CC51_OnOffImpl // the CC51 side delegate implementation
 {
+  typedef CC51_OnOffImpl inherited;
 public:
-  CC51_OnOffPluginUnitDevice() : DeviceOnOffPluginUnit(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  CC51_OnOffPluginUnitDevice(int _item_id) :
+      DeviceOnOffPluginUnit(DG(OnOff), DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  { }; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
