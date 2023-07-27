@@ -78,7 +78,7 @@ public:
   /// @note this must be called whenever the actual input reports a new value
   ///   (or reports not having no value at all), while the device is operational
   /// @param aMeasuredValue the currently measured value
-  /// @param aIsValue true if aMeasuredValue is an actual value, false if the update means "we do not have a value"
+  /// @param aIsValid true if aMeasuredValue is an actual value, false if the update means "we do not have a value"
   /// @param aUpdateMode update mode for propagating the sensor value
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) = 0;
 

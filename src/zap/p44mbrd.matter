@@ -2039,10 +2039,10 @@ endpoint 2 {
   server cluster BridgedDeviceBasicInformation {
     ram      attribute vendorName;
     ram      attribute productName;
-    ram      attribute nodeLabel;
+    callback attribute nodeLabel;
     ram      attribute productURL;
     ram      attribute serialNumber;
-    ram      attribute reachable default = 1;
+    callback attribute reachable default = 1;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;

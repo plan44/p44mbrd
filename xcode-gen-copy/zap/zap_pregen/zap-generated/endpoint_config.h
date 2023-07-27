@@ -290,10 +290,10 @@
   /* Endpoint: 2, Cluster: Bridged Device Basic Information (server) */ \
   { ZAP_EMPTY_DEFAULT(), 0x00000001, 33, ZAP_TYPE(CHAR_STRING), 0 }, /* VendorName */  \
   { ZAP_EMPTY_DEFAULT(), 0x00000003, 33, ZAP_TYPE(CHAR_STRING), 0 }, /* ProductName */  \
-  { ZAP_EMPTY_DEFAULT(), 0x00000005, 33, ZAP_TYPE(CHAR_STRING), ZAP_ATTRIBUTE_MASK(WRITABLE) }, /* NodeLabel */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000005, 33, ZAP_TYPE(CHAR_STRING), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE) }, /* NodeLabel */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000000D, 258, ZAP_TYPE(LONG_CHAR_STRING), 0 }, /* ProductURL */  \
   { ZAP_EMPTY_DEFAULT(), 0x0000000F, 33, ZAP_TYPE(CHAR_STRING), 0 }, /* SerialNumber */  \
-  { ZAP_SIMPLE_DEFAULT(1), 0x00000011, 1, ZAP_TYPE(BOOLEAN), 0 }, /* Reachable */  \
+  { ZAP_EMPTY_DEFAULT(), 0x00000011, 1, ZAP_TYPE(BOOLEAN), ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) }, /* Reachable */  \
   { ZAP_SIMPLE_DEFAULT(0), 0x0000FFFC, 4, ZAP_TYPE(BITMAP32), 0 }, /* FeatureMap */  \
   { ZAP_SIMPLE_DEFAULT(1), 0x0000FFFD, 2, ZAP_TYPE(INT16U), 0 }, /* ClusterRevision */  \
 \
@@ -858,7 +858,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
       .clusterId = 0x00000039, \
       .attributes = ZAP_ATTRIBUTE_INDEX(151), \
       .attributeCount = 8, \
-      .clusterSize = 397, \
+      .clusterSize = 363, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
       .functions = NULL, \
       .acceptedCommandList = nullptr, \
@@ -954,7 +954,7 @@ const EmberAfGenericClusterFunction chipFuncArrayColorControlServer[] = {\
 #define GENERATED_ENDPOINT_TYPES { \
   { ZAP_CLUSTER_INDEX(0), 17, 218 }, \
   { ZAP_CLUSTER_INDEX(17), 3, 15 }, \
-  { ZAP_CLUSTER_INDEX(20), 12, 482 }, \
+  { ZAP_CLUSTER_INDEX(20), 12, 448 }, \
 }
 
 
@@ -969,7 +969,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (37)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (715)
+#define ATTRIBUTE_MAX_SIZE (681)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)

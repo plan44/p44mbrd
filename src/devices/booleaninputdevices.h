@@ -51,7 +51,7 @@ public:
   /// @note this must be called whenever the actual input reports a new state
   ///   (or reports not having no state at all), while the device is operational
   /// @param aState current state
-  /// @param aIsValue true if aState is an actually know state, false if the update means "we do not know the state"
+  /// @param aIsValid true if aState is an actually know state, false if the update means "we do not know the state"
   /// @param aUpdateMode update mode for propagating the sensor value
   void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
 

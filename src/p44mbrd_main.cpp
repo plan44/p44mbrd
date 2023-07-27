@@ -88,6 +88,14 @@
   #include "adapters/cc51/cc51bridge.h"
 #endif // CC51_ADAPTERS
 
+// FIXME: remove debug stuff
+#define CERT_DEBUG 0
+
+#if CERT_DEBUG
+// FIXME: remove debug stuff
+#warning "remove debug stuff"
+#include <credentials/CertificationDeclaration.h>
+#endif
 
 using namespace chip;
 using namespace chip::Credentials;
@@ -322,7 +330,7 @@ public:
       else {
         // already running
         installBridgedDevice(aDev);
-        // save possibly modified first free endpointID (increased when previously unknown devices have been added) 
+        // save possibly modified first free endpointID (increased when previously unknown devices have been added)
         chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
         CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
         LogErrorOnFailure(chiperr);
@@ -883,7 +891,21 @@ public:
     // MARK: basically reduced ChipLinuxAppMainLoop() from here, without actually starting the mainloop
 
     // TODO: implement our own real DAC provider later
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    DeviceAttestationCredentialsProvider *dacProvider = Examples::GetExampleDACProvider();
+    SetDeviceAttestationCredentialsProvider(dacProvider);
+
+    #if CERT_DEBUG
+    #warning "allow actual certs"
+
+    // FIXME: remove debug stuff
+    #warning "remove debug stuff"
+    uint8_t certDeclBuf[Credentials::kMaxCMSSignedCDMessage]; // Sized to hold the example certificate declaration with 100 PIDs.                                                              // See DeviceAttestationCredsExample
+    MutableByteSpan certDeclSpan(certDeclBuf);
+    dacProvider->GetCertificationDeclaration(certDeclSpan);
+    dacProvider->GetDeviceAttestationCert(certDeclSpan);
+    dacProvider->GetProductAttestationIntermediateCert(certDeclSpan);
+
+    #endif // CERT_DEBUG
 
     // Set our own device info provider (before initializing server, which wants to see it installed)
     SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
