@@ -41,9 +41,6 @@ public:
 
   virtual string description() override;
 
-  /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-
   /// @name callbacks for Sensor implementations
   /// @{
 
@@ -56,10 +53,6 @@ public:
   void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
 
   /// @}
-
-protected:
-
-  uint8_t mState; ///< current state, NULL if currently not known
 
 };
 

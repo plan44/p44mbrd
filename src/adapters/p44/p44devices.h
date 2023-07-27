@@ -48,11 +48,6 @@ class P44_DeviceImpl :
 
   string mBridgedDSUID; ///< dSUID of the bridged device (for making API calls)
 
-  string mVendorName;
-  string mModelName;
-  string mConfigUrl;
-  string mSerialNo;
-
   /// @}
 
   /// @name device properties that can change after instantiation
@@ -65,6 +60,8 @@ class P44_DeviceImpl :
 
   /// @}
 
+  JsonObjectPtr mTempDeviceInfo; ///< keeps device info temporarily until device is installed
+
 public:
 
   P44_DeviceImpl();
@@ -73,10 +70,7 @@ public:
   /// @{
   virtual const string endpointUID() const override;
 
-  virtual string vendorName() const override;
-  virtual string modelName() const override;
-  virtual string configUrl() const override;
-  virtual string serialNo() const override;
+  virtual void deviceDidGetInstalled() override;
 
   virtual bool isReachable() const override;
 
@@ -101,7 +95,8 @@ public:
   void notify(const string aNotification, JsonObjectPtr aParams);
   void call(const string aMethod, JsonObjectPtr aParams, JSonMessageCB aResponseCB);
 
-  /// init device with information from bridge query results
+  /// @brief init device with information from bridge query results
+  /// @note the device does not yet have a endpointID at this point and CANNOT ACCESS ATTRIBUTES yet
   /// @param aDeviceInfo the JSON object for the entire bridge-side device
   /// @param aDeviceComponentInfo the JSON description object for the output or input that should be handled
   /// @param aInputType the name of the input type (sensor, binaryInput, button), or NULL if device is not an input device
@@ -113,6 +108,13 @@ public:
 
   /// called to handle pushed properties coming from bridge
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties);
+
+protected:
+
+  /// @brief update device with information from bridge query results now where the device is installed
+  ///   and CAN ACCESS ATTRIBUTES.
+  /// @param aDeviceInfo the JSON object for the entire bridge-side device
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo);
 
   /// @}
 
@@ -159,6 +161,7 @@ protected:
   /// @}
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
   virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);
 };
@@ -176,13 +179,12 @@ protected:
 
   /// @name LevelControlDelegate
   /// @{
-  virtual uint16_t recommendedTransitionTimeDS() override { return mRecommendedTransitionTimeDS; };
   virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS) override;
   virtual void dim(int8_t aDirection, uint8_t aRate) override;
   virtual MLMicroSeconds endOfLatestTransition() override { return mEndOfLatestTransition; };
   /// @}
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
 public:

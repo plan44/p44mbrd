@@ -46,9 +46,6 @@ public:
   /// @param aRate rate of change, 0xFF = use default
   virtual void dim(int8_t aDirection, uint8_t aRate) = 0;
 
-  /// @return recommended transition time for this device in tenths of seconds
-  virtual uint16_t recommendedTransitionTimeDS() = 0;
-
   /// @return the time when the latest started transition will end, in Mainloop::now() time
   virtual MLMicroSeconds endOfLatestTransition() = 0;
 
@@ -69,7 +66,8 @@ public:
 
   DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
-  virtual void willBeInstalled() override;
+  virtual void didGetInstalled() override;
+
   virtual string description() override;
 
   uint8_t currentLevel() { return mLevel; };
@@ -109,14 +107,8 @@ private:
 
   // attributes
   uint8_t mLevel;
-  uint8_t mOnLevel;
-  uint8_t mLevelControlOptions;
-  uint16_t mOnOffTransitionTimeDS;
-  uint8_t mDefaultMoveRateUnitsPerS;
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
-  uint8_t minLevel(); ///< return minimum level (different for generic and lighting cases)
-  uint8_t maxLevel(); ///< return maximum level
   bool shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
 };
 

@@ -3,28 +3,71 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "moveToLevelHandler(unsigned short, unsigned int, unsigned char, unsigned short, unsigned char, unsigned char, unsigned short):level-control.cpp">
-      </ContextState>
-      <ContextState
-         contextName = "emberAfGetServerAttributeIndexByAttributeId(unsigned short, unsigned int, unsigned int):attribute-storage.cpp">
-      </ContextState>
-      <ContextState
-         contextName = "chip::app::Clusters::LevelControl::Attributes::CurrentLevel::Get(unsigned short, unsigned char*):Accessors.cpp">
-      </ContextState>
-      <ContextState
-         contextName = "DeviceLevelControl::effect(bool):devicelevelcontrol.cpp">
+         contextName = "emAfLoadAttributeDefaults(unsigned short, bool, chip::Optional&lt;unsigned int&gt;):attribute-storage.cpp">
       </ContextState>
       <ContextState
          contextName = "DeviceDimmable::HandleReadAttribute(unsigned int, unsigned int, unsigned char*, unsigned short):Device.cpp">
       </ContextState>
       <ContextState
+         contextName = "emberAfEndpointConfigure():attribute-storage.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "chip::app::DefaultAttributePersistenceProvider::ReadValue(chip::app::ConcreteAttributePath const&amp;, unsigned char, unsigned long, chip::Span&lt;unsigned char&gt;&amp;):DefaultAttributePersistenceProvider.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "Device::finalizeDeviceDeclarationWithTypes(chip::Span&lt;EmberAfDeviceType const&gt; const&amp;):device.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "(chip::ClusterId)tl[i]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "moveToLevelHandler(unsigned short, unsigned int, unsigned char, unsigned short, unsigned char, unsigned char, unsigned short):level-control.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord*, EmberAfAttributeMetadata const**, unsigned char*, unsigned short, bool):attribute-storage.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "(const EmberAfCluster)endpointType-&gt;cluster[5]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Device::AddAsDeviceEndpoint():device.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "P44mbrd::installSingleBridgedDevice(boost::intrusive_ptr&lt;Device&gt;, unsigned short):p44mbrd_main.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "chip::app::Clusters::BridgedDeviceBasicInformation::Attributes::VendorName::Set(unsigned short, chip::Span&lt;char const&gt;):Accessors.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emberAfGetServerAttributeIndexByAttributeId(unsigned short, unsigned int, unsigned int):attribute-storage.cpp">
+      </ContextState>
+      <ContextState
          contextName = "emberAfLevelControlClusterMoveToLevelWithOnOffCallback(chip::app::CommandHandler*, chip::app::ConcreteCommandPath const&amp;, chip::app::Clusters::LevelControl::Commands::MoveToLevelWithOnOff::DecodableType const&amp;):level-control.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "setupDynamicEndpointDeclaration(EmberAfEndpointType&amp;, unsigned short, chip::Span&lt;unsigned int const&gt; const&amp;, unsigned char**):attribute-storage.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "chip::app::Clusters::LevelControl::Attributes::CurrentLevel::Get(unsigned short, unsigned char*):Accessors.cpp">
       </ContextState>
       <ContextState
          contextName = "DeviceColor::HandleReadAttribute(unsigned int, unsigned int, unsigned char*, unsigned short):Device.cpp">
       </ContextState>
       <ContextState
-         contextName = "emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord*, EmberAfAttributeMetadata const**, unsigned char*, unsigned short, bool):attribute-storage.cpp">
+         contextName = "chip::Credentials::Examples::(anonymous namespace)::ExampleDACProvider::GetDeviceAttestationCert(chip::Span&lt;unsigned char&gt;&amp;):DeviceAttestationCredsExample.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "emAfWriteAttribute(unsigned short, unsigned int, unsigned int, unsigned char*, unsigned char, bool, bool):attribute-table.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "P44mbrd::installInitiallyBridgedDevices():p44mbrd_main.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "DeviceLevelControl::effect(bool):devicelevelcontrol.cpp">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

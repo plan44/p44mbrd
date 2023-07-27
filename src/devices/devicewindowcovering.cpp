@@ -110,7 +110,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting onOff attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
     }
     return true; // changed
   }

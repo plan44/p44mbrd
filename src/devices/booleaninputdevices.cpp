@@ -34,70 +34,33 @@
 
 using namespace Clusters;
 
-// MARK: - BooleanState specific declarations
-
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
-
-#define ZCL_BOOLEAN_STATE_CLUSTER_REVISION (1u)
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(booleanStateAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(BooleanState::Attributes::StateValue::Id, BOOLEAN, 1, 0),
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(booleanStateClusters)
-  DECLARE_DYNAMIC_CLUSTER(BooleanState::Id, booleanStateAttrs, nullptr, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
-
 // MARK: - BooleanInputDevice
+
+ClusterId booleanStateClusters[] = { BooleanState::Id };
 
 BooleanInputDevice::BooleanInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  mState = false;
+  // - declare device specific clusters
+  useClusterTemplates(Span<ClusterId>(booleanStateClusters));
 }
 
 
 string BooleanInputDevice::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- Boolean State: %s", mState ? "true" : "false");
+  string_format_append(s, "\n- Boolean State");
   return s;
 }
 
 
-EmberAfStatus BooleanInputDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==BooleanState::Id) {
-    if (attributeId == BooleanState::Attributes::StateValue::Id) {
-      return getAttr(buffer, maxReadLength, mState);
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr(buffer, maxReadLength, ZCL_BOOLEAN_STATE_CLUSTER_REVISION);
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
 void BooleanInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
-
 {
   if (aIsValid) {
-    // we have a state
-    mState = static_cast<bool>(aState);
-  }
-  else {
-    // state is unknown
-    NumericAttributeTraits<bool>::SetNull(mState);
-  }
-  if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(GetEndpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+    BooleanState::Attributes::StateValue::Set(endpointId(), aState);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(endpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+    }
   }
 }
 
@@ -113,8 +76,6 @@ const EmberAfDeviceType gContactSensorTypes[] = {
 ContactSensorDevice::ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  // - declare device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(booleanStateClusters));
 }
 
 void ContactSensorDevice::finalizeDeviceDeclaration()

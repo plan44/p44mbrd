@@ -89,6 +89,8 @@ public:
 
   DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
+  virtual void didGetInstalled() override;
+
   virtual const char *deviceType() override { return "color-control"; }
 
   virtual string description() override;
@@ -120,14 +122,11 @@ private:
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() override;
 
-  uint8_t mColorControlOptions;
-
   ColorMode mColorMode;
   uint8_t mHue;
   uint8_t mSaturation;
   uint16_t mColorTemp;
   uint16_t mX;
   uint16_t mY;
-  uint16_t mStartupColorTemp;
 };
 

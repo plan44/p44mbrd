@@ -34,184 +34,21 @@
 
 using namespace Clusters;
 
-// MARK: - SensorDevice, common base class for sensors
-
-SensorDevice::SensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
-{
-  mTolerance = 0;
-}
-
-
-
-EmberAfStatus SensorDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==sensorSpecificClusterId()) {
-    if (attributeId == SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mTolerance);
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr(buffer, maxReadLength, sensorSpecificClusterRevision());
-    }
-    if ((attributeId == Globals::Attributes::FeatureMap::Id) && (maxReadLength == 4)) {
-      return getAttr(buffer, maxReadLength, sensorSpecificFeatureMap());
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
-// MARK: - Unsigned Values Sensor Device
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(commonSensorAttrsUnsigned)
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID, INT16U, 2, 0),
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-UnsignedSensorDevice::UnsignedSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
-{
-  // init nullables
-  using Traits = NumericAttributeTraits<uint16_t>;
-  Traits::SetNull(mMeasuredValue);
-  Traits::SetNull(mMin);
-  Traits::SetNull(mMax);
-}
-
-string UnsignedSensorDevice::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- Unsigned Sensor (%hu..%hu): %hu (+/- %hu)", mMeasuredValue, mMin, mMax, mTolerance);
-  return s;
-}
-
-
-void UnsignedSensorDevice::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
-{
-  if (aIsValid) {
-    mMeasuredValue = (uint16_t)bridgeToMatter(aMeasuredValue);
-  }
-  else {
-    // NULL value or no value contained in state at all
-    NumericAttributeTraits<uint16_t>::SetNull(mMeasuredValue);
-  }
-  if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
-  }
-}
-
-
-EmberAfStatus UnsignedSensorDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==sensorSpecificClusterId()) {
-    if (attributeId == SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMeasuredValue);
-    }
-    if (attributeId == SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMin);
-    }
-    if (attributeId == SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMax);
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
-
-// MARK: - Signed Values Sensor Device
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(commonSensorAttrsSigned)
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID, INT16S, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID, INT16S, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID, INT16S, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID, INT16U, 2, 0),
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-SignedSensorDevice::SignedSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
-{
-  // init nullables
-  using Traits = NumericAttributeTraits<int16_t>;
-  Traits::SetNull(mMeasuredValue);
-  Traits::SetNull(mMin);
-  Traits::SetNull(mMax);
-}
-
-string SignedSensorDevice::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- Signed Sensor (%hd..%hd): %hd (+/- %hu)", mMeasuredValue, mMin, mMax, mTolerance);
-  return s;
-}
-
-
-void SignedSensorDevice::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
-{
-  if (aIsValid) {
-    mMeasuredValue = (int16_t)bridgeToMatter(aMeasuredValue);
-  }
-  else {
-    // NULL value or no value contained in state at all
-    NumericAttributeTraits<int16_t>::SetNull(mMeasuredValue);
-  }
-  if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(GetEndpointId(), sensorSpecificClusterId(), SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID);
-  }
-}
-
-
-EmberAfStatus SignedSensorDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==sensorSpecificClusterId()) {
-    if (attributeId == SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMeasuredValue);
-    }
-    if (attributeId == SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMin);
-    }
-    if (attributeId == SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID) {
-      return getAttr(buffer, maxReadLength, mMax);
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
 // MARK: - Temperature Sensor Device
-
-// TODO: try to extract revision definitions from ZAP-generated defs
-#define ZCL_TEMP_MEASUREMENT_CLUSTER_REVISION (3u)
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(temperatureSensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(TemperatureMeasurement::Id, commonSensorAttrsSigned, nullptr, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gTemperatureSensorTypes[] = {
   { DEVICE_TYPE_MA_TEMP_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+ClusterId temperatureSensorClusters[] = { TemperatureMeasurement::Id };
+
 
 DeviceTemperature::DeviceTemperature(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-  assert(
-    TemperatureMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
-    TemperatureMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
-    TemperatureMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
-    TemperatureMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-  );
   // - declare device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(temperatureSensorClusters));
+  useClusterTemplates(Span<ClusterId>(temperatureSensorClusters));
 }
 
 
@@ -221,50 +58,55 @@ void DeviceTemperature::finalizeDeviceDeclaration()
 }
 
 
-int32_t DeviceTemperature::bridgeToMatter(double aBridgeValue)
+int16_t DeviceTemperature::matterValue(double aBridgeValue, bool aIsValid)
 {
   // matter unit is 1/100th degree celsius
-  return static_cast<int16_t>(aBridgeValue*100.0+0.5);
+  int16_t v;
+  if (aIsValid) {
+    v = static_cast<int16_t>(aBridgeValue*100.0+0.5);
+  }
+  else {
+    NumericAttributeTraits<int16_t>::SetNull(v);
+  }
+  return v;
 }
 
-ClusterId DeviceTemperature::sensorSpecificClusterId()
+
+void DeviceTemperature::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  return TemperatureMeasurement::Id;
+  TemperatureMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
+  TemperatureMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
+  TemperatureMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
-uint16_t DeviceTemperature::sensorSpecificClusterRevision()
+
+void DeviceTemperature::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  return ZCL_TEMP_MEASUREMENT_CLUSTER_REVISION;
+  int16_t v = matterValue(aMeasuredValue);
+  if (!aIsValid) NumericAttributeTraits<int16_t>::SetNull(v);
+  TemperatureMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(endpointId(), TemperatureMeasurement::Id, TemperatureMeasurement::Attributes::MeasuredValue::Id);
+  }
 }
+
+
 
 // MARK: - Illumination Sensor Device
-
-// TODO: try to extract revision definitions from ZAP-generated defs
-#define ZCL_ILLUM_MEASUREMENT_CLUSTER_REVISION (3u)
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(illuminanceSensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(IlluminanceMeasurement::Id, commonSensorAttrsUnsigned, nullptr, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gIlluminanceSensorTypes[] = {
   { DEVICE_TYPE_MA_ILLUM_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+ClusterId illuminanceSensorClusters[] = { IlluminanceMeasurement::Id };
+
 
 DeviceIlluminance::DeviceIlluminance(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-  assert(
-    IlluminanceMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
-    IlluminanceMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
-    IlluminanceMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
-    IlluminanceMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-  );
   // - declare device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(illuminanceSensorClusters));
+  useClusterTemplates(Span<ClusterId>(illuminanceSensorClusters));
 }
 
 
@@ -274,51 +116,53 @@ void DeviceIlluminance::finalizeDeviceDeclaration()
 }
 
 
-int32_t DeviceIlluminance::bridgeToMatter(double aBridgeValue)
+uint16_t DeviceIlluminance::matterValue(double aBridgeValue, bool aIsValid)
 {
   // matter unit is 10000*log10(lux)+1
-  return static_cast<uint16_t>(10000.0*log10(aBridgeValue)+1);
+  uint16_t v;
+  if (aIsValid) {
+    v = static_cast<uint16_t>(10000.0*log10(aBridgeValue)+1);
+  }
+  else {
+    NumericAttributeTraits<uint16_t>::SetNull(v);
+  }
+  return v;
 }
 
 
-ClusterId DeviceIlluminance::sensorSpecificClusterId()
+void DeviceIlluminance::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  return IlluminanceMeasurement::Id;
+  IlluminanceMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
+  IlluminanceMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
+  IlluminanceMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
-uint16_t DeviceIlluminance::sensorSpecificClusterRevision()
+
+void DeviceIlluminance::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  return ZCL_ILLUM_MEASUREMENT_CLUSTER_REVISION;
+  uint16_t v = matterValue(aMeasuredValue, aIsValid);
+  IlluminanceMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(endpointId(), IlluminanceMeasurement::Id, IlluminanceMeasurement::Attributes::MeasuredValue::Id);
+  }
 }
+
 
 // MARK: - Humidity Sensor Device
-
-// TODO: try to extract revision definitions from ZAP-generated defs
-#define ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_REVISION (3u)
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(relativeHumiditySensorClusters)
-  DECLARE_DYNAMIC_CLUSTER(RelativeHumidityMeasurement::Id, commonSensorAttrsUnsigned, nullptr, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
   { DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+ClusterId relativeHumiditySensorClusters[] = { RelativeHumidityMeasurement::Id };
+
 
 DeviceHumidity::DeviceHumidity(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  // Note: this check safeguards our assumption that this cluster's IDs are common among serveral
-  //   measurement clusters, allowing a common implementation. If it fails, code must be rewritten.
-  assert(
-    RelativeHumidityMeasurement::Attributes::MeasuredValue::Id==SENSING_COMMON_MEASURED_VALUE_ATTRIBUTE_ID &&
-    RelativeHumidityMeasurement::Attributes::MinMeasuredValue::Id==SENSING_COMMON_MIN_MEASURED_VALUE_ATTRIBUTE_ID &&
-    RelativeHumidityMeasurement::Attributes::MaxMeasuredValue::Id==SENSING_COMMON_MAX_MEASURED_VALUE_ATTRIBUTE_ID &&
-    RelativeHumidityMeasurement::Attributes::Tolerance::Id==SENSING_COMMON_TOLERANCE_ATTRIBUTE_ID
-  );
   // - declare device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(relativeHumiditySensorClusters));
+  useClusterTemplates(Span<ClusterId>(relativeHumiditySensorClusters));
 }
 
 
@@ -328,19 +172,35 @@ void DeviceHumidity::finalizeDeviceDeclaration()
 }
 
 
-int32_t DeviceHumidity::bridgeToMatter(double aBridgeValue)
+uint16_t DeviceHumidity::matterValue(double aBridgeValue, bool aIsValid)
 {
   // matter unit is 100 * humidity percentage
-  return static_cast<uint16_t>(100.0*aBridgeValue+0.5);
+  uint16_t v;
+  if (aIsValid) {
+    v = static_cast<uint16_t>(100.0*aBridgeValue+0.5);
+  }
+  else {
+    NumericAttributeTraits<uint16_t>::SetNull(v);
+  }
+  return v;
 }
 
 
-ClusterId DeviceHumidity::sensorSpecificClusterId()
+void DeviceHumidity::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  return RelativeHumidityMeasurement::Id;
+  RelativeHumidityMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
+  RelativeHumidityMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
+  RelativeHumidityMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
-uint16_t DeviceHumidity::sensorSpecificClusterRevision()
+
+void DeviceHumidity::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  return ZCL_RELATIVE_HUMIDITY_MEASUREMENT_CLUSTER_REVISION;
+  uint16_t v = matterValue(aMeasuredValue, aIsValid);
+  RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  if (aUpdateMode.Has(UpdateFlags::matter)) {
+    MatterReportingAttributeChangeCallback(endpointId(), RelativeHumidityMeasurement::Id, RelativeHumidityMeasurement::Attributes::MeasuredValue::Id);
+  }
 }
+
+

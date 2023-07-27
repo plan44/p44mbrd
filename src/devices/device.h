@@ -77,24 +77,18 @@ public:
 
   virtual ~DeviceInfoDelegate() = default;
 
+  /// @brief called just after the device got installed into the matter stack
+  /// @note at this point, the device has a valid endpointId and can
+  ///   access attributes. This is the place to override RAM attribute default
+  ///   values with values obtained from device setup
+  virtual void deviceDidGetInstalled() { /* NOP */ };
+
   /// @return unique identifier for the (part of a) bridged device that is represented by the
   ///   matter device this object is the device info delegate of.
   /// @note the identifier is defined by the device adapter implementation such that it allows
   ///   the adapter to identify a the correct bridged device (or, in case of composed device, part of the
   ///   device) when presented with this ID.
   virtual const string endpointUID() const = 0;
-
-  /// @return vendor name (human readable)
-  virtual string vendorName() const = 0;
-
-  /// @return model name or number (human readable)
-  virtual string modelName() const = 0;
-
-  /// @return URL to reach the configuration web interface of the bridged device, if any - empty string otherwise
-  virtual string configUrl() const = 0;
-
-  /// @return hardware device serial number (human readable/understandable)
-  virtual string serialNo() const = 0;
 
   /// @return true if the device hardware is reachable at this time
   virtual bool isReachable() const = 0;
@@ -130,7 +124,7 @@ class Device : public p44::P44LoggingObj
   Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
   EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
-  std::list<Span<EmberAfCluster>> mClusterListCollector; ///< used to dynamically collect cluster info
+  std::list<Span<ClusterId>> mTemplateClusterIdsSpanList; ///< used to dynamically collect template cluster ids
   /// @}
 
   /// @name matter endpointIds and device structure
@@ -181,7 +175,7 @@ public:
 
   /// @return the endpointId of this device (can be part of a composed device)
   /// @note valid only after device setup is complete and device is operational
-  inline chip::EndpointId GetEndpointId() const { return mEndpointId; };
+  inline chip::EndpointId endpointId() const { return mEndpointId; };
 
   /// @return the parentId of this device (can be a composed device or the bridge itself)
   /// @note valid only after device setup is complete and device is operational
@@ -242,9 +236,16 @@ public:
 
   /// @brief called just before the device gets installed
   /// @note at this point, the device is the fully constructed final class, but is
-  ///   not yet connected to the matter stack, so e.g. does not have valid endpointIDs
-  ///   yet and cannot interoperate with the stack.
+  ///   not yet connected to the matter stack, so e.g. DOES NOT HAVE VALID endpointIDs
+  ///   yet and cannot interoperate with the stack, IN PARTICULAR, CANNOT ACCESS
+  ///   ATTRIBUTES.
   virtual void willBeInstalled();
+
+  /// @brief called just after the device got installed into the matter stack
+  /// @note at this point, the device has a valid endpointId and can
+  ///   access attributes. This is the place to override RAM attribute default
+  ///   values with values obtained from device setup
+  virtual void didGetInstalled();
 
   /// @brief called when device has become operational within the matter stack
   virtual void didBecomeOperational();
@@ -257,12 +258,16 @@ public:
 
 protected:
 
-  /// Add a cluster declaration during device setup
+  /// Use cluster declarations from a ZAP template endpoint during device setup
   /// @note preferably this should be called from ctor, to have general cluster defs first
   /// @note this replaces use of `DECLARE_DYNAMIC_CLUSTER_LIST_xxx` macros, to allow dynamically collecting needed
-  ///    clusters over the class hierachy.
-  /// @param aClusterDeclarationList the cluster declarations
-  void addClusterDeclarations(const Span<EmberAfCluster>& aClusterDeclarationList);
+  ///   clusters over the class hierachy, and preventing re-declaration of clusters and attributes that are
+  ///   already declared in ZAP. Together with dynamic attribute storage for RAM and NVRAM attributes,
+  ///   this reduces setup of dynamic endpoints to a few lines, ensuring consistency with the ZAP definitions automatically.
+  /// @param aTemplateClusterIdList a list of clusterIds. These must be present in the last fixed endpoint
+  ///   (which must be defined in ZAP to generate accessors and cluster implementation, and contains all clusters
+  ///   of all to-be-bridged devices. This template endpoint must be set to disabled)
+  void useClusterTemplates(const Span<ClusterId>& aTemplateClusterIdList);
 
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() = 0;
@@ -323,7 +328,13 @@ class IdentifiableDevice : public Device
   /// identify delegate
   IdentifyDelegate& mIdentifyDelegate;
 
-  uint16_t mIdentifyTime;
+  /// @name external attributes
+  /// @{
+
+  uint16_t mIdentifyTime; ///< identify time, setting it directly affects identify
+
+  /// @}
+
   MLTicket mIdentifyTickTimer;
 
 public:
@@ -334,6 +345,8 @@ public:
 
   virtual ~IdentifiableDevice();
 
+  virtual void didGetInstalled() override;
+
   virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
@@ -342,7 +355,7 @@ public:
 
 protected:
 
-  virtual uint8_t identifyType() { return to_underlying<Identify::IdentifyTypeEnum>(Identify::IdentifyTypeEnum::kNone); }
+  virtual Identify::IdentifyTypeEnum identifyType() { return Identify::IdentifyTypeEnum::kNone; }
 
 private:
 

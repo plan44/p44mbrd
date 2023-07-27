@@ -53,7 +53,7 @@ public:
 
   virtual string description() override;
 
-  virtual uint8_t identifyType() override;
+  virtual Identify::IdentifyTypeEnum identifyType() override;
 
   bool isOn() { return mOn; }
   bool updateOnOff(bool aOn, UpdateMode aUpdateMode);

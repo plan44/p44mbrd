@@ -336,7 +336,9 @@ public:
         LogErrorOnFailure(chiperr);
         // add as new endpoint to bridge
         if (aDev->AddAsDeviceEndpoint()) {
-          POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while CHIP is already up");
+          POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while Matter already running");
+          // report installed
+          aDev->didGetInstalled();
           aDev->didBecomeOperational();
           // dump status
           POLOG(aDev, LOG_INFO, "initialized from chip: %s", aDev->description().c_str());
@@ -450,13 +452,14 @@ public:
   static const EndpointId kLegacyFirstDynamicEndpointID = 3;
   #endif
 
+
   CHIP_ERROR installSingleBridgedDevice(DevicePtr dev, chip::EndpointId aParentEndpointId)
   {
     CHIP_ERROR chiperr;
 
     // check if we can add any new devices at all
     if (mNumDynamicEndPoints>=CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) {
-      POLOG(dev, LOG_ERR, "No free endpoint available - all %d dynamic endpoints are occupied -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
+      OLOG(LOG_ERR, "No free endpoint available - all %d dynamic endpoints are occupied -> cannot add new device", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
       return CHIP_ERROR_NO_ENDPOINT;
     }
     // signal installation to device (which, at this point, is a fully constructed class)
@@ -508,12 +511,12 @@ public:
         // - check for being already in use by one of the devices already in the list
         //   Note: this does not happen, normally, but CAN happen once endpointIds wrap around at 0xFFFF
         for (size_t i=0; i<mNumDynamicEndPoints; i++) {
-          if (mDevices[i]->GetEndpointId()==mFirstFreeEndpointId) {
+          if (mDevices[i]->endpointId()==mFirstFreeEndpointId) {
             // the supposedly free next endpointID is in use
             if (++mFirstFreeEndpointId==0xFFFF) mFirstFreeEndpointId = emberAfEndpointCount(); // increment and wraparound from 0xFFFE to first dynamic endpoont
             POLOG(mDevices[i], LOG_WARNING, "is already using what was recorded as next free endpointID -> adjusted the latter to %d", mFirstFreeEndpointId);
           }
-          if (mDevices[i]->GetEndpointId()==endpointId) {
+          if (mDevices[i]->endpointId()==endpointId) {
             // this endpointId is already in use, must create a new one
             POLOG(dev, LOG_WARNING, "This device's former endpoint (%d) is already in use by '%s'", endpointId, mDevices[i]->logContextPrefix().c_str());
             endpointId = kInvalidEndpointId; // must assign a new one
@@ -558,7 +561,7 @@ public:
       // also add subdevices AFTER the main device (if any)
       for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
         (*pos)->flagAsPartOfComposedDevice();
-        installSingleBridgedDevice(*pos, aDev->GetEndpointId());
+        installSingleBridgedDevice(*pos, aDev->endpointId());
       }
     }
     return chiperr;
@@ -624,7 +627,9 @@ public:
     // Add the devices as dynamic endpoints
     for (size_t i=0; i<mNumDynamicEndPoints; i++) {
       if (mDevices[i]->AddAsDeviceEndpoint()) {
-        POLOG(mDevices[i], LOG_NOTICE, "added as dynamic endpoint before starting CHIP mainloop");
+        POLOG(mDevices[i], LOG_DEBUG, "registered before starting Matter mainloop");
+        // report installed
+        mDevices[i]->didGetInstalled();
       }
     }
   }
@@ -976,6 +981,30 @@ DevicePtr deviceForEndPointId(EndpointId aEndpointId)
 
 
 // MARK: - gloabl CHIP callbacks
+
+
+chip::Protocols::InteractionModel::Status
+MatterPreAttributeChangeCallback(
+  const chip::app::ConcreteAttributePath & attributePath,
+  uint8_t type,
+  uint16_t size,
+  uint8_t * value
+)
+{
+  // TODO: implement forwarding to devices
+  return chip::Protocols::InteractionModel::Status::Success;
+}
+
+void MatterPostAttributeChangeCallback(
+  const chip::app::ConcreteAttributePath & attributePath,
+  uint8_t type,
+  uint16_t size,
+  uint8_t * value
+)                                       
+{
+  // TODO: implement forwarding to devices
+}
+
 
 EmberAfStatus emberAfExternalAttributeReadCallback(
   EndpointId endpoint, ClusterId clusterId,

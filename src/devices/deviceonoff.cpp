@@ -34,40 +34,8 @@ using namespace Clusters;
 
 // MARK: - OnOff Device specific declarations
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
 
-#define ZCL_ON_OFF_CLUSTER_REVISION (4u)
-
-// MARK: onOff cluster declarations
-
-// Declare cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnOff::Id, BOOLEAN, 1, 0), /* on/off */
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::GlobalSceneControl::Id, BOOLEAN, 1, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OffWaitTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::StartUpOnOff::Id, ENUM8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0), /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare cluster commands
-// TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
-constexpr CommandId onOffIncomingCommands[] = {
-  OnOff::Commands::Off::Id,
-  OnOff::Commands::On::Id,
-  OnOff::Commands::Toggle::Id,
-  OnOff::Commands::OffWithEffect::Id,
-  OnOff::Commands::OnWithRecallGlobalScene::Id,
-  OnOff::Commands::OnWithTimedOff::Id,
-  kInvalidCommandId,
-};
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(OnOff::Id, onOffAttrs, onOffIncomingCommands, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
+ClusterId onOffLightClusters[] = { OnOff::Id };
 
 
 // MARK: - DeviceOnOff
@@ -83,14 +51,14 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   mStartUpOnOff(to_underlying(OnOff::OnOffStartUpOnOff::kOff))
 {
   // - declare onoff device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
+  useClusterTemplates(Span<ClusterId>(onOffLightClusters));
 }
 
 
-uint8_t DeviceOnOff::identifyType()
+Identify::IdentifyTypeEnum DeviceOnOff::identifyType()
 {
   // Lights identify via light, others somehow operate the actuator (blinds, clicking relay etc.)
-  return to_underlying<Identify::IdentifyTypeEnum>(mLighting ? Identify::IdentifyTypeEnum::kLightOutput : Identify::IdentifyTypeEnum::kActuator);
+  return mLighting ? Identify::IdentifyTypeEnum::kLightOutput : Identify::IdentifyTypeEnum::kActuator;
 }
 
 
@@ -110,7 +78,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting onOff attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
     }
     return true; // changed
   }
@@ -126,25 +94,6 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
     if (attributeId == OnOff::Attributes::OnOff::Id) {
       return getAttr(buffer, maxReadLength, isOn());
     }
-    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
-      return getAttr(buffer, maxReadLength, mGlobalSceneControl);
-    }
-    if (attributeId == OnOff::Attributes::OnTime::Id) {
-      return getAttr(buffer, maxReadLength, mOnTime);
-    }
-    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
-      return getAttr(buffer, maxReadLength, mOffWaitTime);
-    }
-    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
-      return getAttr(buffer, maxReadLength, mStartUpOnOff);
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? to_underlying(OnOff::Feature::kLighting) : 0);
-    }
   }
   // let base class try
   return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
@@ -159,18 +108,6 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
     if (attributeId == OnOff::Attributes::OnOff::Id) {
       updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
       return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
-      return setAttr(mGlobalSceneControl, buffer);
-    }
-    if (attributeId == OnOff::Attributes::OnTime::Id) {
-      return setAttr(mOnTime, buffer);
-    }
-    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
-      return setAttr(mOffWaitTime, buffer);
-    }
-    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
-      return setAttr(mStartUpOnOff, buffer);
     }
   }
   // let base class try

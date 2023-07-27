@@ -28,6 +28,9 @@
 #include "device.h"
 #include "deviceinfoprovider.h"
 
+// commonly needed matter headers
+#include <app-common/zap-generated/attributes/Accessors.h>
+
 // Macros for constructing final `Device` leaf subclasses containing needed delegates
 
 #define DEVICE_ACCESSOR virtual Device &device() override { return static_cast<Device&>(*this); }

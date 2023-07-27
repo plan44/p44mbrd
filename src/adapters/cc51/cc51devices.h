@@ -64,10 +64,7 @@ public:
   /// @{
   virtual const string endpointUID() const override;
 
-  virtual string vendorName() const override;
-  virtual string modelName() const override;
-  virtual string configUrl() const override;
-  virtual string serialNo() const override;
+  virtual void deviceDidGetInstalled() override;
 
   virtual bool isReachable() const override;
 

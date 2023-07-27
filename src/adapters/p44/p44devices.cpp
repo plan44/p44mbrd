@@ -29,7 +29,6 @@
 
 using namespace p44;
 
-
 // MARK: - P44_DeviceImpl
 
 P44_DeviceImpl::P44_DeviceImpl() :
@@ -50,28 +49,14 @@ const string P44_DeviceImpl::endpointUID() const
 }
 
 
-string P44_DeviceImpl::vendorName() const
+void P44_DeviceImpl::deviceDidGetInstalled()
 {
-  return mVendorName;
+  // update bridged info which
+  updateBridgedInfo(mTempDeviceInfo);
+  // we do not need it any more
+  mTempDeviceInfo.reset();
 }
 
-
-string P44_DeviceImpl::modelName() const
-{
-  return mModelName;
-}
-
-
-string P44_DeviceImpl::configUrl() const
-{
-  return mConfigUrl;
-}
-
-
-string P44_DeviceImpl::serialNo() const
-{
-  return mSerialNo;
-}
 
 
 bool P44_DeviceImpl::isReachable() const
@@ -113,34 +98,53 @@ void P44_DeviceImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
   // parse common info from bridge
   JsonObjectPtr o = aDeviceInfo->get("dSUID");
   assert(o);
+  // Assign infos we need from start and are NOT stored in attributes
+  // - dSUID
   mBridgedDSUID = o->stringValue();
-  mSerialNo = mBridgedDSUID; // default serial number
-  // - optionals
-  if (aDeviceInfo->get("displayId", o)) {
-    mSerialNo = o->stringValue();
-  }
-  if (aDeviceInfo->get("vendorName", o)) {
-    mVendorName = o->stringValue();
-  }
-  if (aDeviceInfo->get("model", o)) {
-    mModelName = o->stringValue();
-  }
-  if (aDeviceInfo->get("configURL", o)) {
-    mConfigUrl = o->stringValue();
-  }
   // - default name
   if (aDeviceInfo->get("name", o)) {
     mName = o->stringValue();
-    device().updateNodeLabel(mName, UpdateMode());
+    // Note: propagate only after device is installed
   }
   // - default zone name
   if (aDeviceInfo->get("x-p44-zonename", o)) {
     mZone = o->stringValue();
+    // Note: propagate only after device is installed
   }
   // - initial reachability
   if (aDeviceInfo->get("active", o)) {
     mActive = o->boolValue();
-    device().updateReachable(isReachable(), UpdateMode());
+    // Note: propagate only after device is installed
+  }
+  // - some of the information will go directly to attributes, which are NOT YET AVAILABLE here
+  mTempDeviceInfo = aDeviceInfo;
+}
+
+
+void P44_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  JsonObjectPtr o;
+  // propagate locally stored info to matter attributes
+  device().updateNodeLabel(mName, UpdateMode());
+  device().updateReachable(isReachable(), UpdateMode());
+  // TODO: implement
+  //device().updateZone(mZone, UpdateMode());
+  // get some more info, store in Attributes
+  if (aDeviceInfo->get("displayId", o)) {
+    SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, device().endpointId(), o->stringValue());
+  }
+  else {
+    // use UID as serial number, MUST NOT BE >32 chars
+    SET_ATTR_STRING_M(BridgedDeviceBasicInformation, SerialNumber, device().endpointId(), mBridgedDSUID); // abbreviate in the middle
+  }
+  if (aDeviceInfo->get("vendorName", o)) {
+    SET_ATTR_STRING(BridgedDeviceBasicInformation, VendorName, device().endpointId(), o->stringValue());
+  }
+  if (aDeviceInfo->get("model", o)) {
+    SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, device().endpointId(), o->stringValue());
+  }
+  if (aDeviceInfo->get("configURL", o)) {
+    SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, device().endpointId(), o->stringValue());
   }
 }
 
@@ -254,12 +258,17 @@ void P44_OnOffImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDe
     if (co->get("dsIndex", o2)) {
       if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
     }
-//    if (co->get("channelType", o2)) {
-//      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
-//    }
   }
-  // output devices should examine the channel states
-  o = aDeviceInfo->get("channelStates");
+}
+
+
+void P44_OnOffImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  // basics first
+  inherited::updateBridgedInfo(aDeviceInfo);
+  // specifics
+  // - output devices should examine the channel states
+  JsonObjectPtr o = aDeviceInfo->get("channelStates");
   if (o) {
     parseChannelStates(o, UpdateMode());
   }
@@ -335,19 +344,21 @@ P44_LevelControlImpl::P44_LevelControlImpl() :
 }
 
 
-void P44_LevelControlImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // level coontrol devices should know the recommended transition time for the output
+  // basics first
+  inherited::updateBridgedInfo(aDeviceInfo);
+  // specifics
   JsonObjectPtr o;
   JsonObjectPtr o2;
+  // - level control devices should know the recommended transition time for the output
   if (aDeviceInfo->get("outputDescription", o)) {
     if (o->get("x-p44-recommendedTransitionTime", o2)) {
       // adjust current
       mRecommendedTransitionTimeDS = static_cast<uint16_t>(o2->doubleValue()*10);
     }
   }
-  // get default on level (level of preset1 scene)
+  // - get default on level (level of preset1 scene)
   if (aDeviceInfo->get("scenes", o)) {
     if (o->get("5", o2)) {
       if (o2->get("channels", o2)) {
@@ -534,11 +545,26 @@ void P44_SensorImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
 {
   inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
   JsonObjectPtr o;
+  double min = 0;
+  double max = 0;
+  double tolerance = 0; // unknown
+  bool hasMin = false;
+  bool hasMax = false;
+
   SensorDevice* dev = deviceP<SensorDevice>();
   if (aDeviceComponentInfo->get("resolution", o)) {
     // tolerance is half of the resolution (when resolution is 1, true value might be max +/- 0.5 resolution away)
-    dev->setTolerance(o->doubleValue()/2);
+    tolerance = o->doubleValue()/2;
   }
+  if (aDeviceComponentInfo->get("min", o)) {
+    hasMin = true;
+    min = o->doubleValue();
+  }
+  if (aDeviceComponentInfo->get("max", o)) {
+    hasMax = true;
+    max = o->doubleValue();
+  }
+  dev->setupSensorParams(hasMin, min, hasMax, max, tolerance);
   // also get current value from xxxStates
   parseSensorValue(aDeviceInfo, UpdateMode());
 }

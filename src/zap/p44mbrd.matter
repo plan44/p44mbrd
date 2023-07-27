@@ -167,9 +167,12 @@ server cluster LevelControl = 8 {
 
   readonly attribute nullable int8u currentLevel = 0;
   readonly attribute int16u remainingTime = 1;
+  readonly attribute int8u minLevel = 2;
+  readonly attribute int8u maxLevel = 3;
   attribute LevelControlOptions options = 15;
   attribute int16u onOffTransitionTime = 16;
   attribute nullable int8u onLevel = 17;
+  attribute nullable int8u defaultMoveRate = 20;
   attribute access(write: manage) nullable int8u startUpCurrentLevel = 16384;
   readonly attribute command_id generatedCommandList[] = 65528;
   readonly attribute command_id acceptedCommandList[] = 65529;
@@ -1716,6 +1719,7 @@ server cluster IlluminanceMeasurement = 1024 {
   readonly attribute nullable int16u measuredValue = 0;
   readonly attribute nullable int16u minMeasuredValue = 1;
   readonly attribute nullable int16u maxMeasuredValue = 2;
+  readonly attribute int16u tolerance = 3;
   readonly attribute command_id generatedCommandList[] = 65528;
   readonly attribute command_id acceptedCommandList[] = 65529;
   readonly attribute event_id eventList[] = 65530;
@@ -1729,6 +1733,7 @@ server cluster TemperatureMeasurement = 1026 {
   readonly attribute nullable int16s measuredValue = 0;
   readonly attribute nullable int16s minMeasuredValue = 1;
   readonly attribute nullable int16s maxMeasuredValue = 2;
+  readonly attribute int16u tolerance = 3;
   readonly attribute command_id generatedCommandList[] = 65528;
   readonly attribute command_id acceptedCommandList[] = 65529;
   readonly attribute event_id eventList[] = 65530;
@@ -1742,6 +1747,7 @@ server cluster RelativeHumidityMeasurement = 1029 {
   readonly attribute nullable int16u measuredValue = 0;
   readonly attribute nullable int16u minMeasuredValue = 1;
   readonly attribute nullable int16u maxMeasuredValue = 2;
+  readonly attribute int16u tolerance = 3;
   readonly attribute command_id generatedCommandList[] = 65528;
   readonly attribute command_id acceptedCommandList[] = 65529;
   readonly attribute event_id eventList[] = 65530;
@@ -1985,7 +1991,7 @@ endpoint 2 {
   binding cluster Binding;
 
   server cluster Identify {
-    ram      attribute identifyTime default = 0x0000;
+    callback attribute identifyTime default = 0x0000;
     ram      attribute identifyType default = 0x0;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
@@ -2012,15 +2018,19 @@ endpoint 2 {
   server cluster LevelControl {
     callback attribute currentLevel default = 0x00;
     callback attribute remainingTime default = 0x0000;
-    callback attribute options default = 0x00;
-    callback attribute onOffTransitionTime default = 5;
-    callback attribute onLevel default = 0xFE;
-    callback attribute startUpCurrentLevel default = 0xFE;
+    ram      attribute minLevel default = 0x00;
+    ram      attribute maxLevel default = 0xFE;
+    ram      attribute options default = 0x00;
+    ram      attribute onOffTransitionTime default = 5;
+    ram      attribute onLevel default = 0xFE;
+    ram      attribute defaultMoveRate;
+    ram      attribute startUpCurrentLevel default = 0xFE;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
+    callback attribute eventList default = 0;
     callback attribute attributeList;
-    callback attribute featureMap default = 0;
-    callback attribute clusterRevision default = 5;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 5;
   }
 
   server cluster Descriptor {
@@ -2054,6 +2064,7 @@ endpoint 2 {
     ram      attribute stateValue default = 0;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
+    callback attribute eventList default = 0;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 1;
@@ -2076,31 +2087,33 @@ endpoint 2 {
   server cluster ColorControl {
     callback attribute currentHue default = 0x00;
     callback attribute currentSaturation default = 0x00;
-    ram      attribute currentX default = 0x616B;
-    ram      attribute currentY default = 0x607D;
+    callback attribute currentX default = 0x616B;
+    callback attribute currentY default = 0x607D;
     callback attribute colorTemperatureMireds default = 0x00FA;
     callback attribute colorMode default = 0x01;
-    callback attribute options default = 0x00;
-    callback attribute numberOfPrimaries default = 0;
+    ram      attribute options default = 0x00;
+    ram      attribute numberOfPrimaries default = 0;
     callback attribute enhancedColorMode default = 0x01;
-    callback attribute colorCapabilities default = 0x0000;
-    callback attribute colorTempPhysicalMinMireds default = 0x0000;
-    callback attribute colorTempPhysicalMaxMireds default = 0xFEFF;
-    callback attribute coupleColorTempToLevelMinMireds default = 0x0000;
-    callback attribute startUpColorTemperatureMireds default = 0xFEFF;
+    ram      attribute colorCapabilities default = 0x0000;
+    ram      attribute colorTempPhysicalMinMireds default = 0x0000;
+    ram      attribute colorTempPhysicalMaxMireds default = 0xFEFF;
+    ram      attribute coupleColorTempToLevelMinMireds default = 0x0000;
+    ram      attribute startUpColorTemperatureMireds default = 0xFEFF;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;
-    callback attribute featureMap default = 0;
-    callback attribute clusterRevision default = 5;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 5;
   }
 
   server cluster IlluminanceMeasurement {
     ram      attribute measuredValue default = 0x0000;
     ram      attribute minMeasuredValue;
     ram      attribute maxMeasuredValue;
+    ram      attribute tolerance;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
+    callback attribute eventList default = 0;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 3;
@@ -2110,8 +2123,10 @@ endpoint 2 {
     ram      attribute measuredValue;
     ram      attribute minMeasuredValue default = 0x8000;
     ram      attribute maxMeasuredValue default = 0x8000;
+    ram      attribute tolerance default = 0;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
+    callback attribute eventList default = 0;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 1;
@@ -2121,8 +2136,10 @@ endpoint 2 {
     ram      attribute measuredValue;
     ram      attribute minMeasuredValue;
     ram      attribute maxMeasuredValue;
+    ram      attribute tolerance;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
+    callback attribute eventList default = 0;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 3;

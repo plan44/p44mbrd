@@ -35,12 +35,6 @@ using namespace Clusters;
 
 // MARK: - LevelControl Device specific declarations
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
-
-#define ZCL_COLOR_CONTROL_CLUSTER_REVISION (5u)
 #define ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP (to_underlying(ColorControl::Feature::kColorTemperature))
 #define ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES (to_underlying(ColorControl::Feature::kHueAndSaturation)|to_underlying(ColorControl::Feature::kXy))
 
@@ -48,43 +42,6 @@ using namespace Clusters;
 #define COLOR_TEMP_PHYSICAL_MIN (100)
 #define COLOR_TEMP_PHYSICAL_MAX (1000)
 #define COLOR_TEMP_DEFAULT (370) // 2500K = warm white
-
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(colorControlAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::CurrentHue::Id, INT8U, 1, 0), /* current hue */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::CurrentSaturation::Id, INT8U, 1, 0), /* current saturation */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::ColorTemperatureMireds::Id, INT16U, 2, 0), /* current color temperature */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::ColorTempPhysicalMaxMireds::Id, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::ColorTempPhysicalMinMireds::Id, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::CoupleColorTempToLevelMinMireds::Id, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::StartUpColorTemperatureMireds::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::CurrentX::Id, INT16U, 2, 0), /* current X */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::CurrentY::Id, INT16U, 2, 0), /* current Y */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::Options::Id, BITMAP8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::ColorCapabilities::Id, BITMAP16, 2, 0), /* (Bit0=HS, Bit1=EnhancedHS, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp) */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::ColorMode::Id, ENUM8, 1, 0), /* current color mode (legcacy): see ColorMode enum */
-  DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::EnhancedColorMode::Id, ENUM8, 1, 0), /* current color mode (enhanced hue included): see ColorMode enum */
-//    DECLARE_DYNAMIC_ATTRIBUTE(ColorControl::Attributes::EnhancedCurrentHue::Id, INT16U, 2, 0), /* enhanced 16bit non XY equidistant hue */ // TODO: implement
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0),     /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-constexpr CommandId colorControlIncomingCommands[] = {
-  ColorControl::Commands::MoveToHue::Id,
-  ColorControl::Commands::MoveHue::Id,
-  ColorControl::Commands::StepHue::Id,
-  ColorControl::Commands::MoveToSaturation::Id,
-  ColorControl::Commands::MoveSaturation::Id,
-  ColorControl::Commands::StepSaturation::Id,
-  ColorControl::Commands::MoveToHueAndSaturation::Id,
-  ColorControl::Commands::MoveToColorTemperature::Id,
-  ColorControl::Commands::MoveColorTemperature::Id,
-  ColorControl::Commands::StepColorTemperature::Id,
-  kInvalidCommandId,
-};
-
-// MARK: ct/color light
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(colorLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(ColorControl::Id, colorControlAttrs, colorControlIncomingCommands, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 const EmberAfDeviceType gCTLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
@@ -96,26 +53,28 @@ const EmberAfDeviceType gColorLightTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+ClusterId colorLightClusters[] = { ColorControl::Id };
 
 
 // MARK: - DeviceColorControl
+
+using namespace ColorControl;
 
 DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate), // level control for lighting
   mColorControlDelegate(aColorControlDelegate),
   mCtOnly(aCTOnly),
-  mColorControlOptions(0), // No default options (see EmberAfColorControlOptions for choices)
   mColorMode(aCTOnly ? colormode_ct : colormode_hs),
   mHue(0),
   mSaturation(0),
   mColorTemp(COLOR_TEMP_DEFAULT),
   mX(0),
-  mY(0),
-  mStartupColorTemp(COLOR_TEMP_DEFAULT)
+  mY(0)
 {
   // - declare specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(colorLightClusters));
+  useClusterTemplates(Span<ClusterId>(colorLightClusters));
 }
+
 
 void DeviceColorControl::finalizeDeviceDeclaration()
 {
@@ -125,6 +84,25 @@ void DeviceColorControl::finalizeDeviceDeclaration()
   else {
     finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
   }
+}
+
+
+void DeviceColorControl::didGetInstalled()
+{
+  Attributes::FeatureMap::Set(endpointId(), ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP | (mCtOnly ? 0 : ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES));
+  Attributes::ColorCapabilities::Set(
+    endpointId(),
+    (uint16_t)to_underlying(ColorControl::ColorCapabilities::kColorTemperatureSupported) |
+    (uint16_t)(mCtOnly ? 0 : to_underlying(ColorControl::ColorCapabilities::kHueSaturationSupported)|to_underlying(ColorControl::ColorCapabilities::kXYAttributesSupported))
+  );
+  Attributes::CoupleColorTempToLevelMinMireds::Set(endpointId(), COLOR_TEMP_PHYSICAL_MIN);
+  Attributes::NumberOfPrimaries::Set(endpointId(), 0);
+  Attributes::ColorTempPhysicalMinMireds::Set(endpointId(), COLOR_TEMP_PHYSICAL_MIN);
+  Attributes::ColorTempPhysicalMaxMireds::Set(endpointId(), COLOR_TEMP_PHYSICAL_MAX);
+  Attributes::StartUpColorTemperatureMireds::Set(endpointId(), COLOR_TEMP_DEFAULT);
+
+  // call base class last
+  inherited::didGetInstalled();
 }
 
 
@@ -160,8 +138,8 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting colormode attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::ColorMode::Id);
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::EnhancedColorMode::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::ColorMode::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::EnhancedColorMode::Id);
     }
     return true;
   }
@@ -187,7 +165,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting hue attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::CurrentHue::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentHue::Id);
     }
     return true; // changed
   }
@@ -210,7 +188,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting saturation attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::CurrentSaturation::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentSaturation::Id);
     }
     return true; // changed
   }
@@ -235,7 +213,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting colortemperature attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::ColorTemperatureMireds::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::ColorTemperatureMireds::Id);
     }
     return true; // changed
   }
@@ -258,7 +236,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting X attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::CurrentX::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentX::Id);
     }
     return true; // changed
   }
@@ -281,7 +259,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting Y attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), ColorControl::Id, ColorControl::Attributes::CurrentY::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentY::Id);
     }
     return true; // changed
   }
@@ -289,8 +267,6 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
 }
 
 // MARK: color control cluster command implementation callbacks
-
-using namespace ColorControl;
 
 bool DeviceColorControl::shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride)
 {
@@ -308,7 +284,9 @@ bool DeviceColorControl::shouldExecuteColorChange(OptType aOptionMask, OptType a
     return true;
   }
   // now the options bit decides about executing or not
-  return (mColorControlOptions & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
+  uint8_t opt;
+  ColorControl::Attributes::Options::Get(endpointId(), &opt);
+  return (opt & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
 }
 
 
@@ -609,14 +587,6 @@ void MatterColorControlClusterServerShutdownCallback(EndpointId endpoint)
 EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ColorControl::Id) {
-    if (attributeId == ColorControl::Attributes::ColorCapabilities::Id) {
-      // Bit0=HS, Bit1=EnhancedHue, Bit2=ColorLoop, Bit3=XY, Bit4=ColorTemp
-      return getAttr<uint16_t>(
-        buffer, maxReadLength,
-        (uint16_t)to_underlying(ColorControl::ColorCapabilities::kColorTemperatureSupported) |
-        (uint16_t)(mCtOnly ? 0 : to_underlying(ColorControl::ColorCapabilities::kHueSaturationSupported)|to_underlying(ColorControl::ColorCapabilities::kXYAttributesSupported))
-      );
-    }
     if (attributeId == ColorControl::Attributes::ColorMode::Id) {
       // color mode: 0=Hue+Sat (normal and enhanced!), 1=XY, 2=Colortemp
       return getAttr<uint8_t>(buffer, maxReadLength, mColorMode==colormode_EnhancedHs ? (uint8_t)colormode_hs : mColorMode);
@@ -641,37 +611,6 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     if (attributeId == ColorControl::Attributes::CurrentY::Id) {
       return getAttr(buffer, maxReadLength, currentY());
     }
-    if (attributeId == ColorControl::Attributes::Options::Id) {
-      return getAttr(buffer, maxReadLength, mColorControlOptions);
-    }
-    if (attributeId == ColorControl::Attributes::StartUpColorTemperatureMireds::Id) {
-      return getAttr(buffer, maxReadLength, mStartupColorTemp);
-    }
-    // constants
-    if (attributeId == ColorControl::Attributes::CoupleColorTempToLevelMinMireds::Id) {
-      // this is the level that corresponds to max level when CT is coupled to level
-      // TODO: level coupling is not yet implemented, maybe make this variable later
-      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MIN);
-    }
-    if (attributeId == ColorControl::Attributes::NumberOfPrimaries::Id) {
-      return getAttr<uint8_t>(buffer, maxReadLength, 0);
-    }
-    if (attributeId == ColorControl::Attributes::ColorTempPhysicalMinMireds::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MIN);
-    }
-    if (attributeId == ColorControl::Attributes::ColorTempPhysicalMaxMireds::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, COLOR_TEMP_PHYSICAL_MAX);
-    }
-    // common
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_COLOR_CONTROL_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(
-        buffer, maxReadLength,
-        ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP | (mCtOnly ? 0 : ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES)
-      );
-    }
   }
   // let base class try
   return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
@@ -681,12 +620,7 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
 EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==ColorControl::Id) {
-    if (attributeId == ColorControl::Attributes::Options::Id) {
-      return setAttr(mColorControlOptions, buffer);
-    }
-    if (attributeId == ColorControl::Attributes::StartUpColorTemperatureMireds::Id) {
-      return setAttr(mStartupColorTemp, buffer);
-    }
+    /* NOP */
   }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
@@ -696,7 +630,6 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 string DeviceColorControl::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- colorControlOptions: %d", mColorControlOptions);
   string_format_append(s, "\n- colormode: %d", mColorMode);
   string_format_append(s, "\n- hue: %d", mHue);
   string_format_append(s, "\n- saturation: %d", mSaturation);

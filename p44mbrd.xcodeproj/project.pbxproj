@@ -1262,7 +1262,7 @@
 		ED36DE52286E02CD00CA28EC /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		ED36DE53286E02CD00CA28EC /* DataModelHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataModelHandler.h; sourceTree = "<group>"; };
 		ED36DE54286E02CD00CA28EC /* attribute-size-util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "attribute-size-util.cpp"; sourceTree = "<group>"; };
-		ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "attribute-storage.cpp"; sourceTree = "<group>"; };
+		ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "attribute-storage.cpp"; sourceTree = "<group>"; tabWidth = 4; };
 		ED36DE57286E02CD00CA28EC /* message.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = message.cpp; sourceTree = "<group>"; };
 		ED36DE58286E02CD00CA28EC /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		ED36DE59286E02CD00CA28EC /* error-mapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "error-mapping.cpp"; sourceTree = "<group>"; };

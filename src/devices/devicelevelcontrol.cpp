@@ -34,68 +34,37 @@
 
 // MARK: - LevelControl Device specific declarations
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
-
-#define ZCL_LEVEL_CONTROL_CLUSTER_REVISION (5u)
-#define ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP (to_underlying(LevelControl::Feature::kOnOff))
-
 #define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
 
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(levelControlAttrs)
-  // DECLARE_DYNAMIC_ATTRIBUTE(attId, attType, attSizeBytes, attrMask)
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::CurrentLevel::Id, INT8U, 1, 0), /* current level */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::OnOffTransitionTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* onoff transition time */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::OnLevel::Id, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* level for fully on */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::Options::Id, BITMAP8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* options */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::DefaultMoveRate::Id, INT8U, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* default move/dim rate */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::MaxLevel::Id, INT8U, 1, 0), /* max level */
-  DECLARE_DYNAMIC_ATTRIBUTE(LevelControl::Attributes::MinLevel::Id, INT8U, 1, 0), /* min level */
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0),     /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-constexpr CommandId levelControlIncomingCommands[] = {
-  LevelControl::Commands::MoveToLevel::Id,
-  LevelControl::Commands::Move::Id,
-  LevelControl::Commands::Step::Id,
-  LevelControl::Commands::Stop::Id,
-  LevelControl::Commands::MoveToLevelWithOnOff::Id,
-  LevelControl::Commands::MoveWithOnOff::Id,
-  LevelControl::Commands::StepWithOnOff::Id,
-  LevelControl::Commands::StopWithOnOff::Id,
-//  LevelControl::Commands::MoveToClosestFrequency::Id,
-  kInvalidCommandId,
-};
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(dimmableLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(LevelControl::Id, levelControlAttrs, levelControlIncomingCommands, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
+ClusterId dimmableLightClusters[] = { LevelControl::Id };
 
 // MARK: - DeviceLevelControl
+
+using namespace LevelControl;
 
 DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aLighting, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
-  // Attribute defaults
-  mLevel(0),
-  mOnLevel(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL), // will be updated from ROOM_ON value when available
-  mLevelControlOptions(0), // No default options (see EmberAfLevelControlOptions for choices)
-  mOnOffTransitionTimeDS(5), // default is 0.5 Seconds for transitions (approx dS default)
-  mDefaultMoveRateUnitsPerS(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7) // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
+  // external attribute defaults
+  mLevel(0)
 {
   // - declare specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(dimmableLightClusters));
+  useClusterTemplates(Span<ClusterId>(dimmableLightClusters));
 }
 
 
-void DeviceLevelControl::willBeInstalled()
+void DeviceLevelControl::didGetInstalled()
 {
-  inherited::willBeInstalled();
-  // set default transition time from recommendation. TODO: this should be a persistent setting later
-  mOnOffTransitionTimeDS = mLevelControlDelegate.recommendedTransitionTimeDS();
+  Attributes::FeatureMap::Set(endpointId(), to_underlying(LevelControl::Feature::kOnOff));
+  Attributes::OnOffTransitionTime::Set(endpointId(), 5); // default is 0.5 Seconds for transitions (approx dS default)
+  Attributes::OnLevel::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+  Attributes::DefaultMoveRate::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7); // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
+  Attributes::MinLevel::Set(endpointId(), mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : EMBER_AF_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL);
+  Attributes::MaxLevel::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+  // call base class last
+  inherited::didGetInstalled();
 }
+
 
 
 void DeviceLevelControl::changeOnOff_impl(bool aOn)
@@ -104,49 +73,41 @@ void DeviceLevelControl::changeOnOff_impl(bool aOn)
 }
 
 
-uint8_t DeviceLevelControl::minLevel()
-{
-  // minimum level is different in general case and for lighting
-  return mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : EMBER_AF_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL;
-}
-
-uint8_t DeviceLevelControl::maxLevel()
-{
-  return EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL;
-}
-
-
 bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode)
 {
+  uint8_t minlevel, maxlevel;
+  Attributes::MinLevel::Get(endpointId(), &minlevel);
+  Attributes::MaxLevel::Get(endpointId(), &maxlevel);
+
   // handle relative movement
   int level = aAmount;
   if (aDirection!=0) level = (int)mLevel + (aDirection>0 ? aAmount : -aAmount);
-  if (level>maxLevel()) level = maxLevel();
-  if (level<minLevel()) level = minLevel();
+  if (level>maxlevel) level = maxlevel;
+  if (level<minlevel) level = minlevel;
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=0x%x", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     uint8_t previousLevel = mLevel;
-    if ((previousLevel<=minLevel() || aUpdateMode.Has(UpdateFlags::forced)) && level>minLevel()) {
+    if ((previousLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
       // level is minimum and becomes non-minimum: also set OnOff when enabled
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
     }
-    else if (level<=minLevel()) {
+    else if (level<=minlevel) {
       // level is not minimum and should become minimum: prevent or clear OnOff
       if (aWithOnOff) updateOnOff(false, aUpdateMode);
-      else if (previousLevel==minLevel()) return false; // already at minimum: no change
-      else level = minLevel(); // set to minimum, but not to off
+      else if (previousLevel==minlevel) return false; // already at minimum: no change
+      else level = minlevel; // set to minimum, but not to off
     }
     mLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       mLevelControlDelegate.setLevel(
-        (double)(level-minLevel())/(maxLevel()-minLevel())*100, // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
+        (double)(level-minlevel)/(maxlevel-minlevel)*100, // bridge side is always 0..100%, mapped to minlevel..maxlevel
         aTransitionTimeDs // in tenths of seconds, 0xFFFF for using hardware's default
       );
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting currentLevel attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
     }
     return true; // changed or forced
   }
@@ -168,19 +129,23 @@ uint16_t DeviceLevelControl::remainingTimeDS()
 
 void DeviceLevelControl::setDefaultOnLevel(double aLevelPercent)
 {
-  mOnLevel = static_cast<uint8_t>(aLevelPercent/100*(maxLevel()-minLevel()))+minLevel();
+  uint8_t minlevel, maxlevel;
+  Attributes::MinLevel::Get(endpointId(), &minlevel);
+  Attributes::MaxLevel::Get(endpointId(), &maxlevel);
+  LevelControl::Attributes::OnLevel::Set(endpointId(), static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel))+minlevel);
 }
 
 
 bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMode)
 {
-  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxLevel()-minLevel()))+minLevel(), 0, 0, false, aUpdateMode);
+  uint8_t minlevel, maxlevel;
+  Attributes::MinLevel::Get(endpointId(), &minlevel);
+  Attributes::MaxLevel::Get(endpointId(), &maxlevel);
+  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel))+minlevel, 0, 0, false, aUpdateMode);
 }
 
 
 // MARK: levelControl cluster command implementation callbacks
-
-using namespace LevelControl;
 
 
 bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
@@ -203,7 +168,9 @@ bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOpti
     return true;
   }
   // now the options bit decides about executing or not
-  return (mLevelControlOptions & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
+  chip::BitMask<chip::app::Clusters::LevelControl::LevelControlOptions> opts;
+  Attributes::Options::Get(endpointId(), &opts);
+  return (opts.Raw() & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
 }
 
 
@@ -220,7 +187,7 @@ Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataM
     uint16_t transitionTime;
     if (aTransitionTime.IsNull()) {
       // default, use On/Off transition time attribute's value
-      transitionTime = mOnOffTransitionTimeDS;
+      Attributes::OnOffTransitionTime::Get(endpointId(), &transitionTime);
     }
     else {
       transitionTime = aTransitionTime.Value();
@@ -235,7 +202,7 @@ Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataM
     //   attribute to be set to TRUE, such as a standard On command, a **Move to level (with on/off) command**, a Recall
     //   scene command or a On with recall global scene command.
     if (aWithOnOff && !wasOn && isOn() && mLighting) {
-      OnOff::Attributes::GlobalSceneControl::Set(GetEndpointId(), true);
+      OnOff::Attributes::GlobalSceneControl::Set(endpointId(), true);
     }
   }
   return status;
@@ -301,25 +268,25 @@ Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRat
 {
   Status status = Status::Success;
 
-  uint8_t rate;
+  DataModel::Nullable<uint8_t> rate;
   if (aRate.IsNull()) {
     // use default rate
-    rate = mDefaultMoveRateUnitsPerS;
+    Attributes::DefaultMoveRate::Get(endpointId(), rate);
   }
   else {
-    rate = aRate.Value();
+    rate = aRate;
   }
-  if (rate!=0 || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
+  if ((!rate.IsNull() && rate.Value()!=0) || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
       case EMBER_ZCL_MOVE_MODE_UP:
         if (currentLevel()==0) {
           // start dimming from off level into on levels -> set onoff
           updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
-        mLevelControlDelegate.dim(1, rate);
+        mLevelControlDelegate.dim(1, rate.Value());
         break;
       case EMBER_ZCL_MOVE_MODE_DOWN:
-        mLevelControlDelegate.dim(-1, rate);
+        mLevelControlDelegate.dim(-1, rate.Value());
         break;
       default:
         status = Status::InvalidCommand;
@@ -396,8 +363,8 @@ void DeviceLevelControl::effect(bool aTurnOn)
 
   // get the OnOffTransitionTime attribute.
   uint16_t transitionTime = 0xFFFF;
-  if (emberAfContainsAttribute(GetEndpointId(), LevelControl::Id, Attributes::OnOffTransitionTime::Id)) {
-    status = Attributes::OnOffTransitionTime::Get(GetEndpointId(), &transitionTime);
+  if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnOffTransitionTime::Id)) {
+    status = Attributes::OnOffTransitionTime::Get(endpointId(), &transitionTime);
     if (status!=EMBER_ZCL_STATUS_SUCCESS) {
       transitionTime = 0xFFFF;
     }
@@ -407,8 +374,8 @@ void DeviceLevelControl::effect(bool aTurnOn)
   if (aTurnOn) {
     // get the default onLevel
     app::DataModel::Nullable<uint8_t> targetOnLevel;
-    if (emberAfContainsAttribute(GetEndpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
-      status = Attributes::OnLevel::Get(GetEndpointId(), targetOnLevel);
+    if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
+      status = Attributes::OnLevel::Get(endpointId(), targetOnLevel);
       if (status!=EMBER_ZCL_STATUS_SUCCESS || targetOnLevel.IsNull()) {
         // no OnLevel value, use currentlevel
         targetOnLevel.SetNonNull(currentLevel());
@@ -472,34 +439,6 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
     if (attributeId == LevelControl::Attributes::RemainingTime::Id) {
       return getAttr(buffer, maxReadLength, remainingTimeDS());
     }
-    if (attributeId == LevelControl::Attributes::OnOffTransitionTime::Id) {
-      return getAttr(buffer, maxReadLength, mOnOffTransitionTimeDS);
-    }
-    if (attributeId == LevelControl::Attributes::OnLevel::Id) {
-      return getAttr(buffer, maxReadLength, mOnLevel);
-    }
-    if (attributeId == LevelControl::Attributes::Options::Id) {
-      return getAttr(buffer, maxReadLength, mLevelControlOptions);
-    }
-    if (attributeId == LevelControl::Attributes::DefaultMoveRate::Id) {
-      return getAttr(buffer, maxReadLength, mDefaultMoveRateUnitsPerS);
-    }
-    if (attributeId == LevelControl::Attributes::MinLevel::Id) {
-      return getAttr(buffer, maxReadLength, minLevel());
-    }
-    if (attributeId == LevelControl::Attributes::MaxLevel::Id) {
-      return getAttr(buffer, maxReadLength, maxLevel());
-    }
-    if (attributeId == LevelControl::Attributes::StartUpCurrentLevel::Id) {
-      return getAttr(buffer, maxReadLength, minLevel()); // TODO: default to off, check if this matches intentions
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_LEVEL_CONTROL_CLUSTER_FEATURE_MAP | (mLighting ? to_underlying(LevelControl::Feature::kLighting) : 0));
-    }
   }
   // let base class try
   return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
@@ -509,18 +448,7 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
 EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==LevelControl::Id) {
-    if (attributeId == LevelControl::Attributes::OnOffTransitionTime::Id) {
-      return setAttr(mOnOffTransitionTimeDS, buffer);
-    }
-    if (attributeId == LevelControl::Attributes::OnLevel::Id) {
-      return setAttr(mOnLevel, buffer);
-    }
-    if (attributeId == LevelControl::Attributes::Options::Id) {
-      return setAttr(mLevelControlOptions, buffer);
-    }
-    if (attributeId == LevelControl::Attributes::DefaultMoveRate::Id) {
-      return setAttr(mDefaultMoveRateUnitsPerS, buffer);
-    }
+    /* none */
   }
   // let base class try
   return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
@@ -530,11 +458,7 @@ EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip
 string DeviceLevelControl::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- LevelControlOptions: %d", mLevelControlOptions);
   string_format_append(s, "\n- currentLevel: %d", mLevel);
-  string_format_append(s, "\n- OnLevel: %d", mOnLevel);
-  string_format_append(s, "\n- OnOffTime: %d", mOnOffTransitionTimeDS);
-  string_format_append(s, "\n- DimRate: %d", mDefaultMoveRateUnitsPerS);
   return s;
 }
 

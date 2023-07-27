@@ -47,31 +47,17 @@ const string CC51_DeviceImpl::endpointUID() const
 }
 
 
-string CC51_DeviceImpl::vendorName() const
+void CC51_DeviceImpl::deviceDidGetInstalled()
 {
-  // TODO: return a sensible value
-  return "Becker Antriebe GmbH";
-}
-
-
-string CC51_DeviceImpl::modelName() const
-{
-  // TODO: return a sensible value
-  return "Fehlender Modellname";
-}
-
-
-string CC51_DeviceImpl::configUrl() const
-{
-  // TODO: maybe return a web-UI URL
-  return "";
-}
-
-
-string CC51_DeviceImpl::serialNo() const
-{
-  // TODO: return a sensible value
-  return "THIS_MUST_BE_A_SERIAL_NO";
+  // initialize read-only attributes that will not change during device lifetime
+  // TODO: set a sensible value
+  SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, device().endpointId(), endpointUID());
+  // TODO: set a sensible value
+  SET_ATTR_STRING(BridgedDeviceBasicInformation, VendorName, device().endpointId(), "Becker Antriebe GmbH");
+  // TODO: set a sensible value
+  SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, device().endpointId(), "Bridged Becker Device");
+  // TODO: set a sensible value
+  SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, device().endpointId(), "");
 }
 
 
