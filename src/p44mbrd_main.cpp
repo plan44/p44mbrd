@@ -1000,7 +1000,7 @@ void MatterPostAttributeChangeCallback(
   uint8_t type,
   uint16_t size,
   uint8_t * value
-)                                       
+)
 {
   // TODO: implement forwarding to devices
 }
@@ -1015,16 +1015,16 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
   EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
-    POLOG(dev, LOG_NOTICE,
-      "read external attr 0x%04x in cluster 0x%04x, expecting %d bytes",
-      (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength
+    POLOG(dev, LOG_DEBUG,
+      "read external attr 0x%04x in cluster 0x%04x, expecting %d bytes, attr.size=%d",
+      (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength, (int)attributeMetadata->size
     );
     ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
-      POLOG(dev, LOG_ERR, "Attribute read not handled!");
+      POLOG(dev, LOG_ERR, "NOT HANDLED: reading external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
     else {
-      POLOG(dev, LOG_NOTICE, "- result = %s", dataToHexString(buffer, maxReadLength, ' ').c_str());
+      POLOG(dev, LOG_DEBUG, "- result[%d] = %s%s", maxReadLength, dataToHexString(buffer, maxReadLength>16 ? 16 : maxReadLength, ' ').c_str(), maxReadLength>16 ? " ..." : "");
     }
   }
   return ret;
@@ -1039,14 +1039,14 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
   EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
-    POLOG(dev, LOG_NOTICE, "write external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
-    POLOG(dev, LOG_NOTICE, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
+    POLOG(dev, LOG_DEBUG, "write external attr 0x%04x in cluster 0x%04x, attr.size=%d", (int)attributeMetadata->attributeId, (int)clusterId, (int)attributeMetadata->size);
+    POLOG(dev, LOG_DEBUG, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
     ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
-      POLOG(dev, LOG_ERR, "Attribute write not handled!");
+      POLOG(dev, LOG_ERR, "NOT HANDLED: writing external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
     else {
-      POLOG(dev, LOG_INFO, "processed attribute write: %s", dev->description().c_str());
+      POLOG(dev, LOG_DEBUG, "- processed external attribute write");
     }
   }
   return ret;

@@ -35,8 +35,6 @@ using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-const int kDefaultTextSize = 64;
-
 ClusterId bridgedDeviceCommonClusters[] = { Descriptor::Id, BridgedDeviceBasicInformation::Id };
 
 // MARK: - Device
@@ -167,13 +165,21 @@ void Device::didGetInstalled()
 
 void Device::didBecomeOperational()
 {
-  OLOG(LOG_INFO, "did become operational");
-  if (LOGENABLED(LOG_INFO)) {
-    OLOG(LOG_INFO, "- VendorName: %s", ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str());
-    OLOG(LOG_INFO, "- ProductName: %s", ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str());
-    OLOG(LOG_INFO, "- SerialNumber: %s", ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str());
-    OLOG(LOG_INFO, "- ProductURL: %s", ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str());
-  }
+  OLOG(LOG_INFO,
+    "did become operational:"
+    "\n- (internal) UID: %s"
+    "\n- NodeLabel: %s"
+    "\n- VendorName: %s"
+    "\n- ProductName: %s"
+    "\n- SerialNumber: %s"
+    "\n- ProductURL: %s",
+    mDeviceInfoDelegate.endpointUID().c_str(),
+    ATTR_STRING(BridgedDeviceBasicInformation, NodeLabel, endpointId()).c_str(),
+    ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str(),
+    ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str(),
+    ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str(),
+    ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str()
+  );
 }
 
 
@@ -220,7 +226,7 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       return getAttr(buffer, maxReadLength, mDeviceInfoDelegate.isReachable());
     }
     // Writable Node Label
-    if ((attributeId == BridgedDeviceBasicInformation::Attributes::NodeLabel::Id) && (maxReadLength == kDefaultTextSize)) {
+    if (attributeId == BridgedDeviceBasicInformation::Attributes::NodeLabel::Id) {
       FOCUSOLOG("reading node label: %s", mNodeLabel.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mNodeLabel.substr(0,maxReadLength-1).c_str());
