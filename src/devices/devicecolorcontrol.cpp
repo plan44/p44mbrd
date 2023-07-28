@@ -591,12 +591,12 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     InternalColorMode cm = mColorMode==InternalColorMode::unknown_mode ? (ctOnly() ? InternalColorMode::ct : InternalColorMode::hs) : mColorMode;
     if (attributeId == ColorControl::Attributes::ColorMode::Id) {
       // color mode: 0=Hue+Sat (normal and enhanced!), 1=XY, 2=Colortemp
-      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(mColorMode==InternalColorMode::enhanced_hs ? InternalColorMode::hs : mColorMode));
+      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(mColorMode==InternalColorMode::enhanced_hs ? InternalColorMode::hs : cm));
     }
     if (attributeId == ColorControl::Attributes::EnhancedColorMode::Id) {
       // TODO: this is already prepared for EnhancedHue, which is not yet implemented itself
       // color mode: 0=Hue+Sat, 1=XY, 2=Colortemp, 3=EnhancedHue+Sat
-      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(mColorMode));
+      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(cm));
     }
     if (attributeId == ColorControl::Attributes::CurrentHue::Id) {
       return getAttr(buffer, maxReadLength, currentHue());

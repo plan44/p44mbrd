@@ -87,6 +87,7 @@ executable("p44mbrd") {
     "adapters",
     "chip_glue",
     "bridgeapi",
+    "utils",
     "."
   ]
 

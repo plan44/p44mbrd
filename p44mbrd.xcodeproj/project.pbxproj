@@ -366,7 +366,6 @@
 		ED98459B2A6ED9200057C0D8 /* libcrypto.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */; };
 		ED98459D2A6ED9FB0057C0D8 /* libev.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */; };
 		ED9845DF2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */; };
-		ED9845E02A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845DD2A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.cpp */; };
 		ED9845E32A6FD98C0057C0D8 /* DnssdType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */; };
 		ED9845FE2A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */; };
 		ED9845FF2A72543E0057C0D8 /* scenes-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F92A72543E0057C0D8 /* scenes-server.cpp */; };
@@ -1342,9 +1341,7 @@
 		ED9845CB2A6FD8100057C0D8 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
 		ED9845CC2A6FD8100057C0D8 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
 		ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReportSchedulerImpl.cpp; sourceTree = "<group>"; };
-		ED9845DB2A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynchronizedReportSchedulerImpl.h; sourceTree = "<group>"; };
 		ED9845DC2A6FD9040057C0D8 /* ReportSchedulerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportSchedulerImpl.h; sourceTree = "<group>"; };
-		ED9845DD2A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SynchronizedReportSchedulerImpl.cpp; sourceTree = "<group>"; };
 		ED9845DE2A6FD9040057C0D8 /* ReportScheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportScheduler.h; sourceTree = "<group>"; };
 		ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdType.cpp; sourceTree = "<group>"; };
 		ED9845E22A6FD98C0057C0D8 /* DnssdType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DnssdType.h; sourceTree = "<group>"; };
@@ -2208,8 +2205,6 @@
 				ED9845DE2A6FD9040057C0D8 /* ReportScheduler.h */,
 				ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */,
 				ED9845DC2A6FD9040057C0D8 /* ReportSchedulerImpl.h */,
-				ED9845DD2A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.cpp */,
-				ED9845DB2A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.h */,
 				ED36D8B8286DCF0900CA28EC /* Engine.h */,
 				ED36D8B9286DCF0900CA28EC /* reporting.h */,
 				ED36D8BA286DCF0900CA28EC /* Engine.cpp */,
@@ -3776,7 +3771,6 @@
 				ED24BDDE28A68AE20025CC14 /* mainloop.cpp in Sources */,
 				ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */,
 				ED36DE9C286E043500CA28EC /* DeviceInstanceInfoProvider.cpp in Sources */,
-				ED9845E02A6FD9040057C0D8 /* SynchronizedReportSchedulerImpl.cpp in Sources */,
 				ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */,
 				ED36DA60286DCFC600CA28EC /* AbstractDnssdDiscoveryController.cpp in Sources */,
 				ED36DE88286E02CD00CA28EC /* binding-table.cpp in Sources */,
