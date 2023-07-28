@@ -374,6 +374,7 @@
 		ED9846012A72543E0057C0D8 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845FD2A72543E0057C0D8 /* groups-server.cpp */; };
 		ED98463A2A725E140057C0D8 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98461D2A725E130057C0D8 /* callback-stub.cpp */; };
 		ED98463B2A725E140057C0D8 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */; };
+		ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98463E2A73C6270057C0D8 /* matter_utils.cpp */; };
 		EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388D829E6EF2700BDAED4 /* basic-information.cpp */; };
 		EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */; };
 		EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */; };
@@ -1366,6 +1367,9 @@
 		ED9846262A725E130057C0D8 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
 		ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
 		ED9846282A725E130057C0D8 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
+		ED98463E2A73C6270057C0D8 /* matter_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = matter_utils.cpp; sourceTree = "<group>"; };
+		ED98463F2A73C6270057C0D8 /* matter_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matter_utils.h; sourceTree = "<group>"; };
+		ED9846412A73C7080057C0D8 /* matter_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matter_common.h; sourceTree = "<group>"; };
 		EDB388D729E6EF2700BDAED4 /* basic-information.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "basic-information.h"; sourceTree = "<group>"; };
 		EDB388D829E6EF2700BDAED4 /* basic-information.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "basic-information.cpp"; sourceTree = "<group>"; };
 		EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLVBackingStore.h; sourceTree = "<group>"; };
@@ -1562,11 +1566,13 @@
 				ED23300F2886A18300D934D7 /* p44utils */,
 				ED24BDBA28A6709E0025CC14 /* devices */,
 				ED1A3CA12A45A275009746B8 /* adapters */,
+				ED98463D2A73C5F10057C0D8 /* utils */,
 				ED2330162886A1FB00D934D7 /* p44utils_config.hpp */,
 				ED14F42B294B8E11001C9D2E /* darwinlogger.cpp */,
 				ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */,
 				ED24BDE928A81C0D0025CC14 /* p44mbrd_main.h */,
 				EDC58B512A653E9E00F48DEF /* p44mbrd_common.h */,
+				ED9846412A73C7080057C0D8 /* matter_common.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -3497,6 +3503,15 @@
 			path = "zap-generated";
 			sourceTree = "<group>";
 		};
+		ED98463D2A73C5F10057C0D8 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				ED98463E2A73C6270057C0D8 /* matter_utils.cpp */,
+				ED98463F2A73C6270057C0D8 /* matter_utils.h */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
 		EDB388D629E6EF2700BDAED4 /* basic-information */ = {
 			isa = PBXGroup;
 			children = (
@@ -3782,6 +3797,7 @@
 				ED9845DF2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp in Sources */,
 				ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */,
 				ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */,
+				ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */,
 				ED36DDD2286DDA0300CA28EC /* TraceMessage.cpp in Sources */,
 				ED60FD0428BF88EE00FE950E /* chip_error.cpp in Sources */,
 				ED36DB93286DD2CE00CA28EC /* ASN1Error.cpp in Sources */,

@@ -54,12 +54,16 @@ executable("p44mbrd") {
     "adapters/cc51/cc51bridge.h",
     "adapters/cc51/cc51devices.cpp",
     "adapters/cc51/cc51devices.h",
+    "utils/matter_utils.cpp",
+    "utils/matter_utils.h",
     "chip_glue/deviceinfoprovider.cpp",
     "chip_glue/deviceinfoprovider.h",
     "chip_glue/chip_error.cpp",
     "chip_glue/chip_error.h",
     "p44mbrd_main.cpp",
     "p44mbrd_main.h",
+    "matter_common.h",
+    "p44mbrd_common.h"
   ]
 
   deps = [
@@ -194,6 +198,7 @@ source_set("p44utils") {
   defines = [
   ]
   sources = [
+    "p44utils_config.h",
     "p44utils/p44utils_common.hpp",
     "p44utils/mainloop.cpp",
     "p44utils/socketcomm.cpp",

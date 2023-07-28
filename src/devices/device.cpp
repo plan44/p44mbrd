@@ -30,46 +30,14 @@
 
 #include "device_impl.h" // include as first file!
 
+
 using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
-
-#define ZCL_DESCRIPTOR_CLUSTER_REVISION (1u)
-#define ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION (1u)
-#define ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP (0u)
-#define ZCL_FIXED_LABEL_CLUSTER_REVISION (1u)
-
 const int kDefaultTextSize = 64;
 
-// Declare Descriptor cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(descriptorAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(Descriptor::Attributes::DeviceTypeList::Id, ARRAY, kDescriptorAttributeArraySize, 0), /* device list */
-  DECLARE_DYNAMIC_ATTRIBUTE(Descriptor::Attributes::ServerList::Id, ARRAY, kDescriptorAttributeArraySize, 0), /* server list */
-  DECLARE_DYNAMIC_ATTRIBUTE(Descriptor::Attributes::ClientList::Id, ARRAY, kDescriptorAttributeArraySize, 0), /* client list */
-  DECLARE_DYNAMIC_ATTRIBUTE(Descriptor::Attributes::PartsList::Id, ARRAY, kDescriptorAttributeArraySize, 0),  /* parts list */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare Bridged Device Basic information cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(bridgedDeviceBasicAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::NodeLabel::Id, CHAR_STRING, kDefaultTextSize, ZAP_ATTRIBUTE_MASK(WRITABLE)), /* Optional NodeLabel */
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::VendorName::Id, CHAR_STRING, kDefaultTextSize, 0), /* Optional Vendor Name */
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::ProductName::Id, CHAR_STRING, kDefaultTextSize, 0), /* Optional NodeLabel */
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::ProductURL::Id, CHAR_STRING, kDefaultTextSize, 0), /* Optional Product URL */
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::SerialNumber::Id, CHAR_STRING, kDefaultTextSize, 0), /* Optional Serial Number (dSUID) */
-  DECLARE_DYNAMIC_ATTRIBUTE(BridgedDeviceBasicInformation::Attributes::Reachable::Id, BOOLEAN, 1, 0),               /* Mandatory Reachable */
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0),     /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(bridgedDeviceCommonClusters)
-  DECLARE_DYNAMIC_CLUSTER(Descriptor::Id, descriptorAttrs, nullptr, nullptr),
-  DECLARE_DYNAMIC_CLUSTER(BridgedDeviceBasicInformation::Id, bridgedDeviceBasicAttrs, nullptr, nullptr)
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
+ClusterId bridgedDeviceCommonClusters[] = { Descriptor::Id, BridgedDeviceBasicInformation::Id };
 
 // MARK: - Device
 
@@ -87,20 +55,21 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
   mClusterDataVersionsP = nullptr; // we'll need
   mParentEndpointId = kInvalidEndpointId;
   // - declare common bridged device clusters
-  addClusterDeclarations(Span<EmberAfCluster>(bridgedDeviceCommonClusters));
+  useClusterTemplates(Span<ClusterId>(bridgedDeviceCommonClusters));
 }
+
 
 string Device::logContextPrefix()
 {
   string ep;
-  if (GetEndpointId()!=kInvalidEndpointId) ep = string_format(" @endpoint %d", GetEndpointId());
+  if (endpointId()!=kInvalidEndpointId) ep = string_format(" @endpoint %d", endpointId());
   string pep;
   if (mPartOfComposedDevice && GetParentEndpointId()!=kInvalidEndpointId) pep = string_format(" (part of @endpoint %d)", GetParentEndpointId());
   return string_format(
     "%s %sdevice '%s'%s%s",
     deviceType(),
     mPartOfComposedDevice ? "sub" : "",
-    mNodeLabel.c_str(),
+    mDeviceInfoDelegate.name().c_str(), // bridge side name is available from start, but not node label (although the two might be in sync later)
     ep.c_str(),
     pep.c_str()
   );
@@ -118,31 +87,37 @@ Device::~Device()
 
 // MARK: cluster declaration
 
-void Device::addClusterDeclarations(const Span<EmberAfCluster>& aClusterDeclarationList)
+void Device::useClusterTemplates(const Span<ClusterId>& aTemplateClusterIdList)
 {
-  mClusterListCollector.push_back(aClusterDeclarationList);
+  mTemplateClusterIdsSpanList.push_back(aTemplateClusterIdList);
 }
+
 
 void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
 {
   // save the device type list
   mDeviceTypeList = aDeviceTypeList;
   // now finally populate the endpoint definition
-  // - count the clusters
-  mEndpointDefinition.clusterCount = 0;
-  for (std::list<Span<EmberAfCluster>>::iterator pos = mClusterListCollector.begin(); pos!=mClusterListCollector.end(); ++pos) {
-    mEndpointDefinition.clusterCount += (uint8_t)pos->size();
-  }
-  // - generate the final clusters
-  mEndpointDefinition.cluster = new EmberAfCluster[mEndpointDefinition.clusterCount];
+  // - generate the template clusterId list
   size_t i = 0;
-  for (std::list<Span<EmberAfCluster>>::iterator pos = mClusterListCollector.begin(); pos!=mClusterListCollector.end(); ++pos) {
+  for (std::list<Span<ClusterId>>::iterator pos = mTemplateClusterIdsSpanList.begin(); pos!=mTemplateClusterIdsSpanList.end(); ++pos) {
+    i += pos->size();
+  }
+  ClusterId *tl = new ClusterId[i];
+  i = 0;
+  for (std::list<Span<ClusterId>>::iterator pos = mTemplateClusterIdsSpanList.begin(); pos!=mTemplateClusterIdsSpanList.end(); ++pos) {
     for (size_t j=0; j<pos->size(); j++) {
-      memcpy((void *)&mEndpointDefinition.cluster[i], &pos->data()[j], sizeof(EmberAfCluster));
+      tl[i] = *(pos->data()+j);
       i++;
     }
   }
-  mClusterListCollector.clear(); // don't need this any more
+  // set up the endpoint declaration
+  setupDynamicEndpointDeclaration(
+    mEndpointDefinition,
+    emberAfFixedEndpointCount()-1, // last fixed endpoint is the template endpoint
+    Span<ClusterId>(tl, i)
+  );
+  mTemplateClusterIdsSpanList.clear(); // don't need this any more
   // - allocate the cluster data versions storage
   if (mClusterDataVersionsP) delete mClusterDataVersionsP;
   mClusterDataVersionsP = new DataVersion[mEndpointDefinition.clusterCount];
@@ -153,17 +128,20 @@ bool Device::AddAsDeviceEndpoint()
 {
   // finalize the declaration
   finalizeDeviceDeclaration();
+  // allocate storage
+  auto endpointStorage = new uint8_t[mEndpointDefinition.endpointSize];
   // add as dynamic endpoint
   EmberAfStatus ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
-    GetEndpointId(),
+    endpointId(),
     &mEndpointDefinition,
     Span<DataVersion>(mClusterDataVersionsP, mEndpointDefinition.clusterCount),
     mDeviceTypeList,
-    mParentEndpointId
+    mParentEndpointId,
+    endpointStorage
   );
   if (ret==EMBER_ZCL_STATUS_SUCCESS) {
-    OLOG(LOG_INFO, "Added to CHIP as dynamic endpoint index #%d", mDynamicEndpointIdx);
+    OLOG(LOG_INFO, "added at dynamic endpoint index #%d", mDynamicEndpointIdx);
   }
   else {
     OLOG(LOG_ERR, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
@@ -179,9 +157,23 @@ void Device::willBeInstalled()
 }
 
 
+void Device::didGetInstalled()
+{
+  mDeviceInfoDelegate.deviceDidGetInstalled();
+  OLOG(LOG_DEBUG, "did get installed");
+}
+
+
+
 void Device::didBecomeOperational()
 {
-  OLOG(LOG_DEBUG, "did become operational");
+  OLOG(LOG_INFO, "did become operational");
+  if (LOGENABLED(LOG_INFO)) {
+    OLOG(LOG_INFO, "- VendorName: %s", ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str());
+    OLOG(LOG_INFO, "- ProductName: %s", ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str());
+    OLOG(LOG_INFO, "- SerialNumber: %s", ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str());
+    OLOG(LOG_INFO, "- ProductURL: %s", ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str());
+  }
 }
 
 
@@ -193,7 +185,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
     mReachable = aReachable;
     OLOG(LOG_INFO, "Updating reachable to %s - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", aUpdateMode.Raw());
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(GetEndpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::Reachable::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::Reachable::Id);
     }
   }
 }
@@ -211,7 +203,7 @@ void Device::updateNodeLabel(const string aNodeLabel, UpdateMode aUpdateMode)
       }
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(GetEndpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::NodeLabel::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::NodeLabel::Id);
     }
   }
 }
@@ -234,43 +226,6 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
       MakeZclCharString(zclNameSpan, mNodeLabel.substr(0,maxReadLength-1).c_str());
       return EMBER_ZCL_STATUS_SUCCESS;
     }
-    // Device Information attributes
-    if ((attributeId == BridgedDeviceBasicInformation::Attributes::VendorName::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading vendor name: %s", mDeviceInfoDelegate.vendorName().c_str());
-      MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.vendorName().substr(0,maxReadLength-1).c_str());
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == BridgedDeviceBasicInformation::Attributes::ProductName::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading product name: %s", mDeviceInfoDelegate.modelName().c_str());
-      MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.modelName().substr(0,maxReadLength-1).c_str());
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == BridgedDeviceBasicInformation::Attributes::ProductURL::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading product url: %s", mDeviceInfoDelegate.configUrl().c_str());
-      MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.configUrl().substr(0,maxReadLength-1).c_str());
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if ((attributeId == BridgedDeviceBasicInformation::Attributes::SerialNumber::Id) && (maxReadLength == kDefaultTextSize)) {
-      FOCUSOLOG("reading serial number: %s", mDeviceInfoDelegate.serialNo().c_str());
-      MutableByteSpan zclNameSpan(buffer, maxReadLength);
-      MakeZclCharString(zclNameSpan, mDeviceInfoDelegate.serialNo().c_str());
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_BRIDGED_DEVICE_BASIC_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_BRIDGED_DEVICE_BASIC_FEATURE_MAP);
-    }
-  }
-  // always implement an empty feature map, seems to be mandatory (according to ZAP tool, not specs)
-  if (attributeId == Globals::Attributes::FeatureMap::Id) {
-    FOCUSOLOG("reading generic empty feature map (endpoint does not have a specific one)");
-    return getAttr<uint32_t>(buffer, maxReadLength, 0);
   }
   return EMBER_ZCL_STATUS_FAILURE;
 }
@@ -302,33 +257,7 @@ string Device::description()
 
 using namespace Identify;
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
-
-#define ZCL_IDENTIFY_CLUSTER_REVISION (4u)
-#define ZCL_IDENTIFY_CLUSTER_FEATURE_MAP (0) // no QRY
-
-// Declare cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(identifyAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(Identify::Attributes::IdentifyTime::Id, INT16U, 2, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(Identify::Attributes::IdentifyType::Id, ENUM8, 1, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0), /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare cluster commands
-// TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
-// Note: we only implement "Identify", the only mandatory command when QRY feature is not present
-constexpr CommandId identifyIncomingCommands[] = {
-  Identify::Commands::Identify::Id,
-  kInvalidCommandId,
-};
-
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(identifiableDeviceClusters)
-  DECLARE_DYNAMIC_CLUSTER(Identify::Id, identifyAttrs, identifyIncomingCommands, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
-
+ClusterId identifiableDeviceClusters[] = { Identify::Id };
 
 IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   Device(aDeviceInfoDelegate),
@@ -336,13 +265,23 @@ IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, Devi
   mIdentifyTime(0)
 {
   // - declare identify cluster
-  addClusterDeclarations(Span<EmberAfCluster>(identifiableDeviceClusters));
+  useClusterTemplates(Span<ClusterId>(identifiableDeviceClusters));
 }
 
 
 IdentifiableDevice::~IdentifiableDevice()
 {
 }
+
+
+void IdentifiableDevice::didGetInstalled()
+{
+  // override static attribute defaults
+  Identify::Attributes::IdentifyType::Set(endpointId(), identifyType());
+  // call base class last
+  inherited::didGetInstalled();
+}
+
 
 
 bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode)
@@ -361,7 +300,7 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting IdentifyTime attribute change to matter");
-      MatterReportingAttributeChangeCallback(GetEndpointId(), Identify::Id, Identify::Attributes::IdentifyTime::Id);
+      MatterReportingAttributeChangeCallback(endpointId(), Identify::Id, Identify::Attributes::IdentifyTime::Id);
     }
     return true; // changed
   }
@@ -387,16 +326,6 @@ EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip:
   if (clusterId==Identify::Id) {
     if (attributeId == Identify::Attributes::IdentifyTime::Id) {
       return getAttr(buffer, maxReadLength, mIdentifyTime);
-    }
-    if (attributeId == Identify::Attributes::IdentifyType::Id) {
-      return getAttr(buffer, maxReadLength, identifyType());
-    }
-    // common
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_IDENTIFY_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, ZCL_IDENTIFY_CLUSTER_FEATURE_MAP);
     }
   }
   // let base class try

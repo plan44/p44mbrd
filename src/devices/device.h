@@ -37,7 +37,10 @@
 #include <controller/CHIPCluster.h>
 
 #include "p44mbrd_main.h"
+#include "matter_utils.h"
+
 #include "logger.hpp"
+
 
 using namespace chip;
 using namespace app;
