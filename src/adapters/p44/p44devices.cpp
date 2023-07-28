@@ -474,46 +474,47 @@ void P44_ColorControlImpl::parseChannelStates(JsonObjectPtr aChannelStates, Upda
   JsonObjectPtr o;
   JsonObjectPtr vo;
   bool relevant;
+  using InternalColorMode = DeviceColorControl::InternalColorMode;
   // need to determine color mode
-  DeviceColorControl::ColorMode colorMode = DeviceColorControl::colormode_unknown;
+  DeviceColorControl::InternalColorMode colorMode = InternalColorMode::unknown_mode;
   if (aChannelStates->get("colortemp", o)) {
-    if ((relevant = o->get("age", vo, true))) colorMode = DeviceColorControl::colormode_ct; // age is non-null -> component detemines colormode
+    if ((relevant = o->get("age", vo, true))) colorMode = InternalColorMode::ct; // age is non-null -> component detemines colormode
     if (o->get("value", vo, true)) {
       // scaling: ct is directly in mired
-      deviceP<DeviceColorControl>()->updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==DeviceColorControl::colormode_ct ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+      deviceP<DeviceColorControl>()->updateCurrentColortemp(static_cast<uint16_t>(vo->doubleValue()), relevant && colorMode==InternalColorMode::ct ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
     }
   }
   if (!deviceP<DeviceColorControl>()->ctOnly()) {
     if (aChannelStates->get("hue", o)) {
-      if ((relevant = o->get("age", vo, true))) colorMode = DeviceColorControl::colormode_hs; // age is non-null -> component detemines colormode
+      if ((relevant = o->get("age", vo, true))) colorMode = InternalColorMode::hs; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: hue is 0..360 degrees mapped to 0..0xFE
-        deviceP<DeviceColorControl>()->updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==DeviceColorControl::colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        deviceP<DeviceColorControl>()->updateCurrentHue(static_cast<uint8_t>(vo->doubleValue()/360*0xFE), relevant && colorMode==InternalColorMode::hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("saturation", o)) {
-      if ((relevant = o->get("age", vo, true))) colorMode = DeviceColorControl::colormode_hs; // age is non-null -> component detemines colormode
+      if ((relevant = o->get("age", vo, true))) colorMode = InternalColorMode::hs; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: saturation is 0..100% mapped to 0..0xFE
-        deviceP<DeviceColorControl>()->updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==DeviceColorControl::colormode_hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        deviceP<DeviceColorControl>()->updateCurrentSaturation(static_cast<uint8_t>(vo->doubleValue()/100*0xFE), relevant && colorMode==InternalColorMode::hs ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("x", o)) {
-      if ((relevant = o->get("age", vo, true))) colorMode = DeviceColorControl::colormode_xy; // age is non-null -> component detemines colormode
+      if ((relevant = o->get("age", vo, true))) colorMode = InternalColorMode::xy; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        deviceP<DeviceColorControl>()->updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==DeviceColorControl::colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        deviceP<DeviceColorControl>()->updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("y", o)) {
-      if ((relevant = o->get("age", vo, true))) colorMode = DeviceColorControl::colormode_xy; // age is non-null -> component detemines colormode
+      if ((relevant = o->get("age", vo, true))) colorMode = InternalColorMode::xy; // age is non-null -> component detemines colormode
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        deviceP<DeviceColorControl>()->updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==DeviceColorControl::colormode_xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        deviceP<DeviceColorControl>()->updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
   }

@@ -77,15 +77,14 @@ class DeviceColorControl : public DeviceLevelControl
 
 public:
 
-  /// @note: enum values are from matter specs
-  enum {
-    colormode_hs = 0,
-    colormode_xy = 1,
-    colormode_ct = 2,
-    colormode_EnhancedHs = 3, // TODO: not yet implemented, is optional
-    colormode_unknown = 0xFF
+  /// @note: internal color mode, combined from ColorMode and EnhancedColorMode
+  enum class InternalColorMode : uint8_t {
+    hs = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_CURRENT_HUE_AND_CURRENT_SATURATION,
+    xy = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_CURRENT_X_AND_CURRENT_Y,
+    ct = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_COLOR_TEMPERATURE,
+    enhanced_hs = EmberAfEnhancedColorMode::EMBER_ZCL_ENHANCED_COLOR_MODE_ENHANCED_CURRENT_HUE_AND_CURRENT_SATURATION, // TODO: not yet implemented, is optional
+    unknown_mode = 0xFF // internal only, should not be exposed, matter attributes is non-nullable
   };
-  typedef uint8_t ColorMode;
 
   DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
@@ -96,14 +95,14 @@ public:
   virtual string description() override;
 
   bool ctOnly() { return mCtOnly; };
-  ColorMode currentColorMode() { return mColorMode; };
+  InternalColorMode currentColorMode() { return mColorMode; };
   uint8_t currentHue() { return mHue; };
   uint8_t currentSaturation() { return mSaturation; };
   uint16_t currentColortemp() { return mColorTemp; };
   uint16_t currentX() { return mX; };
   uint16_t currentY() { return mX; };
 
-  bool updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
@@ -122,7 +121,7 @@ private:
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() override;
 
-  ColorMode mColorMode;
+  InternalColorMode mColorMode;
   uint8_t mHue;
   uint8_t mSaturation;
   uint16_t mColorTemp;

@@ -64,7 +64,7 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColo
   inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate), // level control for lighting
   mColorControlDelegate(aColorControlDelegate),
   mCtOnly(aCTOnly),
-  mColorMode(aCTOnly ? colormode_ct : colormode_hs),
+  mColorMode(aCTOnly ? InternalColorMode::ct : InternalColorMode::hs),
   mHue(0),
   mSaturation(0),
   mColorTemp(COLOR_TEMP_DEFAULT),
@@ -107,7 +107,7 @@ void DeviceColorControl::didGetInstalled()
 
 
 
-bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
 {
   bool changed = aColorMode!=mColorMode;
   if (
@@ -118,19 +118,19 @@ bool DeviceColorControl::updateCurrentColorMode(ColorMode aColorMode, UpdateMode
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       switch (mColorMode) {
-        case colormode_hs:
-        case colormode_EnhancedHs: // TODO: separate when we actually have EnhancedHue
+        case InternalColorMode::hs:
+        case InternalColorMode::enhanced_hs: // TODO: separate when we actually have EnhancedHue
           FOCUSOLOG("changing colormode to HS");
           updateCurrentHue(mHue, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
           updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
-        case colormode_xy:
+        case InternalColorMode::xy:
           FOCUSOLOG("changing colormode to XY");
           updateCurrentX(mX, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
           updateCurrentY(mY, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
         default:
-        case colormode_ct:
+        case InternalColorMode::ct:
           FOCUSOLOG("changing colormode to CT");
           updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
           break;
@@ -157,7 +157,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
     OLOG(LOG_INFO, "set hue to %d - updatemode=0x%x", aHue, aUpdateMode.Raw());
     mHue = aHue;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_hs, aUpdateMode, aTransitionTimeDS)) {
+    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         mColorControlDelegate.setHue(mHue, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
@@ -180,7 +180,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
     OLOG(LOG_INFO, "set saturation to %d - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_hs, aUpdateMode, aTransitionTimeDS)) {
+    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update saturation (otherwise, color mode change already sendt H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         mColorControlDelegate.setSaturation(mSaturation, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
@@ -205,7 +205,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
     else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_ct, aUpdateMode, aTransitionTimeDS)) {
+    if (!updateCurrentColorMode(InternalColorMode::ct, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         mColorControlDelegate.setColortemp(mColorTemp, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
@@ -228,7 +228,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
     OLOG(LOG_INFO, "set X to %d - updatemode=0x%x", aX, aUpdateMode.Raw());
     mX = aX;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_xy, aUpdateMode, aTransitionTimeDS)) {
+    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         mColorControlDelegate.setCieX(mX, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
@@ -251,7 +251,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
     OLOG(LOG_INFO, "set Y to %d - updatemode=0x%x", aY, aUpdateMode.Raw());
     mY = aY;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(colormode_xy, aUpdateMode, aTransitionTimeDS)) {
+    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {
       // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
         mColorControlDelegate.setCieY(mY, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
@@ -587,14 +587,16 @@ void MatterColorControlClusterServerShutdownCallback(EndpointId endpoint)
 EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ColorControl::Id) {
+    // create non-unknown default if needed
+    InternalColorMode cm = mColorMode==InternalColorMode::unknown_mode ? (ctOnly() ? InternalColorMode::ct : InternalColorMode::hs) : mColorMode;
     if (attributeId == ColorControl::Attributes::ColorMode::Id) {
       // color mode: 0=Hue+Sat (normal and enhanced!), 1=XY, 2=Colortemp
-      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode==colormode_EnhancedHs ? (uint8_t)colormode_hs : mColorMode);
+      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(mColorMode==InternalColorMode::enhanced_hs ? InternalColorMode::hs : mColorMode));
     }
     if (attributeId == ColorControl::Attributes::EnhancedColorMode::Id) {
       // TODO: this is already prepared for EnhancedHue, which is not yet implemented itself
       // color mode: 0=Hue+Sat, 1=XY, 2=Colortemp, 3=EnhancedHue+Sat
-      return getAttr<uint8_t>(buffer, maxReadLength, mColorMode);
+      return getAttr<uint8_t>(buffer, maxReadLength, to_underlying(mColorMode));
     }
     if (attributeId == ColorControl::Attributes::CurrentHue::Id) {
       return getAttr(buffer, maxReadLength, currentHue());
@@ -630,7 +632,7 @@ EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip
 string DeviceColorControl::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- colormode: %d", mColorMode);
+  string_format_append(s, "\n- colormode: %d", to_underlying(mColorMode));
   string_format_append(s, "\n- hue: %d", mHue);
   string_format_append(s, "\n- saturation: %d", mSaturation);
   string_format_append(s, "\n- ct: %d", mColorTemp);
