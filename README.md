@@ -34,11 +34,12 @@ Work on *p44mbrd* has produced a few contributions already accepted to matter ma
 - [make compatible with time64](https://github.com/project-chip/connectedhomeip/pull/19985)
 - [fix System Layer socket watch for Darwin](https://github.com/project-chip/connectedhomeip/pull/21135)
 - [a build option for custom-implemented clusters](https://github.com/project-chip/connectedhomeip/pull/22042)
-
-And two pending (at the time of writing this) PRs:
-
 - [Support for libev based mainloop](https://github.com/project-chip/connectedhomeip/pull/24232)
 - [Fix Avahi based dns-sd implementation](https://github.com/project-chip/connectedhomeip/pull/26397)
+
+And one draft pending (at the time of writing this):
+
+- [dynamic endpoints: add automatic attr storage, instantiation from ZAP templates](https://github.com/project-chip/connectedhomeip/pull/28372). This one in particular will help building bridge apps *a lot*!
 
 ### p44utils
 

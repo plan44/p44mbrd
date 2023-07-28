@@ -12,14 +12,19 @@ while [[ $# -ge 1 ]]; do
   case "$1" in
     "-d"|"--debug") FOR_DEBUG=1;shift;;
     "-v"|"--verbose") NINJA_OPTS="${NINJA_OPTS} -v";shift;;
+    "-c"|"--continue") NINJA_OPTS="${NINJA_OPTS} -k 0";shift;;
     *) break;;
   esac
 done
 
 # process remaining arguments
 if [[ $# < 1 || $# > 2 ]]; then
-  echo "Usage: $0 [--debug | --verbose] <openwrt buildroot path> [<OpenWrt .config file>]"
-  echo "  builds '${CHIPAPP_NAME}' app from current dir"
+  echo "Usage: $0 [--debug | --verbose | --continue] <openwrt buildroot path> [<OpenWrt .config file>]"
+  echo "  builds '${CHIPAPP_NAME}' app from current dir, stores build binary into prebuilt_bin dir"
+  echo "  of openwrt package named ${OPENWRT_PACKAGE_NAME}"
+  echo "  --debug : builds for debugging, do not store binary in openwrt package"
+  echo "  --verbose : call ninja with verbose option"
+  echo "  --continue : prevent ninja form stopping at first failed job"
   exit 1
 fi
 
