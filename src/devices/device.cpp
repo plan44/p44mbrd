@@ -222,6 +222,7 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
     OLOG(LOG_WARNING, "****** tried to access basic infomation cluster *****");
   }
   else if (clusterId==BridgedDeviceBasicInformation::Id) {
+    // Reachable flag
     if (attributeId == BridgedDeviceBasicInformation::Attributes::Reachable::Id) {
       return getAttr(buffer, maxReadLength, mDeviceInfoDelegate.isReachable());
     }

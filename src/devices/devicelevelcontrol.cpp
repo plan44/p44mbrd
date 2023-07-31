@@ -86,7 +86,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   if (level<minlevel) level = minlevel;
   // now move to given or calculated level
   if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "setting level to %d in %d00mS - %supdatemode=0x%x", aAmount, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
+    OLOG(LOG_INFO, "setting level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     uint8_t previousLevel = mLevel;
     if ((previousLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
       // level is minimum and becomes non-minimum: also set OnOff when enabled
