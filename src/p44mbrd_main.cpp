@@ -35,6 +35,7 @@
 #include <app/util/af-types.h>
 #include <app/util/af.h>
 #include <app/util/attribute-storage.h>
+#include <app/server/CommissioningWindowManager.h>
 //#include <app/util/attribute-table.h>
 #include <app/util/util.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
@@ -131,8 +132,8 @@ using namespace p44;
 #define CC51_DEFAULT_BRIDGE_SERVICE "4343"
 
 
-/// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
-class P44mbrd : public CmdLineApp
+/// Main program application object
+class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
 {
   typedef CmdLineApp inherited;
 
@@ -172,6 +173,11 @@ public:
   }
 
 
+  virtual ~P44mbrd()
+  {
+  }
+
+  
   string logContextPrefix() override
   {
     return "P44mbrd App";
@@ -278,9 +284,20 @@ public:
 
   void updateCommissionableStatus(bool aIsCommissionable)
   {
+    OLOG(LOG_NOTICE, "Commissioning Window changes to %scommissionable)", aIsCommissionable ? "OPEN (" : "CLOSED (not ");
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-      (*pos)->setCommissionable(aIsCommissionable);
+      (*pos)->reportCommissionable(aIsCommissionable);
     }
+  }
+
+
+  void updateCommissionableStatus()
+  {
+    using csta = chip::app::Clusters::AdministratorCommissioning::CommissioningWindowStatusEnum;
+    csta commissioningstatus =
+    Server::GetInstance().GetCommissioningWindowManager().CommissioningWindowManager::CommissioningWindowStatusForCluster();
+    bool commissionable = commissioningstatus != csta::kWindowNotOpen;
+    updateCommissionableStatus(commissionable);
   }
 
 
@@ -300,109 +317,25 @@ public:
   }
 
 
+  void makeCommissionable(bool aIsCommissionable)
+  {
+    if (aIsCommissionable) {
+      Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow();
+    }
+    else {
+      Server::GetInstance().GetCommissioningWindowManager().CloseCommissioningWindow();
+    }
+  }
+
+
   CHIP_ERROR installAdaptersInitialDevices()
   {
     CHIP_ERROR chiperr;
 
     for (BridgeAdaptersList::iterator apos = mAdapters.begin(); apos!=mAdapters.end(); ++apos) {
-      for (BridgeAdapter::DeviceUIDMap::iterator dpos = (*apos)->mDeviceUIDMap.begin(); dpos!=(*apos)->mDeviceUIDMap.end(); ++dpos) {
-        DevicePtr dev = dpos->second;
-        // install the device
-        chiperr = installBridgedDevice(dev);
-      }
+      (*apos)->installInitialDevices(chiperr);
     }
     return chiperr;
-  }
-
-
-
-
-  void installAdditionalDevice(DevicePtr aDev)
-  {
-    if (aDev) {
-      if (!mChipAppInitialized) {
-        // we are still waiting for the first bridged device and haven't started CHIP yet -> start now
-        OLOG(LOG_NOTICE, "First bridgeable device installed, can start CHIP now, finally");
-        // starting chip will take care of actually installing the device
-        // - but unwind call stack before
-        MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
-      }
-      else {
-        // already running
-        installBridgedDevice(aDev);
-        // save possibly modified first free endpointID (increased when previously unknown devices have been added)
-        chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
-        CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
-        LogErrorOnFailure(chiperr);
-        // add as new endpoint to bridge
-        if (aDev->AddAsDeviceEndpoint()) {
-          POLOG(aDev, LOG_NOTICE, "added as additional dynamic endpoint while Matter already running");
-          // report installed
-          aDev->didGetInstalled();
-          aDev->didBecomeOperational();
-          // dump status
-          POLOG(aDev, LOG_INFO, "initialized from chip: %s", aDev->description().c_str());
-          // also add subdevices that are part of this additional device and thus not yet present
-          for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
-            DevicePtr subDev = *pos;
-            if (subDev->AddAsDeviceEndpoint()) {
-              POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
-              subDev->didBecomeOperational();
-              // dump status
-              POLOG(subDev, LOG_INFO, "initialized composed device part from chip: %s", aDev->description().c_str());
-            }
-          }
-        }
-      }
-    }
-  }
-
-
-
-  void adapterStarted(ErrorPtr aError, BridgeAdapter &aAdapter)
-  {
-    mUnstartedAdapters--; // count this start
-    if (Error::notOK(aError)) OLOG(LOG_WARNING, "Adapter startup error: %s", aError->text());
-    if (mUnstartedAdapters>0) {
-      OLOG(LOG_NOTICE, "Adapter started, %d remaining", mUnstartedAdapters);
-    }
-    else {
-      // all adapters have called back, so we can consider all started (or not operational at all)
-      bool startnow = false;
-      bool infoset = false;
-      for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-        // for now: assume we'll have only one adapter running for real application,
-        // which will determine the matter bridge's identification.
-        // With multiple adapters, the first instantiated will determine the device instance info
-        if (!infoset) {
-          infoset = true;
-          mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
-          mP44dbrDeviceInstanceInfoProvider.mLabel = (*pos)->label();
-          mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
-          mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
-          mP44dbrDeviceInstanceInfoProvider.mVendorName = (*pos)->vendor();
-        }
-        if ((*pos)->hasBridgeableDevices()) {
-          startnow = true;
-        }
-      }
-      // initial devices collected
-      if (!startnow) {
-        OLOG(LOG_WARNING, "Bridge has no devices yet, NOT starting CHIP now, waiting for first device to appear");
-      }
-      else {
-        // start chip only now
-        OLOG(LOG_NOTICE, "End of bridge adapter setup, starting CHIP now");
-        // - start but unwind call stack before
-        MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
-      }
-    }
-  }
-
-
-  void addDevice(DevicePtr aDevice)
-  {
-    installAdditionalDevice(aDevice);
   }
 
 
@@ -414,10 +347,9 @@ public:
     // start the adapters
     mUnstartedAdapters = (int)mAdapters.size();
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-      (*pos)->startup(boost::bind(&P44mbrd::adapterStarted, this, _1, _2), boost::bind(&P44mbrd::addDevice, this, _1));
+      (*pos)->startup(static_cast<BridgeMainDelegate&>(*this));
     }
   }
-
 
 
   void startChip()
@@ -552,23 +484,6 @@ public:
   }
 
 
-  CHIP_ERROR installBridgedDevice(DevicePtr aDev)
-  {
-    CHIP_ERROR chiperr;
-    // install base (or single) device
-    chiperr = installSingleBridgedDevice(aDev, MATTER_BRIDGE_ENDPOINT);
-    if (chiperr==CHIP_NO_ERROR) {
-      // also add subdevices AFTER the main device (if any)
-      for (DevicesList::iterator pos = aDev->subDevices().begin(); pos!=aDev->subDevices().end(); ++pos) {
-        (*pos)->flagAsPartOfComposedDevice();
-        installSingleBridgedDevice(*pos, aDev->endpointId());
-      }
-    }
-    return chiperr;
-  }
-
-
-
   void installInitiallyBridgedDevices()
   {
     // Disable last fixed endpoint, which is used as a placeholder for all of the
@@ -656,6 +571,145 @@ public:
     }
     return dev;
   }
+
+
+  // MARK: BridgeMainDelegate
+
+  void adapterStartupComplete(ErrorPtr aError, BridgeAdapter &aAdapter) override
+  {
+    mUnstartedAdapters--; // count this start
+    if (Error::notOK(aError)) OLOG(LOG_WARNING, "Adapter startup error: %s", aError->text());
+    if (mUnstartedAdapters>0) {
+      OLOG(LOG_NOTICE, "Adapter started, %d remaining", mUnstartedAdapters);
+    }
+    else {
+      // all adapters have called back, so we can consider all started (or not operational at all)
+      bool startnow = false;
+      bool infoset = false;
+      for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+        // for now: assume we'll have only one adapter running for real application,
+        // which will determine the matter bridge's identification.
+        // With multiple adapters, the first instantiated will determine the device instance info
+        if (!infoset) {
+          infoset = true;
+          mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
+          mP44dbrDeviceInstanceInfoProvider.mLabel = (*pos)->label();
+          mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
+          mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
+          mP44dbrDeviceInstanceInfoProvider.mVendorName = (*pos)->vendor();
+        }
+        if ((*pos)->hasBridgeableDevices()) {
+          startnow = true;
+        }
+      }
+      // initial devices collected
+      if (!startnow) {
+        OLOG(LOG_WARNING, "Bridge has no devices yet, NOT starting CHIP now, waiting for first device to appear");
+      }
+      else {
+        // start chip only now
+        OLOG(LOG_NOTICE, "End of bridge adapter setup, starting CHIP now");
+        // - start but unwind call stack before
+        MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+      }
+    }
+  }
+
+
+  CHIP_ERROR installDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) override
+  {
+    CHIP_ERROR chiperr;
+    // install base (or single) device
+    chiperr = installSingleBridgedDevice(aDevice, MATTER_BRIDGE_ENDPOINT);
+    if (chiperr==CHIP_NO_ERROR) {
+      // also add subdevices AFTER the main device (if any)
+      for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
+        (*pos)->flagAsPartOfComposedDevice();
+        installSingleBridgedDevice(*pos, aDevice->endpointId());
+      }
+    }
+    return chiperr;
+  }
+
+
+  ErrorPtr addAdditionalDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) override
+  {
+    ErrorPtr err;
+    if (!aDevice) {
+      return TextError::err("addAdditionalDevice: no device");
+    }
+    if (!mChipAppInitialized) {
+      // we are still waiting for the first bridged device and haven't started CHIP yet -> start now
+      OLOG(LOG_NOTICE, "First bridgeable device installed, can start CHIP now, finally");
+      // starting chip will take care of actually installing the device
+      // - but unwind call stack before
+      MainLoop::currentMainLoop().executeNow(boost::bind(&P44mbrd::startChip, this));
+    }
+    else {
+      // already running
+      installDevice(aDevice, aAdapter);
+      // save possibly modified first free endpointID (increased when previously unknown devices have been added)
+      chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
+      CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
+      LogErrorOnFailure(chiperr);
+      // add as new endpoint to bridge
+      if (aDevice->AddAsDeviceEndpoint()) {
+        POLOG(aDevice, LOG_NOTICE, "added as additional dynamic endpoint while Matter already running");
+        // report installed
+        aDevice->didGetInstalled();
+        aDevice->didBecomeOperational();
+        // dump status
+        POLOG(aDevice, LOG_INFO, "initialized from chip: %s", aDevice->description().c_str());
+        // also add subdevices that are part of this additional device and thus not yet present
+        for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
+          DevicePtr subDev = *pos;
+          if (subDev->AddAsDeviceEndpoint()) {
+            POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
+            subDev->didBecomeOperational();
+            // dump status
+            POLOG(subDev, LOG_INFO, "initialized composed device as part of %s", aDevice->description().c_str());
+          }
+        }
+      }
+      err = TextError::err("failed adding device as endpoint");
+    }
+    return err;
+  }
+
+
+  ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) override
+  {
+    makeCommissionable(aCommissionable);
+    return ErrorPtr();
+  }
+
+
+  // MARK: - chip application delegate
+
+
+  //virtual void OnCommissioningSessionEstablishmentStarted() {}
+  //virtual void OnCommissioningSessionStarted() {}
+  //virtual void OnCommissioningSessionStopped(CHIP_ERROR err) {}
+
+  /*
+   * This is called anytime a basic or enhanced commissioning window is opened.
+   *
+   * The type of the window can be retrieved by calling
+   * CommissioningWindowManager::CommissioningWindowStatusForCluster(), but
+   * being careful about how to handle the None status when a window is in
+   * fact open.
+   */
+  void OnCommissioningWindowOpened() override
+  {
+    updateCommissionableStatus();
+  }
+
+
+  void OnCommissioningWindowClosed() override
+  {
+    updateCommissionableStatus();
+  }
+
 
 
   // MARK: - chip stack setup
@@ -916,8 +970,27 @@ public:
     SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
 
     // prepare the onboarding payload
+
+    // TODO: avoid using example-only CommonCaseDeviceServerInitParams
+    // copied from there:
+    /*
+    * ACTION ITEMS FOR TRANSITION from a example in-tree to a product:
+    *
+    * While this could be used indefinitely, it does not exemplify orderly management of
+    * application-injected resources. It is recommended for actual products to instead:
+    *   - Use the basic ServerInitParams in the application
+    *   - Have the application own an instance of the resources being injected in its own
+    *     state (e.g. an implementation of PersistentStorageDelegate and GroupDataProvider
+    *     interfaces).
+    *   - Initialize the injected resources prior to calling Server::Init()
+    *   - De-initialize the injected resources after calling Server::Shutdown()
+    */
+
     static chip::CommonCaseDeviceServerInitParams serverInitParams;
     VerifyOrDie(serverInitParams.InitializeStaticResourcesBeforeServerInit() == CHIP_NO_ERROR);
+
+    serverInitParams.appDelegate = this;
+
     serverInitParams.operationalServicePort        = CHIP_PORT;
     serverInitParams.userDirectedCommissioningPort = CHIP_UDC_PORT;
     if (getIntOption("matter-tcp-port", i)) serverInitParams.operationalServicePort = (uint16_t)i;

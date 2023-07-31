@@ -42,9 +42,6 @@ class CC51_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   /// private constructor because we must use the adapter() singleton getter/factory
   CC51_BridgeImpl();
 
-  /// callback to report adapter startup
-  AdapterStartedCB mAdapterStartedCB;
-
   /// identification of this bridge
   string mUID;
   string mLabel;
@@ -83,15 +80,15 @@ public:
   virtual string serial() override { return mSerial; }
 
   /// @brief start the CC51 bridge adapter implementation
-  /// @param aAdapterStartedCB will be called when the adapter has started up and has discovered
-  ///   and registered the devices that should get bridged to matter at stack startup.
-  ///   The aError parameter of the callback should only return unrecoverable errors.
-  virtual void adapterStartup(AdapterStartedCB aAdapterStartedCB) override;
+  /// The adapter should query its API, discover devices to bridge to matter, instantiate them,
+  /// and add them via registerInitialDevice() for publishing to matter when the stack has started up.
+  /// @note must call startupComplete() later to signal adapter startup is complete.
+  virtual void startup() override;
 
-  /// @brief update commissionable status
+  /// @brief reports commissionable status
   /// @param aIsCommissionable true when matter side is commissionable (which may
   ///    cause adapter implementation to show or hide commissioning info its UI)
-  virtual void setCommissionable(bool aIsCommissionable) override;
+  virtual void reportCommissionable(bool aIsCommissionable) override;
 
   /// @brief update commissioning info
   /// @param aQRCodeData string data that must go into QR Code presented to the user who wants to commission the bridge into a fabric

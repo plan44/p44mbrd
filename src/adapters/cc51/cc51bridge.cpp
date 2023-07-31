@@ -46,11 +46,8 @@ CC51_BridgeImpl& CC51_BridgeImpl::adapter()
 
 // MARK: BridgeAdapter API implementation
 
-void CC51_BridgeImpl::adapterStartup(AdapterStartedCB aAdapterStartedCB)
+void CC51_BridgeImpl::startup()
 {
-  // remember the callback, so we can fire it when discovery is complete
-  mAdapterStartedCB = aAdapterStartedCB;
-
   // start the socket connection
   // - install connection status callback
   mJsonRpcAPI.setConnectionStatusHandler(boost::bind(&CC51_BridgeImpl::jsonRpcConnectionStatusHandler, this, _2));
@@ -59,7 +56,7 @@ void CC51_BridgeImpl::adapterStartup(AdapterStartedCB aAdapterStartedCB)
 }
 
 
-void CC51_BridgeImpl::setCommissionable(bool aIsCommissionable)
+void CC51_BridgeImpl::reportCommissionable(bool aIsCommissionable)
 {
   // TODO: maybe inform the gateway about commissionable status
 }
@@ -161,12 +158,11 @@ void CC51_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, 
 
     JsonObjectPtr params = JsonObject::newObj();
     mJsonRpcAPI.sendRequest("deviced.deviced_get_items_info", params, boost::bind(&CC51_BridgeImpl::deviceListReceived, this, _1, _2, _3));
+    return;
   }
-  else {
-    OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
-  }
-  // Assume discovery done at this point, so fire the callback
-  mAdapterStartedCB(aStatus, *this);
+  OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
+  // startup failed, report back to main app
+  startupComplete(aStatus);
 }
 
 void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
@@ -216,8 +212,8 @@ void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus,
   else {
     OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
   }
-  // Assume discovery done at this point, so fire the callback
-  mAdapterStartedCB(aStatus, *this);
+  // Assume discovery done at this point, so erport back to main app
+  startupComplete(aStatus);
 }
 
 

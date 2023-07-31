@@ -197,7 +197,7 @@ public:
   {
     bridged = 0x01, ///< update state in bridge (send change notification/call)
     matter = 0x02, ///< update state in matter (report attribute as changed)
-    noderive = 0x10, ///< do not derive anything from this change
+    noderive = 0x10, ///< do not derive anything from this change (in particular: not the color mode!)
     chained = 0x20, ///< this update was triggered by another update (prevent recursion)
     noapply = 0x40, ///< do not apply to hardware right now when updating bridge (i.e. color components)
     forced = 0x80 ///< perform updates even when cached state has not changed

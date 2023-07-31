@@ -25,10 +25,28 @@
 
 // MARK: - BridgeAdapter
 
-void BridgeAdapter::startup(AdapterStartedCB aAdapterStartedCB, AddDeviceCB aAddDeviceCB)
+void BridgeAdapter::startup(BridgeMainDelegate& aBridgeMainDelegate)
 {
-  mAddDeviceCB = aAddDeviceCB; // needed for implementation of bridgeAdditionalDevice().
-  adapterStartup(aAdapterStartedCB);
+  mBridgeMainDelegateP = &aBridgeMainDelegate;
+  startup();
+}
+
+
+void BridgeAdapter::startupComplete(ErrorPtr aError)
+{
+  mBridgeMainDelegateP->adapterStartupComplete(aError, *this);
+}
+
+
+void BridgeAdapter::installInitialDevices(CHIP_ERROR& aChipErr)
+{
+  aChipErr = CHIP_NO_ERROR;
+  for (BridgeAdapter::DeviceUIDMap::iterator pos = mDeviceUIDMap.begin(); pos!=mDeviceUIDMap.end(); ++pos) {
+    DevicePtr dev = pos->second;
+    // install the device
+    ChipError err = mBridgeMainDelegateP->installDevice(dev, *this);
+    if (err != CHIP_NO_ERROR) aChipErr = err;
+  }
 }
 
 
@@ -40,7 +58,6 @@ bool BridgeAdapter::hasBridgeableDevices()
 
 void BridgeAdapter::cleanup()
 {
-  mAddDeviceCB = NoOP;
 }
 
 
@@ -54,6 +71,11 @@ void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
 {
   // add to map
   mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
-  assert(mAddDeviceCB);
-  mAddDeviceCB(aDevice);
+  mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+}
+
+
+ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable)
+{
+  return mBridgeMainDelegateP->makeCommissionable(aCommissionable, *this);
 }

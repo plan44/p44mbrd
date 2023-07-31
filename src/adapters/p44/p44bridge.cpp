@@ -46,14 +46,13 @@ P44_BridgeImpl& P44_BridgeImpl::adapter()
 
 // MARK: BridgeAdapter API implementation
 
-void P44_BridgeImpl::adapterStartup(AdapterStartedCB aAdapterStartedCB)
+void P44_BridgeImpl::startup()
 {
-  mAdapterStartedCB = aAdapterStartedCB;
   api().connectBridgeApi(boost::bind(&P44_BridgeImpl::bridgeApiConnectedHandler, this, _1));
 }
 
 
-void P44_BridgeImpl::setCommissionable(bool aIsCommissionable)
+void P44_BridgeImpl::reportCommissionable(bool aIsCommissionable)
 {
   api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(aIsCommissionable));
 }
@@ -367,9 +366,7 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
     }
   }
   // report started (ONCE!)
-  AdapterStartedCB cb = mAdapterStartedCB;
-  mAdapterStartedCB = NoOP;
-  cb(ErrorPtr(), *this);
+  startupComplete(ErrorPtr());
 }
 
 
@@ -439,7 +436,12 @@ void P44_BridgeImpl::bridgeApiNotificationHandler(ErrorPtr aError, JsonObjectPtr
 void P44_BridgeImpl::handleGlobalNotification(const string notification, JsonObjectPtr aJsonMsg)
 {
   JsonObjectPtr o;
-  if (notification=="terminate") {
+  if (notification=="commissioning") {
+    if ((o = aJsonMsg->get("enable"))) {
+      requestCommissioning(o->boolValue());
+    }
+  }
+  else if (notification=="terminate") {
     int exitcode = EXIT_SUCCESS;
     if ((o = aJsonMsg->get("exitcode"))) {
       // custom exit code

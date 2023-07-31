@@ -114,7 +114,7 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
     !aUpdateMode.Has(UpdateFlags::noderive) &&
     (changed || (aUpdateMode.Has(UpdateFlags::forced) && !aUpdateMode.Has(UpdateFlags::chained)))
   ) {
-    OLOG(LOG_INFO, "set color mode to %d - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set color mode to 0x%02x (InternalColorMode) - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
     mColorMode = aColorMode;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       switch (mColorMode) {
@@ -154,7 +154,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
 {
   bool changed = aHue!=mHue;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set hue to %d - updatemode=0x%x", aHue, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set hue to 0x%02x (matter-units) - updatemode=0x%x", aHue, aUpdateMode.Raw());
     mHue = aHue;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
@@ -177,7 +177,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 {
   bool changed = aSaturation!=mSaturation;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set saturation to %d - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set saturation to 0x%02x (matter-units) - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
     mSaturation = aSaturation;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
@@ -200,7 +200,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 {
   bool changed = aColortemp!=mColorTemp;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set colortemp to %d - updatemode=0x%x", aColortemp, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set colortemp to 0x%04x (matter-units) - updatemode=0x%x", aColortemp, aUpdateMode.Raw());
     mColorTemp = aColortemp;
     if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
     else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
@@ -225,7 +225,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
 {
   bool changed = aX!=mX;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set X to %d - updatemode=0x%x", aX, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set X to 0x%04x (matter-units) - updatemode=0x%x", aX, aUpdateMode.Raw());
     mX = aX;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {
@@ -248,7 +248,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
 {
   bool changed = aY!=mY;
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set Y to %d - updatemode=0x%x", aY, aUpdateMode.Raw());
+    OLOG(LOG_INFO, "set Y to 0x%04x (matter-units) - updatemode=0x%x", aY, aUpdateMode.Raw());
     mY = aY;
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
     if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {

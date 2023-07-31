@@ -36,11 +36,45 @@
 #define DEVICE_ACCESSOR virtual Device &device() override { return static_cast<Device&>(*this); }
 #define DG(DelegateBasename) static_cast<DelegateBasename##Delegate&>(*this)
 
+
+class BridgeAdapter;
+
+class BridgeMainDelegate
+{
+
+protected:
+
+  virtual ~BridgeMainDelegate() = default;
+
+public:
+
+  /// must be called after BridgeAdapter::startup(), when adapter has started up and
+  virtual void adapterStartupComplete(ErrorPtr aError, BridgeAdapter &aAdapter) = 0;
+
+  /// can be be called by the bridge implementation at any time after
+  /// adapter startup up to when cleanup() is invoked to add further devices while the matter
+  /// bridge is already operational.
+  /// @param aDevice device to add
+  /// @return ok or error when device could not be added
+  virtual ErrorPtr addAdditionalDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
+
+  /// can be called to make the bridge device open or close a commissioning window
+  /// @param aCommissionable requested commissionable status
+  /// @return ok or error if requested commissionable status cannot be established
+  virtual ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) = 0;
+
+  /// can be called to install
+  virtual ChipError installDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
+
+};
+
+
+
 /// @brief base class for bridge API adapters
 /// Contains utilities needed to access the matter side from bridge API implementations
 class BridgeAdapter
 {
-  friend class P44mbrd;
+  // friend class P44mbrd;
 
 protected:
 
@@ -50,20 +84,34 @@ protected:
   typedef std::map<string, DevicePtr> DeviceUIDMap;
   DeviceUIDMap mDeviceUIDMap;
 
-  /// callback for adding a device after adapter has been started
-  typedef boost::function<void (DevicePtr aDevice)> AddDeviceCB;
-  AddDeviceCB mAddDeviceCB;
-
   /// callback for starting an adapter
   typedef boost::function<void (ErrorPtr aError, BridgeAdapter& aBridgeAdapter)> AdapterStartedCB;
 
-  /// Actual implementation of adapter startup
-  /// @param aAdapterStartedCB will be called when the adapter has started up and has discovered
+  /// @brief startup the bridge adapter
+  /// The bridge adapter should query its API, discover devices to bridge to matter, instantiate them,
+  /// and add them via registerInitialDevice() for publishing to matter when the stack is started up.
+  /// @note must call startupComplete() later to signal startup is complete.
+  virtual void startup() = 0;
+
+  /// must be called after startup() when the adapter has started up and has discovered
   ///   and registered the devices that should get bridged to matter at stack startup.
-  ///   The aError parameter of the callback should only return unrecoverable errors.
-  virtual void adapterStartup(AdapterStartedCB aAdapterStartedCB) = 0;
+  /// @param aError OK when startup has not fatally failed. Recoverable errors should not
+  ///   be reported here.
+  void startupComplete(ErrorPtr aError);
+
+private:
+
+  /// delegate for calling main-level functionality from adapters
+  BridgeMainDelegate* mBridgeMainDelegateP = nullptr;
 
 public:
+
+  /// entry point for main program to start this adapter
+  /// @param aBridgeMainDelegate the delegate for the adapter to request global functionality
+  void startup(BridgeMainDelegate& aBridgeMainDelegate);
+
+  /// will be called to have adapter install the devices collected during startup()..startupComplete().
+  void installInitialDevices(CHIP_ERROR& aChipErr);
 
   /// @return UID of this adapter (or the device it bridges)
   virtual string UID() = 0;
@@ -80,32 +128,30 @@ public:
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() = 0;
 
-  /// @brief startup the bridge adapter
-  /// The bridge adapter should query its API, discover devices to bridge to matter, instantiate them,
-  /// and add them via registerInitialDevice() for publishing to matter when the stack is started up
-  /// @param aAdapterStartedCB will be called when the adapter has started up and has discovered
-  ///   and registered the devices that should get bridged to matter at stack startup.
-  ///   The aError parameter of the callback should only return unrecoverable errors.
-  /// @param aAddDeviceCB this callback might be called by the bridge implementation at any time after
-  ///   adapter startup up to when cleanup() is invoked to add further devices while the matter
-  ///   bridge is already operational.
-  void startup(AdapterStartedCB aAdapterStartedCB, AddDeviceCB aAddDeviceCB);
-
   /// @return true if the adapter as at least on bridgeable device
   bool hasBridgeableDevices();
 
-  /// @brief update commissionable status
-  /// @param aIsCommissionable true when matter side is commissionable (which may
-  ///    cause adapter implementation to show or hide QR code and/or setup code in its UI)
-  virtual void setCommissionable(bool aIsCommissionable) = 0;
-
   /// @brief update commissioning info
+  /// @note the adapter should be ready to receive and store this data independently of the
+  ///    current commissioning status.
   /// @param aQRCodeData string data that must go into QR Code presented to the user who
   ///   wants to commission the bridge into a fabric
   /// @param aManualPairingCode string ma be shown to the user who cannot scan a
   ///   QR code but must enter the commissioning info manually.
   ///   Empty string if there is no manual pairing code available
   virtual void updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode) = 0;
+
+  /// @brief reports commissionable status
+  /// @param aIsCommissionable true when matter side is commissionable (which may
+  ///    cause adapter implementation to show or hide QR code and/or setup code in its UI)
+  virtual void reportCommissionable(bool aIsCommissionable) = 0;
+
+  /// @brief can be called to request opening or closing the commissioning window
+  /// @param aCommissionable requested commissionable status
+  /// @note reportCommissionable() will be called to report when commissioning window status
+  ///   actually has changed.
+  /// @return Ok or error when requested commission status cannot be established
+  ErrorPtr requestCommissioning(bool aCommissionable);
 
   /// @brief update matter bridge running status
   /// @param aRunning true when matter bridge is running

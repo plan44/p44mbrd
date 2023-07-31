@@ -34,7 +34,7 @@ public:
   virtual ~ColorControlDelegate() = default;
 
   /// Set new hue. Implies device changes to HSV color mode if it natively supports color modes
-  /// @param aHue new hue
+  /// @param aHue new hue (matter scale: 0..0xFE = 0..360 degree)
   /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
   /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
   virtual void setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply) = 0;
