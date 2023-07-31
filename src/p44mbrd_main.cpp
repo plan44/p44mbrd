@@ -914,11 +914,12 @@ public:
     chip::MutableCharSpan qrCode(payloadBuffer);
     chip::MutableCharSpan manualPairingCode(payloadBuffer);
     if (GetQRCode(qrCode, onBoardingPayload) == CHIP_NO_ERROR) {
+      string qrCodeStr = qrCode.data();
       string manualParingCodeStr;
       if (GetManualPairingCode(manualPairingCode, onBoardingPayload) == CHIP_NO_ERROR) {
         manualParingCodeStr = manualPairingCode.data();
       }
-      updateCommissioningInfo(qrCode.data(), manualParingCodeStr);
+      updateCommissioningInfo(qrCodeStr, manualParingCodeStr);
       // FIXME: figure out if actually commissionable or not
       updateCommissionableStatus(true /* fixed for now */);
     }
