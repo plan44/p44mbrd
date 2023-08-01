@@ -284,7 +284,7 @@ IdentifiableDevice::~IdentifiableDevice()
 void IdentifiableDevice::didGetInstalled()
 {
   // override static attribute defaults
-  Identify::Attributes::IdentifyType::Set(endpointId(), identifyType());
+  Identify::Attributes::IdentifyType::Set(endpointId(), mIdentifyDelegate.identifyType());
   // call base class last
   inherited::didGetInstalled();
 }

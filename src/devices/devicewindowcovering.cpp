@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  Copyright (c) 2022 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2023 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -28,188 +28,69 @@
 #define FOCUSLOGLEVEL 6
 
 #include "device_impl.h" // include as first file!
-#include "deviceonoff.h"
+#include "devicewindowcovering.h"
+
+#include <app/clusters/window-covering-server/window-covering-server.h>
 
 using namespace Clusters;
 
 // MARK: - OnOff Device specific declarations
 
-// REVISION DEFINITIONS:
-// TODO: move these to a better place, probably into the devices that actually handle them, or
-//   try to extract them from ZAP-generated defs
-// =================================================================================
+ClusterId windowCoveringClusters[] = { WindowCovering::Id };
 
-#define ZCL_ON_OFF_CLUSTER_REVISION (4u)
-
-// MARK: onOff cluster declarations
-
-// Declare cluster attributes
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(onOffAttrs)
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnOff::Id, BOOLEAN, 1, 0), /* on/off */
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::GlobalSceneControl::Id, BOOLEAN, 1, 0),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OnTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::OffWaitTime::Id, INT16U, 2, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(OnOff::Attributes::StartUpOnOff::Id, ENUM8, 1, ZAP_ATTRIBUTE_MASK(WRITABLE)),
-  DECLARE_DYNAMIC_ATTRIBUTE(Globals::Attributes::FeatureMap::Id, BITMAP32, 4, 0), /* feature map */
-DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
-
-// Declare cluster commands
-// TODO: It's not clear whether it would be better to get the command lists from the ZAP config on our last fixed endpoint instead.
-constexpr CommandId onOffIncomingCommands[] = {
-  app::Clusters::OnOff::Commands::Off::Id,
-  app::Clusters::OnOff::Commands::On::Id,
-  app::Clusters::OnOff::Commands::Toggle::Id,
-  app::Clusters::OnOff::Commands::OffWithEffect::Id,
-  app::Clusters::OnOff::Commands::OnWithRecallGlobalScene::Id,
-  app::Clusters::OnOff::Commands::OnWithTimedOff::Id,
-  kInvalidCommandId,
+const EmberAfDeviceType gWindowCoveringTypes[] = {
+  { DEVICE_TYPE_MA_WINDOW_COVERING, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(onOffLightClusters)
-  DECLARE_DYNAMIC_CLUSTER(OnOff::Id, onOffAttrs, onOffIncomingCommands, nullptr),
-DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
+// MARK: - DeviceWindowCovering
 
-// MARK: - DeviceOnOff
-
-DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  IdentifiableDevice(aIdentifyDelegate, aDeviceInfoDelegate),
-  mOnOffDelegate(aOnOffDelegate),
-  mLighting(aLighting),
-  mOn(false),
-  mGlobalSceneControl(false),
-  mOnTime(0),
-  mOffWaitTime(0),
-  mStartUpOnOff(to_underlying(OnOff::OnOffStartUpOnOff::kOff))
+DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegate, aDeviceInfoDelegate),
+  mWindowCoveringDelegate(aWindowCoveringDelegate)
 {
   // - declare onoff device specific clusters
-  addClusterDeclarations(Span<EmberAfCluster>(onOffLightClusters));
+  useClusterTemplates(Span<ClusterId>(windowCoveringClusters));
 }
 
 
-uint8_t DeviceOnOff::identifyType()
-{
-  // Lights identify via light, others somehow operate the actuator (blinds, clicking relay etc.)
-  return mLighting ? EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_VISIBLE_LIGHT : EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_ACTUATOR;
-}
-
-
-void DeviceOnOff::changeOnOff_impl(bool aOn)
-{
-  mOnOffDelegate.setOnOffState(aOn);
-}
-
-
-bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
-{
-  if (aOn!=mOn || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "updating onOff to %s - updatemode=0x%x", aOn ? "ON" : "OFF", aUpdateMode.Raw());
-    mOn = aOn;
-    if (aUpdateMode.Has(UpdateFlags::bridged)) {
-      changeOnOff_impl(mOn);
-    }
-    if (aUpdateMode.Has(UpdateFlags::matter)) {
-      FOCUSOLOG("reporting onOff attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
-    }
-    return true; // changed
-  }
-  return false; // no change
-}
-
-
-// MARK: Attribute access
-
-EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
-{
-  if (clusterId==OnOff::Id) {
-    if (attributeId == OnOff::Attributes::OnOff::Id) {
-      return getAttr(buffer, maxReadLength, isOn());
-    }
-    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
-      return getAttr(buffer, maxReadLength, mGlobalSceneControl);
-    }
-    if (attributeId == OnOff::Attributes::OnTime::Id) {
-      return getAttr(buffer, maxReadLength, mOnTime);
-    }
-    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
-      return getAttr(buffer, maxReadLength, mOffWaitTime);
-    }
-    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
-      return getAttr(buffer, maxReadLength, mStartUpOnOff);
-    }
-    // common attributes
-    if (attributeId == Globals::Attributes::ClusterRevision::Id) {
-      return getAttr<uint16_t>(buffer, maxReadLength, ZCL_ON_OFF_CLUSTER_REVISION);
-    }
-    if (attributeId == Globals::Attributes::FeatureMap::Id) {
-      return getAttr<uint32_t>(buffer, maxReadLength, mLighting ? to_underlying(OnOff::Feature::kLighting) : 0);
-    }
-  }
-  // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
-}
-
-
-
-EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
-{
-  if (clusterId==OnOff::Id) {
-    // Non-writable from outside, but written by standard OnOff cluster implementation
-    if (attributeId == OnOff::Attributes::OnOff::Id) {
-      updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
-      return EMBER_ZCL_STATUS_SUCCESS;
-    }
-    if (attributeId == OnOff::Attributes::GlobalSceneControl::Id) {
-      return setAttr(mGlobalSceneControl, buffer);
-    }
-    if (attributeId == OnOff::Attributes::OnTime::Id) {
-      return setAttr(mOnTime, buffer);
-    }
-    if (attributeId == OnOff::Attributes::OffWaitTime::Id) {
-      return setAttr(mOffWaitTime, buffer);
-    }
-    if (attributeId == OnOff::Attributes::StartUpOnOff::Id) {
-      return setAttr(mStartUpOnOff, buffer);
-    }
-  }
-  // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
-}
-
-
-string DeviceOnOff::description()
+string DeviceWindowCovering::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- OnOff: %d", mOn);
+  // maybe add attributes
   return s;
 }
 
 
-// MARK: - DeviceOnOffLight
-
-const EmberAfDeviceType gOnOffLightTypes[] = {
-  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
-};
-
-void DeviceOnOffLight::finalizeDeviceDeclaration()
+void DeviceWindowCovering::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gWindowCoveringTypes));
 }
 
 
-// MARK: - DeviceOnOffPluginUnit
-
-const EmberAfDeviceType gOnOffPluginTypes[] = {
-  { DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
-};
-
-void DeviceOnOffPluginUnit::finalizeDeviceDeclaration()
+void DeviceWindowCovering::didGetInstalled()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffPluginTypes));
+  // install delegate
+  WindowCovering::SetDefaultDelegate(endpointId(), this);
+  // call base class last
+  inherited::didGetInstalled();
 }
 
 
+// MARK: WindowCovering::Delegate (matter cluster's delegate, not our adapter!) implementation
 
+CHIP_ERROR DeviceWindowCovering::HandleMovement(WindowCovering::WindowCoveringType type)
+{
+  OLOG(LOG_INFO, "WindowCoveringDelegate::HandleMovement: start moving");
+  mWindowCoveringDelegate.setMovement(true);
+  return CHIP_NO_ERROR;
+}
+
+
+CHIP_ERROR DeviceWindowCovering::HandleStopMotion()
+{
+  OLOG(LOG_INFO, "WindowCoveringDelegate::HandleStopMotion: stop moving");
+  mWindowCoveringDelegate.setMovement(false);
+  return CHIP_NO_ERROR;
+}

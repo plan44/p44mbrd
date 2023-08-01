@@ -104,6 +104,7 @@ protected:
   /// @name IdentifyDelegate
   /// @{
   virtual void identify(int aDurationS) override;
+  virtual Identify::IdentifyTypeEnum identifyType() override;
   /// @}
 };
 

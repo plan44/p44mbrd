@@ -1438,14 +1438,33 @@ server cluster WindowCovering = 258 {
   readonly attribute Type type = 0;
   readonly attribute ConfigStatus configStatus = 7;
   readonly attribute OperationalStatus operationalStatus = 10;
+  readonly attribute nullable Percent100ths targetPositionLiftPercent100ths = 11;
+  readonly attribute nullable Percent100ths targetPositionTiltPercent100ths = 12;
   readonly attribute EndProductType endProductType = 13;
+  readonly attribute nullable Percent100ths currentPositionLiftPercent100ths = 14;
+  readonly attribute nullable Percent100ths currentPositionTiltPercent100ths = 15;
   attribute access(write: manage) Mode mode = 23;
+  readonly attribute SafetyStatus safetyStatus = 26;
   readonly attribute command_id generatedCommandList[] = 65528;
   readonly attribute command_id acceptedCommandList[] = 65529;
   readonly attribute event_id eventList[] = 65530;
   readonly attribute attrib_id attributeList[] = 65531;
   readonly attribute bitmap32 featureMap = 65532;
   readonly attribute int16u clusterRevision = 65533;
+
+  request struct GoToLiftPercentageRequest {
+    Percent100ths liftPercent100thsValue = 0;
+  }
+
+  request struct GoToTiltPercentageRequest {
+    Percent100ths tiltPercent100thsValue = 0;
+  }
+
+  command UpOrOpen(): DefaultSuccess = 0;
+  command DownOrClose(): DefaultSuccess = 1;
+  command StopMotion(): DefaultSuccess = 2;
+  command GoToLiftPercentage(GoToLiftPercentageRequest): DefaultSuccess = 5;
+  command GoToTiltPercentage(GoToTiltPercentageRequest): DefaultSuccess = 8;
 }
 
 /** Attributes and commands for controlling the color properties of a color-capable light. */
@@ -2074,8 +2093,13 @@ endpoint 2 {
     ram      attribute type default = 0x00;
     ram      attribute configStatus default = 0x03;
     ram      attribute operationalStatus default = 0x00;
+    ram      attribute targetPositionLiftPercent100ths;
+    ram      attribute targetPositionTiltPercent100ths;
     ram      attribute endProductType default = 0x00;
+    ram      attribute currentPositionLiftPercent100ths;
+    ram      attribute currentPositionTiltPercent100ths;
     ram      attribute mode default = 0x00;
+    ram      attribute safetyStatus default = 0x0000;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute eventList;

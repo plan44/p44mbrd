@@ -8335,7 +8335,7 @@
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
+              "incoming": 1,
               "outgoing": 1
             },
             {
@@ -8343,7 +8343,7 @@
               "code": 1,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
+              "incoming": 1,
               "outgoing": 1
             },
             {
@@ -8351,8 +8351,24 @@
               "code": 2,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
+              "incoming": 1,
               "outgoing": 1
+            },
+            {
+              "name": "GoToLiftPercentage",
+              "code": 5,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 0
+            },
+            {
+              "name": "GoToTiltPercentage",
+              "code": 8,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 0
             }
           ],
           "attributes": [
@@ -8580,7 +8596,7 @@
               "mfgCode": null,
               "side": "server",
               "type": "Percent100ths",
-              "included": 0,
+              "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
@@ -8596,7 +8612,7 @@
               "mfgCode": null,
               "side": "server",
               "type": "Percent100ths",
-              "included": 0,
+              "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
@@ -8628,7 +8644,7 @@
               "mfgCode": null,
               "side": "server",
               "type": "Percent100ths",
-              "included": 0,
+              "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
@@ -8644,7 +8660,7 @@
               "mfgCode": null,
               "side": "server",
               "type": "Percent100ths",
-              "included": 0,
+              "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
@@ -8740,7 +8756,7 @@
               "mfgCode": null,
               "side": "server",
               "type": "SafetyStatus",
-              "included": 0,
+              "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,

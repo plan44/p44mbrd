@@ -317,6 +317,9 @@ public:
   ///   0: use default duration of hardware device
   ///   <0: stop ongoing identification
   virtual void identify(int aDurationS) = 0;
+
+  /// @return the identify type for this device
+  virtual Identify::IdentifyTypeEnum identifyType() { return Identify::IdentifyTypeEnum::kNone; }
 };
 
 
@@ -352,10 +355,6 @@ public:
 
   /// interface for identify cluster command implementations
   bool updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode);
-
-protected:
-
-  virtual Identify::IdentifyTypeEnum identifyType() { return Identify::IdentifyTypeEnum::kNone; }
 
 private:
 

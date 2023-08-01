@@ -99,6 +99,7 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
   if (Error::notOK(aStatus)) {
     OLOG(LOG_WARNING, "bridge API connection error: %s", aStatus->text());
     // TODO: better handling
+    // - re-enable all known devices for "bridged", disable those not found
     OLOG(LOG_WARNING, "(re)connected bridge API, device info might be stale");
     return;
   }
@@ -208,6 +209,11 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                     break;
                 }
               }
+              else if (behaviourtype=="shadow" && groups && groups->get("2")) {
+                // this is a shadow device
+                OLOG(LOG_NOTICE, "found bridgeable shadow device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                dev = new P44_WindowCoveringDevice();
+              }
               else {
                 // not a light, only switched or dimmed
                 OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
@@ -271,8 +277,6 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                       }
                     }
                     break;
-
-
                   case button: // TODO: maybe handle seperately, multiple button definitions in one device are usually coupled
                   default:
                     break;

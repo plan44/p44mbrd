@@ -200,6 +200,10 @@ public:
 
   /// @return non-null pointer to subclass pointer as specified by DevType, or fails assertion.
   template<typename DevType> auto deviceP() { auto devP = dynamic_cast<DevType*>(&device()); assert(devP); return devP; }
+
+  /// Convenience function (as the endpointID is needed often to access attributes
+  /// @return the endpointId
+  EndpointId endpointId() { return device().endpointId(); }
 };
 
 // logging from within adapter implementation classes

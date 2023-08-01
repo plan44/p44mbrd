@@ -389,6 +389,7 @@
 		EDC58B5E2A66946A00F48DEF /* devicecolorcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */; };
 		EDC58B682A66CA6400F48DEF /* sensordevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */; };
 		EDC58B692A66E26D00F48DEF /* booleaninputdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */; };
+		EDCA29572A79135200465C00 /* devicewindowcovering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
 		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
@@ -3798,6 +3799,7 @@
 				ED36DE84286E02CD00CA28EC /* DataModelHandler.cpp in Sources */,
 				ED36DD09286DD8A000CA28EC /* CASEDestinationId.cpp in Sources */,
 				ED36DC06286DD57B00CA28EC /* CHIPPlatformMemory.cpp in Sources */,
+				EDCA29572A79135200465C00 /* devicewindowcovering.cpp in Sources */,
 				ED36DAB6286DD20600CA28EC /* RandUtils.cpp in Sources */,
 				ED36DE9E286E043500CA28EC /* DeviceSafeQueue.cpp in Sources */,
 				ED36DE87286E02CD00CA28EC /* privilege-storage.cpp in Sources */,

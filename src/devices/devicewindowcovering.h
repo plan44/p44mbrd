@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  Copyright (c) 2022 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2023 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -24,24 +24,27 @@
 
 #include "device.h"
 
+#include <app/clusters/window-covering-server/window-covering-delegate.h>
+
 using namespace chip;
 
 
-/// @brief delegate for switching a device on and off
+/// @brief delegate for window covering implementations
 class WindowCoveringDelegate
 {
 public:
 
   virtual ~WindowCoveringDelegate() = default;
 
-  /// Set device to on or off
-  /// @param aOn state to switch to
-  virtual void xxx(bool aOn) = 0;
+  /// Initiate or stop movement
+  /// @param aMove if true, movement should be initiated according to target position attributes.
+  ///   if false, movement should stop ASAP
+  virtual void setMovement(bool aMove) = 0;
 
 };
 
 
-class DeviceWindowCovering : public IdentifiableDevice
+class DeviceWindowCovering : public IdentifiableDevice, public WindowCovering::Delegate
 {
   typedef IdentifiableDevice inherited;
 
@@ -51,16 +54,17 @@ public:
 
   DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
 
+  virtual void didGetInstalled() override;
+
   virtual const char *deviceType() override { return "window covering"; }
 
   virtual string description() override;
 
-  virtual uint8_t identifyType() override;
-
-  /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-  /// handler for external attribute write access
-  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  /// @name Matter Cluster's delegate
+  /// @{
+  virtual CHIP_ERROR HandleMovement(WindowCovering::WindowCoveringType type) override;
+  virtual CHIP_ERROR HandleStopMotion() override;
+  /// @}
 
 protected:
 

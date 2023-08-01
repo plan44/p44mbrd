@@ -32,6 +32,7 @@
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
+#include "devicewindowcovering.h"
 #include "sensordevices.h"
 #include "booleaninputdevices.h"
 
@@ -146,7 +147,7 @@ public:
 
 // MARK: output devices
 
-class P44_OnOffImpl : public P44_IdentifiableImpl, public OnOffDelegate
+class P44_OutputImpl : public P44_IdentifiableImpl
 {
   typedef P44_IdentifiableImpl inherited;
 
@@ -155,15 +156,27 @@ protected:
   /// the default channel ID
   string mDefaultChannelId;
 
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) = 0;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, UpdateMode aUpdateMode) {};
+};
+
+
+
+class P44_OnOffImpl : public P44_OutputImpl, public OnOffDelegate
+{
+  typedef P44_OutputImpl inherited;
+
+protected:
+
   /// @name OnOffDelegate
   /// @{
   virtual void setOnOffState(bool aOn) override;
   /// @}
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
-  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode);
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 };
 
 
@@ -206,6 +219,11 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
   virtual void setColortemp(uint16_t aColortemp, uint16_t aTransitionTimeDS, bool aApply) override;
   /// @}
 
+  /// @name IdentifyDelegate
+  /// @{
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
+  /// @}
+
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
@@ -213,6 +231,35 @@ public:
   P44_ColorControlImpl();
 
 };
+
+
+class P44_WindowCoveringImpl : public P44_OutputImpl, public WindowCoveringDelegate
+{
+  typedef P44_OutputImpl inherited;
+
+  bool mHasTilt;
+
+protected:
+  /// @name WindowCoveringDelegate
+  /// @{
+  virtual void setMovement(bool aMove) override;
+  /// @}
+
+  /// @name IdentifyDelegate
+  /// @{
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
+  /// @}
+
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, UpdateMode aUpdateMode) override;
+
+public:
+  P44_WindowCoveringImpl();
+
+};
+
+
 
 
 
@@ -293,6 +340,7 @@ class P44_OnOffLightDevice final :
 {
 public:
   P44_OnOffLightDevice() : DeviceOnOffLight(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
   DEVICE_ACCESSOR;
 };
 
@@ -303,6 +351,7 @@ class P44_OnOffPluginUnitDevice final :
 {
 public:
   P44_OnOffPluginUnitDevice() : DeviceOnOffPluginUnit(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   DEVICE_ACCESSOR;
 };
 
@@ -313,6 +362,7 @@ class P44_DimmableLightDevice final :
 {
 public:
   P44_DimmableLightDevice() : DeviceDimmableLight(DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
   DEVICE_ACCESSOR;
 };
 
@@ -323,6 +373,7 @@ class P44_DimmablePluginUnitDevice final :
 {
 public:
   P44_DimmablePluginUnitDevice() : DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   DEVICE_ACCESSOR;
 };
 
@@ -335,6 +386,17 @@ public:
   P44_ColorLightDevice(bool aCtOnly) : DeviceColorControl(aCtOnly, DG(ColorControl), DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
+
+
+class P44_WindowCoveringDevice final :
+  public DeviceWindowCovering, // the matter side device
+  public P44_WindowCoveringImpl // the P44 side delegate implementation
+{
+public:
+  P44_WindowCoveringDevice() : DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  DEVICE_ACCESSOR;
+};
+
 
 
 // MARK: Sensors

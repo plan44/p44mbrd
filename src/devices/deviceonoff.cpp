@@ -41,7 +41,7 @@ ClusterId onOffLightClusters[] = { OnOff::Id };
 // MARK: - DeviceOnOff
 
 DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  IdentifiableDevice(aIdentifyDelegate, aDeviceInfoDelegate),
+  inherited(aIdentifyDelegate, aDeviceInfoDelegate),
   mOnOffDelegate(aOnOffDelegate),
   mLighting(aLighting),
   mOn(false),
@@ -52,13 +52,6 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
 {
   // - declare onoff device specific clusters
   useClusterTemplates(Span<ClusterId>(onOffLightClusters));
-}
-
-
-Identify::IdentifyTypeEnum DeviceOnOff::identifyType()
-{
-  // Lights identify via light, others somehow operate the actuator (blinds, clicking relay etc.)
-  return mLighting ? Identify::IdentifyTypeEnum::kLightOutput : Identify::IdentifyTypeEnum::kActuator;
 }
 
 

@@ -122,6 +122,13 @@ void CC51_IdentifiableImpl::identify(int aDurationS)
 }
 
 
+Identify::IdentifyTypeEnum CC51_IdentifiableImpl::identifyType()
+{
+  // TODO: maybe return another identify type, depending on device features (LED?)
+  return Identify::IdentifyTypeEnum::kActuator;
+}
+
+
 // MARK: - CC51_OnOffImpl
 
 // MARK: OnOffDelegate implementation

@@ -782,6 +782,73 @@ void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandP
 
 }
 
+namespace WindowCovering {
+
+void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandPath & aCommandPath, TLV::TLVReader & aDataTlv)
+{
+    CHIP_ERROR TLVError = CHIP_NO_ERROR;
+    bool wasHandled = false;
+    {
+        switch (aCommandPath.mCommandId)
+        {
+        case Commands::UpOrOpen::Id: {
+        Commands::UpOrOpen::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfWindowCoveringClusterUpOrOpenCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::DownOrClose::Id: {
+        Commands::DownOrClose::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfWindowCoveringClusterDownOrCloseCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::StopMotion::Id: {
+        Commands::StopMotion::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfWindowCoveringClusterStopMotionCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::GoToLiftPercentage::Id: {
+        Commands::GoToLiftPercentage::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfWindowCoveringClusterGoToLiftPercentageCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::GoToTiltPercentage::Id: {
+        Commands::GoToTiltPercentage::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfWindowCoveringClusterGoToTiltPercentageCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        default: {
+            // Unrecognized command ID, error status will apply.
+            apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::UnsupportedCommand);
+            ChipLogError(Zcl, "Unknown command " ChipLogFormatMEI " for cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mCommandId), ChipLogValueMEI(aCommandPath.mClusterId));
+            return;
+        }
+        }
+    }
+
+    if (CHIP_NO_ERROR != TLVError || !wasHandled)
+    {
+      apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::InvalidCommand);
+      ChipLogProgress(Zcl, "Failed to dispatch command, TLVError=%" CHIP_ERROR_FORMAT, TLVError.Format());
+    }
+}
+
+}
+
 
 } // namespace Clusters
 
@@ -821,6 +888,9 @@ void DispatchSingleClusterCommand(const ConcreteCommandPath & aCommandPath, TLV:
         break;
     case Clusters::OperationalCredentials::Id:
         Clusters::OperationalCredentials::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
+        break;
+    case Clusters::WindowCovering::Id:
+        Clusters::WindowCovering::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
         break;
     default:
         ChipLogError(Zcl, "Unknown cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mClusterId));
