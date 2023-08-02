@@ -53,6 +53,8 @@ public:
   /// singleton getter / on demand constructor for a P44 adapter
   static P44_BridgeImpl& adapter();
 
+  virtual string logContextPrefix() override { return "P44 Adapter"; }
+
   /// @brief Set up connection parameters for the P44 bridge API
   /// @param aApiHost the host name of the P44 bridge API server
   /// @param aApiService the "service name" (at this time: port number only) of the P44 bridge API server

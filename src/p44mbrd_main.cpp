@@ -220,8 +220,8 @@ public:
       #endif
       #if CC_ADAPTERS
       // - CC device implementations
-      { 0, "ccapihost",           true, "host;host of the bridge API" },
-      { 0, "ccapiservice",        true, "port;port of the bridge API, default is " CC_DEFAULT_BRIDGE_SERVICE },
+      { 0, "ccapihost",           true, "host;host of the CC bridge API" },
+      { 0, "ccapiservice",        true, "port;port of the CC bridge API, default is " CC_DEFAULT_BRIDGE_SERVICE },
       #endif // CC_ADAPTERS
       #if CHIP_LOG_FILTERING
       { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
@@ -1136,6 +1136,28 @@ void chip::DeviceLayer::Internal::ExitExternalMainLoop()
 
 // MARK: - main (entry point)
 
+static void chipLoggingCallback(const char* aModule, uint8_t aCategory, const char *aMsg, va_list aArgs)
+{
+  // Print the log on console for debug
+//  va_list argsCopy;
+//  va_copy(argsCopy, aArgs);
+  int lvl = 0;
+  switch (aCategory) {
+    case chip::Logging::kLogCategory_Error:
+      lvl = LOG_ERR; break;
+    case chip::Logging::kLogCategory_Progress:
+      lvl = LOG_NOTICE; break;
+    default:
+    case chip::Logging::kLogCategory_Detail:
+    case chip::Logging::kLogCategory_Automation:
+      lvl = LOG_DEBUG; break;
+  }
+  string msg;
+  string_format_v(msg, false, aMsg, aArgs);
+  globalLogger.contextLogStr_always(lvl, string_format("CHIP:%-3s", aModule), msg);
+}
+
+
 #ifndef IS_MULTICALL_BINARY_MODULE
 
 int main(int argc, char **argv)
@@ -1143,6 +1165,8 @@ int main(int argc, char **argv)
   // prevent all logging until command line determines level
   SETLOGLEVEL(LOG_EMERG);
   SETERRLEVEL(LOG_EMERG, false); // messages, if any, go to stderr
+  // redirect chip logging
+  chip::Logging::SetLogRedirectCallback(&chipLoggingCallback);
   // create app with current mainloop
   P44mbrd* application = new(P44mbrd);
   // pass control

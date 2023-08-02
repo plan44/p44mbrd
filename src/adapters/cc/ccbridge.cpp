@@ -186,13 +186,13 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
           item = ilist->arrayGet (i);
           item_id = item->get ("id");
 
-          OLOG(LOG_WARNING, "item: %s", item->getCString ("name"));
+          OLOG(LOG_INFO, "item: %s", item->getCString ("name"));
 
           if (item_id && item_id->int32Value() > 0 &&
               !strcmp (item->getCString ("type"), "group") &&
               !strcmp (item->getCString ("device_type"), "switch"))
             {
-              OLOG (LOG_WARNING, "... registering onoff device for switch");
+              OLOG (LOG_NOTICE, "... registering onoff device for switch");
 
               DevicePtr dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
               // register it

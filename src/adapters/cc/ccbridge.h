@@ -53,6 +53,9 @@ public:
   /// singleton getter / on demand constructor for a CC adapter
   static CC_BridgeImpl& adapter();
 
+  /// @return a prefix string identifying the device for log messages issued via the OLOG macro
+  virtual string logContextPrefix() override { return "CC Adapter"; }
+
   /// @return the CC JSON RPC API for this adapter
   JsonRpcComm& api() { return mJsonRpcAPI; };
 
