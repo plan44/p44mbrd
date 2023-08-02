@@ -261,13 +261,14 @@ void P44_OutputImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   // basics first
   inherited::updateBridgedInfo(aDeviceInfo);
   // specifics
-  // - output devices should examine the channel states
   JsonObjectPtr o;
-  if (aDeviceInfo->get("channelStates", o)) {
-    parseChannelStates(o, UpdateMode());
-  }
+  // - first examine general output state (if any)
   if (aDeviceInfo->get("outputState", o)) {
     parseOutputState(o, UpdateMode());
+  }
+  // - then examine the channel states
+  if (aDeviceInfo->get("channelStates", o)) {
+    parseChannelStates(o, UpdateMode());
   }
 }
 
@@ -548,6 +549,8 @@ void P44_ColorControlImpl::parseChannelStates(JsonObjectPtr aChannelStates, Upda
 void P44_WindowCoveringImpl::setMovement(bool aMove)
 {
   JsonObjectPtr params;
+  DLOG(LOG_NOTICE, "%s moving", aMove ? "START" : "STOP");
+  mIsMoving = aMove; // pre-set, will be updated by output state later
   if (!aMove) {
     // call stop scene
     params = JsonObject::newObj();
@@ -584,7 +587,8 @@ void P44_WindowCoveringImpl::setMovement(bool aMove)
 // MARK: P44 internal implementation
 
 P44_WindowCoveringImpl::P44_WindowCoveringImpl() :
-  mHasTilt(false)
+  mHasTilt(false),
+  mIsMoving(false)
 {
 }
 
@@ -633,14 +637,14 @@ void P44_WindowCoveringImpl::parseChannelStates(JsonObjectPtr aChannelStates, Up
   if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     // Lift channel
     if (o->get("value", vo, false)) {
-      if (vo) WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
+      if (vo && !mIsMoving) WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
       else WindowCovering::Attributes::CurrentPositionLiftPercent100ths::SetNull(endpointId());
     }
   }
   if (aChannelStates->get("shadeOpeningAngleOutside", o)) {
     // Tilt channel
     if (o->get("value", vo, false)) {
-      if (vo) WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
+      if (vo && !mIsMoving) WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
       else WindowCovering::Attributes::CurrentPositionTiltPercent100ths::SetNull(endpointId());
     }
   }
@@ -656,7 +660,8 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, Update
     int mstate = o->int32Value();
     BitMask<WindowCovering::OperationalStatus> ostate;
     BitMask<WindowCovering::OperationalStatus>::IntegerType b = 0; // 0: not moving
-    if (mstate!=0) {
+    mIsMoving = mstate!=0;
+    if (mIsMoving) {
       b = mstate>0 ? 1 : 2; // 1: opening, 2: closing
     }
     ostate.SetField(WindowCovering::OperationalStatus::kGlobal, b);

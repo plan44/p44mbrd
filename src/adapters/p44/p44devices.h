@@ -238,6 +238,7 @@ class P44_WindowCoveringImpl : public P44_OutputImpl, public WindowCoveringDeleg
   typedef P44_OutputImpl inherited;
 
   bool mHasTilt;
+  bool mIsMoving;
 
 protected:
   /// @name WindowCoveringDelegate
