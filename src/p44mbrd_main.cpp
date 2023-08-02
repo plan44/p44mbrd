@@ -215,8 +215,11 @@ public:
       // p44mbrd command line args
       #if P44_ADAPTERS
       // - P44 device implementations
-      { 0, "bridgeapihost",       true, "host;host of the p44 bridge API" },
-      { 0, "bridgeapiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
+      { 0, "p44apihost",       true, "host;host of the p44 bridge API" },
+      { 0, "p44apiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
+      // TODO: remove legacy options
+      { 0, "bridgeapihost",       true, nullptr },
+      { 0, "bridgeapiservice",    true, nullptr },
       #endif
       #if CC_ADAPTERS
       // - CC device implementations
@@ -260,8 +263,9 @@ public:
     #if P44_ADAPTERS
     const char* p44apihost = nullptr;
     const char* p44apiservice = P44_DEFAULT_BRIDGE_SERVICE;
-    getStringOption("bridgeapihost", p44apihost);
-    getStringOption("bridgeapiservice", p44apiservice);
+    // TODO: remove compatibiliy options
+    if (!getStringOption("p44apihost", p44apihost)) getStringOption("bridgeapihost", p44apihost);
+    if (!getStringOption("p44apiservice", p44apiservice))  getStringOption("bridgeapiservice", p44apihost);
     if (p44apihost) {
       P44_BridgeImpl* p44bridgeP = &P44_BridgeImpl::adapter();
       p44bridgeP->setAPIParams(p44apihost, p44apiservice);
