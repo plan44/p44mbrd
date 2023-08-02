@@ -181,29 +181,22 @@ void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus,
 
       for (i = 0; i < ilist->arrayLength(); i++)
         {
-          JsonObjectPtr item;
+          JsonObjectPtr item, item_id;
 
           item = ilist->arrayGet (i);
+          item_id = item->get ("id");
 
           OLOG(LOG_WARNING, "item: %s", item->getCString ("name"));
 
-          if (!strcmp (item->getCString ("type"), "group") &&
+          if (item_id && item_id->int32Value() > 0 &&
+              !strcmp (item->getCString ("type"), "group") &&
               !strcmp (item->getCString ("device_type"), "switch"))
             {
               OLOG (LOG_WARNING, "... registering onoff device for switch");
 
-              JsonObjectPtr o;
-              if (item->get("item_id", o)) {
-                int item_id = o->int32Value();
-                // For now: always instantiate a dummy OnOff device
-                DevicePtr dev = new CC51_OnOffPluginUnitDevice(item_id);
-                // set name if exists
-                if (item->get("name", o)) {
-                  CC51_DeviceImpl::impl(dev)->initialize_name(o->stringValue());
-                }
-                // register it
-                registerInitialDevice(dev);
-              }
+              DevicePtr dev = new CC51_OnOffPluginUnitDevice(item_id->int32Value());
+              // register it
+              registerInitialDevice(dev);
             }
         }
     }
