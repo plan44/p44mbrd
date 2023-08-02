@@ -27,6 +27,6 @@
   #define P44_ADAPTERS 1
 #endif
 
-#ifndef CC51_ADAPTERS
-  #define CC51_ADAPTERS 1
+#ifndef CC_ADAPTERS
+  #define CC_ADAPTERS 1
 #endif

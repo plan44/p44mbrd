@@ -21,60 +21,60 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "cc51bridge.h"
+#include "ccbridge.h"
 
-#if CC51_ADAPTERS
+#if CC_ADAPTERS
 
-#include "cc51devices.h"
+#include "ccdevices.h"
 
 using namespace p44;
 
 
-// MARK: - CC51_BridgeImpl
+// MARK: - CC_BridgeImpl
 
-CC51_BridgeImpl* gSharedCC51BridgeP = nullptr;
+CC_BridgeImpl* gSharedCCBridgeP = nullptr;
 
-CC51_BridgeImpl& CC51_BridgeImpl::adapter()
+CC_BridgeImpl& CC_BridgeImpl::adapter()
 {
-  if (gSharedCC51BridgeP==nullptr) {
-    gSharedCC51BridgeP = new CC51_BridgeImpl;
-    assert(gSharedCC51BridgeP);
-    gSharedCC51BridgeP->isMemberVariable();
+  if (gSharedCCBridgeP==nullptr) {
+    gSharedCCBridgeP = new CC_BridgeImpl;
+    assert(gSharedCCBridgeP);
+    gSharedCCBridgeP->isMemberVariable();
   }
-  return *gSharedCC51BridgeP;
+  return *gSharedCCBridgeP;
 }
 
 // MARK: BridgeAdapter API implementation
 
-void CC51_BridgeImpl::startup()
+void CC_BridgeImpl::startup()
 {
   // start the socket connection
   // - install connection status callback
-  mJsonRpcAPI.setConnectionStatusHandler(boost::bind(&CC51_BridgeImpl::jsonRpcConnectionStatusHandler, this, _2));
+  mJsonRpcAPI.setConnectionStatusHandler(boost::bind(&CC_BridgeImpl::jsonRpcConnectionStatusHandler, this, _2));
   // - initiate the connection
   jsonRpcConnectionOpen();
 }
 
 
-void CC51_BridgeImpl::reportCommissionable(bool aIsCommissionable)
+void CC_BridgeImpl::reportCommissionable(bool aIsCommissionable)
 {
   // TODO: maybe inform the gateway about commissionable status
 }
 
 
-void CC51_BridgeImpl::updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
+void CC_BridgeImpl::updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
 {
   // TODO: maybe inform the gateway about commissioning information (pairing QRcode and manual code)
 }
 
 
-void CC51_BridgeImpl::setBridgeRunning(bool aRunning)
+void CC_BridgeImpl::setBridgeRunning(bool aRunning)
 {
   // TODO: maybe inform the gateway about bridge running status
 }
 
 
-void CC51_BridgeImpl::cleanup()
+void CC_BridgeImpl::cleanup()
 {
   // TODO: maybe other cleanup required before or after closing connection
   mJsonRpcAPI.closeConnection();
@@ -82,9 +82,9 @@ void CC51_BridgeImpl::cleanup()
 }
 
 
-// MARK: CC51_BridgeImpl internals
+// MARK: CC_BridgeImpl internals
 
-CC51_BridgeImpl::CC51_BridgeImpl()
+CC_BridgeImpl::CC_BridgeImpl()
 {
   // Note: isMemberVariable() MUST be called on P44Obj based objects that are instantiated
   //   as C++ member variables (instead of allocated via new and managed by refcount),
@@ -93,25 +93,25 @@ CC51_BridgeImpl::CC51_BridgeImpl()
 }
 
 
-void CC51_BridgeImpl::setAPIParams(const string aApiHost, const string aApiService)
+void CC_BridgeImpl::setAPIParams(const string aApiHost, const string aApiService)
 {
-  // End-of-Message is 0 in the CC51 JsonRPC socket stream
+  // End-of-Message is 0 in the CC JsonRPC socket stream
   mJsonRpcAPI.setEndOfMessageChar('\x00');
   // set up connection parameters
   mJsonRpcAPI.setConnectionParams(aApiHost.c_str(), aApiService.c_str(), SOCK_STREAM);
   // install method/notification request handler
-  mJsonRpcAPI.setRequestHandler(boost::bind(&CC51_BridgeImpl::jsonRpcRequestHandler, this, _1, _2, _3));
+  mJsonRpcAPI.setRequestHandler(boost::bind(&CC_BridgeImpl::jsonRpcRequestHandler, this, _1, _2, _3));
 }
 
 
-void CC51_BridgeImpl::jsonRpcConnectionOpen()
+void CC_BridgeImpl::jsonRpcConnectionOpen()
 {
   // initiate API connection, will call back jsonRpcConnectionStatusHandler()
   mJsonRpcAPI.initiateConnection();
 }
 
 
-void CC51_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
+void CC_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
 {
   if (Error::isOK(aStatus)) {
     // connection established ok
@@ -135,7 +135,7 @@ void CC51_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
     // {"jsonrpc":"2.0","id":"26", "method":"deviced_get_group_names","params":{"room_id":1}}
     JsonObjectPtr params = JsonObject::newObj();
     params->add("name", JsonObject::newString("p44mbrd"));
-    mJsonRpcAPI.sendRequest("rpc_client_register", params, boost::bind(&CC51_BridgeImpl::client_registered, this, _1, _2, _3));
+    mJsonRpcAPI.sendRequest("rpc_client_register", params, boost::bind(&CC_BridgeImpl::client_registered, this, _1, _2, _3));
     // processing will continue at deviceListReceived via callback
     return;
   }
@@ -144,12 +144,12 @@ void CC51_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
     OLOG(LOG_WARNING, "JSON RPC API connection failed: %s", aStatus->text());
     // TODO: better recovery
     // for now: just retry connecting in 10 seconds
-    mApiRetryTicket.executeOnce(boost::bind(&CC51_BridgeImpl::jsonRpcConnectionOpen, this), 10*Second);
+    mApiRetryTicket.executeOnce(boost::bind(&CC_BridgeImpl::jsonRpcConnectionOpen, this), 10*Second);
   }
 }
 
 
-void CC51_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+void CC_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
 {
   if (Error::isOK(aStatus)) {
     // request ok
@@ -157,7 +157,7 @@ void CC51_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, 
     /* start discovery */
 
     JsonObjectPtr params = JsonObject::newObj();
-    mJsonRpcAPI.sendRequest("deviced.deviced_get_items_info", params, boost::bind(&CC51_BridgeImpl::deviceListReceived, this, _1, _2, _3));
+    mJsonRpcAPI.sendRequest("deviced.deviced_get_items_info", params, boost::bind(&CC_BridgeImpl::deviceListReceived, this, _1, _2, _3));
     return;
   }
   OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
@@ -165,7 +165,7 @@ void CC51_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, 
   startupComplete(aStatus);
 }
 
-void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
 {
   JsonObjectPtr ilist;
 
@@ -194,7 +194,7 @@ void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus,
             {
               OLOG (LOG_WARNING, "... registering onoff device for switch");
 
-              DevicePtr dev = new CC51_OnOffPluginUnitDevice(item_id->int32Value());
+              DevicePtr dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
               // register it
               registerInitialDevice(dev);
             }
@@ -210,7 +210,7 @@ void CC51_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus,
 }
 
 
-void CC51_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams)
+void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams)
 {
   // JSON RPC request coming FROM bridge
 
@@ -222,4 +222,4 @@ void CC51_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJs
 }
 
 
-#endif // CC51_ADAPTERS
+#endif // CC_ADAPTERS

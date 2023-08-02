@@ -25,14 +25,14 @@
 
 #include "adapters/adapters.h"
 
-#if CC51_ADAPTERS
+#if CC_ADAPTERS
 
 #include "jsonrpccomm.hpp"
 
-// MARK: - CC51_BridgeImpl
+// MARK: - CC_BridgeImpl
 
-/// @brief implements the bridge for the CC51 API
-class CC51_BridgeImpl : public BridgeAdapter, public P44LoggingObj
+/// @brief implements the bridge for the CC API
+class CC_BridgeImpl : public BridgeAdapter, public P44LoggingObj
 {
   typedef BridgeAdapter inherited;
 
@@ -40,7 +40,7 @@ class CC51_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   MLTicket mApiRetryTicket;
 
   /// private constructor because we must use the adapter() singleton getter/factory
-  CC51_BridgeImpl();
+  CC_BridgeImpl();
 
   /// identification of this bridge
   string mUID;
@@ -50,15 +50,15 @@ class CC51_BridgeImpl : public BridgeAdapter, public P44LoggingObj
 
 public:
 
-  /// singleton getter / on demand constructor for a CC51 adapter
-  static CC51_BridgeImpl& adapter();
+  /// singleton getter / on demand constructor for a CC adapter
+  static CC_BridgeImpl& adapter();
 
-  /// @return the CC51 JSON RPC API for this adapter
+  /// @return the CC JSON RPC API for this adapter
   JsonRpcComm& api() { return mJsonRpcAPI; };
 
-  /// @brief Set up connection parameters for the CC51 bridge API
-  /// @param aApiHost the host name of the CC51 bridge API server
-  /// @param aApiService the "service name" (at this time: port number only) of the CC51 bridge API server
+  /// @brief Set up connection parameters for the CC bridge API
+  /// @param aApiHost the host name of the CC bridge API server
+  /// @param aApiService the "service name" (at this time: port number only) of the CC bridge API server
   void setAPIParams(const string aApiHost, const string aApiService);
 
   /// @name BridgeAdapter implementation
@@ -79,7 +79,7 @@ public:
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }
 
-  /// @brief start the CC51 bridge adapter implementation
+  /// @brief start the CC bridge adapter implementation
   /// The adapter should query its API, discover devices to bridge to matter, instantiate them,
   /// and add them via registerInitialDevice() for publishing to matter when the stack has started up.
   /// @note must call startupComplete() later to signal adapter startup is complete.
@@ -115,5 +115,5 @@ private:
 
 };
 
-#endif // CC51_ADAPTERS
+#endif // CC_ADAPTERS
 

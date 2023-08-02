@@ -85,9 +85,9 @@
 #if P44_ADAPTERS
   #include "adapters/p44/p44bridge.h"
 #endif // P44_ADAPTERS
-#if CC51_ADAPTERS
-  #include "adapters/cc51/cc51bridge.h"
-#endif // CC51_ADAPTERS
+#if CC_ADAPTERS
+  #include "adapters/cc/ccbridge.h"
+#endif // CC_ADAPTERS
 
 // FIXME: remove debug stuff
 #define CERT_DEBUG 0
@@ -129,7 +129,7 @@ using namespace p44;
 // MARK: - P44mbrd Application based on p44utils CmdLineApp
 
 #define P44_DEFAULT_BRIDGE_SERVICE "4444"
-#define CC51_DEFAULT_BRIDGE_SERVICE "18163" // RPC 18=R, 16=P, 3=C
+#define CC_DEFAULT_BRIDGE_SERVICE "18163" // RPC 18=R, 16=P, 3=C
 
 
 /// Main program application object
@@ -218,11 +218,11 @@ public:
       { 0, "bridgeapihost",       true, "host;host of the p44 bridge API" },
       { 0, "bridgeapiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
       #endif
-      #if CC51_ADAPTERS
-      // - CC51 device implementations
-      { 0, "cc51apihost",         true, "host;host of the bridge API" },
-      { 0, "cc51apiservice",      true, "port;port of the bridge API, default is " CC51_DEFAULT_BRIDGE_SERVICE },
-      #endif // CC51_ADAPTERS
+      #if CC_ADAPTERS
+      // - CC device implementations
+      { 0, "ccapihost",           true, "host;host of the bridge API" },
+      { 0, "ccapiservice",        true, "port;port of the bridge API, default is " CC_DEFAULT_BRIDGE_SERVICE },
+      #endif // CC_ADAPTERS
       #if CHIP_LOG_FILTERING
       { 0, "chiploglevel",        true, "loglevel;level of detail for logging (0..4, default=2=Progress)" },
       #endif // CHIP_LOG_FILTERING
@@ -268,17 +268,17 @@ public:
       mAdapters.push_back(p44bridgeP);
     }
     #endif // P44_ADAPTERS
-    #if CC51_ADAPTERS
-    const char* cc51apihost = nullptr;
-    const char* cc51apiservice = CC51_DEFAULT_BRIDGE_SERVICE;
-    getStringOption("cc51apihost", cc51apihost);
-    getStringOption("cc51apiservice", cc51apiservice);
-    if (cc51apihost) {
-      CC51_BridgeImpl* cc51bridgeP = &CC51_BridgeImpl::adapter();
-      cc51bridgeP->setAPIParams(cc51apihost, cc51apiservice);
-      mAdapters.push_back(cc51bridgeP);
+    #if CC_ADAPTERS
+    const char* ccapihost = nullptr;
+    const char* ccapiservice = CC_DEFAULT_BRIDGE_SERVICE;
+    getStringOption("ccapihost", ccapihost);
+    getStringOption("ccapiservice", ccapiservice);
+    if (ccapihost) {
+      CC_BridgeImpl* ccbridgeP = &CC_BridgeImpl::adapter();
+      ccbridgeP->setAPIParams(ccapihost, ccapiservice);
+      mAdapters.push_back(ccbridgeP);
     }
-    #endif // CC51_ADAPTERS
+    #endif // CC_ADAPTERS
   }
 
 
