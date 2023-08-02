@@ -27,6 +27,8 @@
 
 #if CC51_ADAPTERS
 
+#include "jsonrpccomm.hpp"
+
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
@@ -126,6 +128,12 @@ protected:
   /// @{
   virtual void setOnOffState(bool aOn) override;
   /// @}
+  ///
+
+private:
+
+  void onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+
 
 };
 

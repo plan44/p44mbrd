@@ -143,8 +143,16 @@ void CC51_OnOffImpl::setOnOffState(bool aOn)
   params->add("group_id", JsonObject::newInt32 (get_item_id ()));
   params->add("command", JsonObject::newString ("switch"));
   params->add("value", JsonObject::newInt32 (aOn ? 1 : 0));
-  CC51_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params);
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC51_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC51_OnOffImpl::onOffResponse, this, _1, _2, _3));
 
 }
+
+
+void CC51_OnOffImpl::onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
+
 
 #endif // P44_ADAPTERS

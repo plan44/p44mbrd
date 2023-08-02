@@ -129,7 +129,7 @@ using namespace p44;
 // MARK: - P44mbrd Application based on p44utils CmdLineApp
 
 #define P44_DEFAULT_BRIDGE_SERVICE "4444"
-#define CC51_DEFAULT_BRIDGE_SERVICE "4343"
+#define CC51_DEFAULT_BRIDGE_SERVICE "18163" // RPC 18=R, 16=P, 3=C
 
 
 /// Main program application object
