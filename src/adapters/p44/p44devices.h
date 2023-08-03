@@ -159,8 +159,7 @@ protected:
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) = 0;
-  virtual void parseOutputState(JsonObjectPtr aOutputState, UpdateMode aUpdateMode) {};
+  virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) {};
 };
 
 
@@ -176,7 +175,7 @@ protected:
   virtual void setOnOffState(bool aOn) override;
   /// @}
 
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 };
 
 
@@ -198,7 +197,7 @@ protected:
   /// @}
 
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
 public:
   P44_LevelControlImpl();
@@ -225,7 +224,7 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
   /// @}
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
 public:
   P44_ColorControlImpl();
@@ -238,12 +237,12 @@ class P44_WindowCoveringImpl : public P44_OutputImpl, public WindowCoveringDeleg
   typedef P44_OutputImpl inherited;
 
   bool mHasTilt;
-  bool mIsMoving;
 
 protected:
   /// @name WindowCoveringDelegate
   /// @{
-  virtual void setMovement(bool aMove) override;
+  virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) override;
+  virtual void stopMovement() override;
   /// @}
 
   /// @name IdentifyDelegate
@@ -252,8 +251,7 @@ protected:
   /// @}
 
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
-  virtual void parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
-  virtual void parseOutputState(JsonObjectPtr aOutputState, UpdateMode aUpdateMode) override;
+  virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
 public:
   P44_WindowCoveringImpl();

@@ -83,7 +83,7 @@ void DeviceWindowCovering::didGetInstalled()
 CHIP_ERROR DeviceWindowCovering::HandleMovement(WindowCovering::WindowCoveringType type)
 {
   OLOG(LOG_INFO, "WindowCoveringDelegate::HandleMovement: start moving");
-  mWindowCoveringDelegate.setMovement(true);
+  mWindowCoveringDelegate.startMovement(type);
   return CHIP_NO_ERROR;
 }
 
@@ -91,6 +91,6 @@ CHIP_ERROR DeviceWindowCovering::HandleMovement(WindowCovering::WindowCoveringTy
 CHIP_ERROR DeviceWindowCovering::HandleStopMotion()
 {
   OLOG(LOG_INFO, "WindowCoveringDelegate::HandleStopMotion: stop moving");
-  mWindowCoveringDelegate.setMovement(false);
+  mWindowCoveringDelegate.stopMovement();
   return CHIP_NO_ERROR;
 }

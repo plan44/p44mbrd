@@ -261,14 +261,10 @@ void P44_OutputImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   // basics first
   inherited::updateBridgedInfo(aDeviceInfo);
   // specifics
-  JsonObjectPtr o;
-  // - first examine general output state (if any)
-  if (aDeviceInfo->get("outputState", o)) {
-    parseOutputState(o, UpdateMode());
-  }
-  // - then examine the channel states
-  if (aDeviceInfo->get("channelStates", o)) {
-    parseChannelStates(o, UpdateMode());
+  JsonObjectPtr outputState = aDeviceInfo->get("outputState");
+  JsonObjectPtr channelStates = aDeviceInfo->get("channelStates");
+  if (outputState || channelStates) {
+    parseOutputState(outputState, channelStates, UpdateMode());
   }
 }
 
@@ -278,13 +274,10 @@ void P44_OutputImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties
   // basics first
   inherited::handleBridgePushProperties(aChangedProperties);
   // specifics
-  // - output devices should parse the channel states
-  JsonObjectPtr stateJson;
-  if (aChangedProperties->get("channelStates", stateJson, true)) {
-    parseChannelStates(stateJson, UpdateMode(UpdateFlags::matter));
-  }
-  if (aChangedProperties->get("outputState", stateJson, true)) {
-    parseOutputState(stateJson, UpdateMode(UpdateFlags::matter));
+  JsonObjectPtr outputState = aChangedProperties->get("outputState");
+  JsonObjectPtr channelStates = aChangedProperties->get("channelStates");
+  if (outputState || channelStates) {
+    parseOutputState(outputState, channelStates, UpdateMode(UpdateFlags::matter));
   }
 }
 
@@ -307,10 +300,10 @@ void P44_OnOffImpl::setOnOffState(bool aOn)
 
 // MARK: P44 internal implementation
 
-void P44_OnOffImpl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+void P44_OnOffImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
   JsonObjectPtr o;
-  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
+  if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
       deviceP<DeviceOnOff>()->updateOnOff(vo->doubleValue()>0, aUpdateMode);
@@ -394,13 +387,13 @@ void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 }
 
 
-void P44_LevelControlImpl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
   // OnOff just sets on/off state when brightness>0
-  inherited::parseChannelStates(aChannelStates, aUpdateMode);
+  inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
   // init level
   JsonObjectPtr o;
-  if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
+  if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
       // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
@@ -487,9 +480,10 @@ void P44_ColorControlImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObject
 }
 
 
-void P44_ColorControlImpl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
-  inherited::parseChannelStates(aChannelStates, aUpdateMode);
+  inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
+  if (!aChannelStates) return; // no channel info at all
   JsonObjectPtr o;
   JsonObjectPtr vo;
   bool relevant;
@@ -546,49 +540,48 @@ void P44_ColorControlImpl::parseChannelStates(JsonObjectPtr aChannelStates, Upda
 
 // MARK: WindowCoveringDelegate implementation
 
-void P44_WindowCoveringImpl::setMovement(bool aMove)
+void P44_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMovementType)
 {
   JsonObjectPtr params;
-  DLOG(LOG_NOTICE, "%s moving", aMove ? "START" : "STOP");
-  mIsMoving = aMove; // pre-set, will be updated by output state later
-  if (!aMove) {
-    // call stop scene
-    params = JsonObject::newObj();
-    params->add("scene", JsonObject::newInt32(15)); // S_STOP
-    params->add("force", JsonObject::newBool(true));
-    notify("callScene", params);
-  }
-  else {
-    // set output values
-    DataModel::Nullable<Percent100ths> lift;
-    WindowCovering::Attributes::TargetPositionLiftPercent100ths::Get(endpointId(), lift);
-    if (mHasTilt) {
-      DataModel::Nullable<Percent100ths> tilt;
-      WindowCovering::Attributes::TargetPositionTiltPercent100ths::Get(endpointId(), tilt);
-      if (!tilt.IsNull()) {
-        params = JsonObject::newObj();
-        params->add("channelId", JsonObject::newString(mDefaultChannelId));
-        params->add("value", JsonObject::newDouble((double)tilt.Value() / 100));
-        params->add("apply_now", JsonObject::newBool(lift.IsNull())); // wait for lift value, unless it is not provided
-        notify("setOutputChannelValue", params);
-      }
-    }
-    if (!lift.IsNull()) {
+  // set output values
+  DataModel::Nullable<Percent100ths> lift;
+  WindowCovering::Attributes::TargetPositionLiftPercent100ths::Get(endpointId(), lift);
+  if (mHasTilt) {
+    DataModel::Nullable<Percent100ths> tilt;
+    WindowCovering::Attributes::TargetPositionTiltPercent100ths::Get(endpointId(), tilt);
+    if (!tilt.IsNull()) {
       params = JsonObject::newObj();
       params->add("channelId", JsonObject::newString(mDefaultChannelId));
-      params->add("value", JsonObject::newDouble((double)lift.Value() / 100));
-      params->add("apply_now", JsonObject::newBool(true)); // Apply now, together with tilt
+      params->add("value", JsonObject::newDouble((double)tilt.Value() / 100));
+      params->add("apply_now", JsonObject::newBool(lift.IsNull())); // wait for lift value, unless it is not provided
       notify("setOutputChannelValue", params);
     }
   }
+  if (!lift.IsNull()) {
+    params = JsonObject::newObj();
+    params->add("channelId", JsonObject::newString(mDefaultChannelId));
+    params->add("value", JsonObject::newDouble((double)lift.Value() / 100));
+    params->add("apply_now", JsonObject::newBool(true)); // Apply now, together with tilt
+    notify("setOutputChannelValue", params);
+  }
 }
+
+
+void P44_WindowCoveringImpl::stopMovement()
+{
+  // call stop scene
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("scene", JsonObject::newInt32(15)); // S_STOP
+  params->add("force", JsonObject::newBool(true));
+  notify("callScene", params);
+}
+
 
 
 // MARK: P44 internal implementation
 
 P44_WindowCoveringImpl::P44_WindowCoveringImpl() :
-  mHasTilt(false),
-  mIsMoving(false)
+  mHasTilt(false)
 {
 }
 
@@ -617,7 +610,8 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   // - configstatus
   chip::BitMask<WindowCovering::ConfigStatus> configstatus;
   configstatus.Set(WindowCovering::ConfigStatus::kOperational); // assume operational
-  configstatus.Set(WindowCovering::ConfigStatus::kLiftMovementReversed); // open and close is reversed in dS (0=fully extended)
+  // Note: dS uses 100% = fully open, which matches Matter with 100% = fully lifted up
+  //configstatus.Set(WindowCovering::ConfigStatus::kLiftMovementReversed); // open and close is reversed in dS (0=fully extended)
   configstatus.Set(WindowCovering::ConfigStatus::kLiftPositionAware); // dS shadow behaviour always assumes lift position aware
   if (mHasTilt) configstatus.Set(WindowCovering::ConfigStatus::kTiltPositionAware); // dS shadow behaviour always assumes tilt position aware if it is available
   // further assumed: timer controlled
@@ -629,74 +623,87 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 }
 
 
-void P44_WindowCoveringImpl::parseChannelStates(JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
+void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
-  // Note: window covering does not have parent classes parsing channel states, this IS the base implementation
+  inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
   JsonObjectPtr o, vo;
+  int moving = 0;
+  if (aOutputState) {
+    // get moving state
+    if (aOutputState->get("movingState", o)) {
+      moving = o->int32Value();
+    }
+    // check for errors
+    if (aOutputState->get("error", o)) {
+      underlying_type_t<WindowCovering::SafetyStatus> status = 0;
+      int err = o->int32Value();
+      switch (err) {
+        case hardwareError_openCircuit:
+        case hardwareError_shortCircuit:
+        case hardwareError_deviceError:
+          // PCB, fuse and other electrics problems.
+          status |= to_underlying(WindowCovering::SafetyStatus::kHardwareFailure);
+          break;
+        case hardwareError_overload:
+          // An obstacle is preventing actuator movement.
+          status |= to_underlying(WindowCovering::SafetyStatus::kObstacleDetected);
+          break;
+        case hardwareError_busConnection:
+          // Communication failure to sensors or other safety equip­ment.
+          status |= to_underlying(WindowCovering::SafetyStatus::kFailedCommunication);
+          break;
+        case hardwareError_lowBattery:
+          // power might not be fully available at the moment.
+          status |= to_underlying(WindowCovering::SafetyStatus::kPower);
+          break;
+      }
+      WindowCovering::Attributes::SafetyStatus::Set(endpointId(), status);
+    }
+  }
   // - current positions
   if (aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     // Lift channel
-    if (o->get("value", vo, false)) {
-      if (vo && !mIsMoving) WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
-      else WindowCovering::Attributes::CurrentPositionLiftPercent100ths::SetNull(endpointId());
+    if (o->get("value", vo, true)) {
+      // non-null channel value
+      double targetvalue = vo->doubleValue()*100;
+      // - always report target value, WindowCovering cluster relies on that
+      WindowCovering::Attributes::TargetPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+      if (moving && o->get("x-p44-transitional", vo, true)) {
+        // we know the actual transitional current position value
+        double currentvalue = vo->doubleValue()*100;
+        WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(currentvalue));
+      }
+      else {
+        // we do not know a transitional value
+        if (!moving) {
+          // not moving, assume target and current equal
+          WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+        }
+      }
     }
   }
   if (aChannelStates->get("shadeOpeningAngleOutside", o)) {
     // Tilt channel
-    if (o->get("value", vo, false)) {
-      if (vo && !mIsMoving) WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(vo->doubleValue()*100));
-      else WindowCovering::Attributes::CurrentPositionTiltPercent100ths::SetNull(endpointId());
+    if (o->get("value", vo, true)) {
+      // non-null channel value
+      double targetvalue = vo->doubleValue()*100;
+      // - always report target value, WindowCovering cluster relies on that
+      WindowCovering::Attributes::TargetPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+      if (moving && o->get("x-p44-transitional", vo, true)) {
+        // we know the actual transitional current position value
+        double currentvalue = vo->doubleValue()*100;
+        WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(currentvalue));
+      }
+      else {
+        // we do not know a transitional value or we are not moving
+        if (!moving) {
+          // not moving, report target and current equal because that triggers the WindowCovering cluster to recognize stop
+          WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+        }
+      }
     }
   }
 }
-
-
-void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, UpdateMode aUpdateMode)
-{
-  inherited::parseOutputState(aOutputState, aUpdateMode);
-  JsonObjectPtr o;
-  if (aOutputState->get("movingState", o)) {
-    // operational state
-    int mstate = o->int32Value();
-    BitMask<WindowCovering::OperationalStatus> ostate;
-    BitMask<WindowCovering::OperationalStatus>::IntegerType b = 0; // 0: not moving
-    mIsMoving = mstate!=0;
-    if (mIsMoving) {
-      b = mstate>0 ? 1 : 2; // 1: opening, 2: closing
-    }
-    ostate.SetField(WindowCovering::OperationalStatus::kGlobal, b);
-    ostate.SetField(WindowCovering::OperationalStatus::kLift, b);
-    ostate.SetField(WindowCovering::OperationalStatus::kTilt, mHasTilt ? b : 0);
-    WindowCovering::Attributes::OperationalStatus::Set(endpointId(), ostate);
-  }
-  if (aOutputState->get("error", o)) {
-    // ok or error conditions
-    underlying_type_t<WindowCovering::SafetyStatus> status = 0;
-    int err = o->int32Value();
-    switch (err) {
-      case hardwareError_openCircuit:
-      case hardwareError_shortCircuit:
-      case hardwareError_deviceError:
-        // PCB, fuse and other electrics problems.
-        status |= to_underlying(WindowCovering::SafetyStatus::kHardwareFailure);
-        break;
-      case hardwareError_overload:
-        // An obstacle is preventing actuator movement.
-        status |= to_underlying(WindowCovering::SafetyStatus::kObstacleDetected);
-        break;
-      case hardwareError_busConnection:
-        // Communication failure to sensors or other safety equip­ment.
-        status |= to_underlying(WindowCovering::SafetyStatus::kFailedCommunication);
-        break;
-      case hardwareError_lowBattery:
-        // power might not be fully available at the moment.
-        status |= to_underlying(WindowCovering::SafetyStatus::kPower);
-        break;
-    }
-    WindowCovering::Attributes::SafetyStatus::Set(endpointId(), status);
-  }
-}
-
 
 
 // MARK: - P44_InputDevice

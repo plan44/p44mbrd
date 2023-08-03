@@ -36,10 +36,13 @@ public:
 
   virtual ~WindowCoveringDelegate() = default;
 
-  /// Initiate or stop movement
-  /// @param aMove if true, movement should be initiated according to target position attributes.
-  ///   if false, movement should stop ASAP
-  virtual void setMovement(bool aMove) = 0;
+  /// Initiate movement to target value(s)
+  /// @param aMovementType indicates movement to perform (lift or tilt), hardware might need
+  ///   to perform both at the same time
+  virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) = 0;
+
+  /// Stop movement
+  virtual void stopMovement() = 0;
 
 };
 
