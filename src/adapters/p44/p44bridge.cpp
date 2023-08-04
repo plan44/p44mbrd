@@ -80,7 +80,8 @@ void P44_BridgeImpl::cleanup()
 
 // MARK: P44_BridgeImpl internals
 
-P44_BridgeImpl::P44_BridgeImpl()
+P44_BridgeImpl::P44_BridgeImpl() :
+  mConnectedOnce(false)
 {
   mBridgeApi.isMemberVariable();
 }
@@ -100,12 +101,18 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
     OLOG(LOG_WARNING, "bridge API connection error: %s", aStatus->text());
     // TODO: better handling
     // - re-enable all known devices for "bridged", disable those not found
-    OLOG(LOG_WARNING, "(re)connected bridge API, device info might be stale");
     return;
   }
   else {
-    // connection established
-    queryBridge();
+    if (mConnectedOnce) {
+      OLOG(LOG_WARNING, "(re)connected bridge API");
+      reconnectBridgedDevices();
+    }
+    else {
+      // connection established for the first time
+      mConnectedOnce = true;
+      queryBridge();
+    }
   }
 }
 
@@ -113,7 +120,7 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
 
 #define NEEDED_DEVICE_PROPERTIES \
   "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
-  "\"outputDescription\":null, \"outputSettings\": null, " \
+  "\"outputDescription\":null, \"outputSettings\": null, \"modelFeatures\":null, " \
   "\"scenes\": { \"0\":null, \"5\":null }, " \
   "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
   "\"channelStates\":null, \"channelDescriptions\":null, " \
@@ -372,6 +379,79 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
   // report started (ONCE!)
   startupComplete(ErrorPtr());
 }
+
+// MARK: - reconnect bridge API
+
+#define RECONNECT_DEVICE_PROPERTIES \
+  "{\"dSUID\":null, " \
+  "\"active\":null, " \
+  "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, }"
+
+void P44_BridgeImpl::reconnectBridgedDevices()
+{
+  OLOG(LOG_NOTICE, "querying bridgeapi query after reconnect for device status");
+  // query devices
+  JsonObjectPtr params = JsonObject::objFromText(
+    "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
+    "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, "
+    "\"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
+    RECONNECT_DEVICE_PROPERTIES
+    "} }} }}"
+  );
+  api().call("getProperty", params, boost::bind(&P44_BridgeImpl::bridgeApiReconnectQueryHandler, this, _1, _2));
+}
+
+void P44_BridgeImpl::bridgeApiReconnectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
+{
+  OLOG(LOG_INFO, "bridgeapi query after reconnect: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  JsonObjectPtr o;
+  JsonObjectPtr result;
+  if (aJsonMsg && aJsonMsg->get("result", result)) {
+    // process device list
+    JsonObjectPtr vdcs;
+    if (result->get("x-p44-vdcs", vdcs)) {
+      vdcs->resetKeyIteration();
+      string vn;
+      JsonObjectPtr vdc;
+      while(vdcs->nextKeyValue(vn, vdc)) {
+        JsonObjectPtr devices;
+        if (vdc->get("x-p44-devices", devices)) {
+          devices->resetKeyIteration();
+          string dn;
+          JsonObjectPtr device;
+          while(devices->nextKeyValue(dn, device)) {
+            if (device->get("dSUID", o, true)) {
+              string dsuid = o->stringValue();
+              if (device->get("x-p44-bridgeable", o) && o->boolValue()) {
+                // is a bridgeable device, look it up
+                DeviceUIDMap::iterator devpos = mDeviceUIDMap.find(dsuid);
+                if (devpos!=mDeviceUIDMap.end()) {
+                  POLOG(devpos->second, LOG_NOTICE, "Continuing operation after API server reconnect");
+                  // we have that device registered, re-enable for bridging
+                  JsonObjectPtr params = JsonObject::newObj();
+                  params->add("dSUID", JsonObject::newString(dsuid));
+                  JsonObjectPtr props = JsonObject::newObj();
+                  props->add("x-p44-bridged", JsonObject::newBool(true));
+                  params->add("properties", props);
+                  api().call("setProperty", params, NoOP);
+                }
+                else {
+                  // we don't know this yet, add separately
+                  OLOG(LOG_NOTICE, "New device '%s' encountered after API server reconnect", dsuid.c_str());
+                  newDeviceGotBridgeable(dsuid);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // TODO: maybe find and disable those that are no longer visible in the brige API
+  OLOG(LOG_WARNING, "Reconnected devices after API server reconnect");
+}
+
+
 
 
 void P44_BridgeImpl::bridgeApiNotificationHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)

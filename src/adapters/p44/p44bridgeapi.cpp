@@ -57,7 +57,6 @@ void P44BridgeApi::connectionStatusHandler(ErrorPtr aStatus)
     // connection ok
     if (mConnectedCB) {
       StatusCB cb = mConnectedCB;
-      mConnectedCB = NoOP;
       cb(aStatus);
     }
     return;

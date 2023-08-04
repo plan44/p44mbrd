@@ -45,7 +45,6 @@ class P44BridgeApi : public JsonComm
   StatusCB mConnectedCB;
   JSonMessageCB mNotificationCB;
 
-
 public:
 
   P44BridgeApi();

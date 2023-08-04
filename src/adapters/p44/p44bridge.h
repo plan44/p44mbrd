@@ -38,6 +38,7 @@ class P44_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   typedef BridgeAdapter inherited;
 
   P44BridgeApi mBridgeApi;
+  bool mConnectedOnce;
 
   /// private constructor because we must use the adapter() singleton getter/factory
   P44_BridgeImpl();
@@ -113,6 +114,8 @@ private:
   void queryBridge();
   DevicePtr bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON);
   void bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);
+  void reconnectBridgedDevices();
+  void bridgeApiReconnectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);
   void handleGlobalNotification(const string notification, JsonObjectPtr aJsonMsg);
   void newDeviceGotBridgeable(string aNewDeviceDSUID);
   void newDeviceInfoQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);
