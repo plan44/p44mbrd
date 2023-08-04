@@ -540,27 +540,73 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
 
 // MARK: WindowCoveringDelegate implementation
 
+// TODO: clarify
+// Note: unclear who sets the WindowCovering::Mode::kMotorDirectionReversed bit, Apple does not and
+//   sends GoToLiftPercentage(100%) to close the blind, so we assume that's the non-reversed meaning
+//   (would semantically fit "WindowCovering": 100% = window fully covered).
+//   As dS has it the other way,  bridge2matter and matter2bridge invert the range IN NORMAL MODE
+//   (and don't when reversed is set)
+
+
+double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
+{
+  double v = (double)aPercent100th/100;
+  return !aMotorDirectionReversed ? 100-v : v; // reversed is dS standard (100% = fully lifted/open), so !aMotorDirectionReversed
+}
+
+
+bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
+{
+  if (aPercent100th.IsNull()) {
+    aBridgeValue = JsonObject::newNull();
+    return false;
+  }
+  aBridgeValue = JsonObject::newDouble(matter2bridge(aPercent100th.Value(), aMotorDirectionReversed));
+  return true;
+}
+
+
+Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
+{
+  Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
+  return !aMotorDirectionReversed ? 100*100 - v : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
+}
+
+
+bool bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aInvert)
+{
+  if (aBridgeValue && !aBridgeValue->isType(json_type_null)) {
+    aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aInvert));
+    return true;
+  }
+  aPercent100th.SetNull();
+  return false;
+}
+
+
 void P44_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMovementType)
 {
-  JsonObjectPtr params;
+  JsonObjectPtr params, val;
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   // set output values
   DataModel::Nullable<Percent100ths> lift;
   WindowCovering::Attributes::TargetPositionLiftPercent100ths::Get(endpointId(), lift);
   if (mHasTilt) {
     DataModel::Nullable<Percent100ths> tilt;
     WindowCovering::Attributes::TargetPositionTiltPercent100ths::Get(endpointId(), tilt);
-    if (!tilt.IsNull()) {
+    if (matter2bridge(tilt, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed))) {
       params = JsonObject::newObj();
-      params->add("channelId", JsonObject::newString(mDefaultChannelId));
-      params->add("value", JsonObject::newDouble((double)tilt.Value() / 100));
+      params->add("channelId", JsonObject::newString("shadeOpeningAngleOutside"));
+      params->add("value", val);
       params->add("apply_now", JsonObject::newBool(lift.IsNull())); // wait for lift value, unless it is not provided
       notify("setOutputChannelValue", params);
     }
   }
-  if (!lift.IsNull()) {
+  if (matter2bridge(lift, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed))) {
     params = JsonObject::newObj();
     params->add("channelId", JsonObject::newString(mDefaultChannelId));
-    params->add("value", JsonObject::newDouble((double)lift.Value() / 100));
+    params->add("value", val);
     params->add("apply_now", JsonObject::newBool(true)); // Apply now, together with tilt
     notify("setOutputChannelValue", params);
   }
@@ -607,15 +653,6 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
   WindowCovering::Attributes::Type::Set(endpointId(), mHasTilt ? WindowCovering::Type::kTiltBlindLiftAndTilt : WindowCovering::Type::kRollerShade);
-  // - configstatus
-  chip::BitMask<WindowCovering::ConfigStatus> configstatus;
-  configstatus.Set(WindowCovering::ConfigStatus::kOperational); // assume operational
-  // Note: dS uses 100% = fully open, which matches Matter with 100% = fully lifted up
-  //configstatus.Set(WindowCovering::ConfigStatus::kLiftMovementReversed); // open and close is reversed in dS (0=fully extended)
-  configstatus.Set(WindowCovering::ConfigStatus::kLiftPositionAware); // dS shadow behaviour always assumes lift position aware
-  if (mHasTilt) configstatus.Set(WindowCovering::ConfigStatus::kTiltPositionAware); // dS shadow behaviour always assumes tilt position aware if it is available
-  // further assumed: timer controlled
-  WindowCovering::Attributes::ConfigStatus::Set(endpointId(), configstatus);
   // - end product type
   WindowCovering::EndProductType endproducttype = WindowCovering::EndProductType::kRollerShade;
   if (mHasTilt) endproducttype = WindowCovering::EndProductType::kSheerShade;
@@ -627,6 +664,8 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
 {
   inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
   JsonObjectPtr o, vo;
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   int moving = 0;
   if (aOutputState) {
     // get moving state
@@ -665,19 +704,19 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
     // Lift channel
     if (o->get("value", vo, true)) {
       // non-null channel value
-      double targetvalue = vo->doubleValue()*100;
+      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
       // - always report target value, WindowCovering cluster relies on that
-      WindowCovering::Attributes::TargetPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+      WindowCovering::Attributes::TargetPositionLiftPercent100ths::Set(endpointId(), targetvalue);
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
-        double currentvalue = vo->doubleValue()*100;
-        WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(currentvalue));
+        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+        WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), currentvalue);
       }
       else {
         // we do not know a transitional value
         if (!moving) {
           // not moving, assume target and current equal
-          WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+          WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), targetvalue);
         }
       }
     }
@@ -686,19 +725,19 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
     // Tilt channel
     if (o->get("value", vo, true)) {
       // non-null channel value
-      double targetvalue = vo->doubleValue()*100;
+      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
       // - always report target value, WindowCovering cluster relies on that
-      WindowCovering::Attributes::TargetPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+      WindowCovering::Attributes::TargetPositionTiltPercent100ths::Set(endpointId(), targetvalue);
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
-        double currentvalue = vo->doubleValue()*100;
-        WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(currentvalue));
+        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+        WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), currentvalue);
       }
       else {
-        // we do not know a transitional value or we are not moving
+        // we do not know a transitional value
         if (!moving) {
-          // not moving, report target and current equal because that triggers the WindowCovering cluster to recognize stop
-          WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), static_cast<chip::Percent100ths>(targetvalue));
+          // not moving, assume target and current equal
+          WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), targetvalue);
         }
       }
     }
