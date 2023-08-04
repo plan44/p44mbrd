@@ -215,8 +215,8 @@ public:
       // p44mbrd command line args
       #if P44_ADAPTERS
       // - P44 device implementations
-      { 0, "p44apihost",       true, "host;host of the p44 bridge API" },
-      { 0, "p44apiservice",    true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
+      { 0, "p44apihost",          true, "host;host of the p44 bridge API" },
+      { 0, "p44apiservice",       true, "port;port of the p44 bridge API, default is " P44_DEFAULT_BRIDGE_SERVICE },
       // TODO: remove legacy options
       { 0, "bridgeapihost",       true, nullptr },
       { 0, "bridgeapiservice",    true, nullptr },

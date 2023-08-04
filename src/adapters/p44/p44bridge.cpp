@@ -478,6 +478,11 @@ void P44_BridgeImpl::handleGlobalNotification(const string notification, JsonObj
       LOG(LOG_NOTICE, "\n\n========== changing CHIP log level from %d to %d ===============", (int)chip::Logging::GetLogFilter(), newChipLogLevel);
       chip::Logging::SetLogFilter((uint8_t)newChipLogLevel);
     }
+    if ((o = aJsonMsg->get("deltas"))) SETDELTATIME(o->boolValue());
+    #if ENABLE_LOG_COLORS
+    if ((o = aJsonMsg->get("symbols"))) SETLOGSYMBOLS(o->boolValue());
+    if ((o = aJsonMsg->get("colors"))) SETLOGCOLORING(o->boolValue());
+    #endif // ENABLE_LOG_COLORS
   }
 }
 
