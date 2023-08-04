@@ -32,6 +32,7 @@
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
+#include "devicewindowcovering.h"
 #include "sensordevices.h"
 #include "booleaninputdevices.h"
 
@@ -121,9 +122,6 @@ protected:
 
   CC_OnOffImpl(int _item_id) : inherited(_item_id) { /* NOP so far */ }
 
-  /// the default channel ID
-  string mDefaultChannelId;
-
   /// @name OnOffDelegate
   /// @{
   virtual void setOnOffState(bool aOn) override;
@@ -134,6 +132,35 @@ private:
 
   void onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 
+
+};
+
+
+
+class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringDelegate
+{
+  typedef CC_IdentifiableImpl inherited;
+
+  bool mHasTilt;
+
+protected:
+
+  CC_WindowCoveringImpl(int _item_id);
+
+  /// @name WindowCoveringDelegate
+  /// @{
+  virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) override;
+  virtual void stopMovement() override;
+  /// @}
+
+  /// @name IdentifyDelegate
+  /// @{
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
+  /// @}
+
+
+public:
+  CC_WindowCoveringImpl();
 
 };
 
@@ -184,6 +211,18 @@ public:
   { }; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
+
+
+
+class CC_WindowCoveringDevice final :
+  public DeviceWindowCovering, // the matter side device
+  public CC_WindowCoveringImpl // the P44 side delegate implementation
+{
+public:
+  CC_WindowCoveringDevice() : DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  DEVICE_ACCESSOR;
+};
+
 
 
 

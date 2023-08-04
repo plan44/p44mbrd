@@ -155,4 +155,60 @@ void CC_OnOffImpl::onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObje
 }
 
 
-#endif // P44_ADAPTERS
+// MARK: - CC_WindowCoveringImpl
+
+// MARK: WindowCoveringDelegate implementation
+
+
+CC_WindowCoveringImpl::CC_WindowCoveringImpl(int _item_id) :
+  inherited(_item_id)
+{
+  // TODO: setup device
+  // probably not here in ctor, but afterwards in a separate method called by adapters' device setup loop
+  // (in p44adapter: initBridgedInfo/updateBridgedInfo)
+  // Anyway, must setup
+  // - WindowCovering::Attributes::FeatureMap (tilt, lift, position aware or not)
+  // - WindowCovering::Attributes::Type (kRollerShade, kTiltBlindLiftAndTilt, ...)
+  // - WindowCovering::Attributes::EndProductType (kRollerShade, kSheerShade, ...)
+
+}
+
+
+
+
+void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMovementType)
+{
+  // - get mode (for kMotorDirectionReversed)
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
+  // - get target values for lift and tilt
+  DataModel::Nullable<Percent100ths> lift;
+  WindowCovering::Attributes::TargetPositionLiftPercent100ths::Get(endpointId(), lift);
+  DataModel::Nullable<Percent100ths> tilt;
+  WindowCovering::Attributes::TargetPositionTiltPercent100ths::Get(endpointId(), tilt);
+  // TODO: implement starting movement
+  // - make movement start, possibly invert 0..100 -> 100..0 when
+  //   `mode.Has(WindowCovering::Mode::kMotorDirectionReversed)`
+  // - check !lift.IsNull() and !tilt.IsNull() before using target values
+
+  // TODO: implement feedback (in API callbacks or polling)
+  // - while movement runs, optionally post intermediate updates to current values
+  //   WindowCovering::Attributes::CurrentPositionLiftPercent100ths and
+  //   WindowCovering::Attributes::CurrentPositionTiltPercent100ths
+  // - when movement stops (early or completed):
+  //   - FIRST set TargetPositionXXX attributes to current position
+  //   - THEN set CurrentPositionXXX attributes to SAME current position
+  //   (only this sequence makes the Window Covering Cluster recognize end of operation)
+
+}
+
+
+void CC_WindowCoveringImpl::stopMovement()
+{
+  // TODO: implement stopping movement
+  // - then, give appropriate feedback of current positions, if known
+
+}
+
+
+#endif // CC_ADAPTERS
