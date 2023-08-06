@@ -5424,7 +5424,7 @@
           "mfgCode": null,
           "define": "BINDING_CLUSTER",
           "side": "client",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "FeatureMap",
@@ -5581,6 +5581,14 @@
               "source": "client",
               "incoming": 1,
               "outgoing": 0
+            },
+            {
+              "name": "InstantActionWithTransition",
+              "code": 1,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 0
             }
           ],
           "attributes": [
@@ -5624,7 +5632,7 @@
           "mfgCode": null,
           "define": "ACTIONS_CLUSTER",
           "side": "server",
-          "enabled": 0,
+          "enabled": 1,
           "attributes": [
             {
               "name": "ActionList",
