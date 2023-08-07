@@ -376,6 +376,25 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
       }
     }
   }
+  // TODO: actually derive actions from rooms and scenes
+  // register one endpoint list
+  EndpointListInfoPtr endpointList = new EndpointListInfo(
+    0xEEEE,
+    "TestZoneBridge",
+    Actions::EndpointListTypeEnum::kOther
+  );
+  endpointList->addEndpoint(1); // FIXME: get action endpoint id from somewhere reliableb
+  addOrReplaceEndpointsList(endpointList);
+  // register one test action
+  ActionPtr testAction = new Action(
+    0x4242, // actionId,
+    "testAction",
+    Actions::ActionTypeEnum::kScene,
+    0xEEEE, // FIXME: reference real list
+    0x03, // instant and instantWithTransition // FIXME: use names
+    Actions::ActionStateEnum::kInactive // FIXME: real value
+  );
+  addOrReplaceAction(testAction);
   // report started (ONCE!)
   startupComplete(ErrorPtr());
 }
