@@ -51,7 +51,7 @@ string attrString(const EndpointId aEndpointId, const ClusterId aClusterId, cons
 }
 
 
-void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId, string aString, bool aAbbrMiddle)
+void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId, string aString, p44::AbbreviationStyle aAbbreviationStyle)
 {
   const size_t maxStrLen = 512;
   uint8_t zclString[maxStrLen+2];
@@ -63,21 +63,7 @@ void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, con
     if (emberAfIsStringAttributeType(mdP->attributeType) || longString) {
       size_t netSz = mdP->size-(longString ? 2 : 1);
       if (netSz>maxStrLen) netSz = maxStrLen;
-      if (netSz<aString.size()) {
-        // needs to be abbreviated
-        if (netSz<=3) {
-          aString.erase(netSz);
-        }
-        else if (aAbbrMiddle && netSz>=7) {
-          netSz-=3;
-          size_t sz2 = netSz/2;
-          aString = aString.substr(0, netSz-sz2) + "..." + aString.substr(aString.size()-sz2);
-        }
-        else {
-          aString.erase(netSz-3);
-          aString += "...";
-        }
-      }
+      abbreviate(aString, netSz, aAbbreviationStyle);
       if (longString) {
         memmove(zclString + 2, aString.data(), aString.size());
         zclString[0] = EMBER_LOW_BYTE(aString.size());

@@ -26,6 +26,7 @@
 #include "p44mbrd_common.h"
 
 #include "device.h"
+#include "actions.h"
 #include "deviceinfoprovider.h"
 
 // commonly needed matter headers
@@ -63,8 +64,17 @@ public:
   /// @return ok or error if requested commissionable status cannot be established
   virtual ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) = 0;
 
-  /// can be called to install
+  /// can be called by adapters to install a device before the stack gets active,
+  /// usually during adapter's installInitialDevices()
   virtual ChipError installDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
+
+  /// can be called to register an action
+  /// @param aAction pointer to action object
+  virtual void addOrReplaceAction(ActionPtr aAction, BridgeAdapter& aAdapter) = 0;
+
+  /// can be called to register an endpoint list (for the actions cluster)
+  /// @param aEndPointList pointer to endpoint list object
+  virtual void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, BridgeAdapter& aAdapter) = 0;
 
 };
 
@@ -175,6 +185,14 @@ public:
   ///   Subdevices must be added to the composed device via addSubdevice() BEFORE the
   ///   composed device is registered, and will be published to the matter side automatically.
   void bridgeAdditionalDevice(DevicePtr aDevice);
+
+  /// can be called to register an action
+  /// @param aActionP pointer to action object
+  void addOrReplaceAction(ActionPtr aAction);
+
+  /// can be called to register an endpoint list (for the actions cluster)
+  /// @param aEndPointListP pointer to endpoint list object
+  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList);
 
 };
 

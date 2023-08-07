@@ -25,6 +25,7 @@
 
 #include "p44mbrd_common.h"
 #include "matter_common.h"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -33,9 +34,9 @@ using namespace app;
 using namespace Clusters;
 
 string attrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId);
-void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId, string aString, bool aAbbrMiddle = false);
+void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId, string aString, p44::AbbreviationStyle aAbbreviationStyle);
 
 #define ATTR_STRING(cluster, attr, endpoint) attrString(endpoint, cluster::Id, cluster::Attributes::attr::Id)
-#define SET_ATTR_STRING(cluster, attr, endpoint, string) setAttrString(endpoint, cluster::Id, cluster::Attributes::attr::Id, string, false)
-#define SET_ATTR_STRING_M(cluster, attr, endpoint, string) setAttrString(endpoint, cluster::Id, cluster::Attributes::attr::Id, string, true)
+#define SET_ATTR_STRING(cluster, attr, endpoint, string) setAttrString(endpoint, cluster::Id, cluster::Attributes::attr::Id, string, p44::end_ellipsis)
+#define SET_ATTR_STRING_M(cluster, attr, endpoint, string) setAttrString(endpoint, cluster::Id, cluster::Attributes::attr::Id, string, p44::middle_ellipsis)
 

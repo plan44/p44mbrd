@@ -436,6 +436,105 @@ server cluster AccessControl = 31 {
   readonly attribute int16u clusterRevision = 65533;
 }
 
+/** This cluster provides a standardized way for a Node (typically a Bridge, but could be any Node) to expose action information. */
+server cluster Actions = 37 {
+  enum ActionErrorEnum : ENUM8 {
+    kUnknown = 0;
+    kInterrupted = 1;
+  }
+
+  enum ActionStateEnum : ENUM8 {
+    kInactive = 0;
+    kActive = 1;
+    kPaused = 2;
+    kDisabled = 3;
+  }
+
+  enum ActionTypeEnum : ENUM8 {
+    kOther = 0;
+    kScene = 1;
+    kSequence = 2;
+    kAutomation = 3;
+    kException = 4;
+    kNotification = 5;
+    kAlarm = 6;
+  }
+
+  enum EndpointListTypeEnum : ENUM8 {
+    kOther = 0;
+    kRoom = 1;
+    kZone = 2;
+  }
+
+  bitmap CommandBits : BITMAP16 {
+    kInstantAction = 0x1;
+    kInstantActionWithTransition = 0x2;
+    kStartAction = 0x4;
+    kStartActionWithDuration = 0x8;
+    kStopAction = 0x10;
+    kPauseAction = 0x20;
+    kPauseActionWithDuration = 0x40;
+    kResumeAction = 0x80;
+    kEnableAction = 0x100;
+    kEnableActionWithDuration = 0x200;
+    kDisableAction = 0x400;
+    kDisableActionWithDuration = 0x800;
+  }
+
+  struct ActionStruct {
+    int16u actionID = 0;
+    char_string<32> name = 1;
+    ActionTypeEnum type = 2;
+    int16u endpointListID = 3;
+    CommandBits supportedCommands = 4;
+    ActionStateEnum state = 5;
+  }
+
+  struct EndpointListStruct {
+    int16u endpointListID = 0;
+    char_string<32> name = 1;
+    EndpointListTypeEnum type = 2;
+    endpoint_no endpoints[] = 3;
+  }
+
+  info event StateChanged = 0 {
+    INT16U actionID = 0;
+    INT32U invokeID = 1;
+    ActionStateEnum newState = 2;
+  }
+
+  info event ActionFailed = 1 {
+    INT16U actionID = 0;
+    INT32U invokeID = 1;
+    ActionStateEnum newState = 2;
+    ActionErrorEnum error = 3;
+  }
+
+  readonly attribute ActionStruct actionList[] = 0;
+  readonly attribute EndpointListStruct endpointLists[] = 1;
+  readonly attribute long_char_string<512> setupURL = 2;
+  readonly attribute command_id generatedCommandList[] = 65528;
+  readonly attribute command_id acceptedCommandList[] = 65529;
+  readonly attribute event_id eventList[] = 65530;
+  readonly attribute attrib_id attributeList[] = 65531;
+  readonly attribute bitmap32 featureMap = 65532;
+  readonly attribute int16u clusterRevision = 65533;
+
+  request struct InstantActionRequest {
+    INT16U actionID = 0;
+    optional INT32U invokeID = 1;
+  }
+
+  request struct InstantActionWithTransitionRequest {
+    INT16U actionID = 0;
+    optional INT32U invokeID = 1;
+    INT16U transitionTime = 2;
+  }
+
+  command InstantAction(InstantActionRequest): DefaultSuccess = 0;
+  command InstantActionWithTransition(InstantActionWithTransitionRequest): DefaultSuccess = 1;
+}
+
 /** This cluster provides attributes and events for determining basic information about Nodes, which supports both
       Commissioning and operational determination of Node characteristics, such as Vendor ID, Product ID and serial number,
       which apply to the whole Node. Also allows setting user device information such as location. */
@@ -1981,7 +2080,6 @@ endpoint 0 {
 }
 endpoint 1 {
   device type anonymousEndpointType = 14, version 1;
-  binding cluster Binding;
 
   server cluster Identify {
     ram      attribute identifyTime default = 0x0;
@@ -1998,6 +2096,17 @@ endpoint 1 {
     callback attribute serverList;
     callback attribute clientList;
     callback attribute partsList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 1;
+  }
+
+  server cluster Actions {
+    callback attribute actionList;
+    callback attribute endpointLists;
+    ram      attribute setupURL default = "https://example.com";
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;

@@ -56,6 +56,8 @@ executable("p44mbrd") {
     "adapters/cc/ccbridge.h",
     "adapters/cc/ccdevices.cpp",
     "adapters/cc/ccdevices.h",
+    "bridge/actions.cpp",
+    "bridge/actions.h",
     "utils/matter_utils.cpp",
     "utils/matter_utils.h",
     "chip_glue/deviceinfoprovider.cpp",
@@ -86,9 +88,9 @@ executable("p44mbrd") {
   include_dirs = [
     "include",
     "devices",
+    "bridge",
     "adapters",
     "chip_glue",
-    "bridgeapi",
     "utils",
     "."
   ]

@@ -68,6 +68,7 @@
 #include "chip_glue/chip_error.h"
 #include "chip_glue/deviceinfoprovider.h"
 
+#include "actions.h"
 #include "device.h"
 #include "deviceonoff.h"
 #include "devicelevelcontrol.h"
@@ -99,6 +100,7 @@
 #endif
 
 using namespace chip;
+using namespace chip::app;
 using namespace chip::Credentials;
 using namespace chip::Inet;
 using namespace chip::Transport;
@@ -162,13 +164,19 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   BridgeAdaptersList mAdapters;
   int mUnstartedAdapters;
 
+  // actions
+  ActionsManager::EndPointListsMap mEndPointLists;
+  ActionsManager::ActionsMap mActions;
+  ActionsManager mActionsManager;
+
 public:
 
   P44mbrd() :
     mChipAppInitialized(false),
     mNumDynamicEndPoints(0),
     mFirstFreeEndpointId(kInvalidEndpointId),
-    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
+    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver),
+    mActionsManager(mActions, mEndPointLists)
   {
   }
 
@@ -567,6 +575,8 @@ public:
   }
 
 
+  // MARK: Access to application level data
+
   DevicePtr deviceForDynamicEndpointIndex(EndpointId aDynamicEndpointIndex)
   {
     DevicePtr dev;
@@ -577,7 +587,13 @@ public:
   }
 
 
-  // MARK: BridgeMainDelegate
+  ActionsManager& getActionsManager()
+  {
+    return mActionsManager;
+  }
+
+
+  // MARK: - BridgeMainDelegate
 
   void adapterStartupComplete(ErrorPtr aError, BridgeAdapter &aAdapter) override
   {
@@ -686,6 +702,21 @@ public:
     makeCommissionable(aCommissionable);
     return ErrorPtr();
   }
+
+
+  void addOrReplaceAction(ActionPtr aAction, BridgeAdapter& aAdapter) override
+  {
+    mActions[aAction->getActionId()] = aAction;
+    MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::ActionList::Id);
+  }
+
+
+  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, BridgeAdapter& aAdapter) override
+  {
+    mEndPointLists[aEndPointList->GetEndpointListId()] = aEndPointList;
+    MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::EndpointLists::Id);
+  }
+
 
 
   // MARK: - chip application delegate
@@ -1061,8 +1092,15 @@ DevicePtr deviceForEndPointId(EndpointId aEndpointId)
 // MARK: - gloabl CHIP callbacks
 
 
-chip::Protocols::InteractionModel::Status
-MatterPreAttributeChangeCallback(
+void MatterActionsPluginServerInitCallback()
+{
+  // register actions server attribute access class
+  P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+  registerAttributeAccessOverride(&app.getActionsManager());
+}
+
+
+chip::Protocols::InteractionModel::Status MatterPreAttributeChangeCallback(
   const chip::app::ConcreteAttributePath & attributePath,
   uint8_t type,
   uint16_t size,
@@ -1081,6 +1119,45 @@ void MatterPostAttributeChangeCallback(
 )
 {
   // TODO: implement forwarding to devices
+}
+
+
+bool emberAfActionsClusterInstantActionCallback(
+  CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+  const Clusters::Actions::Commands::InstantAction::DecodableType & commandData
+)
+{
+  if (commandPath.mEndpointId==MATTER_BRIDGE_ENDPOINT) {
+    P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+    Protocols::InteractionModel::Status status = app.getActionsManager().invokeInstantAction(
+      commandPath,
+      commandData.actionID,
+      commandData.invokeID,
+      Optional<uint16_t>()
+    );
+    commandObj->AddStatus(commandPath, status);
+    return true;
+  }
+  return false; // not handled
+}
+
+bool emberAfActionsClusterInstantActionWithTransitionCallback(
+  CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+  const Clusters::Actions::Commands::InstantActionWithTransition::DecodableType & commandData
+)
+{
+  if (commandPath.mEndpointId==MATTER_BRIDGE_ENDPOINT) {
+    P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+    Protocols::InteractionModel::Status status = app.getActionsManager().invokeInstantAction(
+      commandPath,
+      commandData.actionID,
+      commandData.invokeID,
+      Optional<uint16_t>(commandData.transitionTime)
+    );
+    commandObj->AddStatus(commandPath, status);
+    return true;
+  }
+  return false; // not handled
 }
 
 

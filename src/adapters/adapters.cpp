@@ -79,3 +79,15 @@ ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable)
 {
   return mBridgeMainDelegateP->makeCommissionable(aCommissionable, *this);
 }
+
+
+void BridgeAdapter::addOrReplaceAction(ActionPtr aAction)
+{
+  return mBridgeMainDelegateP->addOrReplaceAction(aAction, *this);
+}
+
+
+void BridgeAdapter::addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList)
+{
+  return mBridgeMainDelegateP->addOrReplaceEndpointsList(aEndPointList, *this);
+}

@@ -30,3 +30,7 @@
 #ifndef CC_ADAPTERS
   #define CC_ADAPTERS 1
 #endif
+
+#include "p44utils_common.hpp"
+#include "matter_utils.h"
+#include "logger.hpp"

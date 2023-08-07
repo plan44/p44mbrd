@@ -389,6 +389,7 @@
 		EDC58B692A66E26D00F48DEF /* booleaninputdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */; };
 		EDCA04482A7AB1A200225B0A /* ccdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA04442A7AB1A100225B0A /* ccdevices.cpp */; };
 		EDCA04492A7AB1A200225B0A /* ccbridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA04462A7AB1A200225B0A /* ccbridge.cpp */; };
+		EDCA044D2A81214200225B0A /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA044B2A81214200225B0A /* actions.cpp */; };
 		EDCA29572A79135200465C00 /* devicewindowcovering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */; };
 		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
@@ -1398,6 +1399,8 @@
 		EDCA04452A7AB1A200225B0A /* ccbridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccbridge.h; sourceTree = "<group>"; };
 		EDCA04462A7AB1A200225B0A /* ccbridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccbridge.cpp; sourceTree = "<group>"; };
 		EDCA04472A7AB1A200225B0A /* ccdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccdevices.h; sourceTree = "<group>"; };
+		EDCA044B2A81214200225B0A /* actions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = actions.cpp; sourceTree = "<group>"; };
+		EDCA044C2A81214200225B0A /* actions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = actions.h; sourceTree = "<group>"; };
 		EDCA29592A7A7C9100465C00 /* .clang-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".clang-format"; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
@@ -1563,6 +1566,7 @@
 				ED24BDC828A670DB0025CC14 /* zap */,
 				ED60FD0128BF888E00FE950E /* chip_glue */,
 				ED23300F2886A18300D934D7 /* p44utils */,
+				EDCA044A2A81209C00225B0A /* bridge */,
 				ED24BDBA28A6709E0025CC14 /* devices */,
 				ED1A3CA12A45A275009746B8 /* adapters */,
 				ED98463D2A73C5F10057C0D8 /* utils */,
@@ -3545,6 +3549,15 @@
 			path = cc;
 			sourceTree = "<group>";
 		};
+		EDCA044A2A81209C00225B0A /* bridge */ = {
+			isa = PBXGroup;
+			children = (
+				EDCA044B2A81214200225B0A /* actions.cpp */,
+				EDCA044C2A81214200225B0A /* actions.h */,
+			);
+			path = bridge;
+			sourceTree = "<group>";
+		};
 		EDF3F4BD2893EC9700A82418 /* platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -3725,6 +3738,7 @@
 				ED36DD13286DD8A000CA28EC /* UserDirectedCommissioningClient.cpp in Sources */,
 				ED36D8F2286DCF0B00CA28EC /* StatusResponse.cpp in Sources */,
 				ED36DDC6286DDA0300CA28EC /* TransportMgrBase.cpp in Sources */,
+				EDCA044D2A81214200225B0A /* actions.cpp in Sources */,
 				ED36DEA6286E043600CA28EC /* DeviceControlServer.cpp in Sources */,
 				ED36DDE7286DDAF300CA28EC /* json_value.cpp in Sources */,
 				ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */,
