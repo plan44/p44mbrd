@@ -113,6 +113,7 @@ private:
   void jsonRpcConnectionStatusHandler(ErrorPtr aError);
   void jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams);
 
+  void client_subscribed(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void client_registered(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void deviceListReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 

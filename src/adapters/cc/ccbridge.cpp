@@ -136,7 +136,7 @@ void CC_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
     JsonObjectPtr params = JsonObject::newObj();
     params->add("name", JsonObject::newString("p44mbrd"));
     mJsonRpcAPI.sendRequest("rpc_client_register", params, boost::bind(&CC_BridgeImpl::client_registered, this, _1, _2, _3));
-    // processing will continue at deviceListReceived via callback
+    // processing will continue at client_registered via callback
     return;
   }
   else {
@@ -150,6 +150,24 @@ void CC_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
 
 
 void CC_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+{
+  if (Error::isOK(aStatus)) {
+    // request ok
+
+    /* subscribe to notifications */
+
+    JsonObjectPtr params = JsonObject::newObj();
+    params->add("pattern", JsonObject::newString("deviced.item_(state|vitals)_changed"));
+    mJsonRpcAPI.sendRequest("rpc_client_subscribe", params, boost::bind(&CC_BridgeImpl::client_subscribed, this, _1, _2, _3));
+    return;
+  }
+  OLOG(LOG_ERR, "error from rpc_client_subscribe: %s", aStatus->text());
+  // startup failed, report back to main app
+  startupComplete(aStatus);
+}
+
+
+void CC_BridgeImpl::client_subscribed(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
 {
   if (Error::isOK(aStatus)) {
     // request ok
@@ -195,8 +213,10 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
               OLOG (LOG_NOTICE, "... registering onoff device for switch");
 
               DevicePtr dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
+              // hm?    dev->initialize_name (item->getCString ("name"));
+
               // register it
-              registerInitialDevice(dev);
+              registerInitialDevice(DevicePtr (dev));
             }
         }
     }
@@ -212,9 +232,72 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
 
 void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams)
 {
-  // JSON RPC request coming FROM bridge
+  // JSON RPC request/notification coming FROM bridge
 
   // TODO: analyze and possibly distribute to `Device` instance that can handle it
+
+  if (!aJsonRpcId)
+    {
+      OLOG (LOG_NOTICE, "Notification %s received", aMethod);
+      if (strcmp ("deviced.item_state_changed", aMethod) == 0)
+        {
+#if 0
+          "value" ist der standard Zustandswert
+
+          darüber hinaus gibt es je nach Gerätetyp:
+
+          "value"
+          "value-tilt"
+          "value-temp"
+          "value-sun"
+          "value-dawn"
+          "value-wind"
+          "value-rain"
+
+          Error-Flags können enthalten:
+          "blocked", "overheated", "unresponsive", "low battery", "alert", "sensor-loss"
+
+          Info-Flags können enthalten:
+          "auto-command", "auto-command-sun", "auto-command-rain", "down-locked", "up-locked",
+          "wind-alarm", "winter-mode", "install-incomplete", "wind-low", "sun-low", "dawn-low",
+          "rain-low", "frost-low", "temp-low", "temp-out-low", "wind-high", "sun-high",
+          "dawn-high", "rain-high", "frost-high", "temp-high", "temp-out-high",
+
+          {
+            "jsonwatch":  "2.0",
+            "request-src":  "deviced",
+            "method":  "deviced.item_state_changed",
+            "params":  {
+              "item_id":  21,
+              "state":  {
+                "error-flags":  ["unresponsive"],
+                "value":  null,
+                "info-flags":  null
+              },
+              "error_flags":  ["unresponsive"]
+            }
+          }
+#endif
+        }
+      else if (strcmp ("deviced.item_vitals_changed", aMethod) == 0)
+        {
+#if 0
+          "vitals" kann sein: "created", "deleted", "children-change"
+
+          {
+            "jsonwatch":  "2.0",
+            "request-src":  "deviced",
+            "method":  "deviced.item_vitals_changed",
+            "params":  {
+              "item_id":  143,
+              "vitals":  "created"
+            }
+          }
+#endif
+        }
+
+      return;
+    }
 
   // For now, we just reject all request with error
   mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidRequest, "TODO: implement methods");
