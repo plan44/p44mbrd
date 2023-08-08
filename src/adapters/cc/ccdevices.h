@@ -63,6 +63,9 @@ public:
 
   CC_DeviceImpl(int item_id);
 
+  /// class method to create UID string from item_id
+  static string uid_string(int item_id);
+
   /// @name DeviceInfoDelegate
   /// @{
   virtual const string endpointUID() const override;
@@ -89,6 +92,8 @@ public:
   int get_item_id ();
 
   void initialize_name(const string _name) { mName = _name; }
+
+  virtual void handle_state_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
 
   /// @}
 
@@ -127,6 +132,8 @@ protected:
   virtual void setOnOffState(bool aOn) override;
   /// @}
   ///
+
+  virtual void handle_state_changed(JsonObjectPtr aParams) override;
 
 private:
 
