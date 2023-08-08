@@ -1401,6 +1401,8 @@
 		EDCA04472A7AB1A200225B0A /* ccdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccdevices.h; sourceTree = "<group>"; };
 		EDCA044B2A81214200225B0A /* actions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = actions.cpp; sourceTree = "<group>"; };
 		EDCA044C2A81214200225B0A /* actions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = actions.h; sourceTree = "<group>"; };
+		EDCA044F2A82681E00225B0A /* deviceattestationprovider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = deviceattestationprovider.cpp; sourceTree = "<group>"; };
+		EDCA04502A82681E00225B0A /* deviceattestationprovider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = deviceattestationprovider.h; sourceTree = "<group>"; };
 		EDCA29592A7A7C9100465C00 /* .clang-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".clang-format"; sourceTree = "<group>"; };
 		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
 		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
@@ -3345,6 +3347,8 @@
 				ED24BDD228A673130025CC14 /* deviceinfoprovider.h */,
 				ED60FD0228BF88ED00FE950E /* chip_error.cpp */,
 				ED60FD0328BF88ED00FE950E /* chip_error.h */,
+				EDCA044F2A82681E00225B0A /* deviceattestationprovider.cpp */,
+				EDCA04502A82681E00225B0A /* deviceattestationprovider.h */,
 			);
 			path = chip_glue;
 			sourceTree = "<group>";

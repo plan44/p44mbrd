@@ -23,8 +23,10 @@
 
 #pragma once
 
+#include "matter_common.h"
+#include "p44mbrd_common.h"
+
 #include <platform/DeviceInstanceInfoProvider.h>
-#include <string>
 
 using namespace chip;
 using namespace std;
