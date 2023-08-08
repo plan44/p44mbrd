@@ -238,9 +238,21 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJson
 
   if (!aJsonRpcId)
     {
-      OLOG (LOG_NOTICE, "Notification %s received", aMethod);
+      OLOG (LOG_NOTICE, "Notification %s received: %s", aMethod, JsonObject::text(aParams));
       if (strcmp ("deviced.item_state_changed", aMethod) == 0)
         {
+          // find device
+          JsonObjectPtr o;
+          if (aParams->get("item_id", o))
+          {
+            int item_id = o->int32Value();
+            DeviceUIDMap::iterator dev = mDeviceUIDMap.find(CC_DeviceImpl::uid_string(item_id));
+            if (dev!=mDeviceUIDMap.end())
+            {
+              CC_DeviceImpl::impl(dev->second)->handle_state_changed(aParams);
+            }
+          }
+
 #if 0
           "value" ist der standard Zustandswert
 

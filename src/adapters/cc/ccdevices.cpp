@@ -38,12 +38,18 @@ CC_DeviceImpl::CC_DeviceImpl(int _item_id) :
 }
 
 
-// MARK: DeviceInfoDelegate implementation in CC_DeviceImpl base class
+string CC_DeviceImpl::uid_string(int aItem_id)
+{
+  return string_format("cc_id_%d", aItem_id);
+}
 
+
+
+// MARK: DeviceInfoDelegate implementation in CC_DeviceImpl base class
 
 const string CC_DeviceImpl::endpointUID() const
 {
-  return string_format("cc_id_%d", item_id);
+  return uid_string(item_id);
 }
 
 
@@ -153,6 +159,21 @@ void CC_OnOffImpl::onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObje
 {
   DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
 }
+
+// MARK: cc bridge specifics
+
+// {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
+void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("state", o)) {
+    if (o->get("value", vo)) {
+      deviceP<DeviceOnOff>()->updateOnOff(vo->int32Value()>0, UpdateMode(UpdateFlags::matter));
+    }
+  }
+}
+
+
 
 
 // MARK: - CC_WindowCoveringImpl
