@@ -111,8 +111,8 @@ public:
 
 private:
 
-  ActionsMap mActions;
-  EndPointListsMap mEndPointLists;
+  ActionsMap& mActions;
+  EndPointListsMap& mEndPointLists;
 
   CHIP_ERROR ReadActionListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
   CHIP_ERROR ReadEndpointListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);

@@ -2115,7 +2115,7 @@ endpoint 1 {
   }
 }
 endpoint 2 {
-  device type anonymousEndpointType = 256, version 1;
+  device type anonymousEndpointType = 269, version 1;
   binding cluster Binding;
 
   server cluster Identify {
