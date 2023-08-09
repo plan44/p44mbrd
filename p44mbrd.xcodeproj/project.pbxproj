@@ -4237,7 +4237,11 @@
 		ED690B5A286DC79500069215 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = RQ57RZ75M9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
@@ -4258,8 +4262,10 @@
 					"/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib",
 					/opt/homebrew/Cellar/libev/4.33/lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.plan44.p44mbrd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/xcode-gen-copy/include",
 					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",
@@ -4293,7 +4299,11 @@
 		ED690B5B286DC79500069215 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = RQ57RZ75M9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
@@ -4314,8 +4324,10 @@
 					"/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib",
 					/opt/homebrew/Cellar/libev/4.33/lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.plan44.p44mbrd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/xcode-gen-copy/include",
 					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",

@@ -94,7 +94,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--chiploglevel 3"
+            argument = "--chiploglevel 2"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
