@@ -200,20 +200,54 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
       for (i = 0; i < ilist->arrayLength(); i++)
         {
           JsonObjectPtr item, item_id;
+          DevicePtr dev = NULL;
 
           item = ilist->arrayGet (i);
           item_id = item->get ("id");
 
           OLOG(LOG_INFO, "item: %s", item->getCString ("name"));
 
-          if (item_id && item_id->int32Value() > 0 &&
-              !strcmp (item->getCString ("type"), "group") &&
-              !strcmp (item->getCString ("device_type"), "switch"))
+          if (!item_id || item_id->int32Value() <= 0 ||
+              strcmp (item->getCString ("type"), "group") != 0)
+            continue;
+
+
+          if (strcmp (item->getCString ("device_type"), "switch") == 0)
             {
               OLOG (LOG_NOTICE, "... registering onoff device for switch");
 
-              DevicePtr dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
+              dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
               CC_DeviceImpl::impl(dev)->initialize_name(item->getCString ("name"));
+
+              // register it
+              registerInitialDevice(DevicePtr (dev));
+            }
+          else if (strcmp (item->getCString ("device_type"), "shutter") == 0)
+            {
+              OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
+
+              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+            }
+          else if (strcmp (item->getCString ("device_type"), "awning") == 0)
+            {
+              OLOG (LOG_NOTICE, "... registering windowcovering device for awning");
+
+              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+            }
+          else if (strcmp (item->getCString ("device_type"), "venetian") == 0)
+            {
+              OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
+
+              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+            }
+          else
+            {
+              OLOG (LOG_NOTICE, "... device_type %s not supported yet", item->getCString ("device_type"));
+            }
+
+          if (dev)
+            {
+              CC_DeviceImpl::impl(dev)->initialize_name (item->getCString ("name"));
 
               // register it
               registerInitialDevice(DevicePtr (dev));

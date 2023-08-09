@@ -142,9 +142,8 @@ Identify::IdentifyTypeEnum CC_IdentifiableImpl::identifyType()
 void CC_OnOffImpl::setOnOffState(bool aOn)
 {
 
-  // TODO: make API call to set the output state
+  // make API call to set the output state
 
-  // probably something like
   JsonObjectPtr params = JsonObject::newObj();
   params->add("group_id", JsonObject::newInt32 (get_item_id ()));
   params->add("command", JsonObject::newString ("switch"));
@@ -212,6 +211,26 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
   //   `mode.Has(WindowCovering::Mode::kMotorDirectionReversed)`
   // - check !lift.IsNull() and !tilt.IsNull() before using target values
 
+  if (!lift.IsNull())
+    {
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+      params->add ("command", JsonObject::newString ("moveto"));
+      params->add ("value", JsonObject::newDouble ((double) lift.Value() / 100.0));
+      DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+      CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
+    }
+
+  if (!tilt.IsNull())
+    {
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+      params->add ("command", JsonObject::newString ("tilt"));
+      params->add ("value", JsonObject::newDouble ((double) tilt.Value() / 100.0));
+      DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+      CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
+    }
+
   // TODO: implement feedback (in API callbacks or polling)
   // - while movement runs, optionally post intermediate updates to current values
   //   WindowCovering::Attributes::CurrentPositionLiftPercent100ths and
@@ -226,10 +245,40 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
 
 void CC_WindowCoveringImpl::stopMovement()
 {
-  // TODO: implement stopping movement
-  // - then, give appropriate feedback of current positions, if known
+  // - get mode (for kMotorDirectionReversed)
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
 
+  // implement stopping movement
+
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add ("command", JsonObject::newString ("move"));
+  params->add ("value", JsonObject::newInt32 (0));
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
 }
 
+
+// {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
+void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("state", o)) {
+    if (o->get("value", vo)) {
+      // roughly something like this?
+      // deviceP<DeviceWindowCovering>()->updateLift(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+    }
+    if (o->get("value-tilt", vo)) {
+      // roughly something like this?
+      // deviceP<DeviceWindowCovering>()->updateTilt(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+    }
+  }
+}
+
+void CC_WindowCoveringImpl::windowCoveringResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
 
 #endif // CC_ADAPTERS

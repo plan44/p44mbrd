@@ -165,6 +165,10 @@ protected:
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   /// @}
 
+  virtual void handle_state_changed(JsonObjectPtr aParams) override;
+
+private:
+  void windowCoveringResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 
 public:
   CC_WindowCoveringImpl();
@@ -225,8 +229,13 @@ class CC_WindowCoveringDevice final :
   public DeviceWindowCovering, // the matter side device
   public CC_WindowCoveringImpl // the P44 side delegate implementation
 {
+  typedef CC_WindowCoveringImpl inherited;
 public:
-  CC_WindowCoveringDevice() : DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+public:
+  CC_WindowCoveringDevice(int _item_id) :
+      DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
