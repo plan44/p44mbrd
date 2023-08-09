@@ -213,7 +213,7 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
               OLOG (LOG_NOTICE, "... registering onoff device for switch");
 
               DevicePtr dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
-              // hm?    dev->initialize_name (item->getCString ("name"));
+              CC_DeviceImpl::impl(dev)->initialize_name(item->getCString ("name"));
 
               // register it
               registerInitialDevice(DevicePtr (dev));
