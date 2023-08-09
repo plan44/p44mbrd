@@ -378,9 +378,12 @@ public:
       terminateApp(EXIT_FAILURE);
       return;
     }
+    // TODO: maybe remove, probably callbacks should post the correct state automatically?
     // update commissionable status in adapters
-    bool commissionable = Server::GetInstance().GetFabricTable().FabricCount() == 0;
-    updateCommissionableStatus(commissionable);
+    if (Server::GetInstance().GetFabricTable().FabricCount() == 0) {
+      // with no fabrics, we are commissionable from start
+      updateCommissionableStatus(true);
+    }
     // install the devices we have
     installInitiallyBridgedDevices();
     // stack is now operational
@@ -736,13 +739,13 @@ public:
    */
   void OnCommissioningWindowOpened() override
   {
-    updateCommissionableStatus();
+    updateCommissionableStatus(true);
   }
 
 
   void OnCommissioningWindowClosed() override
   {
-    updateCommissionableStatus();
+    updateCommissionableStatus(false);
   }
 
 
@@ -955,8 +958,10 @@ public:
         manualParingCodeStr = manualPairingCode.data();
       }
       updateCommissioningInfo(qrCodeStr, manualParingCodeStr);
-      // FIXME: figure out if actually commissionable or not
-      updateCommissionableStatus(true /* fixed for now */);
+      // FIXME: remove should be solved via delegate
+      /*
+      updateCommissionableStatus(true); // fixed for now
+      */
     }
 
     // init the network commissioning instance (which is needed by the Network Commissioning Cluster)
