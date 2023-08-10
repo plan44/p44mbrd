@@ -26,6 +26,8 @@
 #include "matter_common.h"
 #include "p44mbrd_common.h"
 
+#include "factorydataprovider.h"
+
 #include <credentials/DeviceAttestationCredsProvider.h>
 
 using namespace chip;
@@ -34,7 +36,16 @@ using namespace Credentials;
 class P44mbrdDeviceAttestationProvider : public DeviceAttestationCredentialsProvider
 {
 
+  string mCD; ///< the certification declaration
+  string mFirmwareInfo; ///< the firmware information from the certification
+  string mDAC; ///< the device attestation certificate
+  string mPAIC; ///< the product attestation intermediate certificate
+  string mDACKey; ///< the device attestation private key
+  string mDACPubKey; ///< the device attestation public key
+
 public:
+
+  void loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider);
 
   CHIP_ERROR GetCertificationDeclaration(MutableByteSpan & out_span) override;
   CHIP_ERROR GetFirmwareInformation(MutableByteSpan & out_firmware_info_buffer) override;

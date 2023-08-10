@@ -23,7 +23,29 @@
 
 #include "deviceinfoprovider.h"
 
-#define P44_VENDOR_NAME "plan44.ch"
+
+void P44mbrdDeviceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
+{
+  // initialize from factory data provider
+  assert(aFactoryDataProvider);
+  mVendorId = aFactoryDataProvider->getUInt16("VID");
+  mProductId = aFactoryDataProvider->getUInt16("PID");
+  mVendorName = aFactoryDataProvider->getString("VENDORNAME");
+  mHWVersion = aFactoryDataProvider->getUInt16("HWVERSION");
+  if (mHWVersion==0) mHWVersion = 1; // 0 means no version set
+  mHWVersionStr = aFactoryDataProvider->getString("HWVERSIONSTR");
+  mPartNumber = aFactoryDataProvider->getString("PARTNUMBER");
+  mProductURL = aFactoryDataProvider->getString("PRODUCTURL");
+  // these may be overridded by data from bridge API:
+  mProductName = aFactoryDataProvider->getString("PRODUCTNAME");
+  mProductLabel = aFactoryDataProvider->getString("PRODUCTLABEL");
+  mSerial = aFactoryDataProvider->getString("SERIALNO");
+  mUID = aFactoryDataProvider->getString("UID");
+  string ds = aFactoryDataProvider->getString("MANUFACTURINGDATE"); // ISO8601 first 8 digits YYYYMMDD
+  if (ds.empty()) mManuYear = 0;
+  else scanf("%4hu%2hhu%2hhu", &mManuYear, &mManuMonth, &mManuDay);
+}
+
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 {
@@ -56,37 +78,50 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductId(uint16_t & productId)
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
 {
-  hardwareVersion = 1; // FIXME: testing
+  hardwareVersion = mHWVersion;
   return CHIP_NO_ERROR;
 }
 
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
 {
-  uint16_t hwv;
-  GetHardwareVersion(hwv);
-  snprintf(buf, bufSize, "v%hd", hwv);
+  if (mHWVersionStr.empty()) {
+    uint16_t hwv;
+    GetHardwareVersion(hwv);
+    snprintf(buf, bufSize, "v%hd", hwv);
+  }
+  else {
+    ReturnErrorCodeIf(bufSize < mHWVersionStr.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+    strncpy(buf, mHWVersionStr.c_str(), bufSize);
+  }
   return CHIP_NO_ERROR;
 }
 
 
-
-
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
   // Optional: Human readable Part Number (same ProductID may have different packages, colors etc.)
-  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  if (mPartNumber.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  ReturnErrorCodeIf(bufSize < mPartNumber.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  strncpy(buf, mPartNumber.c_str(), bufSize);
+  return CHIP_NO_ERROR;
 }
 
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
   // Optional: Product Website URL
-  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  if (mProductURL.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  ReturnErrorCodeIf(bufSize < mProductURL.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  strncpy(buf, mProductURL.c_str(), bufSize);
+  return CHIP_NO_ERROR;
 }
 
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
   // Optional: More user-friendly version of ProductName, not containing VendorName
-  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  if (mProductLabel.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  ReturnErrorCodeIf(bufSize < mProductLabel.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+  strncpy(buf, mProductLabel.c_str(), bufSize);
+  return CHIP_NO_ERROR;
 }
 
 
@@ -101,13 +136,18 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
 {
   // Optional: when the node was manufactured, ISO8601 date in the first 8 chars
-  return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  if (mManuYear==0) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
+  year = mManuYear;
+  month = mManuMonth;
+  day = mManuDay;
+  return CHIP_NO_ERROR;
 }
 
 
 
 CHIP_ERROR P44mbrdDeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
 {
+  // TODO: implement actual rotation mechanism (maybe hash from UID, but see specs to see if that's allowed)
   ReturnErrorCodeIf(mUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   memcpy(uniqueIdSpan.data(), mUID.c_str(), mUID.size());
   uniqueIdSpan.reduce_size(mUID.size());

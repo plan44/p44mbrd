@@ -67,6 +67,7 @@
 // p44mbrd specific includes
 #include "chip_glue/chip_error.h"
 #include "chip_glue/deviceinfoprovider.h"
+#include "chip_glue/deviceattestationprovider.h"
 
 #include "actions.h"
 #include "device.h"
@@ -144,6 +145,7 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   LinuxCommissionableDataProvider mCommissionableDataProvider;
   chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: example? do we need our own?
   P44mbrdDeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
+  P44mbrdDeviceAttestationProvider mP44mbrdDeviceAttestationProvider; ///< our own attestation provider
 
   // Bridged devices info
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
@@ -199,17 +201,12 @@ public:
 
     const CmdLineOptionDescriptor options[] = {
       // Original CHIP command line args
-      { 0, "vendor-id",           true, "vendorid;vendor ID as assigned by the csa-iot" },
-      { 0, "product-id",          true, "productid;product ID as specified by vendor" },
-      { 0, "custom-flow",         true, "flow;commissioning flow: Standard = 0, UserActionRequired = 1, Custom = 2" },
-      { 0, "payloadversion",      true, "version;The version indication provides versioning of the setup payload (default is 0)" },
-      { 0, "discriminator",       true, "discriminator;a 12-bit unsigned integer to advertise during commissioning" },
-      { 0, "setuppin",            true, "pincode;A 27-bit unsigned integer, which serves as proof of possession during commissioning.\n"
-                                        "If not provided to compute a verifier, the --spake2p-verifier must be provided." },
-      { 0, "spake2p-verifier",    true, "b64_PASE_verifier;A raw concatenation of 'W0' and 'L' (67 bytes) as base64 to override the verifier\n"
-                                            "Auto-computed from the passcode, if provided" },
-      { 0, "spake2p-salt",        true, "b64_PASE_salt;16-32 bytes of salt to use for the PASE verifier, as base64. If omitted, will be generated randomly" },
-      { 0, "spake2p-iterations",  true, "iterations;Number of PBKDF iterations to use." },
+      { 0, "factorydata",         true, "path[:path...];file paths of factory data files to be processed to gather product specific "
+                                        "data such as PID, VID, certificates, etc. Paths are read in the order specified here, "
+                                        "duplicate items overriding already defined ones."},
+      { 0, "discriminator",       true, "discriminator;override the discriminator from factorydata" },
+      { 0, "setuppin",            true, "pincode;override the pincode from factorydata\n"
+                                        "If not provided to compute a verifier, the spake2p-verifier must be provided in factorydata." },
       { 0, "matter-tcp-port",     true, "port;matter TCP port (secured)" },
       { 0, "matter-udp-port",     true, "arg;matter UDP port (unsecured)" },
       { 0, "interface",           true, "interface name;The network interface name to advertise on. Must have IPv6 link local address. If not set, first network interface with Ipv6 link local is used." },
@@ -608,19 +605,7 @@ public:
     else {
       // all adapters have called back, so we can consider all started (or not operational at all)
       bool startnow = false;
-      bool infoset = false;
       for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-        // for now: assume we'll have only one adapter running for real application,
-        // which will determine the matter bridge's identification.
-        // With multiple adapters, the first instantiated will determine the device instance info
-        if (!infoset) {
-          infoset = true;
-          mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
-          mP44dbrDeviceInstanceInfoProvider.mLabel = (*pos)->label();
-          mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
-          mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
-          mP44dbrDeviceInstanceInfoProvider.mVendorName = (*pos)->vendor();
-        }
         if ((*pos)->hasBridgeableDevices()) {
           startnow = true;
         }
@@ -770,29 +755,29 @@ public:
   }
 
 
-  ErrorPtr InitCommissionableDataProvider(LinuxCommissionableDataProvider& aCommissionableDataProvider, chip::PayloadContents& aOnBoardingPayload)
+  ErrorPtr InitCommissionableDataProvider(LinuxCommissionableDataProvider& aCommissionableDataProvider, chip::PayloadContents& aOnBoardingPayload, FactoryDataProviderPtr aFactoryData)
   {
     chip::Optional<std::vector<uint8_t>> spake2pVerifier;
     chip::Optional<std::vector<uint8_t>> spake2pSalt;
 
-    const char* s = nullptr;
+    string s;
     // spake2p-verifier
-    if (getStringOption("spake2p-verifier", s)) {
+    if (aFactoryData->getOptionalString("spake2p-verifier", s)) {
       std::vector<uint8_t> s2pvec;
-      if (Base64ArgToVector(s, chip::Crypto::kSpake2p_VerifierSerialized_Length, s2pvec)) {
+      if (Base64ArgToVector(s.c_str(), chip::Crypto::kSpake2p_VerifierSerialized_Length, s2pvec)) {
         if (s2pvec.size()!=chip::Crypto::kSpake2p_VerifierSerialized_Length) {
           return TextError::err("--spake2p-verifier must be %zu bytes", chip::Crypto::kSpake2p_VerifierSerialized_Length);
         }
         spake2pVerifier.SetValue(s2pvec);
       }
       else {
-        return TextError::err("invalid b64 in --spake2p-verifier");
+        return TextError::err("invalid b64 in spake2p-verifier");
       }
     }
     // spake2p-salt
-    if (getStringOption("spake2p-salt", s)) {
+    if (aFactoryData->getOptionalString("spake2p-salt", s)) {
       std::vector<uint8_t> saltvec;
-      if (Base64ArgToVector(s, chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length, saltvec)) {
+      if (Base64ArgToVector(s.c_str(), chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length, saltvec)) {
         if (
           saltvec.size()>chip::Crypto::kSpake2p_Max_PBKDF_Salt_Length ||
           saltvec.size()<chip::Crypto::kSpake2p_Min_PBKDF_Salt_Length
@@ -802,20 +787,20 @@ public:
         spake2pSalt.SetValue(saltvec);
       }
       else {
-        return TextError::err("invalid b64 in --spake2p-salt");
+        return TextError::err("invalid b64 in spake2p-salt");
       }
     }
     // spake2p-iterations
-    unsigned int spake2pIterationCount = chip::Crypto::kSpake2p_Min_PBKDF_Iterations;
-    getUIntOption("spake2p-iterations", spake2pIterationCount);
+    unsigned int spake2pIterationCount = aFactoryData->getUInt32("spake2p-iterations");
+    if (spake2pIterationCount==0) spake2pIterationCount = chip::Crypto::kSpake2p_Min_PBKDF_Iterations;
     if (spake2pIterationCount<chip::Crypto::kSpake2p_Min_PBKDF_Iterations || spake2pIterationCount>chip::Crypto::kSpake2p_Max_PBKDF_Iterations) {
-      return TextError::err("--spake2p-iterations must be in range %u..%u", chip::Crypto::kSpake2p_Min_PBKDF_Iterations, chip::Crypto::kSpake2p_Max_PBKDF_Iterations);
+      return TextError::err("spake2p-iterations must be in range %u..%u", chip::Crypto::kSpake2p_Min_PBKDF_Iterations, chip::Crypto::kSpake2p_Max_PBKDF_Iterations);
     }
     // setup pincode
     chip::Optional<uint32_t> setUpPINCode;
     if (aOnBoardingPayload.setUpPINCode==0) {
       if (!spake2pVerifier.HasValue()) {
-        return TextError::err("missing --setuppin or --spake2p-verifier");
+        return TextError::err("missing setuppin or spake2p-verifier");
       }
       // Passcode is 0, so will be ignored, and verifier will take over. Onboarding payload
       // printed for debug will be invalid, but if the onboarding payload had been given
@@ -859,46 +844,63 @@ public:
     chip::Logging::SetLogFilter((uint8_t)chiplogmaxcategory);
     #endif // CHIP_LOG_FILTERING
 
-    // MARK: basically reduced ChipLinuxAppInit() from here
-    ErrorPtr err;
+    // parse the factory data
+    string paths;
+    if (!getStringOption("factorydata", paths)) return TextError::err("Missing factory data paths");
+    FactoryDataProviderPtr factoryData = new FileBasedFactoryDataProvider(paths, "p44mbrd");
+
+    // pass factory data to the device instance info provider for initialisation
+    mP44dbrDeviceInstanceInfoProvider.loadFromFactoryData(factoryData);
+    // TODO: maybe remove this, when all info comes from factory data
+    // augment factory data with information from adapter(s)
+    bool infoset = false;
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      // for now: assume we'll have only one adapter running for real application,
+      // which will determine the matter bridge's identification.
+      // With multiple adapters, the first instantiated will determine the device instance info
+      if (!infoset) {
+        infoset = true;
+        // Override if those are not yet set from factory data
+        if (mP44dbrDeviceInstanceInfoProvider.mProductName.empty()) mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
+        if (mP44dbrDeviceInstanceInfoProvider.mProductLabel.empty()) mP44dbrDeviceInstanceInfoProvider.mProductLabel = (*pos)->label();
+        if (mP44dbrDeviceInstanceInfoProvider.mUID.empty()) mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
+        if (mP44dbrDeviceInstanceInfoProvider.mSerial.empty()) mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
+      }
+    }
+
+    // pass factory data to the device attestationprovider for initialisation
+    mP44mbrdDeviceAttestationProvider.loadFromFactoryData(factoryData);
 
     // prepare the onboarding payload
     chip::PayloadContents onBoardingPayload;
     // - always on-network
     onBoardingPayload.rendezvousInformation.SetValue(RendezvousInformationFlag::kOnNetwork);
-    // - use baked in product and vendor IDs if defined
+    // - initialize fields from factory data
+    mP44dbrDeviceInstanceInfoProvider.GetVendorId(onBoardingPayload.vendorID);
     #ifdef CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID
-    onBoardingPayload.vendorID = CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID;
-    OLOG(LOG_WARNING, "May need to use hard-coded Vendor ID 0x%04X (set as default)", onBoardingPayload.vendorID);
+    if (onBoardingPayload.vendorID==0) {
+      onBoardingPayload.vendorID = CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID;
+      OLOG(LOG_WARNING, "No VendorID in factorydata: using development default VID=0x%04X", onBoardingPayload.vendorID);
+    }
     #endif
+    mP44dbrDeviceInstanceInfoProvider.GetProductId(onBoardingPayload.productID);
     #ifdef CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
-    onBoardingPayload.productID = CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID;
-    OLOG(LOG_WARNING, "May need to use hard-coded Product ID 0x%04X (set as default)", onBoardingPayload.productID);
+    if (onBoardingPayload.productID==0) {
+      onBoardingPayload.productID = CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID;
+      OLOG(LOG_WARNING, "No ProductId in factorydata: using development default PID=0x%04X", onBoardingPayload.productID);
+    }
     #endif
-    // - get from command line
+    onBoardingPayload.version = factoryData->getUInt8("PAYLOADVERSION"); // defaults to 0
+    onBoardingPayload.commissioningFlow = (CommissioningFlow)factoryData->getUInt8("COMMISSIONINGFLOW"); // defaults to 0 = CommissioningFlow::kStandard
+    onBoardingPayload.discriminator.SetLongValue(factoryData->getUInt16("DISCRIMINATOR") & ((1<<12)-1)); // defaults to 0, 12 bits max
+    onBoardingPayload.setUpPINCode = factoryData->getUInt32("SETUPPIN") & ((1<<27)-1);
+    // - override from command line
     int i;
-    if (getIntOption("payloadversion", i)) onBoardingPayload.version = (uint8_t)i;
-    if (getIntOption("vendor-id", i)) onBoardingPayload.vendorID = (uint16_t)i;
-    if (getIntOption("product-id", i)) onBoardingPayload.productID = (uint16_t)i;
-    if (getIntOption("custom-flow", i)) onBoardingPayload.commissioningFlow = static_cast<CommissioningFlow>(i);
     if (getIntOption("discriminator", i)) onBoardingPayload.discriminator.SetLongValue(static_cast<uint16_t>(i & ((1<<12)-1)));
     if (getIntOption("setuppin", i)) onBoardingPayload.setUpPINCode = i & ((1<<27)-1);
 
-    // TODO: avoid duplicating these, later
-    mP44dbrDeviceInstanceInfoProvider.mVendorId = onBoardingPayload.vendorID;
-    mP44dbrDeviceInstanceInfoProvider.mProductId = onBoardingPayload.productID;
-
-    // TODO: remove this later - Safety check, we're still forced to use predefined testing IDs for now
-    #ifdef CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID
-    if (CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID!=onBoardingPayload.vendorID) {
-      ChipLogError(DeviceLayer, "CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID (0x%04X) != command line vendor ID (0x%04X)", CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID, onBoardingPayload.vendorID);
-    }
-    #endif
-    #ifdef CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
-    if (CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID!=onBoardingPayload.productID) {
-      ChipLogError(DeviceLayer, "CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID (0x%04X) != command line product ID (0x%04X)", CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID, onBoardingPayload.productID);
-    }
-    #endif
+    // MARK: basically reduced ChipLinuxAppInit() from here
+    ErrorPtr err;
 
     // memory init
     err = P44ChipError::err(Platform::MemoryInit());
@@ -924,7 +926,7 @@ public:
     if (Error::notOK(err)) return err;
 
     // Init the commissionable data provider based on command line options and onboardingpayload
-    err = InitCommissionableDataProvider(mCommissionableDataProvider, onBoardingPayload);
+    err = InitCommissionableDataProvider(mCommissionableDataProvider, onBoardingPayload, factoryData);
     if (Error::notOK(err)) return err;
     DeviceLayer::SetCommissionableDataProvider(&mCommissionableDataProvider);
 
@@ -958,10 +960,6 @@ public:
         manualParingCodeStr = manualPairingCode.data();
       }
       updateCommissioningInfo(qrCodeStr, manualParingCodeStr);
-      // FIXME: remove should be solved via delegate
-      /*
-      updateCommissionableStatus(true); // fixed for now
-      */
     }
 
     // init the network commissioning instance (which is needed by the Network Commissioning Cluster)
@@ -990,7 +988,7 @@ public:
 
     // MARK: basically reduced ChipLinuxAppMainLoop() from here, without actually starting the mainloop
 
-    // TODO: implement our own real DAC provider later
+
     DeviceAttestationCredentialsProvider *dacProvider = Examples::GetExampleDACProvider();
     SetDeviceAttestationCredentialsProvider(dacProvider);
 

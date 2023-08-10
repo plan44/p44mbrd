@@ -26,6 +26,8 @@
 #include "matter_common.h"
 #include "p44mbrd_common.h"
 
+#include "factorydataprovider.h"
+
 #include <platform/DeviceInstanceInfoProvider.h>
 
 using namespace chip;
@@ -33,9 +35,23 @@ using namespace std;
 
 class P44mbrdDeviceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
 {
+
+  uint16_t mVendorId; ///< Matter vendor ID
+  uint16_t mProductId; ///< Matter product ID
+  string mVendorName; ///< vendor name
+  uint16_t mHWVersion; ///< hardware version
+  string mHWVersionStr; ///< user friendly hardware version
+  string mPartNumber; ///< part number
+  string mProductURL; ///< product URL
+  uint16_t mManuYear; ///< manufacturing year
+  uint8_t mManuMonth; ///< manufacturing month
+  uint8_t mManuDay; ///< manufacturing day
+
 public:
-  P44mbrdDeviceInfoProvider() : mVendorName("plan44.ch"), mVendorId(0), mProductId(0) {};
+
   virtual ~P44mbrdDeviceInfoProvider() = default;
+
+  void loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider);
 
   virtual CHIP_ERROR GetVendorName(char * buf, size_t bufSize) override; ///< Human readable vendor name
   virtual CHIP_ERROR GetVendorId(uint16_t & vendorId) override; ///< The csa-iot assigned Vendor ID
@@ -52,12 +68,13 @@ public:
 
   virtual CHIP_ERROR GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan) override;
 
-  string mVendorName; ///< vendor name
+  /// @name user facing product information possibly obtained via bridge interfaces
+  /// @{
+
   string mProductName; ///< model
-  string mLabel; ///< label
+  string mProductLabel; ///< product label (more user friendly product name)
   string mSerial; ///< serial number
   string mUID; ///< unique ID base
 
-  uint16_t mVendorId; ///< vendor ID
-  uint16_t mProductId; ///< product ID
+  /// @}
 };

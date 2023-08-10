@@ -29,6 +29,8 @@
 		ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */; };
 		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
 		ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */; };
+		ED2B994A2A85166B007AD119 /* factorydataprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2B99482A85166B007AD119 /* factorydataprovider.cpp */; };
+		ED2B994B2A852BC2007AD119 /* deviceattestationprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA044F2A82681E00225B0A /* deviceattestationprovider.cpp */; };
 		ED36D781286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */; };
 		ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D764286DCB8A00CA28EC /* TraceHandlers.cpp */; };
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
@@ -471,6 +473,8 @@
 		ED24BDF128ACE3E10025CC14 /* p44utils_common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_common.hpp; sourceTree = "<group>"; };
 		ED24BDF228ACE3E10025CC14 /* p44utils_minimal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_minimal.hpp; sourceTree = "<group>"; };
 		ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "bridged-device-basic-information-server.cpp"; sourceTree = "<group>"; };
+		ED2B99482A85166B007AD119 /* factorydataprovider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = factorydataprovider.cpp; sourceTree = "<group>"; };
+		ED2B99492A85166B007AD119 /* factorydataprovider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = factorydataprovider.h; sourceTree = "<group>"; };
 		ED36D760286DCB8A00CA28EC /* TraceDecoderArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoderArgumentParser.h; sourceTree = "<group>"; };
 		ED36D761286DCB8A00CA28EC /* TraceDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraceDecoder.h; sourceTree = "<group>"; };
 		ED36D762286DCB8A00CA28EC /* TraceDecoderArgumentParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraceDecoderArgumentParser.cpp; sourceTree = "<group>"; };
@@ -3349,6 +3353,8 @@
 				ED60FD0328BF88ED00FE950E /* chip_error.h */,
 				EDCA044F2A82681E00225B0A /* deviceattestationprovider.cpp */,
 				EDCA04502A82681E00225B0A /* deviceattestationprovider.h */,
+				ED2B99482A85166B007AD119 /* factorydataprovider.cpp */,
+				ED2B99492A85166B007AD119 /* factorydataprovider.h */,
 			);
 			path = chip_glue;
 			sourceTree = "<group>";
@@ -3812,6 +3818,7 @@
 				ED36D873286DCDED00CA28EC /* CommandStatusIB.cpp in Sources */,
 				ED9845DF2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp in Sources */,
 				ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */,
+				ED2B994A2A85166B007AD119 /* factorydataprovider.cpp in Sources */,
 				ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */,
 				ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */,
 				ED36DDD2286DDA0300CA28EC /* TraceMessage.cpp in Sources */,
@@ -4067,6 +4074,7 @@
 				ED9846012A72543E0057C0D8 /* groups-server.cpp in Sources */,
 				ED36D869286DCDED00CA28EC /* AttributeDataIB.cpp in Sources */,
 				ED36DE82286E02CD00CA28EC /* message.cpp in Sources */,
+				ED2B994B2A852BC2007AD119 /* deviceattestationprovider.cpp in Sources */,
 				ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */,
 				ED36DCAA286DD7F200CA28EC /* SystemTimeSupport.cpp in Sources */,
 				ED36DB9C286DD42300CA28EC /* Engine.cpp in Sources */,

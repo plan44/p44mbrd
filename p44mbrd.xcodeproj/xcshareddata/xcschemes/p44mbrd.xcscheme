@@ -63,6 +63,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3840"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--factorydata $(PROJECT_DIR)/factory_data_0xFFF1_0x8002.txt"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

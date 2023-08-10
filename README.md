@@ -170,13 +170,16 @@ ${OUT_DIR}/p44mbrd --help
 For real operation you can run *p44mbrd* with:
 
 ```bash
-${OUT_DIR}/p44mbrd --payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3842 --KVS /file/to/store/data --chiploglevel 2 --loglevel 5
+${OUT_DIR}/p44mbrd --factorydata ${CHIPAPP_ROOT}/factory_data_0xFFF1_0x8002.txt --discriminator 3842 --KVS /file/to/store/data --chiploglevel 2 --loglevel 5
 ```
 
-Note that at this time, all this **is not certified by the csa-iot** so must use `vendor-id` and `product-id` as shown above. These are the test vendor and bridge-app product ids from the SDK.
-The `discriminator` should be set to a device-unique value to allow commissioning in a network with multiple bridge-app or p44mbrd instances.
+Note that at this time, all this **is not certified by the csa-iot** so factorydata
+specifies a default set (included at project root as `factory_data_0xFFF1_0x8002.txt`), containing connectedhomeip SDK's data for development vendor 0xFFF1 and development product 0x8002. These are the test vendor and bridge-app product ids from the SDK.
+The `--discriminator` should be set to a device-unique value to allow commissioning in a network with multiple bridge-app or p44mbrd instances.
 
-You also need to have a [*vdcd*](https://github.com/plan44/vdcd) running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--bridgeapihost` and `--bridgeapiport` where to look for the bridge API.
+You also need to have a [*vdcd*](https://github.com/plan44/vdcd) running on the same host providing the *bridge-api* on port 4444 (default, you can define other bridge API ports, allow non-local access with *vdcd* command line options, see `--help`, and you can tell *p44mbrd* using `--p44apihost` and `--p44apiport` where to look for the bridge API.
+
+Or, if you have a CC41 bridge, you can tell *p44mbrd* using `--ccapihost` and `--ccapiport` where to look for the CC41 API.
 
 ## Support p44mbrd
 
