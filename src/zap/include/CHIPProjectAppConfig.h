@@ -27,13 +27,12 @@
 
 #pragma once
 
-// overrides CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT in CHIPProjectConfig
-// FIXME: the dynamic endpoint ids should be ever incrementing until 0xFFFF according to
-//   specs, but current implementation
+// overrides CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT in CHIPProjectConfig.h
 #define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 200
 
-// FIXME: hard-code this because of hard-coded certs included through this
-#define CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID 0x8002
+// This is a bridge, overrides CHIP_DEVICE_CONFIG_DEVICE_TYPE in CHIPDeviceConfig.h
+#define CHIP_DEVICE_CONFIG_DEVICE_TYPE 0x000e
+
 
 // FIXME: luz temp debug, remove again to reduce FOOTPRINT
 // we want verbose error code display
