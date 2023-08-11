@@ -108,6 +108,8 @@ config("p44mbrd_config_extra") {
   defines = [
     # we want log filtering
     "CHIP_LOG_FILTERING=1",
+    # we may or may not want extensive attribute access logging
+    "DEBUG_ATTR_ACCESS=0"
   ]
   cflags = [
     # ev_loop shadows struct constructor in libev@openwrt22.03
