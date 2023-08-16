@@ -7,10 +7,12 @@ OPENWRT_PACKAGE_NAME="${CHIPAPP_NAME}"
 
 # process and consume leading option arguments
 FOR_DEBUG=0
+DEPLOY=1
 NINJA_OPTS=""
 while [[ $# -ge 1 ]]; do
   case "$1" in
-    "-d"|"--debug") FOR_DEBUG=1;shift;;
+    "-d"|"--debug") FOR_DEBUG=1;DEPLOY=0;shift;;
+    "-t"|"--test") DEPLOY=0;shift;;
     "-v"|"--verbose") NINJA_OPTS="${NINJA_OPTS} -v";shift;;
     "-c"|"--continue") NINJA_OPTS="${NINJA_OPTS} -k 0";shift;;
     *) break;;
@@ -19,10 +21,12 @@ done
 
 # process remaining arguments
 if [[ $# < 1 || $# > 2 ]]; then
-  echo "Usage: $0 [--debug | --verbose | --continue] <openwrt buildroot path> [<OpenWrt .config file>]"
+  echo "Usage: $0 [options] <openwrt buildroot path> [<OpenWrt .config file>]"
   echo "  builds '${CHIPAPP_NAME}' app from current dir, stores build binary into prebuilt_bin dir"
   echo "  of openwrt package named ${OPENWRT_PACKAGE_NAME}"
-  echo "  --debug : builds for debugging, do not store binary in openwrt package"
+  echo "Options:"
+  echo "  --debug : build for debugging, do not store binary in openwrt package"
+  echo "  --test : build normally, but do not store binary in openwrt package"
   echo "  --verbose : call ninja with verbose option"
   echo "  --continue : prevent ninja form stopping at first failed job"
   exit 1
@@ -127,7 +131,7 @@ echo "     staging_dir : ${STAGING_DIR}"
 echo "         sysroot : ${SYSROOT}"
 echo "toolchain_prefix : ${TOOLCHAIN_PREFIX}"
 echo "     built_tools : ${BUILT_TOOLS}"
-if [ ${FOR_DEBUG} -eq 0 -a -d "${PREBUILT_BIN}" ]; then
+if [ ${DEPLOY} -eq 1 -a -d "${PREBUILT_BIN}" ]; then
   echo "    prebuilt_bin : ${PREBUILT_BIN}"
 fi
 
@@ -166,24 +170,26 @@ if [[ $? != 0 ]]; then
 fi
 
 # store into files of wrapper package in openwrt
-if [ ${FOR_DEBUG} -eq 0 -a -d "${PREBUILT_BIN}" ]; then
+if [ ${DEPLOY} -eq 1 -a -d "${PREBUILT_BIN}" ]; then
   "${BUILT_TOOLS}/binutils/binutils/strip-new" -o "${PREBUILT_BIN}/${CHIPAPP_NAME}" "${OUT_DIR}/${CHIPAPP_NAME}"
   echo "copied executable to: ${PREBUILT_BIN}"
   # also save info about the source VERSION we built that binary from
   git describe HEAD >"${PREBUILT_BIN}/git_version"
   git rev-parse HEAD >"${PREBUILT_BIN}/git_rev"
   echo "saved version/rev along with executable in: ${PREBUILT_BIN}"
-  echo "# - copy ${CHIPAPP_NAME} to a target's /tmp for testing, stripped:"
-  echo "\"${BUILT_TOOLS}/binutils/binutils/strip-new\" -o \"/tmp/${CHIPAPP_NAME}\" \"${OUT_DIR}/${CHIPAPP_NAME}\""
-  echo "scp \"/tmp/${CHIPAPP_NAME}\" root@\${TARGET_HOST}:/tmp"
-else
-  # debugging
-  if [ -z ${TARGET_HOST} ]; then
-    echo "# TARGET_HOST is not defined, need to define it"
-    # provide symbolically
-    echo "export TARGET_HOST=192.168.x.x"
-    TARGET_HOST='${TARGET_HOST}'
-  fi
+fi
+# debugging/testing only, do not store binary in openwrt package
+if [ -z ${TARGET_HOST} ]; then
+  echo "# TARGET_HOST is not defined, need to define it"
+  # provide symbolically
+  echo "export TARGET_HOST=192.168.x.x"
+  TARGET_HOST='${TARGET_HOST}'
+fi
+echo ""
+echo "# copy ${CHIPAPP_NAME} to a target's /tmp for testing, stripped:"
+echo "\"${BUILT_TOOLS}/binutils/binutils/strip-new\" -o \"/tmp/${CHIPAPP_NAME}\" \"${OUT_DIR}/${CHIPAPP_NAME}\""
+echo "scp \"/tmp/${CHIPAPP_NAME}\" root@${TARGET_HOST}:/tmp"
+if [ ${FOR_DEBUG} -eq 1 ]; then
   pushd ${OUT_DIR}
     _APP=$(pwd)/${CHIPAPP_NAME}
   popd
@@ -195,6 +201,5 @@ else
   echo "popd"
   echo "# - start debugging ${CHIPAPP_NAME}:"
   echo "${BUILDROOT}/scripts/remote-gdb ${TARGET_HOST}:9000 ${_APP}"
-
 fi
 
