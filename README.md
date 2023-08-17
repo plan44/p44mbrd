@@ -3,19 +3,23 @@ p44mbrd
 
 *[[if you want to support p44mbrd development, please consider to sponsor plan44]](https://github.com/sponsors/plan44)*
 
-*p44mbrd* (plan44 matter bridge daemon) is a free (opensource, GPLv3) *matter* bridge daemon, intended as a companion to the [**vdcd**](https://github.com/plan44/vdcd) home automation controller.
+*p44mbrd* (plan44 matter bridge daemon) is a free (opensource, GPLv3) *matter* bridge daemon, originally developed as a companion to the [**vdcd**](https://github.com/plan44/vdcd) home automation controller (which controls devices of many different technologies (DALI, EnOcean, hue, SmartLEDs, and many more). By now, *p44mbrd* has been extended to access devices via *bridge adapters*, of which the *vdcd bridge API* is only one. In parallel, development of a second *bridge adapter* for the Becker-Antriebe "CentralControl" *cc API* is in progress.
 
-*p44mbrd* connects vdcd-based devices from many technologies (DALI, EnOcean, hue, SmartLEDs, and many more) into the new [smart-home standard *matter*](https://buildwithmatter.com), making them available in matter-enabled smart home "oecosystems" such as Apple Home, Smart Things, Alexa, Google and hopefully many more independent ones in the near future.
+*p44mbrd* connects devices from its *bridge adapters* into the new [smart-home standard *matter*](https://buildwithmatter.com), making them available in matter-enabled smart home "oecosystems" such as Apple Home, Smart Things, Alexa, Google and hopefully many more independent ones in the near future.
 
 ## Implementation notes
 
-### bridge API
+### vdcd bridge adapter
 
 *p44mbrd* uses a **JSON-based representation of the [vdc API](http://developer.digitalstrom.org/Architecture/vDC-API.pdf)** to communicate with *vdcd*.
 
 The *vdc-API* was originally defined in 2013 as an abstraction for the [digitalSTROM](https://digitalstrom.com) device model to allow integration of third-party devices into digitalSTROM. The vdc API device model was designed to be as generic as possible, with a strong focus on being self-descriptive through a [structured tree of device properties](http://developer.digitalstrom.org/Architecture/vDC-API-properties.pdf).
 
 This now helps *p44mbrd* to obtain the needed information from devices to be able to map them to *matter bridged device*.
+
+### cc bridge adapter
+
+The *cc bridge adapter* uses a JSON-RPC 2.0 based API to access "CentralControl" devices and map their functionality into matter, in particular the WindowCovering device type. 
 
 ### matter SDK - connectedhomeip
 
@@ -25,9 +29,11 @@ In particular, *p44mbrd* was evolved out of the *bridge-app* example in CHIP.
 
 The *connectedhomeip* is included as a submodule, but **using a plan44 forked github repository**.
 
-The forked version is currently needed because things like build support for OpenWrt or the libev based mainloop are not yet part of upstream *connectedhomeip*. In addition, the forked version omits a lot of very footprint heavy submodules (gigabytes!) containing SDKs for various embedded hardware not relevant to a Linux/Posix based bridge project.
+The forked version is currently needed because not all needed additions to the SDK are already accepted (or maybe acceptable) upstream at the time of writing this.
 
-However, the plan44 fork is not a real fork and will not diverge from *connectedhomeip* a lot. It's just a set of commits on top of *connectedhomeip* that will be rebased from time to time to new upstream releases, and hopefully over time get integrated into the SDK itself.
+In addition, the forked version contains an adapted `.gitmodule` file which prevents fetching a lot of very footprint heavy submodules (gigabytes!) containing SDKs for various embedded hardware not relevant to a Linux/Posix based bridge project (by adding `update = none` and `ignore = all`).
+
+However, **the plan44 fork is not a real fork** and will not diverge from *connectedhomeip* a lot. It's just a set of commits on top of *connectedhomeip* that **will be rebased from time to time** to new upstream releases, and hopefully over time get integrated into the SDK itself.
 
 Work on *p44mbrd* has produced a few contributions already accepted to matter mainline:
 
@@ -47,18 +53,9 @@ p44mbrd is also based on a set of generic C++ utility classes called [*p44utils*
 
 ## Early Beta - Work in Progress!
 
-**This project is an early beta**! It is far from a certifiable (let alone certified) implementation, and has many gaps in functionality. Still, it works pretty nice already with Apple Home at the time of writing.
+**This project is still beta**! It is not yet certifiable (let alone certified), and has gaps in functionality. Still, it works pretty nice already with Apple Home for lights, color lights, plugin switches, window coverings, and some sensors  at the time of writing.
 
-Expect a lot of changes, refactorings and additions in the next few months!
-
-In particular, *connectedhomeip*'s (and underlying ZCL's) design is very much targeted at devices with a factory-defined static device structure defined at compile time, derived from a static data model laid out in the so-called *.zap file* generated by the *zap tool*.
-
-A bridge and its devices however do not have a static structure, but one defined at run time. The *bridge-app* sample in the matter SDK shows some of the tricks needed to create so-called *dynamic endpoints* and implement their storage. *p44mbrd* in its current (October 2022) state is a heavily refactored and modularized version of *bridge-app*, but still using those rather arcane mechanisms available for *dynamic endpoints*.
-
-Just recently (in the *connectedhomeip* `master` branch, not the `v1.0-branch`, a new example named `dynamic-bridge-app` has appeared which seems to address the subject in a less Q&D way than `bridge-app` did. Maybe there's things to learn from `dynamic-bridge-app`...
-
-I also plan to look closer into *zcl/ember* implementation and maybe suggest or help extending it to better support dynamic endpoints from .zap templates instead of all the hand-woven metadata needed right now.
-
+So expect a lot of changes and additions in the next few months!
 
 ## License
 
@@ -188,13 +185,6 @@ Or, if you have a CC41 bridge, you can tell *p44mbrd* using `--ccapihost` and `-
 3. Discuss it in the [plan44 community forum](https://forum.plan44.ch/t/matter).
 3. contribute patches, report issues and suggest new functionality [on github](https://github.com/plan44/p44mbrd) or in the [forum](https://forum.plan44.ch/t/opensource-c-vdcd).
 4. build cool new device integrations and contribute those
-5. Buy plan44.ch [products](https://plan44.ch/automation/products.php) - sales revenue is paying the time for contributing to opensource projects :-)
+5. Buy plan44.ch [products](https://plan44.ch/automation/products.php) - sales revenue is paying the time for contributing to opensource projects 😀
 
 *(c) 2022-2023 by Lukas Zeller / [plan44.ch](http://www.plan44.ch/automation)*
-
-
-
-
-
-
-
