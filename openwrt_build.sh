@@ -154,11 +154,13 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
-# zap gen
-${CHIPAPP_ROOT}/third_party/connectedhomeip/scripts/tools/zap/generate.py ${CHIPAPP_ROOT}/zap/p44mbrd.zap
-if [[ $? != 0 ]]; then
-  echo "# generating .matter file FAILED"
-  exit 1
+# HACK: force zap gen when .zap has changed. Apparently not caught by our gn setup (yet)
+if [ ${CHIPAPP_ROOT}/zap/p44mbrd.zap -nt ${CHIPAPP_ROOT}/zap/p44mbrd.matter ]; then
+  ${CHIPAPP_ROOT}/third_party/connectedhomeip/scripts/tools/zap/generate.py ${CHIPAPP_ROOT}/zap/p44mbrd.zap
+  if [[ $? != 0 ]]; then
+    echo "# generating .matter file FAILED"
+    exit 1
+  fi
 fi
 
 # build with ninja (only the app, not other stuff like address-resolve-tool)
