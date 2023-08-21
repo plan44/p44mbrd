@@ -66,7 +66,7 @@ public:
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
   virtual void finalizeDeviceDeclaration() override;
-  static int16_t matterValue(double aValue, bool aIsValid = true);
+  static int16_t matterValue(double aValue);
 };
 
 
@@ -82,7 +82,7 @@ public:
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
   virtual void finalizeDeviceDeclaration() override;
-  static uint16_t matterValue(double aValue, bool aIsValid = true);
+  static uint16_t matterValue(double aValue);
 };
 
 
@@ -98,5 +98,5 @@ public:
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
   virtual void finalizeDeviceDeclaration() override;
-  static uint16_t matterValue(double aValue, bool aIsValid = true);
+  static uint16_t matterValue(double aValue);
 };

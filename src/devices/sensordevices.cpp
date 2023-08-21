@@ -58,35 +58,28 @@ void DeviceTemperature::finalizeDeviceDeclaration()
 }
 
 
-int16_t DeviceTemperature::matterValue(double aBridgeValue, bool aIsValid)
+int16_t DeviceTemperature::matterValue(double aBridgeValue)
 {
   // matter unit is 1/100th degree celsius
-  int16_t v;
-  if (aIsValid) {
-    v = static_cast<int16_t>(aBridgeValue*100.0+0.5);
-  }
-  else {
-    NumericAttributeTraits<int16_t>::SetNull(v);
-  }
-  return v;
+  return static_cast<int16_t>(aBridgeValue*100.0+0.5);
 }
 
 
 void DeviceTemperature::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  TemperatureMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
-  TemperatureMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
-  TemperatureMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
+  using namespace TemperatureMeasurement::Attributes;
+  if (aHasMin) MinMeasuredValue::Set(endpointId(), matterValue(aMin)); else MinMeasuredValue::SetNull(endpointId());
+  if (aHasMax) MaxMeasuredValue::Set(endpointId(), matterValue(aMin)); else MaxMeasuredValue::SetNull(endpointId());
+  Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
 
 void DeviceTemperature::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  int16_t v = matterValue(aMeasuredValue);
-  if (!aIsValid) NumericAttributeTraits<int16_t>::SetNull(v);
-  TemperatureMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  using namespace TemperatureMeasurement::Attributes;
+  if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), TemperatureMeasurement::Id, TemperatureMeasurement::Attributes::MeasuredValue::Id);
+    MatterReportingAttributeChangeCallback(endpointId(), TemperatureMeasurement::Id, MeasuredValue::Id);
   }
 }
 
@@ -116,34 +109,28 @@ void DeviceIlluminance::finalizeDeviceDeclaration()
 }
 
 
-uint16_t DeviceIlluminance::matterValue(double aBridgeValue, bool aIsValid)
+uint16_t DeviceIlluminance::matterValue(double aBridgeValue)
 {
   // matter unit is 10000*log10(lux)+1
-  uint16_t v;
-  if (aIsValid) {
-    v = static_cast<uint16_t>(10000.0*log10(aBridgeValue)+1);
-  }
-  else {
-    NumericAttributeTraits<uint16_t>::SetNull(v);
-  }
-  return v;
+  return static_cast<uint16_t>(10000.0*log10(aBridgeValue)+1);
 }
 
 
 void DeviceIlluminance::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  IlluminanceMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
-  IlluminanceMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
-  IlluminanceMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
+  using namespace IlluminanceMeasurement::Attributes;
+  if (aHasMin) MinMeasuredValue::Set(endpointId(), matterValue(aMin)); else MinMeasuredValue::SetNull(endpointId());
+  if (aHasMax) MaxMeasuredValue::Set(endpointId(), matterValue(aMin)); else MaxMeasuredValue::SetNull(endpointId());
+  Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
 
 void DeviceIlluminance::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  uint16_t v = matterValue(aMeasuredValue, aIsValid);
-  IlluminanceMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  using namespace IlluminanceMeasurement::Attributes;
+  if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), IlluminanceMeasurement::Id, IlluminanceMeasurement::Attributes::MeasuredValue::Id);
+    MatterReportingAttributeChangeCallback(endpointId(), IlluminanceMeasurement::Id, MeasuredValue::Id);
   }
 }
 
@@ -172,35 +159,27 @@ void DeviceHumidity::finalizeDeviceDeclaration()
 }
 
 
-uint16_t DeviceHumidity::matterValue(double aBridgeValue, bool aIsValid)
+uint16_t DeviceHumidity::matterValue(double aBridgeValue)
 {
   // matter unit is 100 * humidity percentage
-  uint16_t v;
-  if (aIsValid) {
-    v = static_cast<uint16_t>(100.0*aBridgeValue+0.5);
-  }
-  else {
-    NumericAttributeTraits<uint16_t>::SetNull(v);
-  }
-  return v;
+  return static_cast<uint16_t>(100.0*aBridgeValue+0.5);
 }
 
 
 void DeviceHumidity::setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance)
 {
-  RelativeHumidityMeasurement::Attributes::MinMeasuredValue::Set(endpointId(), matterValue(aMin, aHasMin));
-  RelativeHumidityMeasurement::Attributes::MaxMeasuredValue::Set(endpointId(), matterValue(aMax, aHasMax));
-  RelativeHumidityMeasurement::Attributes::Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
+  using namespace RelativeHumidityMeasurement::Attributes;
+  if (aHasMin) MinMeasuredValue::Set(endpointId(), matterValue(aMin)); else MinMeasuredValue::SetNull(endpointId());
+  if (aHasMax) MaxMeasuredValue::Set(endpointId(), matterValue(aMin)); else MaxMeasuredValue::SetNull(endpointId());
+  Tolerance::Set(endpointId(), static_cast<uint16_t>(matterValue(aTolerance)));
 }
 
 
 void DeviceHumidity::updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode)
 {
-  uint16_t v = matterValue(aMeasuredValue, aIsValid);
-  RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(endpointId(), v);
+  using namespace RelativeHumidityMeasurement::Attributes;
+  if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), RelativeHumidityMeasurement::Id, RelativeHumidityMeasurement::Attributes::MeasuredValue::Id);
+    MatterReportingAttributeChangeCallback(endpointId(), RelativeHumidityMeasurement::Id, MeasuredValue::Id);
   }
 }
-
-
