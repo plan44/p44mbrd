@@ -53,6 +53,14 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
 }
 
 
+string DeviceLevelControl::description()
+{
+  string s = inherited::description();
+  string_format_append(s, "\n- currentLevel: %d", mLevel);
+  return s;
+}
+
+
 void DeviceLevelControl::didGetInstalled()
 {
   Attributes::FeatureMap::Set(endpointId(), to_underlying(LevelControl::Feature::kOnOff));
@@ -107,7 +115,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting currentLevel attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
+      reportAttributeChange(LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
     }
     return true; // changed or forced
   }
@@ -430,7 +438,7 @@ bool LevelControlHasFeature(EndpointId endpoint, LevelControl::Feature feature)
 
 // MARK: attribute access
 
-EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus DeviceLevelControl::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==LevelControl::Id) {
     if (attributeId == LevelControl::Attributes::CurrentLevel::Id) {
@@ -441,25 +449,17 @@ EmberAfStatus DeviceLevelControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
   }
   // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+  return inherited::handleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
-EmberAfStatus DeviceLevelControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus DeviceLevelControl::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==LevelControl::Id) {
     /* none */
   }
   // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
-}
-
-
-string DeviceLevelControl::description()
-{
-  string s = inherited::description();
-  string_format_append(s, "\n- currentLevel: %d", mLevel);
-  return s;
+  return inherited::handleWriteAttribute(clusterId, attributeId, buffer);
 }
 
 

@@ -26,6 +26,7 @@ void MatterUnitLocalizationPluginServerInitCallback();
 void MatterUserLabelPluginServerInitCallback();
 void MatterWindowCoveringPluginServerInitCallback();
 
+#error DO NOT USE THIS
 #define MATTER_PLUGINS_INIT \
     MatterAccessControlPluginServerInitCallback(); \
     MatterAdministratorCommissioningPluginServerInitCallback(); \

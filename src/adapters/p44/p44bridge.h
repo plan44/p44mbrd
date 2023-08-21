@@ -107,6 +107,10 @@ public:
 
   /// @}
 
+  /// utility function to check model feature presence
+  static bool hasModelFeature(JsonObjectPtr aDeviceInfo, const char* aModelFeature);
+
+
 private:
 
   void bridgeApiConnectedHandler(ErrorPtr aStatus);

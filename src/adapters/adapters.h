@@ -35,7 +35,7 @@
 // Macros for constructing final `Device` leaf subclasses containing needed delegates
 
 #define DEVICE_ACCESSOR virtual Device &device() override { return static_cast<Device&>(*this); }
-#define DG(DelegateBasename) static_cast<DelegateBasename##Delegate&>(*this)
+#define DG(DelegateBasename) (static_cast<DelegateBasename##Delegate&>(*this))
 
 
 class BridgeAdapter;
@@ -218,6 +218,10 @@ public:
 
   /// @return non-null pointer to subclass pointer as specified by DevType, or fails assertion.
   template<typename DevType> auto deviceP() { auto devP = dynamic_cast<DevType*>(&device()); assert(devP); return devP; }
+
+  /// @return subclass pointer as specified by DevType, or nullPtr if the adapter does not have that subclass
+  template<typename DevType> auto deviceOrNullP() { return dynamic_cast<DevType*>(&device()); }
+
 
   /// Convenience function (as the endpointID is needed often to access attributes
   /// @return the endpointId

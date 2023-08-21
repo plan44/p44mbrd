@@ -191,7 +191,7 @@ void Device::updateReachable(bool aReachable, UpdateMode aUpdateMode)
     mReachable = aReachable;
     OLOG(LOG_INFO, "Updating reachable to %s - updatemode=%d", mReachable ? "REACHABLE" : "OFFLINE", aUpdateMode.Raw());
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(endpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::Reachable::Id);
+      reportAttributeChange(BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::Reachable::Id);
     }
   }
 }
@@ -209,14 +209,14 @@ void Device::updateNodeLabel(const string aNodeLabel, UpdateMode aUpdateMode)
       }
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(endpointId(), BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::NodeLabel::Id);
+      reportAttributeChange(BridgedDeviceBasicInformation::Id, BridgedDeviceBasicInformation::Attributes::NodeLabel::Id);
     }
   }
 }
 
 // MARK: Attribute access
 
-EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==BasicInformation::Id) {
     OLOG(LOG_WARNING, "****** tried to access basic infomation cluster *****");
@@ -238,7 +238,7 @@ EmberAfStatus Device::HandleReadAttribute(ClusterId clusterId, chip::AttributeId
 }
 
 
-EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus Device::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   // handle common device attributes
   if (clusterId==BridgedDeviceBasicInformation::Id) {
@@ -252,6 +252,20 @@ EmberAfStatus Device::HandleWriteAttribute(ClusterId clusterId, chip::AttributeI
   }
   return EMBER_ZCL_STATUS_FAILURE;
 }
+
+
+
+void Device::handleAttributeChange(ClusterId clusterId, chip::AttributeId attributeId)
+{
+  /* NOP in base class */
+}
+
+
+void Device::reportAttributeChange(ClusterId aClusterId, chip::AttributeId aAttributeId)
+{
+  MatterReportingAttributeChangeCallback(endpointId(), aClusterId, aAttributeId);
+}
+
 
 
 string Device::description()
@@ -307,7 +321,7 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting IdentifyTime attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), Identify::Id, Identify::Attributes::IdentifyTime::Id);
+      reportAttributeChange(Identify::Id, Identify::Attributes::IdentifyTime::Id);
     }
     return true; // changed
   }
@@ -328,7 +342,7 @@ void IdentifiableDevice::identifyTick(uint16_t aRemainingSeconds)
 
 
 
-EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus IdentifiableDevice::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==Identify::Id) {
     if (attributeId == Identify::Attributes::IdentifyTime::Id) {
@@ -336,11 +350,11 @@ EmberAfStatus IdentifiableDevice::HandleReadAttribute(ClusterId clusterId, chip:
     }
   }
   // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+  return inherited::handleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
-EmberAfStatus IdentifiableDevice::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus IdentifiableDevice::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==Identify::Id) {
     if (attributeId == Identify::Attributes::IdentifyTime::Id) {
@@ -349,7 +363,7 @@ EmberAfStatus IdentifiableDevice::HandleWriteAttribute(ClusterId clusterId, chip
     }
   }
   // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+  return inherited::handleWriteAttribute(clusterId, attributeId, buffer);
 }
 
 // MARK: callbacks

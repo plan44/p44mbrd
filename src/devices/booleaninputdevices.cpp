@@ -59,7 +59,7 @@ void BooleanInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMo
   if (aIsValid) {
     BooleanState::Attributes::StateValue::Set(endpointId(), aState);
     if (aUpdateMode.Has(UpdateFlags::matter)) {
-      MatterReportingAttributeChangeCallback(endpointId(), BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+      reportAttributeChange(BooleanState::Id, BooleanState::Attributes::StateValue::Id);
     }
   }
 }
@@ -81,4 +81,50 @@ ContactSensorDevice::ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate
 void ContactSensorDevice::finalizeDeviceDeclaration()
 {
   finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gContactSensorTypes));
+}
+
+
+// MARK: - OccupancySensingDevice
+
+const EmberAfDeviceType gOccupancySensingTypes[] = {
+  { DEVICE_TYPE_MA_OCCUPANCY_SENSOR, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+};
+
+OccupancySensingDevice::OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
+{
+}
+
+void OccupancySensingDevice::finalizeDeviceDeclaration()
+{
+  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOccupancySensingTypes));
+}
+
+
+void OccupancySensingDevice::didGetInstalled()
+{
+  // override static attribute defaults
+  // Note: actual device implementation might override these if it has better information
+  //   about the type of sensor
+  using namespace OccupancySensing;
+  Attributes::OccupancySensorType::Set(endpointId(), OccupancySensorTypeEnum::kPir);
+  Attributes::OccupancySensorTypeBitmap::Set(endpointId(), BitMask<OccupancySensorTypeBitmap>(OccupancySensorTypeBitmap::kPir));
+  // call base class last (which will call implementation delegate, which then can override the defaults above)
+  inherited::didGetInstalled();
+}
+
+
+
+void OccupancySensingDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
+{
+  using namespace OccupancySensing;
+  if (aIsValid) {
+    BitMask<OccupancyBitmap> b;
+    if (aState) b.Set(OccupancyBitmap::kOccupied);
+    Attributes::Occupancy::Set(endpointId(), b);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      reportAttributeChange(BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+    }
+  }
 }

@@ -34,7 +34,7 @@
 
 using namespace Clusters;
 
-// MARK: - OnOff Device specific declarations
+// MARK: - DeviceWindowCovering
 
 ClusterId windowCoveringClusters[] = { WindowCovering::Id };
 
@@ -42,9 +42,6 @@ const EmberAfDeviceType gWindowCoveringTypes[] = {
   { DEVICE_TYPE_MA_WINDOW_COVERING, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
-
-
-// MARK: - DeviceWindowCovering
 
 DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aIdentifyDelegate, aDeviceInfoDelegate),

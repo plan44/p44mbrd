@@ -30,6 +30,8 @@ using namespace Clusters;
 
 
 /// @brief delegate for controlling a output level in a device (such as light, or fan speed etc.)
+/// @note this delegate is not only used for actual LevelControl cluster based devices, but
+///    some semantically similar ones like FanControl
 class LevelControlDelegate
 {
 public:
@@ -52,7 +54,27 @@ public:
 };
 
 
-class DeviceLevelControl : public DeviceOnOff
+/// @brief interface class for Levelcontrol and semantically similar devices' implementations
+class LevelControlImplementationInterface
+{
+
+public:
+
+  virtual ~LevelControlImplementationInterface() = default;
+
+  /// @brief set the default on level
+  /// @note this should be called at device setup, before the device goes operational
+  virtual void setDefaultOnLevel(double aLevelPercent) = 0;
+
+  /// @brief update the current level (when bridged device reports it)
+  virtual bool updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode) = 0;
+};
+
+
+
+
+/// device actually based on matter LevelControl cluster
+class DeviceLevelControl : public DeviceOnOff, public LevelControlImplementationInterface
 {
   typedef DeviceOnOff inherited;
 
@@ -73,22 +95,18 @@ public:
   uint8_t currentLevel() { return mLevel; };
   bool updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode);
 
-  /// @name callbacks for LevelControlDelegate implementations
+
+  /// @name LevelControlImplementationInterface
   /// @{
-
-  /// @brief set the default on level
-  /// @note this should be called at device setup, before the device goes operational
-  void setDefaultOnLevel(double aLevelPercent);
-
-  /// @brief update the current level (when bridged device reports it)
-  bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode);
-
+  virtual void setDefaultOnLevel(double aLevelPercent) override;
+  virtual bool updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode) override;
   /// @}
 
-  /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-  /// handler for external attribute write access
-  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  /// @name handlers for external attribute implementation
+  /// @{
+  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  /// @}
 
   /// @name handlers for command implementations
   /// @{
@@ -96,7 +114,6 @@ public:
   Status move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   Status stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void effect(bool aNewValue);
-
   /// @}
 
 protected:

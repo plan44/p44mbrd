@@ -50,7 +50,7 @@ public:
   /// @param aState current state
   /// @param aIsValid true if aState is an actually know state, false if the update means "we do not know the state"
   /// @param aUpdateMode update mode for propagating the sensor value
-  void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
+  virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
 
   /// @}
 
@@ -66,6 +66,29 @@ public:
   ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual const char *deviceType() override { return "contact sensor"; }
+
+protected:
+
+  /// called to have the final leaf class declare the correct device type list
+  virtual void finalizeDeviceDeclaration() override;
+};
+
+
+
+class OccupancySensingDevice : public BooleanInputDevice
+{
+  typedef BooleanInputDevice inherited;
+
+public:
+
+  OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+
+  virtual const char *deviceType() override { return "occupancy sensor"; }
+
+  virtual void didGetInstalled() override;
+
+  /// needs an override because Occupancy is not modelled using booleanState cluster
+  virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) override;
 
 protected:
 

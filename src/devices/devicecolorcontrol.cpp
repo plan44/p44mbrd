@@ -138,8 +138,8 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting colormode attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::ColorMode::Id);
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::EnhancedColorMode::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::ColorMode::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::EnhancedColorMode::Id);
     }
     return true;
   }
@@ -165,7 +165,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting hue attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentHue::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::CurrentHue::Id);
     }
     return true; // changed
   }
@@ -188,7 +188,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting saturation attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentSaturation::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::CurrentSaturation::Id);
     }
     return true; // changed
   }
@@ -213,7 +213,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting colortemperature attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::ColorTemperatureMireds::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::ColorTemperatureMireds::Id);
     }
     return true; // changed
   }
@@ -236,7 +236,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting X attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentX::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::CurrentX::Id);
     }
     return true; // changed
   }
@@ -259,7 +259,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting Y attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), ColorControl::Id, ColorControl::Attributes::CurrentY::Id);
+      reportAttributeChange(ColorControl::Id, ColorControl::Attributes::CurrentY::Id);
     }
     return true; // changed
   }
@@ -584,7 +584,7 @@ void MatterColorControlClusterServerShutdownCallback(EndpointId endpoint)
 
 // MARK: Attribute access
 
-EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus DeviceColorControl::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==ColorControl::Id) {
     // create non-unknown default if needed
@@ -615,17 +615,17 @@ EmberAfStatus DeviceColorControl::HandleReadAttribute(ClusterId clusterId, chip:
     }
   }
   // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+  return inherited::handleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
-EmberAfStatus DeviceColorControl::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus DeviceColorControl::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==ColorControl::Id) {
     /* NOP */
   }
   // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+  return inherited::handleWriteAttribute(clusterId, attributeId, buffer);
 }
 
 

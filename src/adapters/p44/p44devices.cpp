@@ -56,7 +56,7 @@ const string P44_DeviceImpl::endpointUID() const
 
 void P44_DeviceImpl::deviceDidGetInstalled()
 {
-  // update bridged info which
+  // update configuration that could not be set before device was installed (especially: attributes) from bridged info
   updateBridgedInfo(mTempDeviceInfo);
   // we do not need it any more
   mTempDeviceInfo.reset();
@@ -302,11 +302,15 @@ void P44_OnOffImpl::setOnOffState(bool aOn)
 
 void P44_OnOffImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
-  JsonObjectPtr o;
-  if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
-    JsonObjectPtr vo;
-    if (o->get("value", vo, true)) {
-      deviceP<DeviceOnOff>()->updateOnOff(vo->doubleValue()>0, aUpdateMode);
+  auto dev = deviceOrNullP<DeviceOnOff>();
+  if (dev) {
+    JsonObjectPtr o;
+    // we actually have OnOff (level-control-like devices not actually using LevelControl might not have it)
+    if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
+      JsonObjectPtr vo;
+      if (o->get("value", vo, true)) {
+        dev->updateOnOff(vo->doubleValue()>0, aUpdateMode);
+      }
     }
   }
 }
@@ -378,7 +382,7 @@ void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
       if (o2->get("channels", o2)) {
         if (o2->get(mDefaultChannelId.c_str(), o2)) {
           if (o2->get("value", o2)) {
-            deviceP<DeviceLevelControl>()->setDefaultOnLevel(o2->doubleValue());
+            deviceP<LevelControlImplementationInterface>()->setDefaultOnLevel(o2->doubleValue());
           }
         }
       }
@@ -389,7 +393,8 @@ void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 
 void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode)
 {
-  // OnOff just sets on/off state when brightness>0
+  // OnOff just sets on/off state when level>0
+  // Note: only device actually based on levelcontrol will do anything here
   inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
   // init level
   JsonObjectPtr o;
@@ -397,8 +402,8 @@ void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
       // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
-      // Note: updating on/off attribute is handled separately (in deviceonoff), don't do it here
-      deviceP<DeviceLevelControl>()->updateLevel(vo->doubleValue(), aUpdateMode);
+      // Note: updating on/off attribute is handled automatically when needed (and OnOff is present at all)
+      deviceP<LevelControlImplementationInterface>()->updateLevel(vo->doubleValue(), aUpdateMode);
     }
   }
 }
@@ -638,14 +643,7 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   // init attributes
   // - rollershade or tiltblind?
   JsonObjectPtr o, o2;
-  mHasTilt = false;
-  if (aDeviceInfo->get("modelFeatures", o)) {
-    if (o->get("shadebladeang", o2)) {
-      if (o2->boolValue()) {
-        mHasTilt = true;
-      }
-    }
-  }
+  mHasTilt = P44_BridgeImpl::hasModelFeature(aDeviceInfo, "shadebladeang");
   underlying_type_t<WindowCovering::Feature> featuremap = 0;
   featuremap |= to_underlying(WindowCovering::Feature::kLift) | to_underlying(WindowCovering::Feature::kPositionAwareLift);
   if (mHasTilt) {

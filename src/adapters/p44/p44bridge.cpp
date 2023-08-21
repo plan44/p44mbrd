@@ -78,6 +78,22 @@ void P44_BridgeImpl::cleanup()
 }
 
 
+// MARK: helpers
+
+bool P44_BridgeImpl::hasModelFeature(JsonObjectPtr aDeviceInfo, const char* aModelFeature)
+{
+  JsonObjectPtr o, o2;
+  if (aDeviceInfo->get("modelFeatures", o)) {
+    if (o->get(aModelFeature, o2)) {
+      if (o2->boolValue()) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
 // MARK: P44_BridgeImpl internals
 
 P44_BridgeImpl::P44_BridgeImpl() :
@@ -221,8 +237,27 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                 OLOG(LOG_NOTICE, "found bridgeable shadow device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                 dev = new P44_WindowCoveringDevice();
               }
+              else if (behaviourtype=="ventilation") {
+                // actual ventilation device
+                // TODO: actually enable when P44_FullFeatureFanDevice exists
+                /*
+                if (hasModelFeature(aDeviceJSON, "fcu")) {
+                  // ventilation device with extra features (louver, auto mode etc)
+                  dev = new P44_FullFeatureFanDevice();
+                }
+                else
+                */
+                {
+                  // simple ventilation device
+                  dev = new P44_SimpleFanDevice();
+                }
+              }
+              else if (groups && groups->get("10")) {
+                // generic output in the ventilation group -> also model as fan control device
+                dev = new P44_SimpleFanDevice();
+              }
               else {
-                // not a light, only switched or dimmed
+                // not something specific, only switched or dimmed output
                 OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                 switch(outputfunction) {
                   case outputFunction_switch: // switch output
@@ -270,12 +305,13 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                       int binInpType = o->int32Value();
                       // determine input type
                       switch(binInpType) {
+                        // TODO: maybe some time motion will get separated from occupancy
                         case binInpType_presence:
                         case binInpType_presenceInDarkness:
                         case binInpType_motion:
                         case binInpType_motionInDarkness:
-                          // TODO: map to Occupancy Sensing Cluster
-                          // for now: not handled
+                          // assume PIR, which is essentially motion, but commonly used for presence
+                          dev = new P44_OccupancySensor();
                           break;
                         default:
                           // all others: create simple ContactSensors

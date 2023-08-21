@@ -1177,7 +1177,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
       "read external attr 0x%04x in cluster 0x%04x, expecting %d bytes, attr.size=%d",
       (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength, (int)attributeMetadata->size
     );
-    ret = dev->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
+    ret = dev->handleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
       POLOG(dev, LOG_ERR, "NOT HANDLED: reading external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
@@ -1199,7 +1199,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
   if (dev) {
     POLOG(dev, LOG_DEBUG, "write external attr 0x%04x in cluster 0x%04x, attr.size=%d", (int)attributeMetadata->attributeId, (int)clusterId, (int)attributeMetadata->size);
     POLOG(dev, LOG_DEBUG, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
-    ret = dev->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
+    ret = dev->handleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
       POLOG(dev, LOG_ERR, "NOT HANDLED: writing external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
@@ -1208,6 +1208,18 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
     }
   }
   return ret;
+}
+
+
+void MatterPostAttributeChangeCallback(
+  ConcreteAttributePath& attributePath,
+  uint8_t type, uint16_t size, uint8_t* value
+)
+{
+  DevicePtr dev = deviceForEndPointId(attributePath.mEndpointId);
+  if (dev) {
+    dev->handleAttributeChange(attributePath.mClusterId, attributePath.mAttributeId);
+  }
 }
 
 

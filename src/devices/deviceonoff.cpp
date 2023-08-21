@@ -71,7 +71,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       FOCUSOLOG("reporting onOff attribute change to matter");
-      MatterReportingAttributeChangeCallback(endpointId(), OnOff::Id, OnOff::Attributes::OnOff::Id);
+      reportAttributeChange(OnOff::Id, OnOff::Attributes::OnOff::Id);
     }
     return true; // changed
   }
@@ -81,7 +81,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 
 // MARK: Attribute access
 
-EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+EmberAfStatus DeviceOnOff::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==OnOff::Id) {
     if (attributeId == OnOff::Attributes::OnOff::Id) {
@@ -89,12 +89,12 @@ EmberAfStatus DeviceOnOff::HandleReadAttribute(ClusterId clusterId, chip::Attrib
     }
   }
   // let base class try
-  return inherited::HandleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
+  return inherited::handleReadAttribute(clusterId, attributeId, buffer, maxReadLength);
 }
 
 
 
-EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+EmberAfStatus DeviceOnOff::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==OnOff::Id) {
     // Non-writable from outside, but written by standard OnOff cluster implementation
@@ -104,7 +104,7 @@ EmberAfStatus DeviceOnOff::HandleWriteAttribute(ClusterId clusterId, chip::Attri
     }
   }
   // let base class try
-  return inherited::HandleWriteAttribute(clusterId, attributeId, buffer);
+  return inherited::handleWriteAttribute(clusterId, attributeId, buffer);
 }
 
 

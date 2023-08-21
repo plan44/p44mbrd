@@ -251,10 +251,16 @@ public:
   virtual void didBecomeOperational();
 
   /// handler for external attribute read access
-  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
+  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
 
   /// handler for external attribute write access
-  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
+  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
+
+  /// handler for getting notified after attribute was changed via a client writing to it
+  virtual void handleAttributeChange(ClusterId clusterId, chip::AttributeId attributeId);
+
+  /// utility to report attribute changes in this device to matter for reporting in subscriptions
+  void reportAttributeChange(ClusterId aClusterId, chip::AttributeId aAttributeId);
 
 protected:
 
@@ -350,8 +356,8 @@ public:
 
   virtual void didGetInstalled() override;
 
-  virtual EmberAfStatus HandleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-  virtual EmberAfStatus HandleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
   /// interface for identify cluster command implementations
   bool updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode);

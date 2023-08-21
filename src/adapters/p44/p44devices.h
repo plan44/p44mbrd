@@ -33,6 +33,7 @@
 #include "devicelevelcontrol.h"
 #include "devicecolorcontrol.h"
 #include "devicewindowcovering.h"
+#include "devicefancontrol.h"
 #include "sensordevices.h"
 #include "booleaninputdevices.h"
 
@@ -179,6 +180,7 @@ protected:
 };
 
 
+
 class P44_LevelControlImpl : public P44_OnOffImpl, public LevelControlDelegate
 {
   typedef P44_OnOffImpl inherited;
@@ -257,6 +259,23 @@ public:
   P44_WindowCoveringImpl();
 
 };
+
+
+class P44_SimpleFanControlImpl : public P44_LevelControlImpl
+{
+  typedef P44_LevelControlImpl inherited;
+
+protected:
+  /// @name IdentifyDelegate
+  /// @{
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
+  /// @}
+
+public:
+  P44_SimpleFanControlImpl() {};
+
+};
+
 
 
 
@@ -397,6 +416,17 @@ public:
 };
 
 
+class P44_SimpleFanDevice final :
+  public DeviceFanControl, // the matter side device
+  public P44_SimpleFanControlImpl // the P44 side delegate implementation
+{
+public:
+  P44_SimpleFanDevice() : DeviceFanControl(nullptr, DG(LevelControl), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  DEVICE_ACCESSOR;
+};
+
+
+
 
 // MARK: Sensors
 
@@ -426,6 +456,16 @@ class P44_HumiditySensor final :
 {
 public:
   P44_HumiditySensor() : DeviceHumidity(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  DEVICE_ACCESSOR;
+};
+
+
+class P44_OccupancySensor final :
+  public OccupancySensingDevice, // the matter side device
+  public P44_SensorImpl // the P44 side implementation
+{
+public:
+  P44_OccupancySensor() : OccupancySensingDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 

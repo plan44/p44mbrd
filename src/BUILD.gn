@@ -41,6 +41,8 @@ executable("p44mbrd") {
     "devices/devicelevelcontrol.h",
     "devices/devicecolorcontrol.cpp",
     "devices/devicecolorcontrol.h",
+    "devices/devicefancontrol.cpp",
+    "devices/devicefancontrol.h",
     "devices/devicewindowcovering.cpp",
     "devices/devicewindowcovering.h",
     "adapters/adapters.cpp",

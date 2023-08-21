@@ -79,7 +79,7 @@ void DeviceTemperature::updateMeasuredValue(double aMeasuredValue, bool aIsValid
   using namespace TemperatureMeasurement::Attributes;
   if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), TemperatureMeasurement::Id, MeasuredValue::Id);
+    reportAttributeChange(TemperatureMeasurement::Id, MeasuredValue::Id);
   }
 }
 
@@ -130,7 +130,7 @@ void DeviceIlluminance::updateMeasuredValue(double aMeasuredValue, bool aIsValid
   using namespace IlluminanceMeasurement::Attributes;
   if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), IlluminanceMeasurement::Id, MeasuredValue::Id);
+    reportAttributeChange(IlluminanceMeasurement::Id, MeasuredValue::Id);
   }
 }
 
@@ -180,6 +180,6 @@ void DeviceHumidity::updateMeasuredValue(double aMeasuredValue, bool aIsValid, U
   using namespace RelativeHumidityMeasurement::Attributes;
   if (aIsValid) MeasuredValue::Set(endpointId(), matterValue(aMeasuredValue)); else MeasuredValue::SetNull(endpointId());
   if (aUpdateMode.Has(UpdateFlags::matter)) {
-    MatterReportingAttributeChangeCallback(endpointId(), RelativeHumidityMeasurement::Id, MeasuredValue::Id);
+    reportAttributeChange(RelativeHumidityMeasurement::Id, MeasuredValue::Id);
   }
 }
