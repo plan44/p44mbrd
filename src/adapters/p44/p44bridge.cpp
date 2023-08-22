@@ -374,7 +374,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
 
 void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
 {
-  OLOG(LOG_DEBUG, "initial bridgeapi query: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  OLOG(LOG_DEBUG, "initial bridgeapi query: status=%s, answer:\n%s", Error::text(aError), JsonObject::text(aJsonMsg));
   JsonObjectPtr o;
   JsonObjectPtr result;
   if (aJsonMsg && aJsonMsg->get("result", result)) {
@@ -458,7 +458,7 @@ void P44_BridgeImpl::reconnectBridgedDevices()
 
 void P44_BridgeImpl::bridgeApiReconnectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
 {
-  OLOG(LOG_DEBUG, "bridgeapi query after reconnect: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  OLOG(LOG_DEBUG, "bridgeapi query after reconnect: status=%s, answer:\n%s", Error::text(aError), JsonObject::text(aJsonMsg));
   JsonObjectPtr o;
   JsonObjectPtr result;
   if (aJsonMsg && aJsonMsg->get("result", result)) {
@@ -637,12 +637,14 @@ void P44_BridgeImpl::newDeviceGotBridgeable(string aNewDeviceDSUID)
 
 void P44_BridgeImpl::newDeviceInfoQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
 {
-  OLOG(LOG_INFO, "bridgeapi query for additional device: status=%s, answer=%s", Error::text(aError), JsonObject::text(aJsonMsg));
+  OLOG(LOG_INFO, "bridgeapi query for additional device: status=%s, answer:\n%s", Error::text(aError), JsonObject::text(aJsonMsg));
   JsonObjectPtr o;
   JsonObjectPtr result;
   if (aJsonMsg && aJsonMsg->get("result", result)) {
     DevicePtr dev = bridgedDeviceFromJSON(result);
-    bridgeAdditionalDevice(dev);
+    if (dev) {
+      bridgeAdditionalDevice(dev);
+    }
   }
 }
 

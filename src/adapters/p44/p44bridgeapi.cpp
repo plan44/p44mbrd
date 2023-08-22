@@ -102,6 +102,7 @@ void P44BridgeApi::call(const string aMethod, JsonObjectPtr aParams, JSonMessage
   call.mCallId = string_format("%ld", ++mBridgeCallCounter);
   call.mCallback = aResponseCB;
   aParams->add("id", JsonObject::newString(call.mCallId));
+  LOG(LOG_DEBUG, "Calling method '%s' in bridge, params:\n%s", aMethod.c_str(), JsonObject::text(aParams));
   ErrorPtr err = sendMessage(aParams);
   if (Error::isOK(err)) {
     mPendingBridgeCalls.push_back(call);
@@ -142,6 +143,7 @@ ErrorPtr P44BridgeApi::notify(const string aNotification, JsonObjectPtr aParams)
 {
   if (!aParams) aParams = JsonObject::newObj();
   aParams->add("notification", JsonObject::newString(aNotification));
+  LOG(LOG_DEBUG, "Sending notification '%s' to bridge, params:\n%s", aNotification.c_str(), JsonObject::text(aParams));
   ErrorPtr err = sendMessage(aParams);
   if (Error::notOK(err)) {
     LOG(LOG_ERR, "bridge API: sending notification '%s' failed: %s", aNotification.c_str(), err->text());
