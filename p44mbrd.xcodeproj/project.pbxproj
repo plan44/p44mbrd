@@ -10,6 +10,7 @@
 		ED014C802A8EDF8300071593 /* TimerDelegates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED014C7F2A8EDF3200071593 /* TimerDelegates.cpp */; };
 		ED014C832A93AB0900071593 /* devicefancontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED014C812A93AB0900071593 /* devicefancontrol.cpp */; };
 		ED014C882A93C67D00071593 /* fan-control-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED014C852A93C67D00071593 /* fan-control-server.cpp */; };
+		ED014C8D2A94BC8700071593 /* occupancy-sensor-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED014C8B2A94BC8700071593 /* occupancy-sensor-server.cpp */; };
 		ED0362B0287C335D00E46E2A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */; };
 		ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED1A3C9F2A434872009746B8 /* jsonrpccomm.cpp */; };
 		ED072F672A69BBD6007BBF71 /* window-covering-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */; };
@@ -406,6 +407,9 @@
 		ED014C852A93C67D00071593 /* fan-control-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "fan-control-server.cpp"; sourceTree = "<group>"; };
 		ED014C862A93C67D00071593 /* fan-control-delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "fan-control-delegate.h"; sourceTree = "<group>"; };
 		ED014C872A93C67D00071593 /* fan-control-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "fan-control-server.h"; sourceTree = "<group>"; };
+		ED014C8A2A94BC8700071593 /* occupancy-hal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "occupancy-hal.h"; sourceTree = "<group>"; };
+		ED014C8B2A94BC8700071593 /* occupancy-sensor-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "occupancy-sensor-server.cpp"; sourceTree = "<group>"; };
+		ED014C8C2A94BC8700071593 /* occupancy-sensor-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "occupancy-sensor-server.h"; sourceTree = "<group>"; };
 		ED0362AF287C335D00E46E2A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = devicewindowcovering.cpp; sourceTree = "<group>"; };
 		ED072F612A69BA22007BBF71 /* devicewindowcovering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devicewindowcovering.h; sourceTree = "<group>"; };
@@ -1501,6 +1505,16 @@
 			path = "fan-control-server";
 			sourceTree = "<group>";
 		};
+		ED014C892A94BC8700071593 /* occupancy-sensor-server */ = {
+			isa = PBXGroup;
+			children = (
+				ED014C8A2A94BC8700071593 /* occupancy-hal.h */,
+				ED014C8B2A94BC8700071593 /* occupancy-sensor-server.cpp */,
+				ED014C8C2A94BC8700071593 /* occupancy-sensor-server.h */,
+			);
+			path = "occupancy-sensor-server";
+			sourceTree = "<group>";
+		};
 		ED072F632A69BBD6007BBF71 /* window-covering-server */ = {
 			isa = PBXGroup;
 			children = (
@@ -1925,6 +1939,7 @@
 				ED36D7D5286DCDA300CA28EC /* level-control */,
 				ED36D7B7286DCDA200CA28EC /* localization-configuration-server */,
 				ED36D7DA286DCDA300CA28EC /* network-commissioning */,
+				ED014C892A94BC8700071593 /* occupancy-sensor-server */,
 				ED36D7E9286DCDA300CA28EC /* on-off-server */,
 				ED36D7B9286DCDA200CA28EC /* operational-credentials-server */,
 				ED9845F12A72543E0057C0D8 /* scenes-server */,
@@ -3827,6 +3842,7 @@
 				ED36DDD2286DDA0300CA28EC /* TraceMessage.cpp in Sources */,
 				ED60FD0428BF88EE00FE950E /* chip_error.cpp in Sources */,
 				ED36DB93286DD2CE00CA28EC /* ASN1Error.cpp in Sources */,
+				ED014C8D2A94BC8700071593 /* occupancy-sensor-server.cpp in Sources */,
 				ED36DE84286E02CD00CA28EC /* DataModelHandler.cpp in Sources */,
 				ED36DD09286DD8A000CA28EC /* CASEDestinationId.cpp in Sources */,
 				ED36DC06286DD57B00CA28EC /* CHIPPlatformMemory.cpp in Sources */,

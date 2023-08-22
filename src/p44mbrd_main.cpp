@@ -379,6 +379,7 @@ public:
     // update commissionable status in adapters
     if (Server::GetInstance().GetFabricTable().FabricCount() == 0) {
       // with no fabrics, we are commissionable from start
+      OLOG(LOG_NOTICE, "Fabric table is empty - starting up commissionable")
       updateCommissionableStatus(true);
     }
     // install the devices we have
@@ -1104,25 +1105,26 @@ void MatterActionsPluginServerInitCallback()
 
 
 chip::Protocols::InteractionModel::Status MatterPreAttributeChangeCallback(
-  const chip::app::ConcreteAttributePath & attributePath,
-  uint8_t type,
-  uint16_t size,
-  uint8_t * value
+  const ConcreteAttributePath & attributePath,
+  uint8_t type, uint16_t size, uint8_t * value
 )
 {
-  // TODO: implement forwarding to devices
+  // TODO: maybe implement forwarding to devices
   return chip::Protocols::InteractionModel::Status::Success;
 }
 
+
 void MatterPostAttributeChangeCallback(
-  const chip::app::ConcreteAttributePath & attributePath,
-  uint8_t type,
-  uint16_t size,
-  uint8_t * value
+  const ConcreteAttributePath& attributePath,
+  uint8_t type, uint16_t size, uint8_t* value
 )
 {
-  // TODO: implement forwarding to devices
+  DevicePtr dev = deviceForEndPointId(attributePath.mEndpointId);
+  if (dev) {
+    dev->handleAttributeChange(attributePath.mClusterId, attributePath.mAttributeId);
+  }
 }
+
 
 
 bool emberAfActionsClusterInstantActionCallback(
@@ -1208,18 +1210,6 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(
     }
   }
   return ret;
-}
-
-
-void MatterPostAttributeChangeCallback(
-  ConcreteAttributePath& attributePath,
-  uint8_t type, uint16_t size, uint8_t* value
-)
-{
-  DevicePtr dev = deviceForEndPointId(attributePath.mEndpointId);
-  if (dev) {
-    dev->handleAttributeChange(attributePath.mClusterId, attributePath.mAttributeId);
-  }
 }
 
 

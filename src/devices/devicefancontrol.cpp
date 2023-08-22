@@ -130,11 +130,12 @@ bool DeviceFanControl::updateAuto(bool aAuto, double aLevel, Device::UpdateMode 
 
 void DeviceFanControl::setImpliedLevel(Percent aLevelPercent)
 {
-  if (aLevelPercent>100) {
+  if (aLevelPercent>100 && mFanControlExtrasDelegateP && mFanControlExtrasDelegateP->hasAutoMode()) {
     // automatic
     PercentSetting::SetNull(endpointId()); // null value indicates auto
   }
   else {
+    if (aLevelPercent>100) aLevelPercent = 100; // just max
     PercentSetting::Set(endpointId(), aLevelPercent); // fixed level
   }
 }
