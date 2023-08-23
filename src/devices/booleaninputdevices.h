@@ -50,7 +50,7 @@ public:
   /// @param aState current state
   /// @param aIsValid true if aState is an actually know state, false if the update means "we do not know the state"
   /// @param aUpdateMode update mode for propagating the sensor value
-  virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode);
+  virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) = 0;
 
   /// @}
 
@@ -68,6 +68,9 @@ class BoolanStateDevice  : public BinaryInputDevice
 public:
 
   BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+
+  /// update state in boolean state cluster
+  virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) override;
 
 };
 
@@ -104,7 +107,7 @@ public:
 
   virtual void didGetInstalled() override;
 
-  /// needs an override because Occupancy is not modelled using booleanState cluster
+  /// update state in occupancy sensing cluster
   virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) override;
 
 protected:

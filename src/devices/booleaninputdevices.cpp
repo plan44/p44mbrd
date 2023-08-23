@@ -50,17 +50,6 @@ string BinaryInputDevice::description()
 }
 
 
-void BinaryInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
-{
-  if (aIsValid) {
-    BooleanState::Attributes::StateValue::Set(endpointId(), aState);
-    if (aUpdateMode.Has(UpdateFlags::matter)) {
-      reportAttributeChange(BooleanState::Id, BooleanState::Attributes::StateValue::Id);
-    }
-  }
-}
-
-
 // MARK: - BoolanStateDevice
 
 ClusterId booleanStateClusters[] = { BooleanState::Id };
@@ -73,6 +62,15 @@ BoolanStateDevice::BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
 }
 
 
+void BoolanStateDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
+{
+  if (aIsValid) {
+    BooleanState::Attributes::StateValue::Set(endpointId(), aState);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      reportAttributeChange(BooleanState::Id, BooleanState::Attributes::StateValue::Id);
+    }
+  }
+}
 
 
 // MARK: - ContactSensorDevice
