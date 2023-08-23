@@ -33,7 +33,7 @@
   ],
   "endpointTypes": [
     {
-      "id": 9,
+      "id": 4,
       "name": "MA-bridge",
       "deviceTypeRef": {
         "id": 2,
@@ -5061,7 +5061,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": 5,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 6,
@@ -5819,7 +5819,7 @@
       ]
     },
     {
-      "id": 8,
+      "id": 6,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 11,
@@ -9199,7 +9199,7 @@
               "side": "server",
               "type": "array",
               "included": 1,
-              "storageOption": "RAM",
+              "storageOption": "External",
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "",
@@ -9215,7 +9215,7 @@
               "side": "server",
               "type": "array",
               "included": 1,
-              "storageOption": "RAM",
+              "storageOption": "External",
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "",
@@ -9231,7 +9231,7 @@
               "side": "server",
               "type": "array",
               "included": 1,
-              "storageOption": "RAM",
+              "storageOption": "External",
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "",
@@ -9247,7 +9247,7 @@
               "side": "server",
               "type": "array",
               "included": 1,
-              "storageOption": "RAM",
+              "storageOption": "External",
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "",
@@ -9282,7 +9282,7 @@
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "1",
+              "defaultValue": "2",
               "reportable": 1,
               "minInterval": 1,
               "maxInterval": 65534,
@@ -10840,7 +10840,7 @@
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "1",
+              "defaultValue": "4",
               "reportable": 1,
               "minInterval": 1,
               "maxInterval": 65534,
@@ -11376,7 +11376,7 @@
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "2",
+              "defaultValue": "3",
               "reportable": 1,
               "minInterval": 1,
               "maxInterval": 65534,

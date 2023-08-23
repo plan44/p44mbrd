@@ -2331,7 +2331,7 @@ endpoint 2 {
     callback attribute eventList;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
-    ram      attribute clusterRevision default = 1;
+    ram      attribute clusterRevision default = 2;
   }
 
   server cluster ColorControl {
@@ -2379,7 +2379,7 @@ endpoint 2 {
     callback attribute eventList default = 0;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
-    ram      attribute clusterRevision default = 1;
+    ram      attribute clusterRevision default = 4;
   }
 
   server cluster RelativeHumidityMeasurement {
@@ -2403,7 +2403,7 @@ endpoint 2 {
     callback attribute acceptedCommandList;
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
-    ram      attribute clusterRevision default = 2;
+    ram      attribute clusterRevision default = 3;
   }
 }
 
