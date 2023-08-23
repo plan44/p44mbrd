@@ -33,7 +33,7 @@
   ],
   "endpointTypes": [
     {
-      "id": 4,
+      "id": 14,
       "name": "MA-bridge",
       "deviceTypeRef": {
         "id": 2,
@@ -5061,7 +5061,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": 15,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 6,
@@ -5819,7 +5819,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 16,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 11,
@@ -6146,7 +6146,7 @@
           "mfgCode": null,
           "define": "GROUPS_CLUSTER",
           "side": "server",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "AddGroupResponse",
@@ -6402,7 +6402,7 @@
           "mfgCode": null,
           "define": "SCENES_CLUSTER",
           "side": "server",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "AddSceneResponse",

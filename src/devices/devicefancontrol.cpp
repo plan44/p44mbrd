@@ -36,7 +36,7 @@ using namespace Attributes;
 
 // MARK: - DeviceFanControl
 
-ClusterId fanControlClusters[] = { FanControl::Id };
+ClusterId fanControlClusters[] = { FanControl::Id, Groups::Id };
 
 const EmberAfDeviceType gFanDeviceTypes[] = {
   { DEVICE_TYPE_MA_FAN_DEVICE, DEVICE_VERSION_DEFAULT },
