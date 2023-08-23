@@ -164,10 +164,10 @@ bool P44_DeviceImpl::handleBridgeNotification(const string aNotification, JsonOb
     }
   }
   else if (aNotification=="vanish") {
-    // device got removed, make unreachable
+    // device got removed
     mBridgeable = false;
     mActive = false;
-    device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+    P44_BridgeImpl::adapter().removeDevice(&device());
     return true;
   }
   return false; // not handled

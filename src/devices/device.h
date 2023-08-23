@@ -232,7 +232,7 @@ public:
 
 
   /// add the device using the previously set cluster info (and parent endpoint ID)
-  bool AddAsDeviceEndpoint();
+  bool addAsDeviceEndpoint();
 
   /// @brief called just before the device gets installed
   /// @note at this point, the device is the fully constructed final class, but is
@@ -249,6 +249,9 @@ public:
 
   /// @brief called when device has become operational within the matter stack
   virtual void didBecomeOperational();
+
+  /// @brief called immediately before device gets disabled
+  virtual void willBeDisabled();
 
   /// handler for external attribute read access
   virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);

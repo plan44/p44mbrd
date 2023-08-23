@@ -554,7 +554,7 @@ public:
     LogErrorOnFailure(chiperr);
     // Add the devices as dynamic endpoints
     for (size_t i=0; i<mNumDynamicEndPoints; i++) {
-      if (mDevices[i]->AddAsDeviceEndpoint()) {
+      if (mDevices[i]->addAsDeviceEndpoint()) {
         POLOG(mDevices[i], LOG_DEBUG, "registered before starting Matter mainloop");
         // report installed
         mDevices[i]->didGetInstalled();
@@ -662,7 +662,7 @@ public:
       CHIP_ERROR chiperr = kvs.Put(kP44mbrNamespace "firstFreeEndpointId", mFirstFreeEndpointId);
       LogErrorOnFailure(chiperr);
       // add as new endpoint to bridge
-      if (aDevice->AddAsDeviceEndpoint()) {
+      if (aDevice->addAsDeviceEndpoint()) {
         POLOG(aDevice, LOG_NOTICE, "added as additional dynamic endpoint while Matter already running");
         // report installed
         aDevice->didGetInstalled();
@@ -672,7 +672,7 @@ public:
         // also add subdevices that are part of this additional device and thus not yet present
         for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
           DevicePtr subDev = *pos;
-          if (subDev->AddAsDeviceEndpoint()) {
+          if (subDev->addAsDeviceEndpoint()) {
             POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
             subDev->didBecomeOperational();
             // dump status
@@ -683,6 +683,36 @@ public:
       err = TextError::err("failed adding device as endpoint");
     }
     return err;
+  }
+
+
+  void disableDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) override
+  {
+    aDevice->willBeDisabled();
+    // subdevices first
+    for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
+      (*pos)->willBeDisabled();
+      emberAfEndpointEnableDisable((*pos)->endpointId(), false);
+      POLOG((*pos), LOG_NOTICE, "subdevice endpoint disabled, device no longer operational");
+    }
+    // disable main device now
+    emberAfEndpointEnableDisable(aDevice->endpointId(), false);
+    POLOG(aDevice, LOG_NOTICE, "main device endpoint disabled, device no longer operational");
+  }
+
+
+  void reEnableDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) override
+  {
+    POLOG(aDevice, LOG_NOTICE, "re-enabling as dynamic endpoint");
+    // report re-installed
+    aDevice->didGetInstalled();
+    aDevice->didBecomeOperational();
+    // subdevices
+    for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
+      (*pos)->didGetInstalled();
+      emberAfEndpointEnableDisable((*pos)->endpointId(), true);
+      aDevice->didBecomeOperational();
+    }
   }
 
 

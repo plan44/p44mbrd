@@ -69,9 +69,35 @@ void BridgeAdapter::registerInitialDevice(DevicePtr aDevice)
 
 void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
 {
-  // add to map
-  mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
-  mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+  // check if we had that device before and it was only disabled
+  DeviceUIDMap::iterator pos = mDeviceUIDMap.find(aDevice->deviceInfoDelegate().endpointUID());
+  if (pos!=mDeviceUIDMap.end()) {
+    DevicePtr dev = pos->second;
+    EndpointId previousEndpoint = dev->endpointId();
+    if (previousEndpoint!=kInvalidEndpointId) {
+      if (emberAfEndpointIsEnabled(previousEndpoint)) {
+        // already enabled - should not happen
+        POLOG(dev, LOG_ERR, "is already bridged and operational, cannot be added again!")
+      }
+      else {
+        // exists, but is disabled - re-enable
+        // - use newer definition of the device
+        mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
+        mBridgeMainDelegateP->reEnableDevice(aDevice, *this);
+      }
+    }
+  }
+  else {
+    // is new, add it
+    mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
+    mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+  }
+}
+
+
+void BridgeAdapter::removeDevice(DevicePtr aDevice)
+{
+  return mBridgeMainDelegateP->disableDevice(aDevice, *this);
 }
 
 

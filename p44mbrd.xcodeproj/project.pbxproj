@@ -357,7 +357,6 @@
 		ED9845FE2A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */; };
 		ED9845FF2A72543E0057C0D8 /* scenes-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F92A72543E0057C0D8 /* scenes-server.cpp */; };
 		ED9846002A72543E0057C0D8 /* SceneTableImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845FA2A72543E0057C0D8 /* SceneTableImpl.cpp */; };
-		ED9846012A72543E0057C0D8 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845FD2A72543E0057C0D8 /* groups-server.cpp */; };
 		ED98463A2A725E140057C0D8 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98461D2A725E130057C0D8 /* callback-stub.cpp */; };
 		ED98463B2A725E140057C0D8 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */; };
 		ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98463E2A73C6270057C0D8 /* matter_utils.cpp */; };
@@ -1352,8 +1351,6 @@
 		ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtensionFieldSetsImpl.cpp; sourceTree = "<group>"; };
 		ED9845F92A72543E0057C0D8 /* scenes-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "scenes-server.cpp"; sourceTree = "<group>"; };
 		ED9845FA2A72543E0057C0D8 /* SceneTableImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneTableImpl.cpp; sourceTree = "<group>"; };
-		ED9845FC2A72543E0057C0D8 /* groups-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "groups-server.h"; sourceTree = "<group>"; };
-		ED9845FD2A72543E0057C0D8 /* groups-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "groups-server.cpp"; sourceTree = "<group>"; };
 		ED98461D2A725E130057C0D8 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
 		ED98461E2A725E130057C0D8 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
 		ED9846232A725E130057C0D8 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
@@ -1933,7 +1930,6 @@
 				ED36D7C0286DCDA200CA28EC /* general-commissioning-server */,
 				ED36D7D0286DCDA200CA28EC /* general-diagnostics-server */,
 				ED36D7E7286DCDA300CA28EC /* group-key-mgmt-server */,
-				ED9845FB2A72543E0057C0D8 /* groups-server */,
 				EDF3F52B289AA96000A82418 /* groups-server */,
 				ED36D7CB286DCDA200CA28EC /* identify-server */,
 				ED36D7D5286DCDA300CA28EC /* level-control */,
@@ -3321,37 +3317,37 @@
 		ED36DE4F286E02CD00CA28EC /* util */ = {
 			isa = PBXGroup;
 			children = (
+				ED36DE7D286E02CD00CA28EC /* af-enums.h */,
+				ED36DE5C286E02CD00CA28EC /* af-types.h */,
+				ED36DE6B286E02CD00CA28EC /* af.h */,
+				ED36DE72286E02CD00CA28EC /* attribute-metadata.h */,
+				ED36DE54286E02CD00CA28EC /* attribute-size-util.cpp */,
+				ED36DE79286E02CD00CA28EC /* attribute-storage-null-handling.h */,
+				ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */,
+				ED36DE69286E02CD00CA28EC /* attribute-storage.h */,
+				ED36DE7E286E02CD00CA28EC /* attribute-table.cpp */,
+				ED36DE50286E02CD00CA28EC /* attribute-table.h */,
+				ED36DE77286E02CD00CA28EC /* basic-types.h */,
+				ED36DE74286E02CD00CA28EC /* binding-table.cpp */,
+				ED36DE5A286E02CD00CA28EC /* binding-table.h */,
+				ED36DE6F286E02CD00CA28EC /* common.h */,
+				ED36DE58286E02CD00CA28EC /* config.h */,
+				ED36DE5D286E02CD00CA28EC /* DataModelHandler.cpp */,
+				ED36DE53286E02CD00CA28EC /* DataModelHandler.h */,
+				ED36DE7A286E02CD00CA28EC /* ember-compatibility-functions.cpp */,
 				EDB388F429E6F2AC00BDAED4 /* endpoint-config-defines.h */,
+				ED36DE6C286E02CD00CA28EC /* error-mapping.h */,
 				EDB388F329E6F2AC00BDAED4 /* generic-callback-stubs.cpp */,
 				EDB388F229E6F2AC00BDAED4 /* generic-callbacks.h */,
-				ED36DE50286E02CD00CA28EC /* attribute-table.h */,
-				ED36DE52286E02CD00CA28EC /* util.cpp */,
-				ED36DE53286E02CD00CA28EC /* DataModelHandler.h */,
-				ED36DE54286E02CD00CA28EC /* attribute-size-util.cpp */,
-				ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */,
-				ED36DE57286E02CD00CA28EC /* message.cpp */,
-				ED36DE58286E02CD00CA28EC /* config.h */,
-				ED36DE5A286E02CD00CA28EC /* binding-table.h */,
-				ED36DE5C286E02CD00CA28EC /* af-types.h */,
-				ED36DE5D286E02CD00CA28EC /* DataModelHandler.cpp */,
 				ED36DE68286E02CD00CA28EC /* im-client-callbacks.h */,
-				ED36DE69286E02CD00CA28EC /* attribute-storage.h */,
-				ED36DE6B286E02CD00CA28EC /* af.h */,
-				ED36DE6C286E02CD00CA28EC /* error-mapping.h */,
-				ED36DE6D286E02CD00CA28EC /* privilege-storage.cpp */,
-				ED36DE6F286E02CD00CA28EC /* common.h */,
-				ED36DE70286E02CD00CA28EC /* types_stub.h */,
-				ED36DE71286E02CD00CA28EC /* util.h */,
-				ED36DE72286E02CD00CA28EC /* attribute-metadata.h */,
-				ED36DE74286E02CD00CA28EC /* binding-table.cpp */,
-				ED36DE75286E02CD00CA28EC /* privilege-storage.h */,
 				ED36DE76286E02CD00CA28EC /* MatterCallbacks.h */,
-				ED36DE77286E02CD00CA28EC /* basic-types.h */,
-				ED36DE79286E02CD00CA28EC /* attribute-storage-null-handling.h */,
-				ED36DE7A286E02CD00CA28EC /* ember-compatibility-functions.cpp */,
+				ED36DE57286E02CD00CA28EC /* message.cpp */,
 				ED36DE7B286E02CD00CA28EC /* odd-sized-integers.h */,
-				ED36DE7D286E02CD00CA28EC /* af-enums.h */,
-				ED36DE7E286E02CD00CA28EC /* attribute-table.cpp */,
+				ED36DE6D286E02CD00CA28EC /* privilege-storage.cpp */,
+				ED36DE75286E02CD00CA28EC /* privilege-storage.h */,
+				ED36DE70286E02CD00CA28EC /* types_stub.h */,
+				ED36DE52286E02CD00CA28EC /* util.cpp */,
+				ED36DE71286E02CD00CA28EC /* util.h */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -3477,15 +3473,6 @@
 				ED9845FA2A72543E0057C0D8 /* SceneTableImpl.cpp */,
 			);
 			path = "scenes-server";
-			sourceTree = "<group>";
-		};
-		ED9845FB2A72543E0057C0D8 /* groups-server */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845FC2A72543E0057C0D8 /* groups-server.h */,
-				ED9845FD2A72543E0057C0D8 /* groups-server.cpp */,
-			);
-			path = "groups-server";
 			sourceTree = "<group>";
 		};
 		ED9846022A725E130057C0D8 /* gen */ = {
@@ -4080,7 +4067,6 @@
 				EDC58B682A66CA6400F48DEF /* sensordevices.cpp in Sources */,
 				ED36D8DF286DCF0B00CA28EC /* DefaultAttributePersistenceProvider.cpp in Sources */,
 				ED36D788286DCB8A00CA28EC /* Decoder.cpp in Sources */,
-				ED9846012A72543E0057C0D8 /* groups-server.cpp in Sources */,
 				ED36D869286DCDED00CA28EC /* AttributeDataIB.cpp in Sources */,
 				ED36DE82286E02CD00CA28EC /* message.cpp in Sources */,
 				ED2B994B2A852BC2007AD119 /* deviceattestationprovider.cpp in Sources */,

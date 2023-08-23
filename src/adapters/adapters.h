@@ -59,6 +59,17 @@ public:
   /// @return ok or error when device could not be added
   virtual ErrorPtr addAdditionalDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
 
+  /// can be be called by the bridge implementation to disable a device that no
+  /// longer exists at the bridge's other end. It may be re-enabled later
+  /// in case it re-appears with the same endpointUID.
+  /// @param aDevice device to disable
+  virtual void disableDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
+
+  /// can be be called by the bridge implementation to re-enable a device that was
+  /// disabled while the bridge was operational
+  /// @param aDevice device to re-enable
+  virtual void reEnableDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
+
   /// can be called to make the bridge device open or close a commissioning window
   /// @param aCommissionable requested commissionable status
   /// @return ok or error if requested commissionable status cannot be established
@@ -185,6 +196,14 @@ public:
   ///   Subdevices must be added to the composed device via addSubdevice() BEFORE the
   ///   composed device is registered, and will be published to the matter side automatically.
   void bridgeAdditionalDevice(DevicePtr aDevice);
+
+  /// @brief remove (disable) a device which is already bridged. This is for devices
+  ///   that get removed while the bridge is running. The device is kept as disabled
+  ///   endpoint and will be re-enabled when a device with same endpointUID is
+  ///   passed to bridgeAdditionalDevice.
+  /// @note remove only bridge-level devices, not subdevices of a composed device!
+  /// @param aDevice the device to remove.
+  void removeDevice(DevicePtr aDevice);
 
   /// can be called to register an action
   /// @param aAction pointer to action object

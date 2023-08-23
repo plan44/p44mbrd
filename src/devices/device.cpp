@@ -122,7 +122,7 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
 }
 
 
-bool Device::AddAsDeviceEndpoint()
+bool Device::addAsDeviceEndpoint()
 {
   // finalize the declaration
   finalizeDeviceDeclaration();
@@ -147,6 +147,7 @@ bool Device::AddAsDeviceEndpoint()
   }
   return true;
 }
+
 
 
 void Device::willBeInstalled()
@@ -180,6 +181,11 @@ void Device::didBecomeOperational()
     ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str(),
     ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str()
   );
+}
+
+
+void Device::willBeDisabled()
+{
 }
 
 
