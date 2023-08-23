@@ -141,8 +141,8 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
   "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
   "\"channelStates\":null, \"channelDescriptions\":null, " \
   "\"sensorDescriptions\":null, \"sensorStates\":null, " \
-  "\"inputDescriptions\":null, \"inputStates\":null, " \
-  "\"buttonDescriptions\":null, \"buttonStates\":null, " \
+  "\"binaryInputDescriptions\":null, \"binaryInputStates\":null, " \
+  "\"buttonInputDescriptions\":null, \"buttonInputStates\":null, " \
   "\"active\":null, " \
   "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
 
@@ -278,7 +278,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           }
           // Second: check inputs
           enum { sensor, input, button, numInputTypes };
-          const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "button" };
+          const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "buttonInput" };
           for (int inputType = sensor; inputType<numInputTypes; inputType++) {
             JsonObjectPtr inputdescs;
             if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Descriptions").c_str(), inputdescs)) {

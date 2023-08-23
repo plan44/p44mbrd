@@ -460,17 +460,17 @@ public:
 };
 
 
+// MARK: Boolean Inputs
+
+
 class P44_OccupancySensor final :
   public OccupancySensingDevice, // the matter side device
-  public P44_SensorImpl // the P44 side implementation
+  public P44_BinaryInputImpl // the P44 side implementation
 {
 public:
   P44_OccupancySensor() : OccupancySensingDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
-
-
-// MARK: Boolean Inputs
 
 
 class P44_ContactInput final :
