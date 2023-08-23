@@ -226,19 +226,25 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
 
-              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                                WindowCovering::Type::kShutter,
+                                                WindowCovering::EndProductType::kRollerShutter); // TODO: ok? could use kUnknown as well
             }
           else if (strcmp (item->getCString ("device_type"), "awning") == 0)
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for awning");
 
-              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                                WindowCovering::Type::kAwning,
+                                                WindowCovering::EndProductType::kAwningTerracePatio); // TODO: ok? could use kUnknown as well
             }
           else if (strcmp (item->getCString ("device_type"), "venetian") == 0)
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
 
-              dev = new CC_WindowCoveringDevice(item_id->int32Value());
+              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                                WindowCovering::Type::kTiltBlindLiftAndTilt,
+                                                WindowCovering::EndProductType::kExteriorVenetianBlind); // TODO: ok? could use kUnknown as well
             }
           else
             {

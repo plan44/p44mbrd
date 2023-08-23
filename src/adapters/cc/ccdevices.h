@@ -148,11 +148,18 @@ class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringD
 {
   typedef CC_IdentifiableImpl inherited;
 
+  WindowCovering::Type mType;
+  WindowCovering::EndProductType mEndProductType;
   bool mHasTilt;
 
 protected:
 
-  CC_WindowCoveringImpl(int _item_id);
+  CC_WindowCoveringImpl(int _item_id, WindowCovering::Type _type, WindowCovering::EndProductType _end_product_type);
+
+  /// @name DeviceInfoDelegate
+  /// @{
+  virtual void deviceDidGetInstalled() override;
+  /// @}
 
   /// @name WindowCoveringDelegate
   /// @{
@@ -232,9 +239,9 @@ class CC_WindowCoveringDevice final :
   typedef CC_WindowCoveringImpl inherited;
 public:
 public:
-  CC_WindowCoveringDevice(int _item_id) :
+  CC_WindowCoveringDevice(int _item_id, WindowCovering::Type _type, WindowCovering::EndProductType _end_product_type) :
       DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)),
-      inherited(_item_id)
+      inherited(_item_id, _type, _end_product_type)
   {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };

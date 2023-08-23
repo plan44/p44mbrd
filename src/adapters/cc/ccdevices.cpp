@@ -180,20 +180,68 @@ void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 // MARK: WindowCoveringDelegate implementation
 
 
-CC_WindowCoveringImpl::CC_WindowCoveringImpl(int _item_id) :
-  inherited(_item_id)
+CC_WindowCoveringImpl::CC_WindowCoveringImpl(int _item_id, WindowCovering::Type _type, WindowCovering::EndProductType _end_product_type) :
+  inherited(_item_id),
+  mType(_type),
+  mEndProductType(_end_product_type)
 {
-  // TODO: setup device
-  // probably not here in ctor, but afterwards in a separate method called by adapters' device setup loop
-  // (in p44adapter: initBridgedInfo/updateBridgedInfo)
-  // Anyway, must setup
-  // - WindowCovering::Attributes::FeatureMap (tilt, lift, position aware or not)
-  // - WindowCovering::Attributes::Type (kRollerShade, kTiltBlindLiftAndTilt, ...)
-  // - WindowCovering::Attributes::EndProductType (kRollerShade, kSheerShade, ...)
-
+  // Note: CANNOT set up device attributes here, because we are not yet an installed endpoint.
+  //   Do these inits in deviceDidGetInstalled()
 }
 
 
+void CC_WindowCoveringImpl::deviceDidGetInstalled()
+{
+  underlying_type_t<WindowCovering::Feature> featuremap = 0;
+  switch (mType) {
+    case WindowCovering::Type::kShutter:
+    case WindowCovering::Type::kTiltBlindLiftAndTilt:
+      // with tilt
+      mHasTilt = true;
+      // TODO: maybe init more specifics
+      break;
+    default:
+    case WindowCovering::Type::kRollerShade:
+    case WindowCovering::Type::kRollerShade2Motor:
+    case WindowCovering::Type::kRollerShadeExterior:
+    case WindowCovering::Type::kRollerShadeExterior2Motor:
+    case WindowCovering::Type::kDrapery:
+    case WindowCovering::Type::kAwning :
+    case WindowCovering::Type::kProjectorScreen:
+      // w/o tilt
+      // TODO: maybe init more specifics
+      break;
+    case WindowCovering::Type::kTiltBlindTiltOnly:
+      // not supported
+      break;
+  }
+  // set features
+  featuremap |= to_underlying(WindowCovering::Feature::kLift) | to_underlying(WindowCovering::Feature::kPositionAwareLift);
+  if (mHasTilt) {
+    featuremap |= to_underlying(WindowCovering::Feature::kTilt) | to_underlying(WindowCovering::Feature::kPositionAwareTilt);
+  }
+  WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
+  // set type
+  WindowCovering::Attributes::Type::Set(endpointId(), mType);
+  // set end product type
+  WindowCovering::Attributes::EndProductType::Set(endpointId(), mEndProductType);
+}
+
+
+
+static double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
+{
+  double v = (double)aPercent100th/100;
+  return aMotorDirectionReversed ? 100-v : v; // standard is: 100%=fully covered, 0%=fully open
+}
+
+
+static Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
+{
+  Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
+  if (v<100) v=0; // FIXME: q&d to get to zero, otherwise fully open position would not get recognized
+  return aMotorDirectionReversed ? 100*100 - v : v; // standard is: 100%=fully covered, 0%=fully open
+}
 
 
 void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMovementType)
@@ -216,7 +264,7 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
       params->add ("command", JsonObject::newString ("moveto"));
-      params->add ("value", JsonObject::newDouble ((double) lift.Value() / 100.0));
+      params->add ("value", JsonObject::newDouble (matter2bridge(lift.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
       DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
       CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
     }
@@ -226,19 +274,10 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
       params->add ("command", JsonObject::newString ("tilt"));
-      params->add ("value", JsonObject::newDouble ((double) tilt.Value() / 100.0));
+      params->add ("value", JsonObject::newDouble (matter2bridge(tilt.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
       DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
       CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
     }
-
-  // TODO: implement feedback (in API callbacks or polling)
-  // - while movement runs, optionally post intermediate updates to current values
-  //   WindowCovering::Attributes::CurrentPositionLiftPercent100ths and
-  //   WindowCovering::Attributes::CurrentPositionTiltPercent100ths
-  // - when movement stops (early or completed):
-  //   - FIRST set TargetPositionXXX attributes to current position
-  //   - THEN set CurrentPositionXXX attributes to SAME current position
-  //   (only this sequence makes the Window Covering Cluster recognize end of operation)
 
 }
 
@@ -263,15 +302,34 @@ void CC_WindowCoveringImpl::stopMovement()
 // {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
 void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
 {
+  // Notes:
+  // - while movement runs, optionally post intermediate updates to current values
+  //   WindowCovering::Attributes::CurrentPositionLiftPercent100ths and
+  //   WindowCovering::Attributes::CurrentPositionTiltPercent100ths
+  // - when movement stops (early or completed):
+  //   - FIRST set TargetPositionXXX attributes to current position
+  //   - THEN set CurrentPositionXXX attributes to SAME current position
+  //   (only this sequence makes the Window Covering Cluster recognize end of operation)
+
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr o, vo;
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
-      // roughly something like this?
+      // sb: roughly something like this?
       // deviceP<DeviceWindowCovering>()->updateLift(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+      // luz: Would be nice, maybe we can abstract later, but at this time there are too many
+      //   variants how to handle this, so we directly access the attributes:
+      // luz: Assumptions:
+      // - this is the current position
+      WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed)));
     }
-    if (o->get("value-tilt", vo)) {
+    if (o->get("value-tilt", vo) && mHasTilt) {
       // roughly something like this?
       // deviceP<DeviceWindowCovering>()->updateTilt(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+      // luz: Assumptions:
+      // - this is the current position
+      WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed)));
     }
   }
 }
