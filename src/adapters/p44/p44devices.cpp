@@ -553,14 +553,14 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
 //   (and don't when reversed is set)
 
 
-double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
+static double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
 {
   double v = (double)aPercent100th/100;
   return !aMotorDirectionReversed ? 100-v : v; // reversed is dS standard (100% = fully lifted/open), so !aMotorDirectionReversed
 }
 
 
-bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
+static bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
 {
   if (aPercent100th.IsNull()) {
     aBridgeValue = JsonObject::newNull();
@@ -571,14 +571,14 @@ bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, Json
 }
 
 
-Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
+static Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
 {
   Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
   return !aMotorDirectionReversed ? 100*100 - v : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
 }
 
 
-bool bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aInvert)
+static bool bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aInvert)
 {
   if (aBridgeValue && !aBridgeValue->isType(json_type_null)) {
     aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aInvert));
@@ -653,7 +653,7 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   WindowCovering::Attributes::Type::Set(endpointId(), mHasTilt ? WindowCovering::Type::kTiltBlindLiftAndTilt : WindowCovering::Type::kRollerShade);
   // - end product type
   WindowCovering::EndProductType endproducttype = WindowCovering::EndProductType::kRollerShade;
-  if (mHasTilt) endproducttype = WindowCovering::EndProductType::kSheerShade;
+  if (mHasTilt) endproducttype = WindowCovering::EndProductType::kExteriorVenetianBlind; // TODO: maybe differentiate later
   WindowCovering::Attributes::EndProductType::Set(endpointId(), endproducttype);
 }
 

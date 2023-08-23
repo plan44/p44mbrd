@@ -110,6 +110,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--chiploglevel 0"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--trace_log --trace_decode"
             isEnabled = "NO">
          </CommandLineArgument>
