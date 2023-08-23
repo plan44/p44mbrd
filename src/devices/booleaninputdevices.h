@@ -28,16 +28,16 @@ using namespace chip;
 using namespace app;
 
 
-// MARK: - BooleanInputDevice
+// MARK: - BinaryInputDevice
 
 
-class BooleanInputDevice : public Device
+class BinaryInputDevice : public Device
 {
   typedef Device inherited;
 
 public:
 
-  BooleanInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  BinaryInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual string description() override;
 
@@ -57,9 +57,24 @@ public:
 };
 
 
-class ContactSensorDevice : public BooleanInputDevice
+
+// MARK: - Devices based on BooleanState cluster
+
+
+class BoolanStateDevice  : public BinaryInputDevice
 {
-  typedef BooleanInputDevice inherited;
+  typedef BinaryInputDevice inherited;
+
+public:
+
+  BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+
+};
+
+
+class ContactSensorDevice : public BoolanStateDevice
+{
+  typedef BoolanStateDevice inherited;
   
 public:
 
@@ -75,9 +90,11 @@ protected:
 
 
 
-class OccupancySensingDevice : public BooleanInputDevice
+// MARK: - Devices NOT based on specific clusters, not BooleanState
+
+class OccupancySensingDevice : public BinaryInputDevice
 {
-  typedef BooleanInputDevice inherited;
+  typedef BinaryInputDevice inherited;
 
 public:
 

@@ -845,7 +845,7 @@ void P44_BinaryInputImpl::parseInputValue(JsonObjectPtr aProperties, UpdateMode 
     JsonObjectPtr state;
     if (states->get(mInputId.c_str(), state)) {
       JsonObjectPtr o;
-      BooleanInputDevice* dev = deviceP<BooleanInputDevice>();
+      BinaryInputDevice* dev = deviceP<BinaryInputDevice>();
       if (state->get("value", o, true)) {
         // non-NULL value
         dev->updateCurrentState(o->boolValue(), true, aUpdateMode);

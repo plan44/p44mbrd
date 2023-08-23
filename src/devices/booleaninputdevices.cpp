@@ -34,19 +34,15 @@
 
 using namespace Clusters;
 
-// MARK: - BooleanInputDevice
+// MARK: - BinaryInputDevice
 
-ClusterId booleanStateClusters[] = { BooleanState::Id };
-
-BooleanInputDevice::BooleanInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+BinaryInputDevice::BinaryInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
-  // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(booleanStateClusters));
 }
 
 
-string BooleanInputDevice::description()
+string BinaryInputDevice::description()
 {
   string s = inherited::description();
   string_format_append(s, "\n- Boolean State");
@@ -54,7 +50,7 @@ string BooleanInputDevice::description()
 }
 
 
-void BooleanInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
+void BinaryInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
 {
   if (aIsValid) {
     BooleanState::Attributes::StateValue::Set(endpointId(), aState);
@@ -63,6 +59,19 @@ void BooleanInputDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMo
     }
   }
 }
+
+
+// MARK: - BoolanStateDevice
+
+ClusterId booleanStateClusters[] = { BooleanState::Id };
+
+BoolanStateDevice::BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aDeviceInfoDelegate)
+{
+  // - declare device specific clusters
+  useClusterTemplates(Span<ClusterId>(booleanStateClusters));
+}
+
 
 
 
@@ -86,15 +95,21 @@ void ContactSensorDevice::finalizeDeviceDeclaration()
 
 // MARK: - OccupancySensingDevice
 
+ClusterId occupancySensingClusters[] = { OccupancySensing::Id };
+
 const EmberAfDeviceType gOccupancySensingTypes[] = {
   { DEVICE_TYPE_MA_OCCUPANCY_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+
 OccupancySensingDevice::OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
+  // - declare device specific clusters
+  useClusterTemplates(Span<ClusterId>(occupancySensingClusters));
 }
+
 
 void OccupancySensingDevice::finalizeDeviceDeclaration()
 {
