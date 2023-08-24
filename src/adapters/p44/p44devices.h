@@ -36,6 +36,7 @@
 #include "devicefancontrol.h"
 #include "sensordevices.h"
 #include "booleaninputdevices.h"
+#include "switchdevices.h"
 
 
 // MARK: - Generic device implementation classes
@@ -332,6 +333,26 @@ private:
 };
 
 
+class P44_ButtonImpl : public P44_InputImpl
+{
+  typedef P44_InputImpl inherited;
+
+  int mClicks;
+  int mPosition;
+
+public:
+
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
+
+private:
+
+  void parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpdateMode);
+
+};
+
+
+
 
 
 // MARK: - Final device classes - required implementation interfaces plus device itself in one object
@@ -479,6 +500,18 @@ public:
   DEVICE_ACCESSOR;
 };
 
+
+
+// MARK: Switches
+
+class P44_Pushbutton final :
+  public DevicePushbutton, // the matter side device
+  public P44_ButtonImpl // the P44 side implementation
+{
+public:
+  P44_Pushbutton() : DevicePushbutton(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  DEVICE_ACCESSOR;
+};
 
 
 

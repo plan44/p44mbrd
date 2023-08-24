@@ -859,4 +859,108 @@ void P44_BinaryInputImpl::parseInputValue(JsonObjectPtr aProperties, UpdateMode 
 }
 
 
+// MARK: - P44_ButtonImpl
+
+#include <app/clusters/switch-server/switch-server.h>
+
+void P44_ButtonImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+{
+  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  // get current state from xxxStates
+  mClicks = 0;
+  mPosition = 0;
+  // configure switch
+  Switch::Attributes::FeatureMap::Set(endpointId(),
+    to_underlying(Switch::Feature::kMomentarySwitch) |
+    to_underlying(Switch::Feature::kMomentarySwitchRelease) |
+    to_underlying(Switch::Feature::kMomentarySwitchLongPress) |
+    to_underlying(Switch::Feature::kMomentarySwitchMultiPress)
+  );
+  Switch::Attributes::MultiPressMax::Set(endpointId(), 4);
+  Switch::Attributes::NumberOfPositions::Set(endpointId(), 2); // TODO: enhance for rocker support (0=neutral, 1=up, 2=down)
+  // current state
+  parseButtonState(aDeviceInfo, UpdateMode());
+}
+
+
+void P44_ButtonImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
+{
+  inherited::handleBridgePushProperties(aChangedProperties);
+  parseButtonState(aChangedProperties, UpdateMode(UpdateFlags::matter));
+}
+
+
+void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpdateMode)
+{
+  JsonObjectPtr states;
+  if (aProperties->get((mInputType+"States").c_str(), states)) {
+    JsonObjectPtr state;
+    if (states->get(mInputId.c_str(), state)) {
+      JsonObjectPtr o;
+      if (state->get("value", o, true)) {
+        bool position = o->boolValue() ? 1 : 0; // TODO: enhance for rocker support (0=neutral, 1=up, 2=down)
+        DsClickType clicktype = ct_none;
+        if (state->get("clickType", o, true)) {
+          clicktype = (DsClickType)(o->int32Value());
+        }
+        SwitchDevice* dev = deviceP<SwitchDevice>();
+        if (position!=mPosition) {
+          // actual change of position
+          int previousclicks = mClicks;
+          switch(clicktype) {
+            case ct_tip_1x:
+            case ct_tip_2x:
+            case ct_tip_3x:
+            case ct_tip_4x:
+              // update tips (count as clicks)
+              mClicks = (int)clicktype-ct_tip_1x+1;
+              goto multi;
+            case ct_click_1x:
+            case ct_click_2x:
+            case ct_click_3x:
+              // update clicks
+              mClicks = (int)clicktype-ct_click_1x+1;
+            multi:
+              if (position==0) {
+                // any tip or click detection also implies short release
+                SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
+              }
+              break;
+            case ct_progress:
+              if (position==0) {
+                // released
+                SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
+              }
+              else {
+                // pressed
+                SwitchServer::Instance().OnInitialPress(endpointId(), position); // report new position
+                if (mClicks>1) {
+                  // actual progress beyond single click
+                  SwitchServer::Instance().OnMultiPressOngoing(endpointId(), position, mClicks); // report new position
+                }
+              }
+              break;
+            case ct_complete:
+              if (position==0) {
+                SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
+              }
+              mClicks = 0;
+              break;
+            case ct_hold_start:
+              SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
+              break;
+            case ct_hold_end:
+              SwitchServer::Instance().OnLongRelease(endpointId(), mPosition); // report previous position
+              break;
+            default:
+              break;
+          }
+          mPosition = position;
+        }
+      }
+    }
+  }
+}
+
+
 #endif // P44_ADAPTERS

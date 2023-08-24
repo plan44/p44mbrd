@@ -345,6 +345,7 @@
 		ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */; };
 		ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0E28C7D0B900FE950E /* extutils.cpp */; };
 		ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */; };
+		ED692E9D2A9782A700A378D7 /* switchdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED692E9C2A9782A700A378D7 /* switchdevices.cpp */; };
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
@@ -1313,6 +1314,8 @@
 		ED60FD0F28C7D0BA00FE950E /* extutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = extutils.hpp; sourceTree = "<group>"; };
 		ED690B52286DC79500069215 /* p44mbrd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = p44mbrd; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44mbrd_main.cpp; sourceTree = "<group>"; };
+		ED692E9B2A9782A700A378D7 /* switchdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = switchdevices.h; sourceTree = "<group>"; };
+		ED692E9C2A9782A700A378D7 /* switchdevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = switchdevices.cpp; sourceTree = "<group>"; };
 		ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensordevices.cpp; sourceTree = "<group>"; };
 		ED7F9A1D2902C31B00A7CB48 /* sensordevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensordevices.h; sourceTree = "<group>"; };
 		ED7F9A222902DE5C00A7CB48 /* p44bridgeapi_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44bridgeapi_defs.h; sourceTree = "<group>"; };
@@ -1602,23 +1605,25 @@
 		ED24BDBA28A6709E0025CC14 /* devices */ = {
 			isa = PBXGroup;
 			children = (
+				ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */,
+				ED14F429294B76B8001C9D2E /* booleaninputdevices.h */,
 				ED24BDC328A6709E0025CC14 /* device_impl.h */,
 				ED24BDBE28A6709E0025CC14 /* device.cpp */,
 				ED24BDBB28A6709E0025CC14 /* device.h */,
-				ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */,
-				ED24BDBD28A6709E0025CC14 /* deviceonoff.h */,
-				ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */,
-				ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */,
 				ED24BDC128A6709E0025CC14 /* devicecolorcontrol.cpp */,
 				ED24BDC228A6709E0025CC14 /* devicecolorcontrol.h */,
 				ED014C812A93AB0900071593 /* devicefancontrol.cpp */,
 				ED014C822A93AB0900071593 /* devicefancontrol.h */,
+				ED24BDBC28A6709E0025CC14 /* devicelevelcontrol.cpp */,
+				ED24BDBF28A6709E0025CC14 /* devicelevelcontrol.h */,
+				ED24BDC028A6709E0025CC14 /* deviceonoff.cpp */,
+				ED24BDBD28A6709E0025CC14 /* deviceonoff.h */,
 				ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */,
 				ED072F612A69BA22007BBF71 /* devicewindowcovering.h */,
 				ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */,
 				ED7F9A1D2902C31B00A7CB48 /* sensordevices.h */,
-				ED14F428294B76B8001C9D2E /* booleaninputdevices.cpp */,
-				ED14F429294B76B8001C9D2E /* booleaninputdevices.h */,
+				ED692E9C2A9782A700A378D7 /* switchdevices.cpp */,
+				ED692E9B2A9782A700A378D7 /* switchdevices.h */,
 			);
 			path = devices;
 			sourceTree = "<group>";
@@ -3936,6 +3941,7 @@
 				ED24BDDF28A68AE20025CC14 /* socketcomm.cpp in Sources */,
 				ED36DE9D286E043500CA28EC /* SingletonConfigurationManager.cpp in Sources */,
 				ED36DD40286DD91500CA28EC /* ManualSetupPayloadGenerator.cpp in Sources */,
+				ED692E9D2A9782A700A378D7 /* switchdevices.cpp in Sources */,
 				ED36D891286DCDED00CA28EC /* MessageDefHelper.cpp in Sources */,
 				ED36DD11286DD8A000CA28EC /* BdxTransferSession.cpp in Sources */,
 				ED36DCFD286DD8A000CA28EC /* DefaultSessionResumptionStorage.cpp in Sources */,
