@@ -52,13 +52,13 @@ string BinaryInputDevice::description()
 
 // MARK: - BoolanStateDevice
 
-ClusterId booleanStateClusters[] = { BooleanState::Id };
+static ClusterId gBooleanStateClusters[] = { BooleanState::Id };
 
 BoolanStateDevice::BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(booleanStateClusters));
+  useClusterTemplates(Span<ClusterId>(gBooleanStateClusters));
 }
 
 
@@ -75,7 +75,7 @@ void BoolanStateDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMod
 
 // MARK: - ContactSensorDevice
 
-const EmberAfDeviceType gContactSensorTypes[] = {
+static const EmberAfDeviceType gContactSensorTypes[] = {
   { DEVICE_TYPE_MA_CONTACT_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
@@ -93,9 +93,9 @@ void ContactSensorDevice::finalizeDeviceDeclaration()
 
 // MARK: - OccupancySensingDevice
 
-ClusterId occupancySensingClusters[] = { OccupancySensing::Id };
+static ClusterId gOccupancySensingClusters[] = { OccupancySensing::Id };
 
-const EmberAfDeviceType gOccupancySensingTypes[] = {
+static const EmberAfDeviceType gOccupancySensingTypes[] = {
   { DEVICE_TYPE_MA_OCCUPANCY_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
@@ -105,7 +105,7 @@ OccupancySensingDevice::OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDe
   inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(occupancySensingClusters));
+  useClusterTemplates(Span<ClusterId>(gOccupancySensingClusters));
 }
 
 

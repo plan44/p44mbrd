@@ -35,7 +35,7 @@ using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-ClusterId bridgedDeviceCommonClusters[] = { Descriptor::Id, BridgedDeviceBasicInformation::Id };
+static ClusterId gBridgedDeviceCommonClusters[] = { Descriptor::Id, BridgedDeviceBasicInformation::Id };
 
 // MARK: - Device
 
@@ -53,7 +53,7 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
   mClusterDataVersionsP = nullptr; // we'll need
   mParentEndpointId = kInvalidEndpointId;
   // - declare common bridged device clusters
-  useClusterTemplates(Span<ClusterId>(bridgedDeviceCommonClusters));
+  useClusterTemplates(Span<ClusterId>(gBridgedDeviceCommonClusters));
 }
 
 
@@ -284,7 +284,7 @@ string Device::description()
 
 using namespace Identify;
 
-ClusterId identifiableDeviceClusters[] = { Identify::Id };
+static ClusterId gIdentifiableDeviceClusters[] = { Identify::Id };
 
 IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   Device(aDeviceInfoDelegate),
@@ -292,7 +292,7 @@ IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, Devi
   mIdentifyTime(0)
 {
   // - declare identify cluster
-  useClusterTemplates(Span<ClusterId>(identifiableDeviceClusters));
+  useClusterTemplates(Span<ClusterId>(gIdentifiableDeviceClusters));
 }
 
 
@@ -414,7 +414,7 @@ bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chi
 
 // MARK: - ComposedDevice
 
-const EmberAfDeviceType gComposedDeviceTypes[] = {
+static const EmberAfDeviceType gComposedDeviceTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 

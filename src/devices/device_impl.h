@@ -47,7 +47,7 @@ const int kDescriptorAttributeArraySize = 254;
 #define DEVICE_TYPE_MA_CONTACT_SENSOR 0x0015
 #define DEVICE_TYPE_MA_WINDOW_COVERING 0x0202
 #define DEVICE_TYPE_MA_FAN_DEVICE 0x002B
-
+#define DEVICE_TYPE_MA_GENERIC_SWITCH 0x000F
 
 // Device Version for dynamic endpoints:
 #define DEVICE_VERSION_DEFAULT 1

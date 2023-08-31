@@ -259,6 +259,14 @@ protected:
 public:
   P44_WindowCoveringImpl();
 
+  /// @name static value conversion helpers
+  /// @{
+  static double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed);
+  static bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed);
+  static Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed);
+  static bool bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aMotorDirectionReversed);
+  /// @}
+
 };
 
 
@@ -337,8 +345,8 @@ class P44_ButtonImpl : public P44_InputImpl
 {
   typedef P44_InputImpl inherited;
 
-  int mClicks;
-  int mPosition;
+  uint8_t mClicks;
+  uint8_t mPosition;
 
 public:
 

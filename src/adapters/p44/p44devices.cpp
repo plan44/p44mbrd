@@ -553,14 +553,14 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
 //   (and don't when reversed is set)
 
 
-static double matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
+double P44_WindowCoveringImpl::matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
 {
   double v = (double)aPercent100th/100;
   return !aMotorDirectionReversed ? 100-v : v; // reversed is dS standard (100% = fully lifted/open), so !aMotorDirectionReversed
 }
 
 
-static bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
+bool P44_WindowCoveringImpl::matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
 {
   if (aPercent100th.IsNull()) {
     aBridgeValue = JsonObject::newNull();
@@ -571,17 +571,17 @@ static bool matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100t
 }
 
 
-static Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
+Percent100ths P44_WindowCoveringImpl::bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
 {
   Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
   return !aMotorDirectionReversed ? 100*100 - v : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
 }
 
 
-static bool bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aInvert)
+bool P44_WindowCoveringImpl::bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aMotorDirectionReversed)
 {
   if (aBridgeValue && !aBridgeValue->isType(json_type_null)) {
-    aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aInvert));
+    aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aMotorDirectionReversed));
     return true;
   }
   aPercent100th.SetNull();
@@ -870,6 +870,10 @@ void P44_ButtonImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
   mClicks = 0;
   mPosition = 0;
   // configure switch
+  SwitchDevice* dev = deviceP<SwitchDevice>();
+  // - number of positions
+  Switch::Attributes::NumberOfPositions::Set(endpointId(), (uint8_t)dev->mActivePositions.size());
+  // - fixed features for P44 buttons
   Switch::Attributes::FeatureMap::Set(endpointId(),
     to_underlying(Switch::Feature::kMomentarySwitch) |
     to_underlying(Switch::Feature::kMomentarySwitchRelease) |
@@ -877,7 +881,6 @@ void P44_ButtonImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
     to_underlying(Switch::Feature::kMomentarySwitchMultiPress)
   );
   Switch::Attributes::MultiPressMax::Set(endpointId(), 4);
-  Switch::Attributes::NumberOfPositions::Set(endpointId(), 2); // TODO: enhance for rocker support (0=neutral, 1=up, 2=down)
   // current state
   parseButtonState(aDeviceInfo, UpdateMode());
 }
@@ -892,71 +895,75 @@ void P44_ButtonImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties
 
 void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpdateMode)
 {
+  SwitchDevice* dev = deviceP<SwitchDevice>();
   JsonObjectPtr states;
   if (aProperties->get((mInputType+"States").c_str(), states)) {
     JsonObjectPtr state;
-    if (states->get(mInputId.c_str(), state)) {
-      JsonObjectPtr o;
-      if (state->get("value", o, true)) {
-        bool position = o->boolValue() ? 1 : 0; // TODO: enhance for rocker support (0=neutral, 1=up, 2=down)
-        DsClickType clicktype = ct_none;
-        if (state->get("clickType", o, true)) {
-          clicktype = (DsClickType)(o->int32Value());
-        }
-        SwitchDevice* dev = deviceP<SwitchDevice>();
-        if (position!=mPosition) {
-          // actual change of position
-          int previousclicks = mClicks;
-          switch(clicktype) {
-            case ct_tip_1x:
-            case ct_tip_2x:
-            case ct_tip_3x:
-            case ct_tip_4x:
-              // update tips (count as clicks)
-              mClicks = (int)clicktype-ct_tip_1x+1;
-              goto multi;
-            case ct_click_1x:
-            case ct_click_2x:
-            case ct_click_3x:
-              // update clicks
-              mClicks = (int)clicktype-ct_click_1x+1;
-            multi:
-              if (position==0) {
-                // any tip or click detection also implies short release
-                SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
-              }
-              break;
-            case ct_progress:
-              if (position==0) {
-                // released
-                SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
-              }
-              else {
-                // pressed
-                SwitchServer::Instance().OnInitialPress(endpointId(), position); // report new position
-                if (mClicks>1) {
-                  // actual progress beyond single click
-                  SwitchServer::Instance().OnMultiPressOngoing(endpointId(), position, mClicks); // report new position
-                }
-              }
-              break;
-            case ct_complete:
-              if (position==0) {
-                SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
-              }
-              mClicks = 0;
-              break;
-            case ct_hold_start:
-              SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
-              break;
-            case ct_hold_end:
-              SwitchServer::Instance().OnLongRelease(endpointId(), mPosition); // report previous position
-              break;
-            default:
-              break;
+    // scan all active positions
+    for (DevicePushbutton::PositionsMap::iterator pos = dev->mActivePositions.begin(); pos!=dev->mActivePositions.end(); ++pos) {
+      if (states->get(pos->second.c_str(), state)) {
+        JsonObjectPtr o;
+        if (state->get("value", o, true)) {
+          bool position = o->boolValue() ? pos->first : 0; // active position or idle
+          DsClickType clicktype = ct_none;
+          if (state->get("clickType", o, true)) {
+            clicktype = (DsClickType)(o->int32Value());
           }
-          mPosition = position;
+          if (position!=mPosition) {
+            // actual change of position
+            switch(clicktype) {
+              case ct_tip_1x:
+              case ct_tip_2x:
+              case ct_tip_3x:
+              case ct_tip_4x:
+                // update tips (count as clicks)
+                mClicks = (int)clicktype-ct_tip_1x+1;
+                goto multi;
+              case ct_click_1x:
+              case ct_click_2x:
+              case ct_click_3x:
+                // update clicks
+                mClicks = (int)clicktype-ct_click_1x+1;
+              multi:
+                if (position==0) {
+                  // any tip or click detection also implies short release
+                  SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
+                }
+                break;
+              case ct_progress:
+                if (position==0) {
+                  // released
+                  SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
+                }
+                else {
+                  // pressed
+                  SwitchServer::Instance().OnInitialPress(endpointId(), position); // report new position
+                  if (mClicks>1) {
+                    // actual progress beyond single click
+                    SwitchServer::Instance().OnMultiPressOngoing(endpointId(), position, mClicks); // report new position
+                  }
+                }
+                break;
+              case ct_complete:
+                if (position==0) {
+                  SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
+                }
+                mClicks = 0;
+                break;
+              case ct_hold_start:
+                SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
+                break;
+              case ct_hold_end:
+                SwitchServer::Instance().OnLongRelease(endpointId(), mPosition); // report previous position
+                break;
+              default:
+                break;
+            }
+            mPosition = position;
+          }
         }
+        // only evaluate ONE button state (should be only one)
+        break;
       }
     }
   }

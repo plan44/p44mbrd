@@ -36,7 +36,7 @@
 
 #define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
 
-ClusterId dimmableLightClusters[] = { LevelControl::Id };
+static ClusterId gLevelControlClusters[] = { LevelControl::Id };
 
 // MARK: - DeviceLevelControl
 
@@ -49,7 +49,7 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
   mLevel(0)
 {
   // - declare specific clusters
-  useClusterTemplates(Span<ClusterId>(dimmableLightClusters));
+  useClusterTemplates(Span<ClusterId>(gLevelControlClusters));
 }
 
 
@@ -465,7 +465,7 @@ EmberAfStatus DeviceLevelControl::handleWriteAttribute(ClusterId clusterId, chip
 
 // MARK: - DeviceDimmableLight
 
-const EmberAfDeviceType gDimmableLightTypes[] = {
+static const EmberAfDeviceType gDimmableLightTypes[] = {
   { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
@@ -478,7 +478,7 @@ void DeviceDimmableLight::finalizeDeviceDeclaration()
 
 // MARK: - DeviceDimmablePluginUnit
 
-const EmberAfDeviceType gDimmablePluginTypes[] = {
+static const EmberAfDeviceType gDimmablePluginTypes[] = {
   { DEVICE_TYPE_MA_DIMMABLE_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };

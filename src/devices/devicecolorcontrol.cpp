@@ -43,17 +43,17 @@ using namespace Clusters;
 #define COLOR_TEMP_PHYSICAL_MAX (1000)
 #define COLOR_TEMP_DEFAULT (370) // 2500K = warm white
 
-const EmberAfDeviceType gCTLightTypes[] = {
+static const EmberAfDeviceType gCTLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-const EmberAfDeviceType gColorLightTypes[] = {
+static const EmberAfDeviceType gColorLightTypes[] = {
   { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ClusterId colorLightClusters[] = { ColorControl::Id };
+static ClusterId gColorLightClusters[] = { ColorControl::Id };
 
 
 // MARK: - DeviceColorControl
@@ -72,7 +72,7 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColo
   mY(0)
 {
   // - declare specific clusters
-  useClusterTemplates(Span<ClusterId>(colorLightClusters));
+  useClusterTemplates(Span<ClusterId>(gColorLightClusters));
 }
 
 

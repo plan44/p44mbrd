@@ -36,19 +36,19 @@ using namespace Clusters;
 
 // MARK: - Temperature Sensor Device
 
-const EmberAfDeviceType gTemperatureSensorTypes[] = {
+static const EmberAfDeviceType gTemperatureSensorTypes[] = {
   { DEVICE_TYPE_MA_TEMP_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ClusterId temperatureSensorClusters[] = { TemperatureMeasurement::Id };
+static ClusterId gTemperatureSensorClusters[] = { TemperatureMeasurement::Id };
 
 
 DeviceTemperature::DeviceTemperature(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(temperatureSensorClusters));
+  useClusterTemplates(Span<ClusterId>(gTemperatureSensorClusters));
 }
 
 
@@ -87,19 +87,19 @@ void DeviceTemperature::updateMeasuredValue(double aMeasuredValue, bool aIsValid
 
 // MARK: - Illumination Sensor Device
 
-const EmberAfDeviceType gIlluminanceSensorTypes[] = {
+static const EmberAfDeviceType gIlluminanceSensorTypes[] = {
   { DEVICE_TYPE_MA_ILLUM_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ClusterId illuminanceSensorClusters[] = { IlluminanceMeasurement::Id };
+static ClusterId gIlluminanceSensorClusters[] = { IlluminanceMeasurement::Id };
 
 
 DeviceIlluminance::DeviceIlluminance(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(illuminanceSensorClusters));
+  useClusterTemplates(Span<ClusterId>(gIlluminanceSensorClusters));
 }
 
 
@@ -137,19 +137,19 @@ void DeviceIlluminance::updateMeasuredValue(double aMeasuredValue, bool aIsValid
 
 // MARK: - Humidity Sensor Device
 
-const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
+static const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
   { DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ClusterId relativeHumiditySensorClusters[] = { RelativeHumidityMeasurement::Id };
+static ClusterId gRelativeHumiditySensorClusters[] = { RelativeHumidityMeasurement::Id };
 
 
 DeviceHumidity::DeviceHumidity(DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aDeviceInfoDelegate)
 {
   // - declare device specific clusters
-  useClusterTemplates(Span<ClusterId>(relativeHumiditySensorClusters));
+  useClusterTemplates(Span<ClusterId>(gRelativeHumiditySensorClusters));
 }
 
 

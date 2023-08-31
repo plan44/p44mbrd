@@ -35,7 +35,7 @@ using namespace Clusters;
 // MARK: - OnOff Device specific declarations
 
 
-ClusterId onOffLightClusters[] = { OnOff::Id, Groups::Id, Scenes::Id };
+static ClusterId gOnOffDeviceClusters[] = { OnOff::Id, Groups::Id, Scenes::Id };
 
 
 // MARK: - DeviceOnOff
@@ -51,7 +51,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   mStartUpOnOff(to_underlying(OnOff::OnOffStartUpOnOff::kOff))
 {
   // - declare onoff device specific clusters
-  useClusterTemplates(Span<ClusterId>(onOffLightClusters));
+  useClusterTemplates(Span<ClusterId>(gOnOffDeviceClusters));
 }
 
 
@@ -118,7 +118,7 @@ string DeviceOnOff::description()
 
 // MARK: - DeviceOnOffLight
 
-const EmberAfDeviceType gOnOffLightTypes[] = {
+static const EmberAfDeviceType gOnOffLightTypes[] = {
   { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
@@ -131,7 +131,7 @@ void DeviceOnOffLight::finalizeDeviceDeclaration()
 
 // MARK: - DeviceOnOffPluginUnit
 
-const EmberAfDeviceType gOnOffPluginTypes[] = {
+static const EmberAfDeviceType gOnOffPluginTypes[] = {
   { DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
