@@ -36,16 +36,12 @@ class SwitchDevice : public Device
 
 public:
 
-  SwitchDevice(DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aDeviceInfoDelegate) {};
+  typedef std::map<int, string> PositionsMap;
+  PositionsMap mActivePositions;
 
-  /// @brief report switch event
-  /// @param aNewPosition position the switch has reached now
-  /// @param aPreviousPosition position the switch had before
-  /// @param aLong beginning or end of a long press detection
-  /// @param aCount number of multi-presses detected in the current sequence so far.
-  ///   0=none/unknown, as could be after initial press before short/long-press separation timeout
-  ///   or events between clicks that do not carry the count
-  void reportSwitchEvent(int aNewPosition, int aPreviousPosition, bool aLong, int aCount);
+  SwitchDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+
+  void setActivePosition(int aPosition, const string& aPositionName);
 
 };
 
@@ -56,7 +52,7 @@ class DevicePushbutton : public SwitchDevice
 {
   typedef SwitchDevice inherited;
 public:
-  DevicePushbutton(DeviceInfoDelegate& aDeviceInfoDelegate);
+  DevicePushbutton(DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aDeviceInfoDelegate) {};
   virtual const char *deviceType() override { return "push button"; }
   virtual bool isLatching() { return false; };
 protected:

@@ -917,13 +917,13 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
               case ct_tip_3x:
               case ct_tip_4x:
                 // update tips (count as clicks)
-                mClicks = (int)clicktype-ct_tip_1x+1;
+                mClicks = (uint8_t)clicktype-ct_tip_1x+1;
                 goto multi;
               case ct_click_1x:
               case ct_click_2x:
               case ct_click_3x:
                 // update clicks
-                mClicks = (int)clicktype-ct_click_1x+1;
+                mClicks = (uint8_t)clicktype-ct_click_1x+1;
               multi:
                 if (position==0) {
                   // any tip or click detection also implies short release

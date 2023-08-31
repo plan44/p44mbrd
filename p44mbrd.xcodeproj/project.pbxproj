@@ -1334,7 +1334,6 @@
 		ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libev.4.dylib; path = ../../../../../../opt/homebrew/Cellar/libev/4.33/lib/libev.4.dylib; sourceTree = "<group>"; };
 		ED9845C12A6FD8100057C0D8 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
 		ED9845C22A6FD8100057C0D8 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
-		ED9845C72A6FD8100057C0D8 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
 		ED9845C82A6FD8100057C0D8 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
 		ED9845C92A6FD8100057C0D8 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
 		ED9845CA2A6FD8100057C0D8 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
@@ -3454,7 +3453,6 @@
 		ED9845C62A6FD8100057C0D8 /* zap-generated */ = {
 			isa = PBXGroup;
 			children = (
-				ED9845C72A6FD8100057C0D8 /* CHIPClientCallbacks.h */,
 				ED9845C82A6FD8100057C0D8 /* endpoint_config.h */,
 				ED9845C92A6FD8100057C0D8 /* CHIPClusters.h */,
 				ED9845CA2A6FD8100057C0D8 /* access.h */,

@@ -286,6 +286,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               string inputid;
               JsonObjectPtr inputdesc;
               inputdescs->resetKeyIteration();
+              bool moreInputs = false; // default to one input per device
               while (inputdescs->nextKeyValue(inputid, inputdesc)) {
                 switch (inputType) {
                   case sensor: {
@@ -320,11 +321,58 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                       }
                     }
                     break;
-                  case button: // TODO: maybe handle seperately, multiple button definitions in one device are usually coupled
+                  case button:
+                    if (inputdesc->get("buttonType", o)) {
+                      int buttonType = o->int32Value();
+                      int buttonElementID = buttonElement_center; // default to single button/center
+                      if (inputdesc->get("buttonElementID", o)) {
+                        buttonElementID = o->int32Value();
+                      }
+                      // determine input type
+                      switch(buttonType) {
+                        case buttonType_undefined:
+                        case buttonType_single:
+                          // single pushbutton
+                          dev = new P44_Pushbutton();
+                          {
+                            auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
+                            if (switchDevP) {
+                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                              switchDevP->setActivePosition(1, inputid);
+                            }
+                          }
+                          break;
+                        case buttonType_2way:
+                          // two-way rocker
+                          if (moreInputs) {
+                            // we were waiting for the second half of the rocker, this is it
+                            moreInputs = false;
+                            // add second position to existing device
+                            auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
+                            if (switchDevP) {
+                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                              switchDevP->setActivePosition(buttonElementID==buttonElement_up ? 1 : 2, inputid);
+                            }
+                          }
+                          else {
+                            // we need to have more inputs to form the rocker device
+                            moreInputs = true;
+                            SwitchDevice* switchDevP = new P44_Pushbutton();
+                            dev = switchDevP;
+                            // add neutral and first position
+                            if (switchDevP) {
+                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                              switchDevP->setActivePosition(buttonElementID==buttonElement_down ? 2 : 1, inputid);
+                            }
+                          }
+                          break;
+                      }
+                    }
+                    break;
                   default:
                     break;
                 }
-                if (dev) {
+                if (dev && !moreInputs) {
                   P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
                   devices.push_back(dev);
                   dev.reset();
