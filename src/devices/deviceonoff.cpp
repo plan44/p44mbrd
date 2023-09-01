@@ -35,7 +35,7 @@ using namespace Clusters;
 // MARK: - OnOff Device specific declarations
 
 
-static ClusterId gOnOffDeviceClusters[] = { OnOff::Id };
+static ClusterId gOnOffDeviceClusters[] = { OnOff::Id, Groups::Id, Scenes::Id };
 
 
 // MARK: - DeviceOnOff
