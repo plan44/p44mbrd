@@ -98,7 +98,7 @@ string P44_DeviceImpl::zone() const
 
 // MARK: P44 specific methods
 
-void P44_DeviceImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_DeviceImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType, const char* aInputId)
 {
   // parse common info from bridge
   JsonObjectPtr o = aDeviceInfo->get("dSUID");
@@ -239,9 +239,9 @@ void P44_IdentifiableImpl::identify(int aDurationS)
 
 // MARK: P44 internal implementation
 
-void P44_OutputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_OutputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType, const char* aInputId)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  inherited::initBridgedInfo(aDeviceInfo, aInputType, aInputId);
   // output devices should know which one is the default channel
   JsonObjectPtr o = aDeviceInfo->get("channelDescriptions");
   o->resetKeyIteration();
@@ -478,9 +478,9 @@ P44_ColorControlImpl::P44_ColorControlImpl()
 }
 
 
-void P44_ColorControlImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_ColorControlImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType, const char* aInputId)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  inherited::initBridgedInfo(aDeviceInfo, aInputType, aInputId);
   // no extra info at this level so far -> NOP
 }
 
@@ -752,19 +752,20 @@ const string P44_InputImpl::endpointUIDSuffix() const
 }
 
 
-void P44_InputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_InputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType, const char* aInputId)
 {
   mInputType = aInputType;
   mInputId = aInputId;
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  inherited::initBridgedInfo(aDeviceInfo, aInputType, aInputId);
 }
 
 
 // MARK: - P44_SensorImpl
 
-void P44_SensorImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_SensorImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  inherited::updateBridgedInfo(aDeviceInfo);
+
   JsonObjectPtr o;
   double min = 0;
   double max = 0;
@@ -773,19 +774,22 @@ void P44_SensorImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
   bool hasMax = false;
 
   SensorDevice* dev = deviceP<SensorDevice>();
-  if (aDeviceComponentInfo->get("resolution", o)) {
-    // tolerance is half of the resolution (when resolution is 1, true value might be max +/- 0.5 resolution away)
-    tolerance = o->doubleValue()/2;
+  JsonObjectPtr descriptions;
+  if (aDeviceInfo->get((mInputType+"Descriptions").c_str(), descriptions)) {
+    if (descriptions->get("resolution", o)) {
+      // tolerance is half of the resolution (when resolution is 1, true value might be max +/- 0.5 resolution away)
+      tolerance = o->doubleValue()/2;
+    }
+    if (descriptions->get("min", o)) {
+      hasMin = true;
+      min = o->doubleValue();
+    }
+    if (descriptions->get("max", o)) {
+      hasMax = true;
+      max = o->doubleValue();
+    }
+    dev->setupSensorParams(hasMin, min, hasMax, max, tolerance);
   }
-  if (aDeviceComponentInfo->get("min", o)) {
-    hasMin = true;
-    min = o->doubleValue();
-  }
-  if (aDeviceComponentInfo->get("max", o)) {
-    hasMax = true;
-    max = o->doubleValue();
-  }
-  dev->setupSensorParams(hasMin, min, hasMax, max, tolerance);
   // also get current value from xxxStates
   parseSensorValue(aDeviceInfo, UpdateMode());
 }
@@ -823,9 +827,9 @@ void P44_SensorImpl::parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpd
 // MARK: - P44_BinaryInputImpl
 
 
-void P44_BinaryInputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_BinaryInputImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
+  inherited::updateBridgedInfo(aDeviceInfo);
   // get current value from xxxStates
   parseInputValue(aDeviceInfo, UpdateMode());
 }
@@ -863,10 +867,8 @@ void P44_BinaryInputImpl::parseInputValue(JsonObjectPtr aProperties, UpdateMode 
 
 #include <app/clusters/switch-server/switch-server.h>
 
-void P44_ButtonImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo, const char* aInputType, const char* aInputId)
+void P44_ButtonImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
-  inherited::initBridgedInfo(aDeviceInfo, aDeviceComponentInfo, aInputType, aInputId);
-  // get current state from xxxStates
   mClicks = 0;
   mPosition = 0;
   // configure switch
@@ -881,7 +883,7 @@ void P44_ButtonImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aD
     to_underlying(Switch::Feature::kMomentarySwitchMultiPress)
   );
   Switch::Attributes::MultiPressMax::Set(endpointId(), 4);
-  // current state
+  // get current value from xxxStates
   parseButtonState(aDeviceInfo, UpdateMode());
 }
 

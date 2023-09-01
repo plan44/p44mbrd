@@ -104,7 +104,7 @@ public:
   /// @param aDeviceComponentInfo the JSON description object for the output or input that should be handled
   /// @param aInputType the name of the input type (sensor, binaryInput, button), or NULL if device is not an input device
   /// @param aInputId the name of the input ID within the input type, or NULL if device not an input device
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr);
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr);
 
   /// called to handle notifications from bridge
   bool handleBridgeNotification(const string aNotification, JsonObjectPtr aParams);
@@ -158,7 +158,7 @@ protected:
   /// the default channel ID
   string mDefaultChannelId;
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
   virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) {};
@@ -226,7 +226,7 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
   /// @}
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
 
 public:
@@ -300,7 +300,7 @@ protected:
 
 public:
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
 
 protected:
 
@@ -315,7 +315,7 @@ class P44_SensorImpl : public P44_InputImpl
 
 public:
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 private:
@@ -331,7 +331,7 @@ class P44_BinaryInputImpl : public P44_InputImpl
 
 public:
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 private:
@@ -350,7 +350,7 @@ class P44_ButtonImpl : public P44_InputImpl
 
 public:
 
-  virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, JsonObjectPtr aDeviceComponentInfo = nullptr, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
 
 private:

@@ -209,7 +209,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           }
           if (dev) {
             OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
-            P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
+            P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON);
             devices.push_back(dev);
           }
         }
@@ -276,7 +276,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               }
             }
             if (dev) {
-              P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, outputdesc);
+              P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON);
               devices.push_back(dev);
               dev.reset();
             }
@@ -378,7 +378,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                     break;
                 }
                 if (dev && !moreInputs) {
-                  P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputdesc, inputTypeNames[inputType], inputid.c_str());
+                  P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
                   devices.push_back(dev);
                   dev.reset();
                 }
