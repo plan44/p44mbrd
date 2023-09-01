@@ -33,7 +33,7 @@
   ],
   "endpointTypes": [
     {
-      "id": 29,
+      "id": 37,
       "name": "MA-bridge",
       "deviceTypeRef": {
         "id": 2,
@@ -5061,7 +5061,7 @@
       ]
     },
     {
-      "id": 30,
+      "id": 36,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 6,
@@ -5819,7 +5819,7 @@
       ]
     },
     {
-      "id": 31,
+      "id": 35,
       "name": "Anonymous Endpoint Type",
       "deviceTypeRef": {
         "id": 11,
@@ -6545,6 +6545,38 @@
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "SceneTableSize",
+              "code": 6,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int16u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "64",
+              "reportable": 1,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "RemainingCapacity",
+              "code": 7,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int8u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "32",
               "reportable": 1,
               "minInterval": 1,
               "maxInterval": 65534,
