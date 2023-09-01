@@ -37,6 +37,49 @@ namespace app {
 
 namespace Clusters {
 
+namespace Actions {
+
+void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandPath & aCommandPath, TLV::TLVReader & aDataTlv)
+{
+    CHIP_ERROR TLVError = CHIP_NO_ERROR;
+    bool wasHandled = false;
+    {
+        switch (aCommandPath.mCommandId)
+        {
+        case Commands::InstantAction::Id: {
+        Commands::InstantAction::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfActionsClusterInstantActionCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::InstantActionWithTransition::Id: {
+        Commands::InstantActionWithTransition::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfActionsClusterInstantActionWithTransitionCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        default: {
+            // Unrecognized command ID, error status will apply.
+            apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::UnsupportedCommand);
+            ChipLogError(Zcl, "Unknown command " ChipLogFormatMEI " for cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mCommandId), ChipLogValueMEI(aCommandPath.mClusterId));
+            return;
+        }
+        }
+    }
+
+    if (CHIP_NO_ERROR != TLVError || !wasHandled)
+    {
+      apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::InvalidCommand);
+      ChipLogProgress(Zcl, "Failed to dispatch command, TLVError=%" CHIP_ERROR_FORMAT, TLVError.Format());
+    }
+}
+
+}
+
 namespace AdministratorCommissioning {
 
 void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandPath & aCommandPath, TLV::TLVReader & aDataTlv)
@@ -482,6 +525,81 @@ void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandP
 
 }
 
+namespace Groups {
+
+void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandPath & aCommandPath, TLV::TLVReader & aDataTlv)
+{
+    CHIP_ERROR TLVError = CHIP_NO_ERROR;
+    bool wasHandled = false;
+    {
+        switch (aCommandPath.mCommandId)
+        {
+        case Commands::AddGroup::Id: {
+        Commands::AddGroup::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterAddGroupCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::ViewGroup::Id: {
+        Commands::ViewGroup::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterViewGroupCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::GetGroupMembership::Id: {
+        Commands::GetGroupMembership::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterGetGroupMembershipCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::RemoveGroup::Id: {
+        Commands::RemoveGroup::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterRemoveGroupCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::RemoveAllGroups::Id: {
+        Commands::RemoveAllGroups::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterRemoveAllGroupsCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        case Commands::AddGroupIfIdentifying::Id: {
+        Commands::AddGroupIfIdentifying::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+        wasHandled = emberAfGroupsClusterAddGroupIfIdentifyingCallback(apCommandObj, aCommandPath, commandData);
+        }
+            break;
+        }
+        default: {
+            // Unrecognized command ID, error status will apply.
+            apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::UnsupportedCommand);
+            ChipLogError(Zcl, "Unknown command " ChipLogFormatMEI " for cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mCommandId), ChipLogValueMEI(aCommandPath.mClusterId));
+            return;
+        }
+        }
+    }
+
+    if (CHIP_NO_ERROR != TLVError || !wasHandled)
+    {
+      apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::InvalidCommand);
+      ChipLogProgress(Zcl, "Failed to dispatch command, TLVError=%" CHIP_ERROR_FORMAT, TLVError.Format());
+    }
+}
+
+}
+
 namespace Identify {
 
 void DispatchServerCommand(CommandHandler * apCommandObj, const ConcreteCommandPath & aCommandPath, TLV::TLVReader & aDataTlv)
@@ -856,6 +974,9 @@ void DispatchSingleClusterCommand(const ConcreteCommandPath & aCommandPath, TLV:
 {
     switch (aCommandPath.mClusterId)
     {
+    case Clusters::Actions::Id:
+        Clusters::Actions::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
+        break;
     case Clusters::AdministratorCommissioning::Id:
         Clusters::AdministratorCommissioning::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
         break;
@@ -876,6 +997,9 @@ void DispatchSingleClusterCommand(const ConcreteCommandPath & aCommandPath, TLV:
         break;
     case Clusters::GroupKeyManagement::Id:
         Clusters::GroupKeyManagement::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
+        break;
+    case Clusters::Groups::Id:
+        Clusters::Groups::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
         break;
     case Clusters::Identify::Id:
         Clusters::Identify::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
