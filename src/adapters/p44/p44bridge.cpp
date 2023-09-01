@@ -244,6 +244,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               }
               else if (behaviourtype=="ventilation") {
                 // actual ventilation device
+                OLOG(LOG_NOTICE, "found bridgeable ventilation behaviour device '%s': %s", name.c_str(), dsuid.c_str());
                 // TODO: actually enable when P44_FullFeatureFanDevice exists
                 /*
                 if (hasModelFeature(aDeviceJSON, "fcu")) {
@@ -259,6 +260,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               }
               else if (groups && groups->get("10")) {
                 // generic output in the ventilation group -> also model as fan control device
+                OLOG(LOG_NOTICE, "found bridgeable standard output in ventilation group device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                 dev = new P44_SimpleFanDevice();
               }
               else {
@@ -378,6 +380,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                     break;
                 }
                 if (dev && !moreInputs) {
+                  OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", name.c_str(), inputid.c_str(), dsuid.c_str());
                   P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
                   devices.push_back(dev);
                   dev.reset();
