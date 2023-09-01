@@ -195,12 +195,17 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           // bridging hint should determine bridged device
           string bridgeAs = o->stringValue();
           if (bridgeAs=="on-off") {
-            if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_OnOffLightDevice();
+            if (groups && groups->get("2")) dev = new P44_WindowCoveringDevice(); // group_grey_shadow
+            else if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_OnOffLightDevice();
             else dev = new P44_OnOffPluginUnitDevice();
           }
           else if (bridgeAs=="level-control") {
-            if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_DimmableLightDevice();
+            if (groups && groups->get("2")) dev = new P44_WindowCoveringDevice(); // group_grey_shadow
+            else if (behaviourtype=="light" && groups && groups->get("1")) dev = new P44_DimmableLightDevice(); // group_yellow_light
             else dev = new P44_DimmablePluginUnitDevice();
+          }
+          else if (bridgeAs=="window-covering") {
+            dev = new P44_WindowCoveringDevice();
           }
           if (dev) {
             OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
@@ -215,7 +220,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
             if (outputdesc->get("function", o)) {
               int outputfunction = (int)o->int32Value();
               // output device
-              if (behaviourtype=="light" && groups && groups->get("1")) {
+              if (behaviourtype=="light" && groups && groups->get("1")) { // group_yellow_light
                 // this is a light device
                 OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                 switch(outputfunction) {
