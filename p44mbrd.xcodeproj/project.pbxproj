@@ -358,9 +358,9 @@
 		ED9845FE2A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */; };
 		ED9845FF2A72543E0057C0D8 /* scenes-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F92A72543E0057C0D8 /* scenes-server.cpp */; };
 		ED9846002A72543E0057C0D8 /* SceneTableImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845FA2A72543E0057C0D8 /* SceneTableImpl.cpp */; };
-		ED98463A2A725E140057C0D8 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98461D2A725E130057C0D8 /* callback-stub.cpp */; };
-		ED98463B2A725E140057C0D8 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */; };
 		ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98463E2A73C6270057C0D8 /* matter_utils.cpp */; };
+		ED9B79172AC5A16E00B09890 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9B79102AC5A16E00B09890 /* IMClusterCommandHandler.cpp */; };
+		ED9B79182AC5A16E00B09890 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9B79152AC5A16E00B09890 /* callback-stub.cpp */; };
 		EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388D829E6EF2700BDAED4 /* basic-information.cpp */; };
 		EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */; };
 		EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */; };
@@ -1332,13 +1332,6 @@
 		ED9845982A6ED9200057C0D8 /* libssl.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libssl.3.dylib"; sourceTree = "<group>"; };
 		ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libcrypto.3.dylib"; sourceTree = "<group>"; };
 		ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libev.4.dylib; path = ../../../../../../opt/homebrew/Cellar/libev/4.33/lib/libev.4.dylib; sourceTree = "<group>"; };
-		ED9845C12A6FD8100057C0D8 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
-		ED9845C22A6FD8100057C0D8 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
-		ED9845C82A6FD8100057C0D8 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
-		ED9845C92A6FD8100057C0D8 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
-		ED9845CA2A6FD8100057C0D8 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
-		ED9845CB2A6FD8100057C0D8 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
-		ED9845CC2A6FD8100057C0D8 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
 		ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReportSchedulerImpl.cpp; sourceTree = "<group>"; };
 		ED9845DC2A6FD9040057C0D8 /* ReportSchedulerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportSchedulerImpl.h; sourceTree = "<group>"; };
 		ED9845DE2A6FD9040057C0D8 /* ReportScheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportScheduler.h; sourceTree = "<group>"; };
@@ -1353,17 +1346,16 @@
 		ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtensionFieldSetsImpl.cpp; sourceTree = "<group>"; };
 		ED9845F92A72543E0057C0D8 /* scenes-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "scenes-server.cpp"; sourceTree = "<group>"; };
 		ED9845FA2A72543E0057C0D8 /* SceneTableImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneTableImpl.cpp; sourceTree = "<group>"; };
-		ED98461D2A725E130057C0D8 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
-		ED98461E2A725E130057C0D8 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
-		ED9846232A725E130057C0D8 /* CHIPClientCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClientCallbacks.h; sourceTree = "<group>"; };
-		ED9846242A725E130057C0D8 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
-		ED9846252A725E130057C0D8 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
-		ED9846262A725E130057C0D8 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
-		ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
-		ED9846282A725E130057C0D8 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
 		ED98463E2A73C6270057C0D8 /* matter_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = matter_utils.cpp; sourceTree = "<group>"; };
 		ED98463F2A73C6270057C0D8 /* matter_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matter_utils.h; sourceTree = "<group>"; };
 		ED9846412A73C7080057C0D8 /* matter_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matter_common.h; sourceTree = "<group>"; };
+		ED9B790D2AC5A16E00B09890 /* endpoint_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endpoint_config.h; sourceTree = "<group>"; };
+		ED9B790E2AC5A16E00B09890 /* CHIPClusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPClusters.h; sourceTree = "<group>"; };
+		ED9B790F2AC5A16E00B09890 /* access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = access.h; sourceTree = "<group>"; };
+		ED9B79102AC5A16E00B09890 /* IMClusterCommandHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IMClusterCommandHandler.cpp; sourceTree = "<group>"; };
+		ED9B79112AC5A16E00B09890 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
+		ED9B79152AC5A16E00B09890 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
+		ED9B79162AC5A16E00B09890 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
 		EDB388D729E6EF2700BDAED4 /* basic-information.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "basic-information.h"; sourceTree = "<group>"; };
 		EDB388D829E6EF2700BDAED4 /* basic-information.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "basic-information.cpp"; sourceTree = "<group>"; };
 		EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLVBackingStore.h; sourceTree = "<group>"; };
@@ -1581,6 +1573,7 @@
 		ED24BDB928A670570025CC14 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				ED9B79082AC5A16E00B09890 /* pregen */,
 				EDF3F539289BF3C100A82418 /* args.gni */,
 				EDF3F53A289BF3C100A82418 /* BUILD.gn */,
 				ED690B65286DC80800069215 /* connectedhomeip */,
@@ -3386,9 +3379,7 @@
 				EDCA29592A7A7C9100465C00 /* .clang-format */,
 				ED1A3C9D2A4346B0009746B8 /* README.md */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
-				ED9846022A725E130057C0D8 /* gen */,
 				ED36DE12286DDD5200CA28EC /* xcode-include */,
-				ED9845BD2A6FD8100057C0D8 /* xcode-gen-copy */,
 				ED24BDB928A670570025CC14 /* src */,
 				ED690B53286DC79500069215 /* Products */,
 				ED36DE40286DFE6100CA28EC /* Frameworks */,
@@ -3416,52 +3407,6 @@
 			path = third_party/connectedhomeip;
 			sourceTree = "<group>";
 		};
-		ED9845BD2A6FD8100057C0D8 /* xcode-gen-copy */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845BE2A6FD8100057C0D8 /* zap */,
-			);
-			path = "xcode-gen-copy";
-			sourceTree = "<group>";
-		};
-		ED9845BE2A6FD8100057C0D8 /* zap */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845C02A6FD8100057C0D8 /* app */,
-				ED9845C52A6FD8100057C0D8 /* zapgen */,
-			);
-			path = zap;
-			sourceTree = "<group>";
-		};
-		ED9845C02A6FD8100057C0D8 /* app */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845C12A6FD8100057C0D8 /* callback-stub.cpp */,
-				ED9845C22A6FD8100057C0D8 /* PluginApplicationCallbacks.h */,
-			);
-			path = app;
-			sourceTree = "<group>";
-		};
-		ED9845C52A6FD8100057C0D8 /* zapgen */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845C62A6FD8100057C0D8 /* zap-generated */,
-			);
-			path = zapgen;
-			sourceTree = "<group>";
-		};
-		ED9845C62A6FD8100057C0D8 /* zap-generated */ = {
-			isa = PBXGroup;
-			children = (
-				ED9845C82A6FD8100057C0D8 /* endpoint_config.h */,
-				ED9845C92A6FD8100057C0D8 /* CHIPClusters.h */,
-				ED9845CA2A6FD8100057C0D8 /* access.h */,
-				ED9845CB2A6FD8100057C0D8 /* IMClusterCommandHandler.cpp */,
-				ED9845CC2A6FD8100057C0D8 /* gen_config.h */,
-			);
-			path = "zap-generated";
-			sourceTree = "<group>";
-		};
 		ED9845F12A72543E0057C0D8 /* scenes-server */ = {
 			isa = PBXGroup;
 			children = (
@@ -3478,54 +3423,6 @@
 			path = "scenes-server";
 			sourceTree = "<group>";
 		};
-		ED9846022A725E130057C0D8 /* gen */ = {
-			isa = PBXGroup;
-			children = (
-				ED98461A2A725E130057C0D8 /* zap */,
-			);
-			name = gen;
-			path = src/out/openwrt/mipsel_24kc/release/gen;
-			sourceTree = "<group>";
-		};
-		ED98461A2A725E130057C0D8 /* zap */ = {
-			isa = PBXGroup;
-			children = (
-				ED98461C2A725E130057C0D8 /* app */,
-				ED9846212A725E130057C0D8 /* zapgen */,
-			);
-			path = zap;
-			sourceTree = "<group>";
-		};
-		ED98461C2A725E130057C0D8 /* app */ = {
-			isa = PBXGroup;
-			children = (
-				ED98461D2A725E130057C0D8 /* callback-stub.cpp */,
-				ED98461E2A725E130057C0D8 /* PluginApplicationCallbacks.h */,
-			);
-			path = app;
-			sourceTree = "<group>";
-		};
-		ED9846212A725E130057C0D8 /* zapgen */ = {
-			isa = PBXGroup;
-			children = (
-				ED9846222A725E130057C0D8 /* zap-generated */,
-			);
-			path = zapgen;
-			sourceTree = "<group>";
-		};
-		ED9846222A725E130057C0D8 /* zap-generated */ = {
-			isa = PBXGroup;
-			children = (
-				ED9846232A725E130057C0D8 /* CHIPClientCallbacks.h */,
-				ED9846242A725E130057C0D8 /* endpoint_config.h */,
-				ED9846252A725E130057C0D8 /* CHIPClusters.h */,
-				ED9846262A725E130057C0D8 /* access.h */,
-				ED9846272A725E130057C0D8 /* IMClusterCommandHandler.cpp */,
-				ED9846282A725E130057C0D8 /* gen_config.h */,
-			);
-			path = "zap-generated";
-			sourceTree = "<group>";
-		};
 		ED98463D2A73C5F10057C0D8 /* utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -3533,6 +3430,76 @@
 				ED98463F2A73C6270057C0D8 /* matter_utils.h */,
 			);
 			path = utils;
+			sourceTree = "<group>";
+		};
+		ED9B79082AC5A16E00B09890 /* pregen */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B79092AC5A16E00B09890 /* p44mbrd */,
+			);
+			path = pregen;
+			sourceTree = "<group>";
+		};
+		ED9B79092AC5A16E00B09890 /* p44mbrd */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B790A2AC5A16E00B09890 /* zap */,
+				ED9B79122AC5A16E00B09890 /* codegen */,
+			);
+			path = p44mbrd;
+			sourceTree = "<group>";
+		};
+		ED9B790A2AC5A16E00B09890 /* zap */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B790B2AC5A16E00B09890 /* app-templates */,
+			);
+			path = zap;
+			sourceTree = "<group>";
+		};
+		ED9B790B2AC5A16E00B09890 /* app-templates */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B790C2AC5A16E00B09890 /* zap-generated */,
+			);
+			path = "app-templates";
+			sourceTree = "<group>";
+		};
+		ED9B790C2AC5A16E00B09890 /* zap-generated */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B790D2AC5A16E00B09890 /* endpoint_config.h */,
+				ED9B790E2AC5A16E00B09890 /* CHIPClusters.h */,
+				ED9B790F2AC5A16E00B09890 /* access.h */,
+				ED9B79102AC5A16E00B09890 /* IMClusterCommandHandler.cpp */,
+				ED9B79112AC5A16E00B09890 /* gen_config.h */,
+			);
+			path = "zap-generated";
+			sourceTree = "<group>";
+		};
+		ED9B79122AC5A16E00B09890 /* codegen */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B79132AC5A16E00B09890 /* cpp-app */,
+			);
+			path = codegen;
+			sourceTree = "<group>";
+		};
+		ED9B79132AC5A16E00B09890 /* cpp-app */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B79142AC5A16E00B09890 /* app */,
+			);
+			path = "cpp-app";
+			sourceTree = "<group>";
+		};
+		ED9B79142AC5A16E00B09890 /* app */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B79152AC5A16E00B09890 /* callback-stub.cpp */,
+				ED9B79162AC5A16E00B09890 /* PluginApplicationCallbacks.h */,
+			);
+			path = app;
 			sourceTree = "<group>";
 		};
 		EDB388D629E6EF2700BDAED4 /* basic-information */ = {
@@ -3855,6 +3822,7 @@
 				ED36DC10286DD57B00CA28EC /* Base64.cpp in Sources */,
 				ED36D88C286DCDED00CA28EC /* ArrayParser.cpp in Sources */,
 				ED36DE89286E02CD00CA28EC /* ember-compatibility-functions.cpp in Sources */,
+				ED9B79172AC5A16E00B09890 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D864286DCDED00CA28EC /* ArrayBuilder.cpp in Sources */,
 				ED36D87A286DCDED00CA28EC /* AttributeReportIB.cpp in Sources */,
 				ED36D8E0286DCF0B00CA28EC /* EventManagement.cpp in Sources */,
@@ -3868,7 +3836,6 @@
 				ED36DBAD286DD48C00CA28EC /* Device.cpp in Sources */,
 				ED36D8E7286DCF0B00CA28EC /* Engine.cpp in Sources */,
 				ED24BDE028A68AE20025CC14 /* fdcomm.cpp in Sources */,
-				ED98463A2A725E140057C0D8 /* callback-stub.cpp in Sources */,
 				ED36DA88286DD14F00CA28EC /* CHIPCertToX509.cpp in Sources */,
 				ED36DC0D286DD57B00CA28EC /* BufferWriter.cpp in Sources */,
 				ED36D8EE286DCF0B00CA28EC /* CommandSender.cpp in Sources */,
@@ -3934,7 +3901,6 @@
 				ED36DD6F286DD9A400CA28EC /* SystemPacketBuffer.cpp in Sources */,
 				ED36DDD8286DDA0300CA28EC /* TCP.cpp in Sources */,
 				ED36DD76286DD9A400CA28EC /* SystemLayer.cpp in Sources */,
-				ED98463B2A725E140057C0D8 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D876286DCDED00CA28EC /* ReportDataMessage.cpp in Sources */,
 				ED24BDDF28A68AE20025CC14 /* socketcomm.cpp in Sources */,
 				ED36DE9D286E043500CA28EC /* SingletonConfigurationManager.cpp in Sources */,
@@ -4023,6 +3989,7 @@
 				ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */,
 				ED36DAD9286DD27200CA28EC /* InetArgParser.cpp in Sources */,
 				ED36DC11286DD57B00CA28EC /* Verhoeff.cpp in Sources */,
+				ED9B79182AC5A16E00B09890 /* callback-stub.cpp in Sources */,
 				ED36D7F0286DCDA300CA28EC /* switch-server.cpp in Sources */,
 				ED36D884286DCDED00CA28EC /* ListBuilder.cpp in Sources */,
 				ED36DC0B286DD57B00CA28EC /* BytesCircularBuffer.cpp in Sources */,
@@ -4273,31 +4240,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/xcode-gen-copy/include",
-					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",
-					"$(PROJECT_DIR)/xcode-gen-link/zap",
-					"$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen",
-					"$(PROJECT_DIR)/xcode-gen-copy/zap",
-					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/src",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
-					"$(PROJECT_DIR)/src/out/macos/debug/gen/zap",
-					"$(PROJECT_DIR)/src/zap-generated",
-					"$(PROJECT_DIR)/src/zap/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
-					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@3/include",
+					"$(PROJECT_DIR)/xcode-gen-copy/include\n$(PROJECT_DIR)/xcode-gen-link/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-link/zap\n$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-copy/zap\n$(PROJECT_DIR)/xcode-include\n$(PROJECT_DIR)/src\n$(PROJECT_DIR)/src/zap/include\n$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates\n$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include\n$(inherited)\n$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Debug;
@@ -4335,31 +4278,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/xcode-gen-copy/include",
-					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",
-					"$(PROJECT_DIR)/xcode-gen-link/zap",
-					"$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen",
-					"$(PROJECT_DIR)/xcode-gen-copy/zap",
-					"$(PROJECT_DIR)/xcode-include",
-					"$(PROJECT_DIR)/src",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
-					"$(PROJECT_DIR)/src/out/macos/debug/gen/zap",
-					"$(PROJECT_DIR)/src/zap-generated",
-					"$(PROJECT_DIR)/src/zap/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
-					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
-					"$(inherited)",
-					"$(BREW_PREFIX)/opt/openssl@3/include",
+					"$(PROJECT_DIR)/xcode-gen-copy/include\n$(PROJECT_DIR)/xcode-gen-link/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-link/zap\n$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-copy/zap\n$(PROJECT_DIR)/xcode-include\n$(PROJECT_DIR)/src\n$(PROJECT_DIR)/src/zap/include\n$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates\n$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include\n$(inherited)\n$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Release;
