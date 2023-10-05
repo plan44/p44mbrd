@@ -566,11 +566,12 @@ public:
   void stackDidBecomeOperational()
   {
     for (size_t i=0; i<CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT; i++) {
-      if (mDevices[i]) {
+      Device* dev = mDevices[i];
+      if (dev) {
         // give device chance to do things just after becoming operational
-        mDevices[i]->didBecomeOperational();
+        dev->didBecomeOperational();
         // dump status
-        POLOG(mDevices[i], LOG_INFO, "initialized from chip: %s", mDevices[i]->description().c_str());
+        POLOG(dev, LOG_INFO, "initialized from chip: %s", dev->description().c_str());
       }
     }
   }
