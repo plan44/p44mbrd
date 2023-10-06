@@ -19,7 +19,7 @@ This now helps *p44mbrd* to obtain the needed information from devices to be abl
 
 ### cc bridge adapter
 
-The *cc bridge adapter* uses a JSON-RPC 2.0 based API to access "CentralControl" devices and map their functionality into matter, in particular the WindowCovering device type. 
+The *cc bridge adapter* uses a JSON-RPC 2.0 based API to access "CentralControl" devices and map their functionality into matter, in particular the WindowCovering device type.
 
 ### matter SDK - connectedhomeip
 
@@ -29,7 +29,7 @@ In particular, *p44mbrd* was evolved out of the *bridge-app* example in CHIP.
 
 The *connectedhomeip* is included as a submodule, but **using a plan44 forked github repository**.
 
-The forked version is currently needed because not all needed additions to the SDK are already accepted (or maybe acceptable) upstream at the time of writing this.
+A forked version is currently required because not all needed additions to the SDK are already accepted (or maybe acceptable) upstream at the time of writing this.
 
 In addition, the forked version contains an adapted `.gitmodule` file which prevents fetching a lot of very footprint heavy submodules (gigabytes!) containing SDKs for various embedded hardware not relevant to a Linux/Posix based bridge project (by adding `update = none` and `ignore = all`).
 
@@ -43,19 +43,20 @@ Work on *p44mbrd* has produced a few contributions already accepted to matter ma
 - [Support for libev based mainloop](https://github.com/project-chip/connectedhomeip/pull/24232)
 - [Fix Avahi based dns-sd implementation](https://github.com/project-chip/connectedhomeip/pull/26397)
 
-And one draft pending (at the time of writing this):
+And two pending (at the time of writing this):
 
 - [dynamic endpoints: add automatic attr storage, instantiation from ZAP templates](https://github.com/project-chip/connectedhomeip/pull/28372). This one in particular will help building bridge apps *a lot*!
+- [external build systems: scripts/configure: allow out-of-tree project root](https://github.com/project-chip/connectedhomeip/pull/29627). This is a small contribution to the work done in the [matter-openwrt](https://github.com/project-chip/matter-openwrt) context which is extremely useful for building matter SDK based projects from within third-party build systems (not only openwrt!).
 
 ### p44utils
 
 p44mbrd is also based on a set of generic C++ utility classes called [*p44utils*](https://github.com/plan44/p44utils), which provides basic mechanisms for mainloop-based, nonblocking I/O driven automation daemons, as well as a script language, [*p44script*](https://plan44.ch/p44-techdocs/en/#topics). p44utils is included as a submodule into this project.
 
-## Early Beta - Work in Progress!
+## Beta - Work in Progress!
 
-**This project is still beta**! It is not yet certifiable (let alone certified), and has gaps in functionality. Still, it works pretty nice already with Apple Home for lights, color lights, plugin switches, window coverings, and some sensors  at the time of writing.
+**This project is still beta**! It is not yet certified, and has some gaps in functionality. Still, it works pretty nice already with Apple Home, Smartthings, Google and maybe others for lights, color lights, plugin switches, window coverings, and some sensors  at the time of writing.
 
-So expect a lot of changes and additions in the next few months!
+So expect a changes and additions in the next few months!
 
 ## License
 
@@ -71,24 +72,37 @@ plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain
 
 ## Build it for OpenWrt Linux
 
-To cross-build for Openwrt, you can use the `openwrt_build.sh` as follows:
+To build p44mbrd for Openwrt (22.03.5 at this time), see the [p44mbrd](https://github.com/plan44/plan44-feed/tree/main/p44mbrd) package in the [plan44 public openwrt feed](https://github.com/plan44/plan44-feed).
+
+From within openwrt buildroot:
 
 ```bash
-CHIPAPP_ROOT="/checkout/dir/of/p44mbrd"
-BUILDROOT="/Volumes/CaseSens/openwrt-2"
+# add the matter-openwrt feed
+echo "src-git --force matter https://github.com/project-chip/matter-openwrt.git" >>feeds.conf
+ 
+# add the plan44 openwrt feed
+echo "src-git plan44 https://github.com/plan44/plan44-feed.git;main" >>feeds.conf
 
-cd "${CHIPAPP_ROOT}/src"
-source third_party/connectedhomeip/scripts/activate.sh
+# install the gn and p44mbrd packages
+./scripts/feeds install -p matter gn
+./scripts/feeds install -p plan44 p44mbrd
 
-../openwrt_build.sh --debug ${BUILDROOT} ${BUILDROOT}/.config
+# enable `gn` in menuconfig under `Development`
+# enabled `p44mbrd` in menuconfig under `plan44->products->p44mbrd`
+make menuconfig
+# - exit and save
+
+# build gn
+make package/gn/host/compile
+
+# build p44mbrd
+make package/p44mbrd/compile
 ```
 
 Notes:
 
-- The example above builds for debugging (`--debug`), which does just produce the executable and then gives some hints how to proceed, assuming the [p44build](https://github.com/plan44/p44build) script is in use for managing openwrt builds.
-- Without `--debug`, the script would try to copy a symbol-stripped version of the executable into a hardcoded (line 5, `OPENWRT_WRAPPER_PACKAGE`) package subdirectory, to allow an openwrt package makefile pick the prebuilt executable from there - all this in lack of having figured out building all of matter completely from within the openwrt build system.
-- `openwrt_build.sh` only works for mips and arm architectures at this time, and is actually tested with MT768x (Onion Omega2) and BCM27xx (RaspberryPi) targets.
-- the second argument of `openwrt_build.sh` points to the current config of the same openwrt tree as specified in the first argument in the example above, but could point to any .config copy for which the openwrt tree has a compiled toolchain.
+- This should work for all targets with architectures the matter SDK can be built for. At this time, it is actually tested only for `ramips` (Onion Omega) and `bcm27xx` (Raspberry Pi).
+- The p44mbrd package includes `runit` control scripts and "factory data" for running p44mbrd with the identity and certificates of a (uncertified) matter test device.
 
 ## Build it for regular Linux
 
