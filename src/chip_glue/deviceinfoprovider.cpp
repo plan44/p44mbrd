@@ -43,7 +43,8 @@ void P44mbrdDeviceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFact
   mUID = aFactoryDataProvider->getString("UID");
   string ds = aFactoryDataProvider->getString("MANUFACTURINGDATE"); // ISO8601 first 8 digits YYYYMMDD
   if (ds.empty()) mManuYear = 0;
-  else scanf("%4hu%2hhu%2hhu", &mManuYear, &mManuMonth, &mManuDay);
+  else if (sscanf(ds.c_str(), "%4hu%2hhu%2hhu", &mManuYear, &mManuMonth, &mManuDay) < 3)
+    mManuYear = mManuMonth = mManuDay = 0;
 }
 
 
