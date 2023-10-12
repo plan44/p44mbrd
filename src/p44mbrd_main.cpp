@@ -422,7 +422,7 @@ public:
     if (chiperr==CHIP_NO_ERROR) {
       // this device was mapped before with the fixed index/endpointID scheme
       // calculate the endpointId
-      endpointId = legacyDynamicEndpointIdx + kLegacyFirstDynamicEndpointID;
+      endpointId = static_cast<chip::EndpointId>(legacyDynamicEndpointIdx + kLegacyFirstDynamicEndpointID);
       // migrate kvs entry into new format
       chiperr = kvs.Delete(legacy_key.c_str()); // delete from legacy
       LogErrorOnFailure(chiperr);
@@ -522,7 +522,7 @@ public:
         for (EndpointId i=0; i<nde; i++) {
           if (legacyDynamicEndPointMap[i]!=' ') {
             if (i>=mFirstFreeEndpointId-kLegacyFirstDynamicEndpointID) {
-              mFirstFreeEndpointId = i+kLegacyFirstDynamicEndpointID+1;
+              mFirstFreeEndpointId = static_cast<chip::EndpointId>(i+kLegacyFirstDynamicEndpointID+1);
             }
           }
         }

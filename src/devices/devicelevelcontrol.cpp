@@ -140,7 +140,7 @@ void DeviceLevelControl::setDefaultOnLevel(double aLevelPercent)
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
   Attributes::MaxLevel::Get(endpointId(), &maxlevel);
-  LevelControl::Attributes::OnLevel::Set(endpointId(), static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel))+minlevel);
+  LevelControl::Attributes::OnLevel::Set(endpointId(), static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel));
 }
 
 
@@ -149,7 +149,7 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
   Attributes::MaxLevel::Get(endpointId(), &maxlevel);
-  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel))+minlevel, 0, 0, false, aUpdateMode);
+  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel), 0, 0, false, aUpdateMode);
 }
 
 

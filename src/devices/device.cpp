@@ -112,7 +112,7 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
   // set up the endpoint declaration
   setupDynamicEndpointDeclaration(
     mEndpointDefinition,
-    emberAfFixedEndpointCount()-1, // last fixed endpoint is the template endpoint
+    static_cast<chip::EndpointId>(emberAfFixedEndpointCount()-1), // last fixed endpoint is the template endpoint
     Span<ClusterId>(tl, i)
   );
   mTemplateClusterIdsSpanList.clear(); // don't need this any more

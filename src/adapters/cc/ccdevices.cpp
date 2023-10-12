@@ -240,7 +240,7 @@ static Percent100ths bridge2matter(double aBridgeValue, bool aMotorDirectionReve
 {
   Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
   if (v<100) v=0; // FIXME: q&d to get to zero, otherwise fully open position would not get recognized
-  return aMotorDirectionReversed ? 100*100 - v : v; // standard is: 100%=fully covered, 0%=fully open
+  return aMotorDirectionReversed ? static_cast<chip::Percent100ths> (100*100 - v) : v; // standard is: 100%=fully covered, 0%=fully open
 }
 
 

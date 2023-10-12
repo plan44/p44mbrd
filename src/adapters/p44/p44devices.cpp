@@ -574,7 +574,7 @@ bool P44_WindowCoveringImpl::matter2bridge(const DataModel::Nullable<Percent100t
 Percent100ths P44_WindowCoveringImpl::bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
 {
   Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
-  return !aMotorDirectionReversed ? 100*100 - v : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
+  return !aMotorDirectionReversed ? static_cast<chip::Percent100ths> (100*100 - v) : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
 }
 
 
@@ -672,7 +672,7 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
     }
     // check for errors
     if (aOutputState->get("error", o)) {
-      underlying_type_t<WindowCovering::SafetyStatus> status = 0;
+      int status = 0;
       int err = o->int32Value();
       switch (err) {
         case hardwareError_openCircuit:
@@ -694,7 +694,7 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
           status |= to_underlying(WindowCovering::SafetyStatus::kPower);
           break;
       }
-      WindowCovering::Attributes::SafetyStatus::Set(endpointId(), status);
+      WindowCovering::Attributes::SafetyStatus::Set(endpointId(), static_cast<underlying_type_t<WindowCovering::SafetyStatus>>(status));
     }
   }
   // - current positions
@@ -919,13 +919,13 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
               case ct_tip_3x:
               case ct_tip_4x:
                 // update tips (count as clicks)
-                mClicks = (uint8_t)clicktype-ct_tip_1x+1;
+                mClicks = (uint8_t)(clicktype-ct_tip_1x+1);
                 goto multi;
               case ct_click_1x:
               case ct_click_2x:
               case ct_click_3x:
                 // update clicks
-                mClicks = (uint8_t)clicktype-ct_click_1x+1;
+                mClicks = (uint8_t)(clicktype-ct_click_1x+1);
               multi:
                 if (position==0) {
                   // any tip or click detection also implies short release
