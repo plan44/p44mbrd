@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Details see: file:///Users/luz/Code/looking_at_external_stuff/connectedhomeip/docs/code_generation.md
 

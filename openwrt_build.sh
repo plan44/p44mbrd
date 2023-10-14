@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # the name of the app
 CHIPAPP_NAME="p44mbrd"
