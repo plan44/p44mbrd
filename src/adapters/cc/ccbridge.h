@@ -48,6 +48,11 @@ class CC_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   string mModel;
   string mSerial;
 
+  bool   IsRunning;
+  bool   IsCommissionable;
+  string QRCodeData;
+  string ManualPairingCode;
+
 public:
 
   /// singleton getter / on demand constructor for a CC adapter

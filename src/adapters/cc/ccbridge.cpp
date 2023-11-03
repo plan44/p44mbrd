@@ -59,18 +59,33 @@ void CC_BridgeImpl::startup()
 void CC_BridgeImpl::reportCommissionable(bool aIsCommissionable)
 {
   // TODO: maybe inform the gateway about commissionable status
+  IsCommissionable = aIsCommissionable;
+
+  JsonObjectPtr result = JsonObject::newObj();
+
+  result->add("commissionable", JsonObject::newBool (IsCommissionable));
+
+  if (IsCommissionable)
+    {
+      result->add ("qrcode", JsonObject::newString (QRCodeData));
+      result->add ("pairingcode", JsonObject::newString (ManualPairingCode));
+    }
+  mJsonRpcAPI.sendRequest("matter_commissionable_status", result, NULL);
 }
 
 
 void CC_BridgeImpl::updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
 {
   // TODO: maybe inform the gateway about commissioning information (pairing QRcode and manual code)
+  QRCodeData = aQRCodeData;
+  ManualPairingCode = aManualPairingCode;
 }
 
 
 void CC_BridgeImpl::setBridgeRunning(bool aRunning)
 {
   // TODO: maybe inform the gateway about bridge running status
+  IsRunning = aRunning;
 }
 
 
@@ -350,11 +365,47 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const JsonObjectP
 
       return;
     }
+  else if (strcmp ("matter_set_commissionable", aMethod) == 0)
+    {
+      JsonObjectPtr o;
+
+      if (aParams &&
+          aParams->isType (json_type_object) &&
+          aParams->get("commissionable", o) &&
+          o->isType (json_type_boolean))
+        {
+          bool commissionable = o->boolValue ();
+          requestCommissioning (commissionable);
+          mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
+        }
+      else
+        {
+          mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidParams, "mandatory boolean parameter \"commissionable\" wrong or missing.");
+        }
+
+      return;
+    }
+  else if (strcmp ("matter_get_commissionable", aMethod) == 0)
+    {
+      JsonObjectPtr result = JsonObject::newObj();
+
+      result->add("commissionable", JsonObject::newBool (IsCommissionable));
+
+      if (IsCommissionable)
+        {
+          result->add ("qrcode", JsonObject::newString (QRCodeData));
+          result->add ("pairingcode", JsonObject::newString (ManualPairingCode));
+        }
+      mJsonRpcAPI.sendResult(aJsonRpcId, result);
+      return;
+    }
 
   // For now, we just reject all request with error
   mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidRequest, "TODO: implement methods");
 
 }
+
+
 
 
 #endif // CC_ADAPTERS
