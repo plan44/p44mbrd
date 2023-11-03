@@ -84,10 +84,7 @@ bool CC_DeviceImpl::changeName(const string aNewName)
 {
   if (aNewName!=mName) {
     mName = aNewName;
-    // TODO: forward new name
 
-    // probably something like
-    // {"jsonrpc":"2.0","id":"26", "method":"deviced_get_group_names","params":{"room_id":1}}
     JsonObjectPtr params = JsonObject::newObj();
     params->add("item_id", JsonObject::newInt32(CC_DeviceImpl::get_item_id ()));
     params->add("name", JsonObject::newString(aNewName));
