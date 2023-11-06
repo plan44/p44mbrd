@@ -64,6 +64,8 @@ void CC_DeviceImpl::deviceDidGetInstalled()
   SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, device().endpointId(), "Bridged Becker Device");
   // TODO: set a sensible value
   SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, device().endpointId(), "");
+
+  updateBridgedInfo(NULL);
 }
 
 
@@ -104,6 +106,14 @@ string CC_DeviceImpl::zone() const
 int CC_DeviceImpl::get_item_id()
 {
   return item_id;
+}
+
+
+void CC_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  JsonObjectPtr o;
+  // propagate locally stored info to matter attributes
+  device().updateNodeLabel(mName, UpdateMode(UpdateFlags::matter));
 }
 
 
@@ -189,6 +199,8 @@ CC_WindowCoveringImpl::CC_WindowCoveringImpl(int _item_id, WindowCovering::Type 
 
 void CC_WindowCoveringImpl::deviceDidGetInstalled()
 {
+  inherited::updateBridgedInfo(NULL);
+
   underlying_type_t<WindowCovering::Feature> featuremap = 0;
   switch (mType) {
     case WindowCovering::Type::kShutter:
@@ -213,9 +225,13 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
       break;
   }
   // set features
-  featuremap |= to_underlying(WindowCovering::Feature::kLift) | to_underlying(WindowCovering::Feature::kPositionAwareLift);
+  featuremap |= to_underlying(WindowCovering::Feature::kLift);
+  if (feedback)
+    featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareLift);
   if (mHasTilt) {
-    featuremap |= to_underlying(WindowCovering::Feature::kTilt) | to_underlying(WindowCovering::Feature::kPositionAwareTilt);
+    featuremap |= to_underlying(WindowCovering::Feature::kTilt);
+    if (feedback)
+      featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareTilt);
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
   // set type
@@ -335,5 +351,6 @@ void CC_WindowCoveringImpl::windowCoveringResponse(int32_t aResponseId, ErrorPtr
 {
   DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
 }
+
 
 #endif // CC_ADAPTERS

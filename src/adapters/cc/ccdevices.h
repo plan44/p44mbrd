@@ -90,10 +90,14 @@ public:
 
   int item_id;
   int get_item_id ();
+  bool feedback;
 
   void initialize_name(const string _name) { mName = _name; }
+  void initialize_feedback(const bool _feedback) { feedback = _feedback; }
 
   virtual void handle_state_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
+
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo);
 
   /// @}
 
@@ -234,7 +238,7 @@ public:
 
 class CC_WindowCoveringDevice final :
   public DeviceWindowCovering, // the matter side device
-  public CC_WindowCoveringImpl // the P44 side delegate implementation
+  public CC_WindowCoveringImpl // the CC side delegate implementation
 {
   typedef CC_WindowCoveringImpl inherited;
 public:

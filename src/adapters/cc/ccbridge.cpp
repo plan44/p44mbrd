@@ -216,6 +216,8 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
         {
           JsonObjectPtr item, item_id;
           DevicePtr dev = NULL;
+          const char *device_type = NULL;
+          bool feedback = 0;
 
           item = ilist->arrayGet (i);
           item_id = item->get ("id");
@@ -226,40 +228,42 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
               strcmp (item->getCString ("type"), "group") != 0)
             continue;
 
+          /* ignore groups not backed with a backend (i.e. "real groups") */
+          if (item->getCString ("backend") == NULL)
+            continue;
 
-          if (strcmp (item->getCString ("device_type"), "switch") == 0)
+          device_type = item->getCString ("device_type");
+          feedback = item->get("feedback") ? item->get("feedback")->boolValue() : false;
+
+          if (strcmp (device_type, "switch") == 0)
             {
               OLOG (LOG_NOTICE, "... registering onoff device for switch");
 
               dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
-              CC_DeviceImpl::impl(dev)->initialize_name(item->getCString ("name"));
-
-              // register it
-              registerInitialDevice(DevicePtr (dev));
             }
-          else if (strcmp (item->getCString ("device_type"), "shutter") == 0)
+          else if (strcmp (device_type, "shutter") == 0)
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
 
               dev = new CC_WindowCoveringDevice(item_id->int32Value(),
                                                 WindowCovering::Type::kShutter,
-                                                WindowCovering::EndProductType::kRollerShutter); // TODO: ok? could use kUnknown as well
+                                                WindowCovering::EndProductType::kRollerShutter);
             }
-          else if (strcmp (item->getCString ("device_type"), "awning") == 0)
+          else if (strcmp (device_type, "awning") == 0)
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for awning");
 
               dev = new CC_WindowCoveringDevice(item_id->int32Value(),
                                                 WindowCovering::Type::kAwning,
-                                                WindowCovering::EndProductType::kAwningTerracePatio); // TODO: ok? could use kUnknown as well
+                                                WindowCovering::EndProductType::kAwningTerracePatio);
             }
-          else if (strcmp (item->getCString ("device_type"), "venetian") == 0)
+          else if (strcmp (device_type, "venetian") == 0)
             {
               OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
 
               dev = new CC_WindowCoveringDevice(item_id->int32Value(),
                                                 WindowCovering::Type::kTiltBlindLiftAndTilt,
-                                                WindowCovering::EndProductType::kExteriorVenetianBlind); // TODO: ok? could use kUnknown as well
+                                                WindowCovering::EndProductType::kExteriorVenetianBlind);
             }
           else
             {
@@ -269,6 +273,7 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
           if (dev)
             {
               CC_DeviceImpl::impl(dev)->initialize_name (item->getCString ("name"));
+              CC_DeviceImpl::impl(dev)->initialize_feedback (feedback);
 
               // register it
               registerInitialDevice(DevicePtr (dev));
