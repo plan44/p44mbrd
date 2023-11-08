@@ -13,7 +13,7 @@ p44mbrd
 
 *p44mbrd* uses a **JSON-based representation of the [vdc API](http://developer.digitalstrom.org/Architecture/vDC-API.pdf)** to communicate with *vdcd*.
 
-The *vdc-API* was originally defined in 2013 as an abstraction for the [digitalSTROM](https://digitalstrom.com) device model to allow integration of third-party devices into digitalSTROM. The vdc API device model was designed to be as generic as possible, with a strong focus on being self-descriptive through a [structured tree of device properties](http://developer.digitalstrom.org/Architecture/vDC-API-properties.pdf).
+The *vdc-API* was originally defined in 2013 as an abstraction for the [Digital Strom](https://digitalstrom.com) device model to allow integration of third-party devices into Digital Strom. The vdc API device model was designed to be as generic as possible, with a strong focus on being self-descriptive through a [structured tree of device properties](http://developer.digitalstrom.org/Architecture/vDC-API-properties.pdf).
 
 This now helps *p44mbrd* to obtain the needed information from devices to be able to map them to *matter bridged device*.
 
@@ -67,7 +67,7 @@ If that's a problem for your particular application, I am open to provide a comm
 
 ## Try it out
 
-plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain a complete OpenWrt, with vdcd and p44mbrd installed and fully configured as a digitalSTROM bridge or a standalone light controller with matter support. You can download one of these from [plan44.ch/automation/p44-dsb-x.php](https://plan44.ch/automation/p44-dsb-x.php) or [plan44.ch/automation/p44-lc-x.php](https://plan44.ch/automation/p44-lc-x.php), copy it to a SD Card and use it with a RPi B, B+, 2,3 and 4. Note that the downloaded images are not always the most current version, so use the built-in "check for update" to get the latest version. Details see https://plan44.ch/p44-techdocs/en/matter/beta_readme/.
+plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain a complete OpenWrt, with vdcd and p44mbrd installed and fully configured as a Digital Strom bridge or a standalone light controller with matter support. You can download one of these from [plan44.ch/automation/p44-dsb-x.php](https://plan44.ch/automation/p44-dsb-x.php) or [plan44.ch/automation/p44-lc-x.php](https://plan44.ch/automation/p44-lc-x.php), copy it to a SD Card and use it with a RPi B, B+, 2,3 and 4. Note that the downloaded images are not always the most current version, so use the built-in "check for update" to get the latest version. Details see https://plan44.ch/p44-techdocs/en/matter/beta_readme/.
 
 
 ## Build it for OpenWrt Linux
