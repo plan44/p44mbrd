@@ -86,12 +86,15 @@ bool CC_DeviceImpl::changeName(const string aNewName)
 {
   if (aNewName!=mName) {
     mName = aNewName;
-
+#if 0
+    /* do not propagate back to deviced */
     JsonObjectPtr params = JsonObject::newObj();
     params->add("item_id", JsonObject::newInt32(CC_DeviceImpl::get_item_id ()));
     params->add("name", JsonObject::newString(aNewName));
     CC_BridgeImpl::adapter().api().sendRequest("item_set_name", params);
+#endif
 
+    updateBridgedInfo(NULL);
   }
   return true; // new name propagated
 }
@@ -167,6 +170,17 @@ void CC_OnOffImpl::onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObje
 }
 
 // MARK: cc bridge specifics
+
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_OnOffImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
 
 // {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
 void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
@@ -311,6 +325,17 @@ void CC_WindowCoveringImpl::stopMovement()
   CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
 }
 
+
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_WindowCoveringImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
 
 // {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
 void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)

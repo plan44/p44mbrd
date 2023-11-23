@@ -95,6 +95,7 @@ public:
   void initialize_name(const string _name) { mName = _name; }
   void initialize_feedback(const bool _feedback) { feedback = _feedback; }
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
   virtual void handle_state_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
 
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo);
@@ -137,6 +138,7 @@ protected:
   /// @}
   ///
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
   virtual void handle_state_changed(JsonObjectPtr aParams) override;
 
 private:
@@ -176,6 +178,7 @@ protected:
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   /// @}
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
   virtual void handle_state_changed(JsonObjectPtr aParams) override;
 
 private:

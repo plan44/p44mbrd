@@ -114,6 +114,8 @@ public:
 
 private:
 
+  void createDeviceForData(JsonObjectPtr item, bool in_init);
+
   void jsonRpcConnectionOpen();
   void jsonRpcConnectionStatusHandler(ErrorPtr aError);
   void jsonRpcRequestHandler(const char *aMethod, const JsonObjectPtr aJsonRpcId, JsonObjectPtr aParams);
@@ -121,6 +123,7 @@ private:
   void client_subscribed(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void client_registered(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void deviceListReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+  void itemInfoReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 
 };
 
