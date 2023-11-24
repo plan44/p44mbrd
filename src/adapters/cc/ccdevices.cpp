@@ -222,7 +222,8 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
   inherited::updateBridgedInfo(NULL);
 
   underlying_type_t<WindowCovering::Feature> featuremap = 0;
-  underlying_type_t<WindowCovering::Mode> mode = 0;
+  int mode = 0;
+
   switch (mType) {
     case WindowCovering::Type::kShutter:
     case WindowCovering::Type::kTiltBlindLiftAndTilt:
@@ -259,7 +260,7 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
   if (mInverted)
     mode |= to_underlying(WindowCovering::Mode::kMotorDirectionReversed);
 
-  WindowCovering::Attributes::Mode::Set(endpointId(), mode);
+  WindowCovering::Attributes::Mode::Set(endpointId(), (underlying_type_t<WindowCovering::Mode>) mode);
   // set type
   WindowCovering::Attributes::Type::Set(endpointId(), mType);
   // set end product type
@@ -361,7 +362,7 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
   //   - THEN set CurrentPositionXXX attributes to SAME current position
   //   (only this sequence makes the Window Covering Cluster recognize end of operation)
 
-  underlying_type_t<WindowCovering::SafetyStatus> safety_status = 0;
+  int safety_status = 0;
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr o, vo;
@@ -400,7 +401,7 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
       }
     }
 
-    WindowCovering::Attributes::SafetyStatus::Set(endpointId(), safety_status);
+    WindowCovering::Attributes::SafetyStatus::Set(endpointId(), (underlying_type_t<WindowCovering::SafetyStatus>) safety_status);
   }
 
   // STATE_ERROR_BLOCKED      = Obstacle Detected
