@@ -161,6 +161,7 @@ class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringD
   WindowCovering::Type mType;
   WindowCovering::EndProductType mEndProductType;
   bool mHasTilt;
+  bool mInverted;
 
 protected:
 

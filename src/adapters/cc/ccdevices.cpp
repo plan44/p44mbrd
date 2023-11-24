@@ -221,6 +221,7 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
   inherited::updateBridgedInfo(NULL);
 
   underlying_type_t<WindowCovering::Feature> featuremap = 0;
+  underlying_type_t<WindowCovering::Mode> mode = 0;
   switch (mType) {
     case WindowCovering::Type::kShutter:
     case WindowCovering::Type::kTiltBlindLiftAndTilt:
@@ -228,16 +229,16 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
       mHasTilt = true;
       // TODO: maybe init more specifics
       break;
+    case WindowCovering::Type::kAwning :
+      mInverted = true;
+      break;
     default:
     case WindowCovering::Type::kRollerShade:
     case WindowCovering::Type::kRollerShade2Motor:
     case WindowCovering::Type::kRollerShadeExterior:
     case WindowCovering::Type::kRollerShadeExterior2Motor:
     case WindowCovering::Type::kDrapery:
-    case WindowCovering::Type::kAwning :
     case WindowCovering::Type::kProjectorScreen:
-      // w/o tilt
-      // TODO: maybe init more specifics
       break;
     case WindowCovering::Type::kTiltBlindTiltOnly:
       // not supported
@@ -253,6 +254,11 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
       featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareTilt);
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
+
+  if (mInverted)
+    mode |= to_underlying(WindowCovering::Mode::kMotorDirectionReversed);
+
+  WindowCovering::Attributes::Mode::Set(endpointId(), mode);
   // set type
   WindowCovering::Attributes::Type::Set(endpointId(), mType);
   // set end product type
