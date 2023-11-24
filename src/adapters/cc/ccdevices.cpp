@@ -191,6 +191,7 @@ void CC_OnOffImpl::handle_config_changed(JsonObjectPtr aParams)
 void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 {
   JsonObjectPtr o, vo;
+
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
       deviceP<DeviceOnOff>()->updateOnOff(vo->int32Value()>0, UpdateMode(UpdateFlags::matter));
@@ -360,9 +361,12 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
   //   - THEN set CurrentPositionXXX attributes to SAME current position
   //   (only this sequence makes the Window Covering Cluster recognize end of operation)
 
+  underlying_type_t<WindowCovering::SafetyStatus> safety_status = 0;
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr o, vo;
+  int i;
+
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
       // sb: roughly something like this?
@@ -380,6 +384,31 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
       // - this is the current position
       WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed)));
     }
+
+  if (aParams->get("error_flags", o)) {
+    for (i = 0; vo = o->arrayGet(i); i++) {
+      const char *eflag = vo->c_strValue();
+
+      if (strcmp (eflag, "blocked") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kObstacleDetected);
+      } else if (strcmp (eflag, "overheated") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kThermalProtection);
+      } else if (strcmp (eflag, "alert") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kProtection);
+      } else if (strcmp (eflag, "sensor-loss") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kFailedCommunication);
+      }
+    }
+
+    WindowCovering::Attributes::SafetyStatus::Set(endpointId(), safety_status);
+  }
+
+  // STATE_ERROR_BLOCKED      = Obstacle Detected
+  // STATE_ERROR_OVERHEATED   = ThermalProtection
+  // STATE_ERROR_UNRESPONSIVE = (Basic-Information?)
+  // STATE_ERROR_LOW_BATTERY  = (?)
+  // STATE_ERROR_ALERT        = Protection
+  // STATE_ERROR_SENSOR_LOSS  = Failed Communication
   }
 }
 
