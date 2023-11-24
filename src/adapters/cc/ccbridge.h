@@ -82,7 +82,7 @@ public:
   virtual string model() override { return mModel; }
 
   /// @return vendor name for this bridge (or the device it bridges)
-  virtual string vendor() override { return "plan44.ch"; };
+  virtual string vendor() override { return "Becker-Antriebe GmbH"; };
 
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }

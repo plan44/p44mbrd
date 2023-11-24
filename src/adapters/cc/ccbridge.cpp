@@ -40,7 +40,11 @@ CC_BridgeImpl& CC_BridgeImpl::adapter()
     gSharedCCBridgeP = new CC_BridgeImpl;
     assert(gSharedCCBridgeP);
     gSharedCCBridgeP->isMemberVariable();
+    gSharedCCBridgeP->mLabel = "mein Entwicklungs-Bastel-Gerät";
+    gSharedCCBridgeP->mModel = "CentralControl CC41";
+    gSharedCCBridgeP->mSerial = "9876543210";
   }
+
   return *gSharedCCBridgeP;
 }
 
