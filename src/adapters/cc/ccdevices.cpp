@@ -129,14 +129,19 @@ void CC_IdentifiableImpl::identify(int aDurationS)
   // (re)start or stop identify in the bridged device
   // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
 
-  // TODO: make API calls to the device to draw user's attention to it...
-
-  // probably something like
   JsonObjectPtr params = JsonObject::newObj();
-  params->add("someting", JsonObject::newInt32(3));
-  CC_BridgeImpl::adapter().api().sendRequest("some_method", params);
+  params->add("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add("command", JsonObject::newString ("clack"));
+  params->add("value", JsonObject::newInt32 (3));
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_IdentifiableImpl::onIdentifyResponse, this, _1, _2, _3));
 }
 
+
+void CC_IdentifiableImpl::onIdentifyResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
 
 Identify::IdentifyTypeEnum CC_IdentifiableImpl::identifyType()
 {

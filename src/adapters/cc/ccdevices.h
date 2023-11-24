@@ -119,6 +119,10 @@ protected:
   virtual void identify(int aDurationS) override;
   virtual Identify::IdentifyTypeEnum identifyType() override;
   /// @}
+
+private:
+  void onIdentifyResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+
 };
 
 
