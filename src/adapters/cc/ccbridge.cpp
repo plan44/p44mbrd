@@ -244,6 +244,14 @@ void CC_BridgeImpl::createDeviceForData(JsonObjectPtr item,
                                         WindowCovering::Type::kAwning,
                                         WindowCovering::EndProductType::kAwningTerracePatio);
     }
+  else if (strcmp (device_type, "screen") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering windowcovering device for screen");
+
+      dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                        WindowCovering::Type::kRollerShade,
+                                        WindowCovering::EndProductType::kAwningVerticalScreen);
+    }
   else if (strcmp (device_type, "venetian") == 0)
     {
       OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
