@@ -273,6 +273,7 @@ void CC_BridgeImpl::createDeviceForData(JsonObjectPtr item,
     {
       CC_DeviceImpl::impl(dev)->initialize_name (item->getCString ("name"));
       CC_DeviceImpl::impl(dev)->initialize_feedback (feedback);
+      CC_DeviceImpl::impl(dev)->handle_state_changed(item);
 
       // register it
       if (in_init)
