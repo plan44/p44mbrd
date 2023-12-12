@@ -90,10 +90,12 @@ public:
 
   int item_id;
   int get_item_id ();
-  bool feedback;
+  bool mFeedback;
+  bool mUnresponsive;
 
   void initialize_name(const string _name) { mName = _name; }
-  void initialize_feedback(const bool _feedback) { feedback = _feedback; }
+  void initialize_feedback(const bool _feedback) { mFeedback = _feedback; }
+  void initialize_unresponsive() { mUnresponsive = false; }
 
   virtual void handle_config_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
   virtual void handle_state_changed(JsonObjectPtr aParams) { /* NOP in base class */ }

@@ -71,8 +71,7 @@ void CC_DeviceImpl::deviceDidGetInstalled()
 
 bool CC_DeviceImpl::isReachable() const
 {
-  // TODO: return actual reachability status
-  return true;
+  return !mUnresponsive;
 }
 
 
@@ -248,11 +247,11 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
   }
   // set features
   featuremap |= to_underlying(WindowCovering::Feature::kLift);
-  if (feedback)
+  if (mFeedback)
     featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareLift);
   if (mHasTilt) {
     featuremap |= to_underlying(WindowCovering::Feature::kTilt);
-    if (feedback)
+    if (mFeedback)
       featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareTilt);
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
@@ -303,7 +302,7 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
     {
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
-      if (feedback)
+      if (mFeedback)
         {
           params->add ("command", JsonObject::newString ("moveto"));
           params->add ("value", JsonObject::newDouble (matter2bridge(lift.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
@@ -371,6 +370,7 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
   //   (only this sequence makes the Window Covering Cluster recognize end of operation)
 
   int safety_status = 0;
+  bool unresponsive = false;
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr o, vo;
@@ -406,15 +406,22 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
         safety_status |= to_underlying(WindowCovering::SafetyStatus::kProtection);
       } else if (strcmp (eflag, "sensor-loss") == 0) {
         safety_status |= to_underlying(WindowCovering::SafetyStatus::kFailedCommunication);
+      } else if (strcmp (eflag, "unresponsive") == 0) {
+        unresponsive = true;
       }
     }
 
     WindowCovering::Attributes::SafetyStatus::Set(endpointId(), (underlying_type_t<WindowCovering::SafetyStatus>) safety_status);
+    if (mUnresponsive != unresponsive)
+      {
+        mUnresponsive = unresponsive;
+        device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+      }
   }
 
   // STATE_ERROR_BLOCKED      = Obstacle Detected
   // STATE_ERROR_OVERHEATED   = ThermalProtection
-  // STATE_ERROR_UNRESPONSIVE = (Basic-Information?)
+  // STATE_ERROR_UNRESPONSIVE = (--> bridged basic information)
   // STATE_ERROR_LOW_BATTERY  = (?)
   // STATE_ERROR_ALERT        = Protection
   // STATE_ERROR_SENSOR_LOSS  = Failed Communication
