@@ -200,6 +200,62 @@ void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 
 
 
+// MARK: - CC_LevelControlImpl
+
+// MARK: LevelControlDelegate implementation
+
+void CC_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS)
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add ("command", JsonObject::newString ("dimto"));
+  params->add ("value", JsonObject::newDouble (aNewLevel));
+
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_LevelControlImpl::levelControlResponse, this, _1, _2, _3));
+}
+
+void CC_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add ("command", JsonObject::newString ("dim"));
+  params->add ("value", JsonObject::newDouble (aDirection ? 1.0 : -1.0));
+
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_LevelControlImpl::levelControlResponse, this, _1, _2, _3));
+}
+
+
+void CC_LevelControlImpl::levelControlResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
+
+
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_LevelControlImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
+
+// {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
+void CC_LevelControlImpl::handle_state_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+
+  if (aParams->get("state", o)) {
+    if (o->get("value", vo)) {
+      deviceP<LevelControlImplementationInterface>()->updateLevel(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+    }
+  }
+}
+
 
 // MARK: - CC_WindowCoveringImpl
 

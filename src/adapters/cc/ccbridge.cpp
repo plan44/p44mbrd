@@ -232,6 +232,12 @@ void CC_BridgeImpl::createDeviceForData(JsonObjectPtr item,
 
       dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
     }
+  else if (strcmp (device_type, "dimmer") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering dimmablelight device for dimmer");
+
+      dev = new CC_DimmableLightDevice(item_id->int32Value());
+    }
   else if (strcmp (device_type, "shutter") == 0)
     {
       OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");

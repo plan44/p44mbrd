@@ -155,6 +155,31 @@ private:
 };
 
 
+class CC_LevelControlImpl : public CC_OnOffImpl, public LevelControlDelegate
+{
+  typedef CC_OnOffImpl inherited;
+
+protected:
+  CC_LevelControlImpl(int _item_id) : inherited(_item_id) { /* NOP so far */ }
+
+  /// the hardware recommended transition time (usually provided by the bridged hardware)
+  uint16_t mRecommendedTransitionTimeDS;
+  MLMicroSeconds mEndOfLatestTransition;
+
+  /// @name LevelControlDelegate
+  /// @{
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS) override;
+  virtual void dim(int8_t aDirection, uint8_t aRate) override;
+  virtual MLMicroSeconds endOfLatestTransition() override { return mEndOfLatestTransition; };
+  /// @}
+
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
+  virtual void handle_state_changed(JsonObjectPtr aParams) override;
+
+private:
+  void levelControlResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+};
+
 
 class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringDelegate
 {
@@ -244,6 +269,37 @@ public:
   DEVICE_ACCESSOR;
 };
 
+
+class CC_DimmableLightDevice final :
+  public DeviceDimmableLight, // the matter side device
+  public CC_LevelControlImpl  // the CC side delegate implementation
+{
+  typedef CC_LevelControlImpl inherited;
+public:
+  CC_DimmableLightDevice(int _item_id) :
+      DeviceDimmableLight(DG(LevelControl), DG(OnOff),
+                          DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
+  DEVICE_ACCESSOR;
+};
+
+
+class CC_DimmablePluginUnitDevice final :
+  public DeviceDimmablePluginUnit, // the matter side device
+  public CC_LevelControlImpl // the CC side delegate implementation
+{
+  typedef CC_LevelControlImpl inherited;
+public:
+  CC_DimmablePluginUnitDevice(int _item_id) :
+      DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff),
+                               DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
+  DEVICE_ACCESSOR;
+};
 
 
 class CC_WindowCoveringDevice final :
