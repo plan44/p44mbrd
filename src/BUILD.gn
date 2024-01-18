@@ -89,7 +89,8 @@ executable("p44mbrd") {
 
   cflags = [
     "-Wconversion",
-    "-Wno-noexcept-type"
+    "-Wno-noexcept-type",
+    "-Wno-undef"
   ]
 
   include_dirs = [
@@ -255,6 +256,7 @@ config("p44utils_config") {
   cflags = [
     "-Wconversion",
     "-Wno-noexcept-type",
+    "-Wno-undef"
   ]
   libs = [
     "ev",
