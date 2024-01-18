@@ -211,7 +211,6 @@
 		ED36DBFF286DD57B00CA28EC /* BytesToHex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBB2286DD57800CA28EC /* BytesToHex.cpp */; };
 		ED36DC00286DD57B00CA28EC /* SerializableIntegerSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBB4286DD57800CA28EC /* SerializableIntegerSet.cpp */; };
 		ED36DC01286DD57B00CA28EC /* CHIPMem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */; };
-		ED36DC02286DD57B00CA28EC /* ErrorStr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBB8286DD57800CA28EC /* ErrorStr.cpp */; };
 		ED36DC03286DD57B00CA28EC /* BufferReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBBC286DD57900CA28EC /* BufferReader.cpp */; };
 		ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBC0286DD57900CA28EC /* ThreadOperationalDataset.cpp */; };
 		ED36DC05286DD57B00CA28EC /* UnitTestRegistration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBC7286DD57900CA28EC /* UnitTestRegistration.cpp */; };
@@ -230,7 +229,6 @@
 		ED36DC14286DD57B00CA28EC /* Verhoeff10.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBF7286DD57B00CA28EC /* Verhoeff10.cpp */; };
 		ED36DC16286DD57B00CA28EC /* Pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBFA286DD57B00CA28EC /* Pool.cpp */; };
 		ED36DC17286DD57B00CA28EC /* CHIPMem-Malloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBFE286DD57B00CA28EC /* CHIPMem-Malloc.cpp */; };
-		ED36DC1C286DD5A300CA28EC /* CHIPLogging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC19286DD5A300CA28EC /* CHIPLogging.cpp */; };
 		ED36DC46286DD65900CA28EC /* CHIPError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC24286DD65800CA28EC /* CHIPError.cpp */; };
 		ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC28286DD65800CA28EC /* CHIPKeyIds.cpp */; };
 		ED36DC4C286DD65900CA28EC /* OTAImageHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC3F286DD65900CA28EC /* OTAImageHeader.cpp */; };
@@ -426,6 +424,7 @@
 		ED1A3C9D2A4346B0009746B8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		ED1A3C9E2A434872009746B8 /* jsonrpccomm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jsonrpccomm.hpp; sourceTree = "<group>"; };
 		ED1A3C9F2A434872009746B8 /* jsonrpccomm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jsonrpccomm.cpp; sourceTree = "<group>"; };
+		ED1D253F2ADD625A00C2F3E8 /* factory_data_0xFFF1_0x8002.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = factory_data_0xFFF1_0x8002.txt; sourceTree = "<group>"; };
 		ED1EDDF52A04F71700FD93B5 /* DnssdImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = DnssdImpl.h; sourceTree = "<group>"; tabWidth = 4; };
 		ED1EDDF62A04F71700FD93B5 /* DnssdImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdImpl.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		ED2330102886A1C500D934D7 /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
@@ -928,7 +927,6 @@
 		ED36DBB5286DD57800CA28EC /* CodeUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeUtils.h; sourceTree = "<group>"; };
 		ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPMem.cpp; sourceTree = "<group>"; };
 		ED36DBB7286DD57800CA28EC /* TestGroupData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestGroupData.h; sourceTree = "<group>"; };
-		ED36DBB8286DD57800CA28EC /* ErrorStr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ErrorStr.cpp; sourceTree = "<group>"; };
 		ED36DBB9286DD57800CA28EC /* BytesCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BytesCircularBuffer.h; sourceTree = "<group>"; };
 		ED36DBBA286DD57800CA28EC /* Pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pool.h; sourceTree = "<group>"; };
 		ED36DBBB286DD57800CA28EC /* FibonacciUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FibonacciUtils.h; sourceTree = "<group>"; };
@@ -937,7 +935,6 @@
 		ED36DBBE286DD57900CA28EC /* CHIPArgParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHIPArgParser.hpp; sourceTree = "<group>"; };
 		ED36DBBF286DD57900CA28EC /* IntrusiveList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntrusiveList.h; sourceTree = "<group>"; };
 		ED36DBC0286DD57900CA28EC /* ThreadOperationalDataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadOperationalDataset.cpp; sourceTree = "<group>"; };
-		ED36DBC1286DD57900CA28EC /* ErrorStr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorStr.h; sourceTree = "<group>"; };
 		ED36DBC2286DD57900CA28EC /* SerializableIntegerSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerializableIntegerSet.h; sourceTree = "<group>"; };
 		ED36DBC3286DD57900CA28EC /* SafePointerCast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SafePointerCast.h; sourceTree = "<group>"; };
 		ED36DBC4286DD57900CA28EC /* ThreadOperationalDataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadOperationalDataset.h; sourceTree = "<group>"; };
@@ -994,7 +991,6 @@
 		ED36DBFC286DD57B00CA28EC /* SafeString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SafeString.h; sourceTree = "<group>"; };
 		ED36DBFD286DD57B00CA28EC /* SafeInt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SafeInt.h; sourceTree = "<group>"; };
 		ED36DBFE286DD57B00CA28EC /* CHIPMem-Malloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "CHIPMem-Malloc.cpp"; sourceTree = "<group>"; };
-		ED36DC19286DD5A300CA28EC /* CHIPLogging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPLogging.cpp; sourceTree = "<group>"; };
 		ED36DC1A286DD5A300CA28EC /* CHIPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPLogging.h; sourceTree = "<group>"; };
 		ED36DC1B286DD5A300CA28EC /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		ED36DC20286DD65800CA28EC /* CHIPKeyIds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPKeyIds.h; sourceTree = "<group>"; };
@@ -1302,6 +1298,13 @@
 		ED36DEAC286E086300CA28EC /* DeviceInfoProviderImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceInfoProviderImpl.cpp; sourceTree = "<group>"; };
 		ED36DEAD286E086300CA28EC /* DeviceInfoProviderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInfoProviderImpl.h; sourceTree = "<group>"; };
 		ED36DF24286E354400CA28EC /* p44mbrd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = p44mbrd.entitlements; sourceTree = "<group>"; };
+		ED5C37912B5928C40081B309 /* BinaryLogging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BinaryLogging.h; sourceTree = "<group>"; };
+		ED5C37922B5928C40081B309 /* TextOnlyLogging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextOnlyLogging.h; sourceTree = "<group>"; };
+		ED5C37932B5928C40081B309 /* TextOnlyLogging.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextOnlyLogging.cpp; sourceTree = "<group>"; };
+		ED5C37942B5928C40081B309 /* BinaryLogging.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryLogging.cpp; sourceTree = "<group>"; };
+		ED5C37952B59294A0081B309 /* TLVTags.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TLVTags.cpp; sourceTree = "<group>"; };
+		ED5C37962B59294A0081B309 /* ErrorStr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ErrorStr.cpp; sourceTree = "<group>"; };
+		ED5C37972B59294A0081B309 /* ErrorStr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ErrorStr.h; sourceTree = "<group>"; };
 		ED60FD0228BF88ED00FE950E /* chip_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chip_error.cpp; sourceTree = "<group>"; };
 		ED60FD0328BF88ED00FE950E /* chip_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chip_error.h; sourceTree = "<group>"; };
 		ED60FD0528BFCA9B00FE950E /* ServerIPAddresses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerIPAddresses.h; sourceTree = "<group>"; };
@@ -2631,8 +2634,6 @@
 				ED36DBDF286DD57A00CA28EC /* Defer.h */,
 				ED36DBC6286DD57900CA28EC /* DLLUtil.h */,
 				ED36DBBD286DD57900CA28EC /* EnforceFormat.h */,
-				ED36DBB8286DD57800CA28EC /* ErrorStr.cpp */,
-				ED36DBC1286DD57900CA28EC /* ErrorStr.h */,
 				ED36DBDE286DD57A00CA28EC /* FibonacciUtils.cpp */,
 				ED36DBBB286DD57800CA28EC /* FibonacciUtils.h */,
 				ED36DBCE286DD57900CA28EC /* FixedBufferAllocator.cpp */,
@@ -2693,7 +2694,10 @@
 		ED36DC18286DD5A300CA28EC /* logging */ = {
 			isa = PBXGroup;
 			children = (
-				ED36DC19286DD5A300CA28EC /* CHIPLogging.cpp */,
+				ED5C37942B5928C40081B309 /* BinaryLogging.cpp */,
+				ED5C37912B5928C40081B309 /* BinaryLogging.h */,
+				ED5C37932B5928C40081B309 /* TextOnlyLogging.cpp */,
+				ED5C37922B5928C40081B309 /* TextOnlyLogging.h */,
 				ED36DC1A286DD5A300CA28EC /* CHIPLogging.h */,
 				ED36DC1B286DD5A300CA28EC /* Constants.h */,
 			);
@@ -2703,24 +2707,6 @@
 		ED36DC1D286DD60E00CA28EC /* core */ = {
 			isa = PBXGroup;
 			children = (
-				EDB388E629E6EF8D00BDAED4 /* TLV.h */,
-				EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */,
-				EDB388EB29E6EF8E00BDAED4 /* TLVCircularBuffer.cpp */,
-				EDB388E729E6EF8D00BDAED4 /* TLVCircularBuffer.h */,
-				EDB388DE29E6EF8D00BDAED4 /* TLVCommon.h */,
-				EDB388E829E6EF8D00BDAED4 /* TLVData.h */,
-				EDB388E329E6EF8D00BDAED4 /* TLVDebug.cpp */,
-				EDB388DB29E6EF8D00BDAED4 /* TLVDebug.h */,
-				EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */,
-				EDB388E229E6EF8D00BDAED4 /* TLVReader.h */,
-				EDB388E129E6EF8D00BDAED4 /* TLVTags.h */,
-				EDB388E529E6EF8D00BDAED4 /* TLVTypes.h */,
-				EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */,
-				EDB388DF29E6EF8D00BDAED4 /* TLVUpdater.h */,
-				EDB388E929E6EF8E00BDAED4 /* TLVUtilities.cpp */,
-				EDB388E029E6EF8D00BDAED4 /* TLVUtilities.h */,
-				EDB388EA29E6EF8E00BDAED4 /* TLVWriter.cpp */,
-				EDB388E429E6EF8D00BDAED4 /* TLVWriter.h */,
 				ED36DC34286DD65900CA28EC /* CASEAuthTag.h */,
 				ED36DC42286DD65900CA28EC /* CHIPCallback.h */,
 				ED36DC2F286DD65800CA28EC /* CHIPConfig.h */,
@@ -2735,6 +2721,8 @@
 				ED36DC3E286DD65900CA28EC /* CHIPVendorIdentifiers.hpp */,
 				ED36DC35286DD65900CA28EC /* ClusterEnums.h */,
 				ED36DC2D286DD65800CA28EC /* DataModelTypes.h */,
+				ED5C37962B59294A0081B309 /* ErrorStr.cpp */,
+				ED5C37972B59294A0081B309 /* ErrorStr.h */,
 				ED36DC3D286DD65900CA28EC /* GroupId.h */,
 				ED36DC2E286DD65800CA28EC /* InPlace.h */,
 				ED36DC36286DD65900CA28EC /* NodeId.h */,
@@ -2745,6 +2733,25 @@
 				ED36DC33286DD65900CA28EC /* PeerId.h */,
 				ED36DC37286DD65900CA28EC /* ReferenceCounted.h */,
 				ED36DC31286DD65900CA28EC /* ScopedNodeId.h */,
+				EDB388E629E6EF8D00BDAED4 /* TLV.h */,
+				EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */,
+				EDB388EB29E6EF8E00BDAED4 /* TLVCircularBuffer.cpp */,
+				EDB388E729E6EF8D00BDAED4 /* TLVCircularBuffer.h */,
+				EDB388DE29E6EF8D00BDAED4 /* TLVCommon.h */,
+				EDB388E829E6EF8D00BDAED4 /* TLVData.h */,
+				EDB388E329E6EF8D00BDAED4 /* TLVDebug.cpp */,
+				EDB388DB29E6EF8D00BDAED4 /* TLVDebug.h */,
+				EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */,
+				EDB388E229E6EF8D00BDAED4 /* TLVReader.h */,
+				ED5C37952B59294A0081B309 /* TLVTags.cpp */,
+				EDB388E129E6EF8D00BDAED4 /* TLVTags.h */,
+				EDB388E529E6EF8D00BDAED4 /* TLVTypes.h */,
+				EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */,
+				EDB388DF29E6EF8D00BDAED4 /* TLVUpdater.h */,
+				EDB388E929E6EF8E00BDAED4 /* TLVUtilities.cpp */,
+				EDB388E029E6EF8D00BDAED4 /* TLVUtilities.h */,
+				EDB388EA29E6EF8E00BDAED4 /* TLVWriter.cpp */,
+				EDB388E429E6EF8D00BDAED4 /* TLVWriter.h */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -3376,6 +3383,7 @@
 		ED690B49286DC79500069215 = {
 			isa = PBXGroup;
 			children = (
+				ED1D253F2ADD625A00C2F3E8 /* factory_data_0xFFF1_0x8002.txt */,
 				EDCA29592A7A7C9100465C00 /* .clang-format */,
 				ED1A3C9D2A4346B0009746B8 /* README.md */,
 				ED36DF24286E354400CA28EC /* p44mbrd.entitlements */,
@@ -3714,7 +3722,6 @@
 				EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */,
 				ED36DA70286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp in Sources */,
 				ED36D86F286DCDED00CA28EC /* ClusterPathIB.cpp in Sources */,
-				ED36DC02286DD57B00CA28EC /* ErrorStr.cpp in Sources */,
 				ED36DA8B286DD14F00CA28EC /* GenerateChipX509Cert.cpp in Sources */,
 				ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */,
 				ED36DDC8286DDA0300CA28EC /* SessionHolder.cpp in Sources */,
@@ -3966,7 +3973,6 @@
 				ED36D7B5286DCCBB00CA28EC /* ExampleAccessControlDelegate.cpp in Sources */,
 				ED36DC63286DD6A400CA28EC /* ExchangeMessageDispatch.cpp in Sources */,
 				ED36D8E3286DCF0B00CA28EC /* CASEClient.cpp in Sources */,
-				ED36DC1C286DD5A300CA28EC /* CHIPLogging.cpp in Sources */,
 				ED36D786286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36D7B4286DCCBB00CA28EC /* PermissiveAccessControlDelegate.cpp in Sources */,
 				ED36D7FD286DCDA300CA28EC /* descriptor.cpp in Sources */,

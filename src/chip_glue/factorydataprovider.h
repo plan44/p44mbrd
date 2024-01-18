@@ -35,7 +35,7 @@ public:
   virtual string logContextPrefix() override { return "FactoryDataProvider"; }
 
   /// @brief get unsigned integer data (such as PID, VID etc.) item from the provider
-  /// @param aKey the key for the item, case insensitiv
+  /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, 0 if aKey does not exist
   virtual uint32_t getUInt32(const char* aKey) = 0;
 
@@ -46,14 +46,14 @@ public:
   uint8_t getUInt8(const char* aKey);
 
   /// @brief get string data item from the provider
-  /// @param aKey the key for the item, case insensitiv
+  /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, empty string if aKey does not exist
   virtual string getString(const char* aKey) = 0;
 
   bool getOptionalString(const char* aKey, string& aString);
 
   /// @brief get binary data string item from the provider
-  /// @param aKey the key for the item, case insensitiv
+  /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, empty string if aKey does not exist
   virtual string getBytes(const char* aKey) = 0;
 

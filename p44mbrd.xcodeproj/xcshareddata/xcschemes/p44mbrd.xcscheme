@@ -87,6 +87,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/p44mbr_xcode_mixwerk_kvs"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--KVS /Users/luz/Documents/plan44/P44-xx/hacking+devdocs/p44mbr-mixwerk/matter_test_harness_kvs"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
