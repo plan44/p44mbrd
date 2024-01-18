@@ -87,9 +87,21 @@ void DeviceColorControl::finalizeDeviceDeclaration()
 }
 
 
+uint32_t DeviceColorControl::featureMap()
+{
+  return ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP | (mCtOnly ? 0 : ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES);
+}
+
+
+bool DeviceColorControl::hasFeature(ColorControl::Feature aFeature)
+{
+  return (featureMap() && to_underlying(aFeature))!=0;
+}
+
+
 void DeviceColorControl::didGetInstalled()
 {
-  Attributes::FeatureMap::Set(endpointId(), ZCL_COLOR_CONTROL_CLUSTER_MINIMAL_FEATURE_MAP | (mCtOnly ? 0 : ZCL_COLOR_CONTROL_CLUSTER_FULLCOLOR_FEATURES));
+  Attributes::FeatureMap::Set(endpointId(), featureMap());
   Attributes::ColorCapabilities::Set(
     endpointId(),
     (uint16_t)to_underlying(ColorControl::ColorCapabilities::kColorTemperatureSupported) |
@@ -104,7 +116,6 @@ void DeviceColorControl::didGetInstalled()
   // call base class last
   inherited::didGetInstalled();
 }
-
 
 
 bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
@@ -531,7 +542,10 @@ bool emberAfColorControlClusterStopMoveStepCallback(app::CommandHandler * comman
 
 void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
 {
-  // TODO: check if we need this
+  #ifdef EMBER_AF_PLUGIN_SCENES
+  // Registers Scene handlers for the color control cluster on the server
+  app::Clusters::Scenes::ScenesServer::Instance().RegisterSceneHandler(endpoint, ColorControlServer::GetSceneHandler());
+  #endif // EMBER_AF_PLUGIN_SCENES
 }
 
 #ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
@@ -640,3 +654,298 @@ string DeviceColorControl::description()
   string_format_append(s, "\n- Y: %d", mY);
   return s;
 }
+
+
+// MARK: - Scene control
+// TODO: Modularize level-control server
+// - for now this is extracted from app/clusters/level-control as the original
+//   cluster does not allow overriding the ower level (actual transition stepping) parts of
+//   the cluster, which are NOT suitable for remote hardware control in bridging apps
+
+#ifdef EMBER_AF_PLUGIN_SCENES
+
+// MARK: Adapter from scene mechanics to our own implementation of Level-Control
+
+/// This implementation provides the same signature as the static function in level-control.cpp
+/// to the scene handler implementation
+
+
+// MARK: copied from app/clusters/level-control-server
+
+#include <app/clusters/scenes-server/scenes-server.h>
+
+class DefaultColorControlSceneHandler : public scenes::DefaultSceneHandlerImpl
+{
+public:
+    // As per spec, 9 attributes are scenable in the color control cluster, if new scenables attributes are added, this value should
+    // be updated.
+    static constexpr uint8_t kColorControlScenableAttributesCount = 9;
+
+    DefaultColorControlSceneHandler() = default;
+    ~DefaultColorControlSceneHandler() override {}
+
+    // Default function for ColorControl cluster, only puts the ColorControl cluster ID in the span if supported on the caller
+    // endpoint
+    void GetSupportedClusters(EndpointId endpoint, Span<ClusterId> & clusterBuffer) override
+    {
+        ClusterId * buffer = clusterBuffer.data();
+        if (emberAfContainsServer(endpoint, ColorControl::Id) && clusterBuffer.size() >= 1)
+        {
+            buffer[0] = ColorControl::Id;
+            clusterBuffer.reduce_size(1);
+        }
+        else
+        {
+            clusterBuffer.reduce_size(0);
+        }
+    }
+
+    // Default function for ColorControl cluster, only checks if ColorControl is enabled on the endpoint
+    bool SupportsCluster(EndpointId endpoint, ClusterId cluster) override
+    {
+        return (cluster == ColorControl::Id) && (emberAfContainsServer(endpoint, ColorControl::Id));
+    }
+
+    /// @brief Serialize the Cluster's EFS value
+    /// @param endpoint target endpoint
+    /// @param cluster  target cluster
+    /// @param serializedBytes data to serialize into EFS
+    /// @return CHIP_NO_ERROR if successfully serialized the data, CHIP_ERROR_INVALID_ARGUMENT otherwise
+    CHIP_ERROR SerializeSave(EndpointId endpoint, ClusterId cluster, MutableByteSpan & serializedBytes) override
+    {
+        using AttributeValuePair = Scenes::Structs::AttributeValuePair::Type;
+
+        AttributeValuePair pairs[kColorControlScenableAttributesCount];
+
+        size_t attributeCount = 0;
+
+        // obtain p44mbrd device
+        auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(endpoint);
+        if (!dev) return CHIP_ERROR_INTERNAL;
+
+        if (dev->hasFeature(ColorControl::Feature::kXy))
+        {
+            uint16_t xValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::CurrentX::Get(endpoint, &xValue))
+            {
+                xValue = 0x616B; // Default X value according to spec
+            }
+            AddAttributeValuePair(pairs, Attributes::CurrentX::Id, xValue, attributeCount);
+
+            uint16_t yValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::CurrentY::Get(endpoint, &yValue))
+            {
+                yValue = 0x607D; // Default Y value according to spec
+            }
+            AddAttributeValuePair(pairs, Attributes::CurrentY::Id, yValue, attributeCount);
+        }
+
+        if (dev->hasFeature(ColorControl::Feature::kEnhancedHue))
+        {
+            uint16_t hueValue = 0x0000;
+            Attributes::EnhancedCurrentHue::Get(endpoint, &hueValue);
+            AddAttributeValuePair(pairs, Attributes::EnhancedCurrentHue::Id, hueValue, attributeCount);
+        }
+
+        if (dev->hasFeature(ColorControl::Feature::kHueAndSaturation))
+        {
+            uint8_t saturationValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::CurrentSaturation::Get(endpoint, &saturationValue))
+            {
+                saturationValue = 0x00;
+            }
+            AddAttributeValuePair(pairs, Attributes::CurrentSaturation::Id, saturationValue, attributeCount);
+        }
+
+        if (dev->hasFeature(ColorControl::Feature::kColorLoop))
+        {
+            uint8_t loopActiveValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::ColorLoopActive::Get(endpoint, &loopActiveValue))
+            {
+                loopActiveValue = 0x00;
+            }
+            AddAttributeValuePair(pairs, Attributes::ColorLoopActive::Id, loopActiveValue, attributeCount);
+
+            uint8_t loopDirectionValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::ColorLoopDirection::Get(endpoint, &loopDirectionValue))
+            {
+                loopDirectionValue = 0x00;
+            }
+            AddAttributeValuePair(pairs, Attributes::ColorLoopDirection::Id, loopDirectionValue, attributeCount);
+
+            uint16_t loopTimeValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::ColorLoopTime::Get(endpoint, &loopTimeValue))
+            {
+                loopTimeValue = 0x0019; // Default loop time value according to spec
+            }
+            AddAttributeValuePair(pairs, Attributes::ColorLoopTime::Id, loopTimeValue, attributeCount);
+        }
+
+        if (dev->hasFeature(ColorControl::Feature::kColorTemperature))
+        {
+            uint16_t temperatureValue;
+            if (EMBER_ZCL_STATUS_SUCCESS != Attributes::ColorTemperatureMireds::Get(endpoint, &temperatureValue))
+            {
+                temperatureValue = 0x00FA; // Default temperature value according to spec
+            }
+            AddAttributeValuePair(pairs, Attributes::ColorTemperatureMireds::Id, temperatureValue, attributeCount);
+        }
+
+        uint8_t modeValue;
+        if (EMBER_ZCL_STATUS_SUCCESS != Attributes::EnhancedColorMode::Get(endpoint, &modeValue))
+        {
+          modeValue = to_underlying(DeviceColorControl::InternalColorMode::xy); // Default mode value according to spec
+        }
+        AddAttributeValuePair(pairs, Attributes::EnhancedColorMode::Id, modeValue, attributeCount);
+
+        app::DataModel::List<AttributeValuePair> attributeValueList(pairs, attributeCount);
+
+        return EncodeAttributeValueList(attributeValueList, serializedBytes);
+    }
+
+    /// @brief Default EFS interaction when applying scene to the ColorControl Cluster
+    /// @param endpoint target endpoint
+    /// @param cluster  target cluster
+    /// @param serializedBytes Data from nvm
+    /// @param timeMs transition time in ms
+    /// @return CHIP_NO_ERROR if value as expected, CHIP_ERROR_INVALID_ARGUMENT otherwise
+    CHIP_ERROR ApplyScene(EndpointId endpoint, ClusterId cluster, const ByteSpan & serializedBytes,
+                          scenes::TransitionTimeMs timeMs) override
+    {
+        app::DataModel::DecodableList<Scenes::Structs::AttributeValuePair::DecodableType> attributeValueList;
+
+        // obtain p44mbrd device
+        auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(endpoint);
+        if (!dev) return CHIP_ERROR_INTERNAL;
+
+        ReturnErrorOnFailure(DecodeAttributeValueList(serializedBytes, attributeValueList));
+
+        size_t attributeCount = 0;
+        auto pair_iterator    = attributeValueList.begin();
+
+        // The color control cluster should have a maximum of 9 scenable attributes
+        ReturnErrorOnFailure(attributeValueList.ComputeSize(&attributeCount));
+        VerifyOrReturnError(attributeCount <= kColorControlScenableAttributesCount, CHIP_ERROR_BUFFER_TOO_SMALL);
+
+        // Initialize action attributes to default values in case they are not in the scene
+        DeviceColorControl::InternalColorMode targetColorMode = DeviceColorControl::InternalColorMode::unknown_mode; // default: imply color mode from props set
+        uint8_t loopActiveValue    = 0x00;
+        uint8_t loopDirectionValue = 0x00;
+        uint16_t loopTimeValue     = 0x0019; // Default loop time value according to spec
+
+        while (pair_iterator.Next())
+        {
+            auto & decodePair = pair_iterator.GetValue();
+
+            switch (decodePair.attributeID)
+            {
+            case Attributes::CurrentX::Id:
+                if (dev->hasFeature(ColorControl::Feature::kXy)) {
+                  if (decodePair.attributeValue) {
+                    dev->updateCurrentX(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                  }
+                }
+                break;
+            case Attributes::CurrentY::Id:
+                if (dev->hasFeature(ColorControl::Feature::kXy)) {
+                  dev->updateCurrentY(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                }
+                break;
+            case Attributes::EnhancedCurrentHue::Id:
+                if (dev->hasFeature(ColorControl::Feature::kEnhancedHue)) {
+                  // TODO: implement enhanced hue
+                  //colorHueTransitionState->finalEnhancedHue = static_cast<uint16_t>(decodePair.attributeValue);
+                }
+                break;
+            case Attributes::CurrentHue::Id:
+                if (dev->hasFeature(ColorControl::Feature::kHueAndSaturation)) {
+                  dev->updateCurrentHue(static_cast<uint8_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                }
+                break;
+            case Attributes::CurrentSaturation::Id:
+                if (dev->hasFeature(ColorControl::Feature::kHueAndSaturation)) {
+                  dev->updateCurrentSaturation(static_cast<uint8_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                }
+                break;
+            case Attributes::ColorLoopActive::Id:
+                if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
+                  // TODO: implement color loops, maybe
+                  loopActiveValue = static_cast<uint8_t>(decodePair.attributeValue);
+                }
+                break;
+            case Attributes::ColorLoopDirection::Id:
+                if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
+                  // TODO: implement color loops, maybe
+                  loopDirectionValue = static_cast<uint8_t>(decodePair.attributeValue);
+                }
+                break;
+            case Attributes::ColorLoopTime::Id:
+                if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
+                  // TODO: implement color loops, maybe
+                  loopTimeValue = static_cast<uint16_t>(decodePair.attributeValue);
+                }
+                break;
+            case Attributes::ColorTemperatureMireds::Id:
+                if (dev->hasFeature(ColorControl::Feature::kColorTemperature)) {
+                  dev->updateCurrentColortemp(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                }
+                break;
+            case Attributes::EnhancedColorMode::Id:
+                if (decodePair.attributeValue <= static_cast<uint8_t>(DeviceColorControl::InternalColorMode::ct))
+                {
+                  targetColorMode = static_cast<DeviceColorControl::InternalColorMode>(decodePair.attributeValue);
+                }
+                break;
+            default:
+                return CHIP_ERROR_INVALID_ARGUMENT;
+                break;
+            }
+        }
+        ReturnErrorOnFailure(pair_iterator.GetStatus());
+
+        // Determine the final color mode
+        if (targetColorMode==DeviceColorControl::InternalColorMode::unknown_mode) {
+          // use implied
+          targetColorMode = dev->currentColorMode();
+        }
+
+        uint16_t transitionTime10th = static_cast<uint16_t>(timeMs / 100);
+
+        // apply (forced to make sure all components are updated to the bridge)
+        dev->updateCurrentColorMode(
+          targetColorMode,
+          Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced),
+          transitionTime10th
+        );
+
+        return CHIP_NO_ERROR;
+    }
+
+private:
+
+    void AddAttributeValuePair(Scenes::Structs::AttributeValuePair::Type * pairs, AttributeId id, uint32_t value,
+                               size_t & attributeCount)
+    {
+        pairs[attributeCount].attributeID    = id;
+        pairs[attributeCount].attributeValue = value;
+        attributeCount++;
+    }
+};
+
+
+static DefaultColorControlSceneHandler sColorControlSceneHandler;
+
+#endif // EMBER_AF_PLUGIN_SCENES
+
+namespace ColorControlServer {
+
+  chip::scenes::SceneHandler * GetSceneHandler()
+  {
+    #ifdef EMBER_AF_PLUGIN_SCENES
+    return &sColorControlSceneHandler;
+    #else
+    return nullptr;
+    #endif // EMBER_AF_PLUGIN_SCENES
+  }
+
+} // namespace ColorControlServer

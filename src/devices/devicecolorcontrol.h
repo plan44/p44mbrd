@@ -116,6 +116,15 @@ public:
   /// handler for external attribute write access
   virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
+  /// @name helpers for scene control
+  /// @{
+
+  uint32_t featureMap();
+  bool hasFeature(ColorControl::Feature aFeature);
+
+  /// @}
+
+
 private:
 
   /// called to have the final leaf class declare the correct device type list
@@ -128,4 +137,21 @@ private:
   uint16_t mX;
   uint16_t mY;
 };
+
+
+// MARK: - Scene control
+// TODO: Modularize color-control-server
+// - for now this is extracted from app/clusters/control-control-server as the original
+//   cluster does not allow overriding the lower level (actual transition stepping) parts of
+//   the cluster, which are NOT suitable for remote hardware control in bridging apps
+
+#include <app/clusters/scenes-server/SceneTable.h>
+#include <app/clusters/scenes-server/scenes-server.h>
+
+namespace ColorControlServer {
+
+  chip::scenes::SceneHandler * GetSceneHandler();
+
+} // namespace ColorControlServer
+
 
