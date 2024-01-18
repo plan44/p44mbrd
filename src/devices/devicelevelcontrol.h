@@ -167,3 +167,21 @@ protected:
   virtual void finalizeDeviceDeclaration() override;
 
 };
+
+
+// MARK: - Scene control
+// TODO: Modularize level-control server
+// - for now this is extracted from app/clusters/level-control as the original
+//   cluster does not allow overriding the lower level (actual transition stepping) parts of
+//   the cluster, which are NOT suitable for remote hardware control in bridging apps
+
+#include <app/clusters/scenes-server/SceneTable.h>
+#include <app/clusters/scenes-server/scenes-server.h>
+
+namespace LevelControlServer {
+
+  chip::scenes::SceneHandler * GetSceneHandler();
+
+} // namespace LevelControlServer
+
+
