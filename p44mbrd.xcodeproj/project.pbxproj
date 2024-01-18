@@ -1305,6 +1305,8 @@
 		ED5C37952B59294A0081B309 /* TLVTags.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TLVTags.cpp; sourceTree = "<group>"; };
 		ED5C37962B59294A0081B309 /* ErrorStr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ErrorStr.cpp; sourceTree = "<group>"; };
 		ED5C37972B59294A0081B309 /* ErrorStr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ErrorStr.h; sourceTree = "<group>"; };
+		ED5C37982B5976390081B309 /* .gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gn; sourceTree = "<group>"; };
+		ED5C37992B5976390081B309 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		ED60FD0228BF88ED00FE950E /* chip_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chip_error.cpp; sourceTree = "<group>"; };
 		ED60FD0328BF88ED00FE950E /* chip_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chip_error.h; sourceTree = "<group>"; };
 		ED60FD0528BFCA9B00FE950E /* ServerIPAddresses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerIPAddresses.h; sourceTree = "<group>"; };
@@ -1576,6 +1578,8 @@
 		ED24BDB928A670570025CC14 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				ED5C37992B5976390081B309 /* .gitignore */,
+				ED5C37982B5976390081B309 /* .gn */,
 				ED9B79082AC5A16E00B09890 /* pregen */,
 				EDF3F539289BF3C100A82418 /* args.gni */,
 				EDF3F53A289BF3C100A82418 /* BUILD.gn */,
