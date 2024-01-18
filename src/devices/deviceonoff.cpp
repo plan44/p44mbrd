@@ -48,7 +48,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   mGlobalSceneControl(false),
   mOnTime(0),
   mOffWaitTime(0),
-  mStartUpOnOff(to_underlying(OnOff::OnOffStartUpOnOff::kOff))
+  mStartUpOnOff(to_underlying(OnOff::StartUpOnOffEnum::kOff))
 {
   // - declare onoff device specific clusters
   useClusterTemplates(Span<ClusterId>(gOnOffDeviceClusters));
