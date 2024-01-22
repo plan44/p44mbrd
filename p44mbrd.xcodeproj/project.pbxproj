@@ -1307,6 +1307,7 @@
 		ED5C37972B59294A0081B309 /* ErrorStr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ErrorStr.h; sourceTree = "<group>"; };
 		ED5C37982B5976390081B309 /* .gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gn; sourceTree = "<group>"; };
 		ED5C37992B5976390081B309 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		ED5C379A2B5ED5030081B309 /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		ED60FD0228BF88ED00FE950E /* chip_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chip_error.cpp; sourceTree = "<group>"; };
 		ED60FD0328BF88ED00FE950E /* chip_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chip_error.h; sourceTree = "<group>"; };
 		ED60FD0528BFCA9B00FE950E /* ServerIPAddresses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerIPAddresses.h; sourceTree = "<group>"; };
@@ -3387,6 +3388,7 @@
 		ED690B49286DC79500069215 = {
 			isa = PBXGroup;
 			children = (
+				ED5C379A2B5ED5030081B309 /* .gitmodules */,
 				ED1D253F2ADD625A00C2F3E8 /* factory_data_0xFFF1_0x8002.txt */,
 				EDCA29592A7A7C9100465C00 /* .clang-format */,
 				ED1A3C9D2A4346B0009746B8 /* README.md */,
