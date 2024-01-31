@@ -451,7 +451,7 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
     }
 
   if (aParams->get("error_flags", o)) {
-    for (i = 0; vo = o->arrayGet(i); i++) {
+    for (i = 0; (vo = o->arrayGet(i)) != NULL; i++) {
       const char *eflag = vo->c_strValue();
 
       if (strcmp (eflag, "blocked") == 0) {
