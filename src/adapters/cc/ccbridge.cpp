@@ -448,6 +448,26 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const JsonObjectP
       mJsonRpcAPI.sendResult(aJsonRpcId, result);
       return;
     }
+  else if (strcmp ("matter_reset_credentials", aMethod) == 0)
+    {
+      JsonObjectPtr o;
+
+      if (aParams &&
+          aParams->isType (json_type_object) &&
+          aParams->get("i_mean_it", o) &&
+          o->isType (json_type_boolean) &&
+          o->boolValue ())
+        {
+          mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
+          exit (5);
+        }
+      else
+        {
+          mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidParams, "mandatory boolean parameter \"i_mean_it\" wrong or missing.");
+        }
+
+      return;
+    }
 
   // For now, we just reject all request with error
   mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidRequest, "TODO: implement methods");
