@@ -27,7 +27,7 @@
   #define P44_ADAPTERS 1
 #endif
 
-#ifndef CC_ADAPTERS
+#if !defined(CC_ADAPTERS) && !defined(P44_BUILD_OW)
   #define CC_ADAPTERS 1
 #endif
 
