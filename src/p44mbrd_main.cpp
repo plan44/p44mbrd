@@ -681,7 +681,9 @@ public:
           }
         }
       }
-      err = TextError::err("failed adding device as endpoint");
+      else {
+        err = TextError::err("failed adding device as endpoint");
+      }
     }
     return err;
   }

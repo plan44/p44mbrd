@@ -90,7 +90,10 @@ void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
   else {
     // is new, add it
     mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
-    mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+    ErrorPtr err = mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+    if (Error::notOK(err)) {
+      POLOG(aDevice, LOG_ERR, "cannot add device: %s", err->text());
+    }
   }
 }
 
