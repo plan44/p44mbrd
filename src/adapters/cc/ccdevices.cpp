@@ -64,13 +64,14 @@ void CC_DeviceImpl::deviceDidGetInstalled()
   SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, device().endpointId(), "Bridged Becker Device");
   // TODO: set a sensible value
   SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, device().endpointId(), "");
+
+  updateBridgedInfo(NULL);
 }
 
 
 bool CC_DeviceImpl::isReachable() const
 {
-  // TODO: return actual reachability status
-  return true;
+  return !mUnresponsive;
 }
 
 
@@ -84,15 +85,15 @@ bool CC_DeviceImpl::changeName(const string aNewName)
 {
   if (aNewName!=mName) {
     mName = aNewName;
-    // TODO: forward new name
-
-    // probably something like
-    // {"jsonrpc":"2.0","id":"26", "method":"deviced_get_group_names","params":{"room_id":1}}
+#if 0
+    /* do not propagate back to deviced */
     JsonObjectPtr params = JsonObject::newObj();
     params->add("item_id", JsonObject::newInt32(CC_DeviceImpl::get_item_id ()));
     params->add("name", JsonObject::newString(aNewName));
     CC_BridgeImpl::adapter().api().sendRequest("item_set_name", params);
+#endif
 
+    updateBridgedInfo(NULL);
   }
   return true; // new name propagated
 }
@@ -110,6 +111,14 @@ int CC_DeviceImpl::get_item_id()
 }
 
 
+void CC_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  JsonObjectPtr o;
+  // propagate locally stored info to matter attributes
+  device().updateNodeLabel(mName, UpdateMode(UpdateFlags::matter));
+}
+
+
 // MARK: - CC_IdentifiableImpl
 
 // MARK: IdentityDelegate implementation
@@ -119,14 +128,19 @@ void CC_IdentifiableImpl::identify(int aDurationS)
   // (re)start or stop identify in the bridged device
   // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
 
-  // TODO: make API calls to the device to draw user's attention to it...
-
-  // probably something like
   JsonObjectPtr params = JsonObject::newObj();
-  params->add("someting", JsonObject::newInt32(3));
-  CC_BridgeImpl::adapter().api().sendRequest("some_method", params);
+  params->add("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add("command", JsonObject::newString ("clack"));
+  params->add("value", JsonObject::newInt32 (3));
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_IdentifiableImpl::onIdentifyResponse, this, _1, _2, _3));
 }
 
+
+void CC_IdentifiableImpl::onIdentifyResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
 
 Identify::IdentifyTypeEnum CC_IdentifiableImpl::identifyType()
 {
@@ -161,10 +175,22 @@ void CC_OnOffImpl::onOffResponse(int32_t aResponseId, ErrorPtr &aError, JsonObje
 
 // MARK: cc bridge specifics
 
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_OnOffImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
+
 // {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
 void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 {
   JsonObjectPtr o, vo;
+
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
       deviceP<DeviceOnOff>()->updateOnOff(vo->int32Value()>0, UpdateMode(UpdateFlags::matter));
@@ -173,6 +199,62 @@ void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 }
 
 
+
+// MARK: - CC_LevelControlImpl
+
+// MARK: LevelControlDelegate implementation
+
+void CC_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS)
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add ("command", JsonObject::newString ("dimto"));
+  params->add ("value", JsonObject::newDouble (aNewLevel));
+
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_LevelControlImpl::levelControlResponse, this, _1, _2, _3));
+}
+
+void CC_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+  params->add ("command", JsonObject::newString ("dim"));
+  params->add ("value", JsonObject::newDouble (aDirection ? 1.0 : -1.0));
+
+  DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+  CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_LevelControlImpl::levelControlResponse, this, _1, _2, _3));
+}
+
+
+void CC_LevelControlImpl::levelControlResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData)
+{
+  DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
+}
+
+
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_LevelControlImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
+
+// {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
+void CC_LevelControlImpl::handle_state_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+
+  if (aParams->get("state", o)) {
+    if (o->get("value", vo)) {
+      deviceP<LevelControlImplementationInterface>()->updateLevel(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
+    }
+  }
+}
 
 
 // MARK: - CC_WindowCoveringImpl
@@ -192,7 +274,11 @@ CC_WindowCoveringImpl::CC_WindowCoveringImpl(int _item_id, WindowCovering::Type 
 
 void CC_WindowCoveringImpl::deviceDidGetInstalled()
 {
+  inherited::updateBridgedInfo(NULL);
+
   underlying_type_t<WindowCovering::Feature> featuremap = 0;
+  int mode = 0;
+
   switch (mType) {
     case WindowCovering::Type::kShutter:
     case WindowCovering::Type::kTiltBlindLiftAndTilt:
@@ -200,27 +286,36 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
       mHasTilt = true;
       // TODO: maybe init more specifics
       break;
+    case WindowCovering::Type::kAwning :
+      mInverted = true;
+      break;
     default:
     case WindowCovering::Type::kRollerShade:
     case WindowCovering::Type::kRollerShade2Motor:
     case WindowCovering::Type::kRollerShadeExterior:
     case WindowCovering::Type::kRollerShadeExterior2Motor:
     case WindowCovering::Type::kDrapery:
-    case WindowCovering::Type::kAwning :
     case WindowCovering::Type::kProjectorScreen:
-      // w/o tilt
-      // TODO: maybe init more specifics
       break;
     case WindowCovering::Type::kTiltBlindTiltOnly:
       // not supported
       break;
   }
   // set features
-  featuremap |= to_underlying(WindowCovering::Feature::kLift) | to_underlying(WindowCovering::Feature::kPositionAwareLift);
+  featuremap |= to_underlying(WindowCovering::Feature::kLift);
+  if (mFeedback)
+    featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareLift);
   if (mHasTilt) {
-    featuremap |= to_underlying(WindowCovering::Feature::kTilt) | to_underlying(WindowCovering::Feature::kPositionAwareTilt);
+    featuremap |= to_underlying(WindowCovering::Feature::kTilt);
+    if (mFeedback)
+      featuremap |= to_underlying(WindowCovering::Feature::kPositionAwareTilt);
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
+
+  if (mInverted)
+    mode |= to_underlying(WindowCovering::Mode::kMotorDirectionReversed);
+
+  WindowCovering::Attributes::Mode::Set(endpointId(), (underlying_type_t<WindowCovering::Mode>) mode);
   // set type
   WindowCovering::Attributes::Type::Set(endpointId(), mType);
   // set end product type
@@ -263,8 +358,16 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
     {
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
-      params->add ("command", JsonObject::newString ("moveto"));
-      params->add ("value", JsonObject::newDouble (matter2bridge(lift.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
+      if (mFeedback)
+        {
+          params->add ("command", JsonObject::newString ("moveto"));
+          params->add ("value", JsonObject::newDouble (matter2bridge(lift.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
+        }
+      else
+        {
+          params->add ("command", JsonObject::newString ("move"));
+          params->add ("value", JsonObject::newDouble (matter2bridge(lift.Value(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed)) > 0.01 ? 1 : -1));
+        }
       DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
       CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
     }
@@ -299,6 +402,17 @@ void CC_WindowCoveringImpl::stopMovement()
 }
 
 
+// {"item_id":4,"config":{"name":"fump"}}
+void CC_WindowCoveringImpl::handle_config_changed(JsonObjectPtr aParams)
+{
+  JsonObjectPtr o, vo;
+  if (aParams->get("config", o)) {
+    if (o->get("name", vo)) {
+      changeName(vo->stringValue());
+    }
+  }
+}
+
 // {"item_id":4,"state":{"error-flags":null,"value":1},"error_flags":[]}
 void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
 {
@@ -311,9 +425,13 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
   //   - THEN set CurrentPositionXXX attributes to SAME current position
   //   (only this sequence makes the Window Covering Cluster recognize end of operation)
 
+  int safety_status = 0;
+  bool unresponsive = false;
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr o, vo;
+  int i;
+
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
       // sb: roughly something like this?
@@ -331,6 +449,38 @@ void CC_WindowCoveringImpl::handle_state_changed(JsonObjectPtr aParams)
       // - this is the current position
       WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed)));
     }
+
+  if (aParams->get("error_flags", o)) {
+    for (i = 0; (vo = o->arrayGet(i)) != NULL; i++) {
+      const char *eflag = vo->c_strValue();
+
+      if (strcmp (eflag, "blocked") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kObstacleDetected);
+      } else if (strcmp (eflag, "overheated") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kThermalProtection);
+      } else if (strcmp (eflag, "alert") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kProtection);
+      } else if (strcmp (eflag, "sensor-loss") == 0) {
+        safety_status |= to_underlying(WindowCovering::SafetyStatus::kFailedCommunication);
+      } else if (strcmp (eflag, "unresponsive") == 0) {
+        unresponsive = true;
+      }
+    }
+
+    WindowCovering::Attributes::SafetyStatus::Set(endpointId(), (underlying_type_t<WindowCovering::SafetyStatus>) safety_status);
+    if (mUnresponsive != unresponsive)
+      {
+        mUnresponsive = unresponsive;
+        device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+      }
+  }
+
+  // STATE_ERROR_BLOCKED      = Obstacle Detected
+  // STATE_ERROR_OVERHEATED   = ThermalProtection
+  // STATE_ERROR_UNRESPONSIVE = (--> bridged basic information)
+  // STATE_ERROR_LOW_BATTERY  = (?)
+  // STATE_ERROR_ALERT        = Protection
+  // STATE_ERROR_SENSOR_LOSS  = Failed Communication
   }
 }
 
@@ -338,5 +488,6 @@ void CC_WindowCoveringImpl::windowCoveringResponse(int32_t aResponseId, ErrorPtr
 {
   DLOG(LOG_INFO, "got response for deviced.group_send_command: error=%s, result=%s", Error::text(aError), JsonObject::text(aResultOrErrorData));
 }
+
 
 #endif // CC_ADAPTERS

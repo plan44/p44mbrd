@@ -829,9 +829,9 @@ public:
 
         // Initialize action attributes to default values in case they are not in the scene
         DeviceColorControl::InternalColorMode targetColorMode = DeviceColorControl::InternalColorMode::unknown_mode; // default: imply color mode from props set
-        uint8_t loopActiveValue    = 0x00;
-        uint8_t loopDirectionValue = 0x00;
-        uint16_t loopTimeValue     = 0x0019; // Default loop time value according to spec
+        // uint8_t loopActiveValue    = 0x00;
+        // uint8_t loopDirectionValue = 0x00;
+        // uint16_t loopTimeValue     = 0x0019; // Default loop time value according to spec
 
         while (pair_iterator.Next())
         {
@@ -870,19 +870,19 @@ public:
             case Attributes::ColorLoopActive::Id:
                 if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
                   // TODO: implement color loops, maybe
-                  loopActiveValue = static_cast<uint8_t>(decodePair.attributeValue);
+                  // loopActiveValue = static_cast<uint8_t>(decodePair.attributeValue);
                 }
                 break;
             case Attributes::ColorLoopDirection::Id:
                 if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
                   // TODO: implement color loops, maybe
-                  loopDirectionValue = static_cast<uint8_t>(decodePair.attributeValue);
+                  // loopDirectionValue = static_cast<uint8_t>(decodePair.attributeValue);
                 }
                 break;
             case Attributes::ColorLoopTime::Id:
                 if (dev->hasFeature(ColorControl::Feature::kColorLoop)) {
                   // TODO: implement color loops, maybe
-                  loopTimeValue = static_cast<uint16_t>(decodePair.attributeValue);
+                  // loopTimeValue = static_cast<uint16_t>(decodePair.attributeValue);
                 }
                 break;
             case Attributes::ColorTemperatureMireds::Id:

@@ -90,10 +90,17 @@ public:
 
   int item_id;
   int get_item_id ();
+  bool mFeedback;
+  bool mUnresponsive;
 
   void initialize_name(const string _name) { mName = _name; }
+  void initialize_feedback(const bool _feedback) { mFeedback = _feedback; }
+  void initialize_unresponsive() { mUnresponsive = false; }
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
   virtual void handle_state_changed(JsonObjectPtr aParams) { /* NOP in base class */ }
+
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo);
 
   /// @}
 
@@ -114,6 +121,10 @@ protected:
   virtual void identify(int aDurationS) override;
   virtual Identify::IdentifyTypeEnum identifyType() override;
   /// @}
+
+private:
+  void onIdentifyResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+
 };
 
 
@@ -133,6 +144,7 @@ protected:
   /// @}
   ///
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
   virtual void handle_state_changed(JsonObjectPtr aParams) override;
 
 private:
@@ -143,6 +155,31 @@ private:
 };
 
 
+class CC_LevelControlImpl : public CC_OnOffImpl, public LevelControlDelegate
+{
+  typedef CC_OnOffImpl inherited;
+
+protected:
+  CC_LevelControlImpl(int _item_id) : inherited(_item_id) { /* NOP so far */ }
+
+  /// the hardware recommended transition time (usually provided by the bridged hardware)
+  uint16_t mRecommendedTransitionTimeDS;
+  MLMicroSeconds mEndOfLatestTransition;
+
+  /// @name LevelControlDelegate
+  /// @{
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS) override;
+  virtual void dim(int8_t aDirection, uint8_t aRate) override;
+  virtual MLMicroSeconds endOfLatestTransition() override { return mEndOfLatestTransition; };
+  /// @}
+
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
+  virtual void handle_state_changed(JsonObjectPtr aParams) override;
+
+private:
+  void levelControlResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+};
+
 
 class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringDelegate
 {
@@ -151,6 +188,7 @@ class CC_WindowCoveringImpl : public CC_IdentifiableImpl, public WindowCoveringD
   WindowCovering::Type mType;
   WindowCovering::EndProductType mEndProductType;
   bool mHasTilt;
+  bool mInverted;
 
 protected:
 
@@ -172,6 +210,7 @@ protected:
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   /// @}
 
+  virtual void handle_config_changed(JsonObjectPtr aParams) override;
   virtual void handle_state_changed(JsonObjectPtr aParams) override;
 
 private:
@@ -231,10 +270,41 @@ public:
 };
 
 
+class CC_DimmableLightDevice final :
+  public DeviceDimmableLight, // the matter side device
+  public CC_LevelControlImpl  // the CC side delegate implementation
+{
+  typedef CC_LevelControlImpl inherited;
+public:
+  CC_DimmableLightDevice(int _item_id) :
+      DeviceDimmableLight(DG(LevelControl), DG(OnOff),
+                          DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
+  DEVICE_ACCESSOR;
+};
+
+
+class CC_DimmablePluginUnitDevice final :
+  public DeviceDimmablePluginUnit, // the matter side device
+  public CC_LevelControlImpl // the CC side delegate implementation
+{
+  typedef CC_LevelControlImpl inherited;
+public:
+  CC_DimmablePluginUnitDevice(int _item_id) :
+      DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff),
+                               DG(Identify), DG(DeviceInfo)),
+      inherited(_item_id)
+  {}; // this class itself implements all needed delegates
+  virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
+  DEVICE_ACCESSOR;
+};
+
 
 class CC_WindowCoveringDevice final :
   public DeviceWindowCovering, // the matter side device
-  public CC_WindowCoveringImpl // the P44 side delegate implementation
+  public CC_WindowCoveringImpl // the CC side delegate implementation
 {
   typedef CC_WindowCoveringImpl inherited;
 public:

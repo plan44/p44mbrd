@@ -40,7 +40,11 @@ CC_BridgeImpl& CC_BridgeImpl::adapter()
     gSharedCCBridgeP = new CC_BridgeImpl;
     assert(gSharedCCBridgeP);
     gSharedCCBridgeP->isMemberVariable();
+    gSharedCCBridgeP->mLabel = "mein Entwicklungs-Bastel-Gerät";
+    gSharedCCBridgeP->mModel = "CentralControl CC41";
+    gSharedCCBridgeP->mSerial = "9876543210";
   }
+
   return *gSharedCCBridgeP;
 }
 
@@ -59,18 +63,33 @@ void CC_BridgeImpl::startup()
 void CC_BridgeImpl::reportCommissionable(bool aIsCommissionable)
 {
   // TODO: maybe inform the gateway about commissionable status
+  IsCommissionable = aIsCommissionable;
+
+  JsonObjectPtr result = JsonObject::newObj();
+
+  result->add("commissionable", JsonObject::newBool (IsCommissionable));
+
+  if (IsCommissionable)
+    {
+      result->add ("qrcode", JsonObject::newString (QRCodeData));
+      result->add ("pairingcode", JsonObject::newString (ManualPairingCode));
+    }
+  mJsonRpcAPI.sendRequest("matter_commissionable_status", result, NULL);
 }
 
 
 void CC_BridgeImpl::updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
 {
   // TODO: maybe inform the gateway about commissioning information (pairing QRcode and manual code)
+  QRCodeData = aQRCodeData;
+  ManualPairingCode = aManualPairingCode;
 }
 
 
 void CC_BridgeImpl::setBridgeRunning(bool aRunning)
 {
   // TODO: maybe inform the gateway about bridge running status
+  IsRunning = aRunning;
 }
 
 
@@ -157,7 +176,7 @@ void CC_BridgeImpl::client_registered(int32_t aResponseId, ErrorPtr &aStatus, Js
     /* subscribe to notifications */
 
     JsonObjectPtr params = JsonObject::newObj();
-    params->add("pattern", JsonObject::newString("deviced.item_(state|vitals)_changed"));
+    params->add("pattern", JsonObject::newString("deviced.item_(config|state|vitals)_changed"));
     mJsonRpcAPI.sendRequest("rpc_client_subscribe", params, boost::bind(&CC_BridgeImpl::client_subscribed, this, _1, _2, _3));
     return;
   }
@@ -175,12 +194,99 @@ void CC_BridgeImpl::client_subscribed(int32_t aResponseId, ErrorPtr &aStatus, Js
     /* start discovery */
 
     JsonObjectPtr params = JsonObject::newObj();
+    params->add("verbose", JsonObject::newBool (true));
     mJsonRpcAPI.sendRequest("deviced.deviced_get_items_info", params, boost::bind(&CC_BridgeImpl::deviceListReceived, this, _1, _2, _3));
     return;
   }
   OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
   // startup failed, report back to main app
   startupComplete(aStatus);
+}
+
+void CC_BridgeImpl::createDeviceForData(JsonObjectPtr item,
+                                        bool          in_init)
+{
+  JsonObjectPtr item_id;
+  DevicePtr dev = NULL;
+  const char *device_type = NULL;
+  bool feedback = 0;
+
+  item_id = item->get ("id");
+
+  OLOG(LOG_INFO, "item: %s", item->getCString ("name"));
+
+  if (!item_id || item_id->int32Value() <= 0 ||
+      strcmp (item->getCString ("type"), "group") != 0)
+    return;
+
+  /* ignore groups not backed with a backend (i.e. "real groups") */
+  if (item->getCString ("backend") == NULL)
+    return;
+
+  device_type = item->getCString ("device_type");
+  feedback = item->get("feedback") ? item->get("feedback")->boolValue() : false;
+
+  if (strcmp (device_type, "switch") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering onoff device for switch");
+
+      dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
+    }
+  else if (strcmp (device_type, "dimmer") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering dimmablelight device for dimmer");
+
+      dev = new CC_DimmableLightDevice(item_id->int32Value());
+    }
+  else if (strcmp (device_type, "shutter") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
+
+      dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                        WindowCovering::Type::kShutter,
+                                        WindowCovering::EndProductType::kRollerShutter);
+    }
+  else if (strcmp (device_type, "awning") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering windowcovering device for awning");
+
+      dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                        WindowCovering::Type::kAwning,
+                                        WindowCovering::EndProductType::kAwningTerracePatio);
+    }
+  else if (strcmp (device_type, "screen") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering windowcovering device for screen");
+
+      dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                        WindowCovering::Type::kRollerShade,
+                                        WindowCovering::EndProductType::kAwningVerticalScreen);
+    }
+  else if (strcmp (device_type, "venetian") == 0)
+    {
+      OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
+
+      dev = new CC_WindowCoveringDevice(item_id->int32Value(),
+                                        WindowCovering::Type::kTiltBlindLiftAndTilt,
+                                        WindowCovering::EndProductType::kExteriorVenetianBlind);
+    }
+  else
+    {
+      OLOG (LOG_NOTICE, "... device_type %s not supported yet", item->getCString ("device_type"));
+    }
+
+  if (dev)
+    {
+      CC_DeviceImpl::impl(dev)->initialize_name (item->getCString ("name"));
+      CC_DeviceImpl::impl(dev)->initialize_feedback (feedback);
+      CC_DeviceImpl::impl(dev)->handle_state_changed(item);
+
+      // register it
+      if (in_init)
+        registerInitialDevice(DevicePtr (dev));
+      else
+        bridgeAdditionalDevice(DevicePtr (dev));
+    }
 }
 
 void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
@@ -190,87 +296,42 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
   if (Error::isOK(aStatus)) {
     // request ok
 
-    // assuming we have a list of devices to be bridged here:
-    // TODO: implement device instantiation
+    // we have a list of devices to be bridged here:
 
     ilist = aResultOrErrorData->get ("item_list");
     if (ilist && ilist->arrayLength() > 0) {
       int i;
 
       for (i = 0; i < ilist->arrayLength(); i++)
-        {
-          JsonObjectPtr item, item_id;
-          DevicePtr dev = NULL;
-
-          item = ilist->arrayGet (i);
-          item_id = item->get ("id");
-
-          OLOG(LOG_INFO, "item: %s", item->getCString ("name"));
-
-          if (!item_id || item_id->int32Value() <= 0 ||
-              strcmp (item->getCString ("type"), "group") != 0)
-            continue;
-
-
-          if (strcmp (item->getCString ("device_type"), "switch") == 0)
-            {
-              OLOG (LOG_NOTICE, "... registering onoff device for switch");
-
-              dev = new CC_OnOffPluginUnitDevice(item_id->int32Value());
-              CC_DeviceImpl::impl(dev)->initialize_name(item->getCString ("name"));
-
-              // register it
-              registerInitialDevice(DevicePtr (dev));
-            }
-          else if (strcmp (item->getCString ("device_type"), "shutter") == 0)
-            {
-              OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
-
-              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
-                                                WindowCovering::Type::kShutter,
-                                                WindowCovering::EndProductType::kRollerShutter); // TODO: ok? could use kUnknown as well
-            }
-          else if (strcmp (item->getCString ("device_type"), "awning") == 0)
-            {
-              OLOG (LOG_NOTICE, "... registering windowcovering device for awning");
-
-              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
-                                                WindowCovering::Type::kAwning,
-                                                WindowCovering::EndProductType::kAwningTerracePatio); // TODO: ok? could use kUnknown as well
-            }
-          else if (strcmp (item->getCString ("device_type"), "venetian") == 0)
-            {
-              OLOG (LOG_NOTICE, "... registering windowcovering device for venetian");
-
-              dev = new CC_WindowCoveringDevice(item_id->int32Value(),
-                                                WindowCovering::Type::kTiltBlindLiftAndTilt,
-                                                WindowCovering::EndProductType::kExteriorVenetianBlind); // TODO: ok? could use kUnknown as well
-            }
-          else
-            {
-              OLOG (LOG_NOTICE, "... device_type %s not supported yet", item->getCString ("device_type"));
-            }
-
-          if (dev)
-            {
-              CC_DeviceImpl::impl(dev)->initialize_name (item->getCString ("name"));
-
-              // register it
-              registerInitialDevice(DevicePtr (dev));
-            }
-        }
+      {
+        createDeviceForData (ilist->arrayGet (i), true);
+      }
     }
-
   }
   else {
-    OLOG(LOG_ERR, "error from deviced_get_group_names: %s", aStatus->text());
+    OLOG(LOG_ERR, "error from deviced_get_items_info: %s", aStatus->text());
   }
-  // Assume discovery done at this point, so erport back to main app
+  // Assume discovery done at this point, so report back to main app
   startupComplete(aStatus);
 }
 
 
-void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams)
+void CC_BridgeImpl::itemInfoReceived(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+{
+  if (Error::isOK(aStatus)) {
+    // request ok
+
+    // we have an item info object of the device to be bridged here:
+
+    createDeviceForData (aResultOrErrorData, false);
+  }
+  else {
+    OLOG(LOG_ERR, "error from item_get_info: %s", aStatus->text());
+  }
+}
+
+
+void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const JsonObjectPtr aJsonRpcId, JsonObjectPtr aParams)
 {
   // JSON RPC request/notification coming FROM bridge
 
@@ -279,7 +340,21 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJson
   if (!aJsonRpcId)
     {
       OLOG (LOG_NOTICE, "Notification %s received: %s", aMethod, JsonObject::text(aParams));
-      if (strcmp ("deviced.item_state_changed", aMethod) == 0)
+      if (strcmp ("deviced.item_config_changed", aMethod) == 0)
+        {
+          // find device
+          JsonObjectPtr o;
+          if (aParams->get("item_id", o))
+          {
+            int item_id = o->int32Value();
+            DeviceUIDMap::iterator dev = mDeviceUIDMap.find(CC_DeviceImpl::uid_string(item_id));
+            if (dev!=mDeviceUIDMap.end())
+            {
+              CC_DeviceImpl::impl(dev->second)->handle_config_changed(aParams);
+            }
+          }
+        }
+      else if (strcmp ("deviced.item_state_changed", aMethod) == 0)
         {
           // find device
           JsonObjectPtr o;
@@ -292,47 +367,36 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJson
               CC_DeviceImpl::impl(dev->second)->handle_state_changed(aParams);
             }
           }
-
-#if 0
-          "value" ist der standard Zustandswert
-
-          darüber hinaus gibt es je nach Gerätetyp:
-
-          "value"
-          "value-tilt"
-          "value-temp"
-          "value-sun"
-          "value-dawn"
-          "value-wind"
-          "value-rain"
-
-          Error-Flags können enthalten:
-          "blocked", "overheated", "unresponsive", "low battery", "alert", "sensor-loss"
-
-          Info-Flags können enthalten:
-          "auto-command", "auto-command-sun", "auto-command-rain", "down-locked", "up-locked",
-          "wind-alarm", "winter-mode", "install-incomplete", "wind-low", "sun-low", "dawn-low",
-          "rain-low", "frost-low", "temp-low", "temp-out-low", "wind-high", "sun-high",
-          "dawn-high", "rain-high", "frost-high", "temp-high", "temp-out-high",
-
-          {
-            "jsonwatch":  "2.0",
-            "request-src":  "deviced",
-            "method":  "deviced.item_state_changed",
-            "params":  {
-              "item_id":  21,
-              "state":  {
-                "error-flags":  ["unresponsive"],
-                "value":  null,
-                "info-flags":  null
-              },
-              "error_flags":  ["unresponsive"]
-            }
-          }
-#endif
         }
       else if (strcmp ("deviced.item_vitals_changed", aMethod) == 0)
         {
+          // determine what happened
+          JsonObjectPtr o1, o2;
+          if (aParams->get("vitals", o1) &&
+              aParams->get("item_id", o2))
+          {
+            if (strcmp (o1->c_strValue(), "created") == 0)
+            {
+              int item_id = o2->int32Value();
+              DeviceUIDMap::iterator dev = mDeviceUIDMap.find(CC_DeviceImpl::uid_string(item_id));
+              /* we might already have it due to a deviced restart */
+              if (dev!=mDeviceUIDMap.end())
+                return;
+
+              JsonObjectPtr params = JsonObject::newObj();
+              params->add("item_id", JsonObject::newInt32 (o2->int32Value()));
+              mJsonRpcAPI.sendRequest("deviced.item_get_info", params, boost::bind(&CC_BridgeImpl::itemInfoReceived, this, _1, _2, _3));
+            }
+            else if (strcmp (o1->c_strValue(), "deleted") == 0)
+            {
+              int item_id = o2->int32Value();
+              DeviceUIDMap::iterator dev = mDeviceUIDMap.find(CC_DeviceImpl::uid_string(item_id));
+              if (dev!=mDeviceUIDMap.end())
+              {
+                removeDevice (DevicePtr (dev->second));
+              }
+            }
+          }
 #if 0
           "vitals" kann sein: "created", "deleted", "children-change"
 
@@ -350,11 +414,67 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const char *aJson
 
       return;
     }
+  else if (strcmp ("matter_set_commissionable", aMethod) == 0)
+    {
+      JsonObjectPtr o;
+
+      if (aParams &&
+          aParams->isType (json_type_object) &&
+          aParams->get("commissionable", o) &&
+          o->isType (json_type_boolean))
+        {
+          bool commissionable = o->boolValue ();
+          requestCommissioning (commissionable);
+          mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
+        }
+      else
+        {
+          mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidParams, "mandatory boolean parameter \"commissionable\" wrong or missing.");
+        }
+
+      return;
+    }
+  else if (strcmp ("matter_get_commissionable", aMethod) == 0)
+    {
+      JsonObjectPtr result = JsonObject::newObj();
+
+      result->add("commissionable", JsonObject::newBool (IsCommissionable));
+
+      if (IsCommissionable)
+        {
+          result->add ("qrcode", JsonObject::newString (QRCodeData));
+          result->add ("pairingcode", JsonObject::newString (ManualPairingCode));
+        }
+      mJsonRpcAPI.sendResult(aJsonRpcId, result);
+      return;
+    }
+  else if (strcmp ("matter_reset_credentials", aMethod) == 0)
+    {
+      JsonObjectPtr o;
+
+      if (aParams &&
+          aParams->isType (json_type_object) &&
+          aParams->get("i_mean_it", o) &&
+          o->isType (json_type_boolean) &&
+          o->boolValue ())
+        {
+          mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
+          exit (5);
+        }
+      else
+        {
+          mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidParams, "mandatory boolean parameter \"i_mean_it\" wrong or missing.");
+        }
+
+      return;
+    }
 
   // For now, we just reject all request with error
   mJsonRpcAPI.sendError(aJsonRpcId, JsonRpcError::InvalidRequest, "TODO: implement methods");
 
 }
+
+
 
 
 #endif // CC_ADAPTERS

@@ -48,6 +48,11 @@ class CC_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   string mModel;
   string mSerial;
 
+  bool   IsRunning;
+  bool   IsCommissionable;
+  string QRCodeData;
+  string ManualPairingCode;
+
 public:
 
   /// singleton getter / on demand constructor for a CC adapter
@@ -77,7 +82,7 @@ public:
   virtual string model() override { return mModel; }
 
   /// @return vendor name for this bridge (or the device it bridges)
-  virtual string vendor() override { return "plan44.ch"; };
+  virtual string vendor() override { return "Becker-Antriebe GmbH"; };
 
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }
@@ -109,13 +114,16 @@ public:
 
 private:
 
+  void createDeviceForData(JsonObjectPtr item, bool in_init);
+
   void jsonRpcConnectionOpen();
   void jsonRpcConnectionStatusHandler(ErrorPtr aError);
-  void jsonRpcRequestHandler(const char *aMethod, const char *aJsonRpcId, JsonObjectPtr aParams);
+  void jsonRpcRequestHandler(const char *aMethod, const JsonObjectPtr aJsonRpcId, JsonObjectPtr aParams);
 
   void client_subscribed(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void client_registered(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void deviceListReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+  void itemInfoReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 
 };
 
