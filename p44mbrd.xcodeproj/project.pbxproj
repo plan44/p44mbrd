@@ -40,7 +40,6 @@
 		ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D766286DCB8A00CA28EC /* TraceDecoder.cpp */; };
 		ED36D785286DCB8A00CA28EC /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D76B286DCB8A00CA28EC /* Decoder.cpp */; };
 		ED36D786286DCB8A00CA28EC /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D76E286DCB8A00CA28EC /* Decoder.cpp */; };
-		ED36D787286DCB8A00CA28EC /* DecoderCustomLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D772286DCB8A00CA28EC /* DecoderCustomLog.cpp */; };
 		ED36D788286DCB8A00CA28EC /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D773286DCB8A00CA28EC /* Decoder.cpp */; };
 		ED36D789286DCB8A00CA28EC /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D777286DCB8A00CA28EC /* Decoder.cpp */; };
 		ED36D78A286DCB8A00CA28EC /* TraceDecoderProtocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D778286DCB8A00CA28EC /* TraceDecoderProtocols.cpp */; };
@@ -120,7 +119,6 @@
 		ED36D8E1286DCF0B00CA28EC /* AttributePathExpandIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D89C286DCF0800CA28EC /* AttributePathExpandIterator.cpp */; };
 		ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D89D286DCF0800CA28EC /* InteractionModelEngine.cpp */; };
 		ED36D8E3286DCF0B00CA28EC /* CASEClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8A0286DCF0800CA28EC /* CASEClient.cpp */; };
-		ED36D8E4286DCF0B00CA28EC /* FailSafeContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8B0286DCF0900CA28EC /* FailSafeContext.cpp */; };
 		ED36D8E6286DCF0B00CA28EC /* ReadHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */; };
 		ED36D8E7286DCF0B00CA28EC /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8BA286DCF0900CA28EC /* Engine.cpp */; };
 		ED36D8E8286DCF0B00CA28EC /* RequiredPrivilege.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8BB286DCF0900CA28EC /* RequiredPrivilege.cpp */; };
@@ -142,9 +140,6 @@
 		ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D904286DCF5000CA28EC /* Server.cpp */; };
 		ED36D90D286DCF5100CA28EC /* CommissioningWindowManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D905286DCF5000CA28EC /* CommissioningWindowManager.cpp */; };
 		ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D906286DCF5100CA28EC /* DefaultAclStorage.cpp */; };
-		ED36DA6F286DD04300CA28EC /* DeviceAttestationVerifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA69286DD04300CA28EC /* DeviceAttestationVerifier.cpp */; };
-		ED36DA70286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA6A286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp */; };
-		ED36DA71286DD04300CA28EC /* FileAttestationTrustStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA6D286DD04300CA28EC /* FileAttestationTrustStore.cpp */; };
 		ED36DA85286DD14F00CA28EC /* DeviceAttestationCredsProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA74286DD14E00CA28EC /* DeviceAttestationCredsProvider.cpp */; };
 		ED36DA86286DD14F00CA28EC /* GroupDataProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA75286DD14E00CA28EC /* GroupDataProviderImpl.cpp */; };
 		ED36DA87286DD14F00CA28EC /* CertificationDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA78286DD14E00CA28EC /* CertificationDeclaration.cpp */; };
@@ -233,7 +228,6 @@
 		ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC28286DD65800CA28EC /* CHIPKeyIds.cpp */; };
 		ED36DC4C286DD65900CA28EC /* OTAImageHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC3F286DD65900CA28EC /* OTAImageHeader.cpp */; };
 		ED36DC60286DD6A400CA28EC /* ErrorCategory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC4F286DD6A300CA28EC /* ErrorCategory.cpp */; };
-		ED36DC61286DD6A400CA28EC /* ExchangeContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC51286DD6A300CA28EC /* ExchangeContext.cpp */; };
 		ED36DC62286DD6A400CA28EC /* ReliableMessageMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC52286DD6A300CA28EC /* ReliableMessageMgr.cpp */; };
 		ED36DC63286DD6A400CA28EC /* ExchangeMessageDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC54286DD6A300CA28EC /* ExchangeMessageDispatch.cpp */; };
 		ED36DC64286DD6A400CA28EC /* ApplicationExchangeDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC57286DD6A300CA28EC /* ApplicationExchangeDispatch.cpp */; };
@@ -359,6 +353,14 @@
 		ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98463E2A73C6270057C0D8 /* matter_utils.cpp */; };
 		ED9B79172AC5A16E00B09890 /* IMClusterCommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9B79102AC5A16E00B09890 /* IMClusterCommandHandler.cpp */; };
 		ED9B79182AC5A16E00B09890 /* callback-stub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9B79152AC5A16E00B09890 /* callback-stub.cpp */; };
+		EDAEF94A2BD02E61000B3FE0 /* ExchangeContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC51286DD6A300CA28EC /* ExchangeContext.cpp */; };
+		EDAEF94B2BD035C2000B3FE0 /* ErrorStr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5C37962B59294A0081B309 /* ErrorStr.cpp */; };
+		EDAEF94C2BD03605000B3FE0 /* FailSafeContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8B0286DCF0900CA28EC /* FailSafeContext.cpp */; };
+		EDAEF94E2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDAEF94D2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp */; };
+		EDAEF9502BD03707000B3FE0 /* Stat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDAEF94F2BD03707000B3FE0 /* Stat.cpp */; };
+		EDAEF9512BD0373A000B3FE0 /* BinaryLogging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5C37942B5928C40081B309 /* BinaryLogging.cpp */; };
+		EDAEF9522BD0376B000B3FE0 /* TextOnlyLogging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5C37932B5928C40081B309 /* TextOnlyLogging.cpp */; };
+		EDAEF9532BD11E8A000B3FE0 /* DecoderCustomLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D772286DCB8A00CA28EC /* DecoderCustomLog.cpp */; };
 		EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388D829E6EF2700BDAED4 /* basic-information.cpp */; };
 		EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DC29E6EF8D00BDAED4 /* TLVReader.cpp */; };
 		EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDB388DD29E6EF8D00BDAED4 /* TLVUpdater.cpp */; };
@@ -1362,6 +1364,8 @@
 		ED9B79112AC5A16E00B09890 /* gen_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gen_config.h; sourceTree = "<group>"; };
 		ED9B79152AC5A16E00B09890 /* callback-stub.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "callback-stub.cpp"; sourceTree = "<group>"; };
 		ED9B79162AC5A16E00B09890 /* PluginApplicationCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginApplicationCallbacks.h; sourceTree = "<group>"; };
+		EDAEF94D2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InetInterfaceImplDefault.cpp; sourceTree = "<group>"; };
+		EDAEF94F2BD03707000B3FE0 /* Stat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Stat.cpp; sourceTree = "<group>"; };
 		EDB388D729E6EF2700BDAED4 /* basic-information.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "basic-information.h"; sourceTree = "<group>"; };
 		EDB388D829E6EF2700BDAED4 /* basic-information.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "basic-information.cpp"; sourceTree = "<group>"; };
 		EDB388DA29E6EF8C00BDAED4 /* TLVBackingStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLVBackingStore.h; sourceTree = "<group>"; };
@@ -2406,6 +2410,7 @@
 		ED36DAB7286DD21200CA28EC /* inet */ = {
 			isa = PBXGroup;
 			children = (
+				EDAEF94D2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp */,
 				EDF3F4A328916F9A00A82418 /* InetLayer.h */,
 				ED36DABC286DD27100CA28EC /* arpa-inet-compatibility.h */,
 				ED36DAC0286DD27100CA28EC /* IANAConstants.h */,
@@ -2598,6 +2603,7 @@
 		ED36DBA0286DD43F00CA28EC /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				EDAEF94F2BD03707000B3FE0 /* Stat.cpp */,
 				ED36DBA2286DD48C00CA28EC /* Base64.cpp */,
 				ED36DBA1286DD48C00CA28EC /* Config.cpp */,
 				ED36DBA6286DD48C00CA28EC /* Device.cpp */,
@@ -3748,7 +3754,6 @@
 				ED36DBAB286DD48C00CA28EC /* Meta.cpp in Sources */,
 				ED36D866286DCDED00CA28EC /* MessageParser.cpp in Sources */,
 				EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */,
-				ED36DA70286DD04300CA28EC /* DefaultDeviceAttestationVerifier.cpp in Sources */,
 				ED36D86F286DCDED00CA28EC /* ClusterPathIB.cpp in Sources */,
 				ED36DA8B286DD14F00CA28EC /* GenerateChipX509Cert.cpp in Sources */,
 				ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */,
@@ -3763,6 +3768,7 @@
 				EDCA044D2A81214200225B0A /* actions.cpp in Sources */,
 				ED36DEA6286E043600CA28EC /* DeviceControlServer.cpp in Sources */,
 				ED36DDE7286DDAF300CA28EC /* json_value.cpp in Sources */,
+				EDAEF9502BD03707000B3FE0 /* Stat.cpp in Sources */,
 				ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */,
 				ED36D88F286DCDED00CA28EC /* EventFilterIBs.cpp in Sources */,
 				ED36D87D286DCDED00CA28EC /* AttributePathIB.cpp in Sources */,
@@ -3812,6 +3818,7 @@
 				ED36DE9C286E043500CA28EC /* DeviceInstanceInfoProvider.cpp in Sources */,
 				ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */,
 				ED36DE88286E02CD00CA28EC /* binding-table.cpp in Sources */,
+				EDAEF94E2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp in Sources */,
 				ED36D909286DCF5100CA28EC /* OnboardingCodesUtil.cpp in Sources */,
 				ED36DEA2286E043500CA28EC /* PlatformEventSupport.cpp in Sources */,
 				ED36DA8C286DD14F00CA28EC /* DeviceAttestationConstructor.cpp in Sources */,
@@ -3829,6 +3836,7 @@
 				ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */,
 				ED2B994A2A85166B007AD119 /* factorydataprovider.cpp in Sources */,
 				ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */,
+				EDAEF9512BD0373A000B3FE0 /* BinaryLogging.cpp in Sources */,
 				ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */,
 				ED014C882A93C67D00071593 /* fan-control-server.cpp in Sources */,
 				ED36DDD2286DDA0300CA28EC /* TraceMessage.cpp in Sources */,
@@ -3849,6 +3857,7 @@
 				ED36D7B3286DCCBB00CA28EC /* AccessControl.cpp in Sources */,
 				ED36D86E286DCDED00CA28EC /* StatusResponseMessage.cpp in Sources */,
 				ED36D870286DCDED00CA28EC /* AttributeStatusIBs.cpp in Sources */,
+				EDAEF94B2BD035C2000B3FE0 /* ErrorStr.cpp in Sources */,
 				ED36D880286DCDED00CA28EC /* ListParser.cpp in Sources */,
 				ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */,
 				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
@@ -3860,6 +3869,7 @@
 				ED9B79172AC5A16E00B09890 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D864286DCDED00CA28EC /* ArrayBuilder.cpp in Sources */,
 				ED36D87A286DCDED00CA28EC /* AttributeReportIB.cpp in Sources */,
+				EDAEF9532BD11E8A000B3FE0 /* DecoderCustomLog.cpp in Sources */,
 				ED36D8E0286DCF0B00CA28EC /* EventManagement.cpp in Sources */,
 				ED36DC00286DD57B00CA28EC /* SerializableIntegerSet.cpp in Sources */,
 				ED36DDD0286DDA0300CA28EC /* Session.cpp in Sources */,
@@ -3899,6 +3909,7 @@
 				ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */,
 				ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */,
 				EDCA04492A7AB1A200225B0A /* ccbridge.cpp in Sources */,
+				EDAEF94A2BD02E61000B3FE0 /* ExchangeContext.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
 				ED36DB8D286DD2CE00CA28EC /* IncrementalResolve.cpp in Sources */,
 				ED36DDC7286DDA0300CA28EC /* GroupPeerMessageCounter.cpp in Sources */,
@@ -3968,12 +3979,12 @@
 				EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */,
 				ED9846002A72543E0057C0D8 /* SceneTableImpl.cpp in Sources */,
 				ED36D7EE286DCDA300CA28EC /* localization-configuration-server.cpp in Sources */,
-				ED36D787286DCB8A00CA28EC /* DecoderCustomLog.cpp in Sources */,
 				ED36DD71286DD9A400CA28EC /* SystemClock.cpp in Sources */,
 				ED36DC05286DD57B00CA28EC /* UnitTestRegistration.cpp in Sources */,
 				ED36DDD6286DDA0300CA28EC /* SessionManager.cpp in Sources */,
 				ED36DCFA286DD8A000CA28EC /* MessageCounterManager.cpp in Sources */,
 				ED36D868286DCDED00CA28EC /* StructBuilder.cpp in Sources */,
+				EDAEF94C2BD03605000B3FE0 /* FailSafeContext.cpp in Sources */,
 				ED36DAB3286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp in Sources */,
 				ED36D883286DCDED00CA28EC /* AttributeReportIBs.cpp in Sources */,
 				ED36DD0A286DD8A000CA28EC /* UnsolicitedStatusHandler.cpp in Sources */,
@@ -3984,7 +3995,6 @@
 				ED36DB6B286DD2CE00CA28EC /* ServiceNaming.cpp in Sources */,
 				ED36DD73286DD9A400CA28EC /* TLVPacketBufferBackingStore.cpp in Sources */,
 				ED36DB90286DD2CE00CA28EC /* ASN1Writer.cpp in Sources */,
-				ED36DA6F286DD04300CA28EC /* DeviceAttestationVerifier.cpp in Sources */,
 				ED36DD41286DD91500CA28EC /* AdditionalDataPayloadGenerator.cpp in Sources */,
 				ED36DBAA286DD48C00CA28EC /* Base64.cpp in Sources */,
 				ED36DB74286DD2CE00CA28EC /* IP.cpp in Sources */,
@@ -4013,12 +4023,10 @@
 				ED36DAD6286DD27200CA28EC /* InetError.cpp in Sources */,
 				ED36DE80286E02CD00CA28EC /* attribute-size-util.cpp in Sources */,
 				ED36DAD3286DD27200CA28EC /* IPPrefix.cpp in Sources */,
-				ED36D8E4286DCF0B00CA28EC /* FailSafeContext.cpp in Sources */,
 				ED36DE9A286E043500CA28EC /* Globals.cpp in Sources */,
 				ED36DC16286DD57B00CA28EC /* Pool.cpp in Sources */,
 				ED36DD70286DD9A400CA28EC /* SystemError.cpp in Sources */,
 				ED36D801286DCDA300CA28EC /* group-key-mgmt-server.cpp in Sources */,
-				ED36DC61286DD6A400CA28EC /* ExchangeContext.cpp in Sources */,
 				ED36DBAE286DD48C00CA28EC /* Dns.cpp in Sources */,
 				ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */,
 				ED36DAD9286DD27200CA28EC /* InetArgParser.cpp in Sources */,
@@ -4046,6 +4054,7 @@
 				ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */,
 				ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */,
 				ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */,
+				EDAEF9522BD0376B000B3FE0 /* TextOnlyLogging.cpp in Sources */,
 				ED36DCAD286DD7F200CA28EC /* ConfigurationManagerImpl.cpp in Sources */,
 				ED36DC0E286DD57B00CA28EC /* ZclString.cpp in Sources */,
 				ED36DD50286DD91500CA28EC /* ManualSetupPayloadParser.cpp in Sources */,
@@ -4091,7 +4100,6 @@
 				EDB388F129E6EF8E00BDAED4 /* TLVCircularBuffer.cpp in Sources */,
 				ED36DAE6286DD29600CA28EC /* AddressResolve.cpp in Sources */,
 				ED36DBA9286DD48C00CA28EC /* Config.cpp in Sources */,
-				ED36DA71286DD04300CA28EC /* FileAttestationTrustStore.cpp in Sources */,
 				ED36D881286DCDED00CA28EC /* EventStatusIB.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4253,6 +4261,8 @@
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
 					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
+					"ICD_MAX_NOTIFICATION_SUBSCRIBERS=1",
+					"CHIP_CONFIG_ENABLE_ICD_SERVER=0",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",
@@ -4274,7 +4284,32 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/xcode-gen-copy/include\n$(PROJECT_DIR)/xcode-gen-link/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-link/zap\n$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-copy/zap\n$(PROJECT_DIR)/xcode-include\n$(PROJECT_DIR)/src\n$(PROJECT_DIR)/src/zap/include\n$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates\n$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include\n$(inherited)\n$(BREW_PREFIX)/opt/openssl@3/include",
+					"$(PROJECT_DIR)/xcode-gen-copy/include",
+					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",
+					"$(PROJECT_DIR)/xcode-gen-link/zap",
+					"$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen",
+					"$(PROJECT_DIR)/xcode-gen-copy/zap",
+					"$(PROJECT_DIR)/xcode-include",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/zap/include",
+					"$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates",
+					"$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlunit-test/repo/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(inherited)",
+					"$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Debug;
@@ -4291,6 +4326,8 @@
 					"$(inherited)",
 					"CHIP_HAVE_CONFIG_H=1",
 					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
+					"ICD_MAX_NOTIFICATION_SUBSCRIBERS=1",
+					"CHIP_CONFIG_ENABLE_ICD_SERVER=0",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",
@@ -4312,7 +4349,32 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/xcode-gen-copy/include\n$(PROJECT_DIR)/xcode-gen-link/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-link/zap\n$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen\n$(PROJECT_DIR)/xcode-gen-copy/zap\n$(PROJECT_DIR)/xcode-include\n$(PROJECT_DIR)/src\n$(PROJECT_DIR)/src/zap/include\n$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates\n$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/src\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp\n$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common\n$(PROJECT_DIR)/src/third_party/connectedhomeip/examples\n$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include\n$(inherited)\n$(BREW_PREFIX)/opt/openssl@3/include",
+					"$(PROJECT_DIR)/xcode-gen-copy/include",
+					"$(PROJECT_DIR)/xcode-gen-link/zap/zapgen",
+					"$(PROJECT_DIR)/xcode-gen-link/zap",
+					"$(PROJECT_DIR)/xcode-gen-copy/zap/zapgen",
+					"$(PROJECT_DIR)/xcode-gen-copy/zap",
+					"$(PROJECT_DIR)/xcode-include",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/zap/include",
+					"$(PROJECT_DIR)/src/pregen/p44mbrd/zap/app-templates",
+					"$(PROJECT_DIR)/src/pregen/p44mbrd/codegen/cpp-app",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated/app-common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/config/standalone",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlunit-test/repo/src",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlassert/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/nlio/repo/include",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/inipp/repo/inipp",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/zzz_generated",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/platform/linux",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/providers",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples/common",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/examples",
+					"$(PROJECT_DIR)/src/third_party/connectedhomeip/third_party/jsoncpp/repo/include",
+					"$(inherited)",
+					"$(BREW_PREFIX)/opt/openssl@3/include",
 				);
 			};
 			name = Release;
