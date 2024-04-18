@@ -78,22 +78,22 @@ void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
       if (emberAfEndpointIsEnabled(previousEndpoint)) {
         // already enabled - should not happen
         POLOG(dev, LOG_ERR, "is already bridged and operational, cannot be added again!")
+        return;
       }
       else {
         // exists, but is disabled - re-enable
         // - use newer definition of the device
         mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
         mBridgeMainDelegateP->reEnableDevice(aDevice, *this);
+        return;
       }
     }
   }
-  else {
-    // is new, add it
-    mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
-    ErrorPtr err = mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
-    if (Error::notOK(err)) {
-      POLOG(aDevice, LOG_ERR, "cannot add device: %s", err->text());
-    }
+  // is new, or previous device with same endpointUID had no endpoint assigned yet -> add it
+  mDeviceUIDMap[aDevice->deviceInfoDelegate().endpointUID()] = aDevice;
+  ErrorPtr err = mBridgeMainDelegateP->addAdditionalDevice(aDevice, *this);
+  if (Error::notOK(err)) {
+    POLOG(aDevice, LOG_ERR, "cannot add device: %s", err->text());
   }
 }
 
