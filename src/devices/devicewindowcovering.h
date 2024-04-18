@@ -25,6 +25,7 @@
 #include "device.h"
 
 #include <app/clusters/window-covering-server/window-covering-delegate.h>
+#include <app/clusters/window-covering-server/window-covering-server.h>
 
 using namespace chip;
 

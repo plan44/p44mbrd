@@ -650,11 +650,12 @@ void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
     featuremap |= to_underlying(WindowCovering::Feature::kTilt) | to_underlying(WindowCovering::Feature::kPositionAwareTilt);
   }
   WindowCovering::Attributes::FeatureMap::Set(endpointId(), featuremap);
-  WindowCovering::Attributes::Type::Set(endpointId(), mHasTilt ? WindowCovering::Type::kTiltBlindLiftAndTilt : WindowCovering::Type::kRollerShade);
+  WindowCovering::ConfigStatusUpdateFeatures(endpointId()); // update dependent attributes
+  WindowCovering::TypeSet(endpointId(), mHasTilt ? WindowCovering::Type::kTiltBlindLiftAndTilt : WindowCovering::Type::kRollerShade);
   // - end product type
   WindowCovering::EndProductType endproducttype = WindowCovering::EndProductType::kRollerShade;
   if (mHasTilt) endproducttype = WindowCovering::EndProductType::kExteriorVenetianBlind; // TODO: maybe differentiate later
-  WindowCovering::Attributes::EndProductType::Set(endpointId(), endproducttype);
+  WindowCovering::EndProductTypeSet(endpointId(), endproducttype);
 }
 
 
@@ -662,8 +663,7 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
 {
   inherited::parseOutputState(aOutputState, aChannelStates, aUpdateMode);
   JsonObjectPtr o, vo;
-  BitMask<WindowCovering::Mode> mode;
-  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
+  BitMask<WindowCovering::Mode> mode = WindowCovering::ModeGet(endpointId());
   int moving = 0;
   if (aOutputState) {
     // get moving state
@@ -694,6 +694,9 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
           status |= to_underlying(WindowCovering::SafetyStatus::kPower);
           break;
       }
+      // FIXME: it seems SafetyStatusSet() should be used, however it is not implemented (due to declaration/impl mismatch in the SDK...)
+      // (but as the intended implementation is just setting the attribute, we leave it at that)
+      //WindowCovering::SafetyStatusSet(endpointId(), static_cast<underlying_type_t<WindowCovering::SafetyStatus>>(status));
       WindowCovering::Attributes::SafetyStatus::Set(endpointId(), static_cast<underlying_type_t<WindowCovering::SafetyStatus>>(status));
     }
   }
@@ -708,13 +711,13 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
         Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
-        WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), currentvalue);
+        WindowCovering::LiftPositionSet(endpointId(), WindowCovering::NPercent100ths(currentvalue));
       }
       else {
         // we do not know a transitional value
         if (!moving) {
           // not moving, assume target and current equal
-          WindowCovering::Attributes::CurrentPositionLiftPercent100ths::Set(endpointId(), targetvalue);
+          WindowCovering::LiftPositionSet(endpointId(), WindowCovering::NPercent100ths(targetvalue));
         }
       }
     }
@@ -729,13 +732,13 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
         Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
-        WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), currentvalue);
+        WindowCovering::TiltPositionSet(endpointId(), WindowCovering::NPercent100ths(currentvalue));
       }
       else {
         // we do not know a transitional value
         if (!moving) {
           // not moving, assume target and current equal
-          WindowCovering::Attributes::CurrentPositionTiltPercent100ths::Set(endpointId(), targetvalue);
+          WindowCovering::TiltPositionSet(endpointId(), WindowCovering::NPercent100ths(targetvalue));
         }
       }
     }
