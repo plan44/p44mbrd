@@ -58,8 +58,12 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--ccapihost 192.168.59.121"
+            argument = "--dynamicpin --discriminator 3292"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--ccapihost 192.168.59.121"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3840"
@@ -126,6 +130,13 @@
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "IDEPreferLogStreaming"
+            value = "YES"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

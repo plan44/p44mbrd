@@ -201,21 +201,22 @@ public:
 
     const CmdLineOptionDescriptor options[] = {
       // Original CHIP command line args
-      { 0, "factorydata",         true, "path[:path...];file paths of factory data files to be processed to gather product specific "
-                                        "data such as PID, VID, certificates, etc. Paths are read in the order specified here, "
-                                        "duplicate items overriding already defined ones."},
-      { 0, "discriminator",       true, "discriminator;override the discriminator from factorydata" },
-      { 0, "setuppin",            true, "pincode;override the pincode from factorydata\n"
-                                        "If not provided to compute a verifier, the spake2p-verifier must be provided in factorydata." },
-      { 0, "matter-tcp-port",     true, "port;matter TCP port (secured)" },
-      { 0, "matter-udp-port",     true, "arg;matter UDP port (unsecured)" },
-      { 0, "interface",           true, "interface name;The network interface name to advertise on. Must have IPv6 link local address. If not set, first network interface with Ipv6 link local is used." },
-      { 0, "PICS",                true, "filepath;A file containing PICS items" },
-      { 0, "KVS",                 true, "filepath;A file to store Key Value Store items" },
+      { 0, "factorydata",         true,   "path[:path...];file paths of factory data files to be processed to gather product specific "
+                                          "data such as PID, VID, certificates, etc. Paths are read in the order specified here, "
+                                          "duplicate items overriding already defined ones."},
+      { 0, "discriminator",       true,   "discriminator;override the discriminator from factorydata" },
+      { 0, "dynamicpin",          false,  "generates a dynamic pin/passcode for commissioning" },
+      { 0, "setuppin",            true,   "pincode;override the pin/passcode from factorydata\n"
+                                          "If not provided to compute a verifier, the spake2p-verifier must be provided in factorydata." },
+      { 0, "matter-tcp-port",     true,   "port;matter TCP port (secured)" },
+      { 0, "matter-udp-port",     true,   "arg;matter UDP port (unsecured)" },
+      { 0, "interface",           true,   "interface name;The network interface name to advertise on. Must have IPv6 link local address. If not set, first network interface with Ipv6 link local is used." },
+      { 0, "PICS",                true,   "filepath;A file containing PICS items" },
+      { 0, "KVS",                 true,   "filepath;A file to store Key Value Store items" },
       #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
-      { 0, "trace_file",          true, "filepath;Output trace data to the provided file." },
-      { 0, "trace_log",           false, "enables traces to go to the log" },
-      { 0, "trace_decode",        false, "enables traces decoding" },
+      { 0, "trace_file",          true,   "filepath;Output trace data to the provided file." },
+      { 0, "trace_log",           false,  "enables traces to go to the log" },
+      { 0, "trace_decode",        false,  "enables traces decoding" },
       #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
       // p44mbrd command line args
       #if P44_ADAPTERS
@@ -930,8 +931,23 @@ public:
     onBoardingPayload.setUpPINCode = factoryData->getUInt32("SETUPPIN") & ((1<<27)-1);
     // - override from command line
     int i;
-    if (getIntOption("discriminator", i)) onBoardingPayload.discriminator.SetLongValue(static_cast<uint16_t>(i & ((1<<12)-1)));
-    if (getIntOption("setuppin", i)) onBoardingPayload.setUpPINCode = i & ((1<<27)-1);
+    if (getIntOption("discriminator", i)) {
+      // just extract 12 bits
+      onBoardingPayload.discriminator.SetLongValue(static_cast<uint16_t>(i & ((1<<12)-1)));
+    }
+    if (getOption("dynamicpin")) {
+      // auto-generate dynamic pin, loop to skip specifically forbidden trivial values
+      do {
+        i = (rand() % (kMaxSetupPasscode-kMinSetupPasscode+1))+kMinSetupPasscode;
+      } while(!PayloadContents::IsValidSetupPIN(i));
+      onBoardingPayload.setUpPINCode = i;
+    }
+    else if (getIntOption("setuppin", i)) {
+      if (!PayloadContents::IsValidSetupPIN(i)) {
+        return TextError::err("Invalid setup pin, must be 1..%d, and exclude trivial values like 11111111", kMaxSetupPasscode);
+      }
+      onBoardingPayload.setUpPINCode = i;
+    }
 
     // MARK: basically reduced ChipLinuxAppInit() from here
     ErrorPtr err;
