@@ -7,6 +7,10 @@ p44mbrd
 
 *p44mbrd* connects devices from its *bridge adapters* into the new [smart-home standard *matter*](https://buildwithmatter.com), making them available in matter-enabled smart home "oecosystems" such as Apple Home, Smart Things, Alexa, Google and hopefully many more independent ones in the near future.
 
+## Try it
+
+If you want to test *p44mbrd* (and *vdcd*) in action, you may want to grab the free [*P44-LC-X* RaspberryPi image](https://plan44.ch/automation/p44-lc-x.php), an old RasPi (any B,B+,2,3 or 4 will do) and some WS28xx LEDs and check out the [tutorials](https://plan44.ch/p44-techdocs/en/tutorials/) for example to build a decorative matter-enabled [LED torch](https://plan44.ch/p44-techdocs/en/tutorials/p44torch/). *P44-LC-X* is a OpenWrt based setup with vdcd, p44mbrd and a WebUI preinstalled. There's also a [version for integrating with digitalstrom](https://plan44.ch/automation/p44-dsb-x.php). Note that the downloaded images are not always the most recent version, so please use the built-in "check for update" in the Web-UI to get the latest version.
+
 ## Implementation notes
 
 ### vdcd bridge adapter
@@ -63,11 +67,6 @@ So expect a changes and additions in the next few months!
 *p44mbrd* is licensed under the GPLv3 License (see COPYING).
 
 If that's a problem for your particular application, I am open to provide a commercial license, within the limits of the third party code included (in particular, *connectedhomeip*'s Apache 2 License) - please contact me at [luz@plan44.ch](mailto:luz@plan44.ch).
-
-
-## Try it out
-
-plan44.ch provides RaspberryPi images named P44-DSB-X and P44-LC-X which contain a complete OpenWrt, with vdcd and p44mbrd installed and fully configured as a Digital Strom bridge or a standalone light controller with matter support. You can download one of these from [plan44.ch/automation/p44-dsb-x.php](https://plan44.ch/automation/p44-dsb-x.php) or [plan44.ch/automation/p44-lc-x.php](https://plan44.ch/automation/p44-lc-x.php), copy it to a SD Card and use it with a RPi B, B+, 2,3 and 4. Note that the downloaded images are not always the most current version, so use the built-in "check for update" to get the latest version. Details see https://plan44.ch/p44-techdocs/en/matter/beta_readme/.
 
 
 ## Build it for OpenWrt Linux
