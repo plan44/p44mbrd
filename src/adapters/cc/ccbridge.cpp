@@ -311,6 +311,16 @@ void CC_BridgeImpl::deviceListReceived(int32_t aResponseId, ErrorPtr &aStatus, J
   else {
     OLOG(LOG_ERR, "error from deviced_get_items_info: %s", aStatus->text());
   }
+
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("persistent", JsonObject::newBool (false));
+  params->add("shown", JsonObject::newBool (false));
+  params->add("domain", JsonObject::newString ("p44mbrd"));
+  params->add("code", JsonObject::newInt32 (0));
+  params->add("message", JsonObject::newString ("p44mbrd startup done"));
+
+  mJsonRpcAPI.sendRequest("systemd.log_entry_dump", params, boost::bind(&CC_BridgeImpl::ignoreLogResponse, this, _1, _2, _3));
+
   // Assume discovery done at this point, so report back to main app
   startupComplete(aStatus);
 }
@@ -327,6 +337,17 @@ void CC_BridgeImpl::itemInfoReceived(int32_t aResponseId, ErrorPtr &aStatus, Jso
   }
   else {
     OLOG(LOG_ERR, "error from item_get_info: %s", aStatus->text());
+  }
+}
+
+
+void CC_BridgeImpl::ignoreLogResponse(int32_t aResponseId, ErrorPtr &aStatus, JsonObjectPtr aResultOrErrorData)
+{
+  if (Error::isOK(aStatus)) {
+    // request ok
+  }
+  else {
+    OLOG(LOG_ERR, "error from systemd.log_entry_dump: %s", aStatus->text());
   }
 }
 

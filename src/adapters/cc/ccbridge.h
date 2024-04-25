@@ -123,6 +123,7 @@ private:
   void client_subscribed(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void client_registered(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void deviceListReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
+  void ignoreLogResponse(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
   void itemInfoReceived(int32_t aResponseId, ErrorPtr &aError, JsonObjectPtr aResultOrErrorData);
 
 };
