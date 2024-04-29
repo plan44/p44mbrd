@@ -149,6 +149,7 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
 void P44_BridgeImpl::queryBridge()
 {
   // first update (reset) bridge status
+  api().setProperty("root", "x-p44-bridge.bridgetype", JsonObject::newString("matter"));
   api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
   api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(""));
   api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(false));
