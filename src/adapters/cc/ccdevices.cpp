@@ -284,7 +284,6 @@ void CC_WindowCoveringImpl::deviceDidGetInstalled()
     case WindowCovering::Type::kTiltBlindLiftAndTilt:
       // with tilt
       mHasTilt = true;
-      // TODO: maybe init more specifics
       break;
     case WindowCovering::Type::kAwning :
       mInverted = true;
@@ -354,7 +353,8 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
   //   `mode.Has(WindowCovering::Mode::kMotorDirectionReversed)`
   // - check !lift.IsNull() and !tilt.IsNull() before using target values
 
-  if (!lift.IsNull())
+  if (!lift.IsNull() &&
+      aMovementType == WindowCovering::WindowCoveringType::Lift)
     {
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
@@ -372,7 +372,9 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
       CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
     }
 
-  if (!tilt.IsNull())
+  if (!tilt.IsNull() &&
+      aMovementType == WindowCovering::WindowCoveringType::Tilt &&
+      mHasTilt)
     {
       JsonObjectPtr params = JsonObject::newObj();
       params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
@@ -381,7 +383,6 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
       DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
       CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
     }
-
 }
 
 
