@@ -243,7 +243,7 @@ void CC_BridgeImpl::createDeviceForData(JsonObjectPtr item,
       OLOG (LOG_NOTICE, "... registering windowcovering device for shutter");
 
       dev = new CC_WindowCoveringDevice(item_id->int32Value(),
-                                        WindowCovering::Type::kShutter,
+                                        WindowCovering::Type::kRollerShadeExterior,
                                         WindowCovering::EndProductType::kRollerShutter);
     }
   else if (strcmp (device_type, "awning") == 0)
