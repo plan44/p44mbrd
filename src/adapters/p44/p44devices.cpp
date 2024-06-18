@@ -909,12 +909,12 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
       if (states->get(pos->second.c_str(), state)) {
         JsonObjectPtr o;
         if (state->get("value", o, true)) {
-          bool position = o->boolValue() ? pos->first : 0; // active position or idle
+          uint8_t position = static_cast<uint8_t>(o->boolValue() ? pos->first : 0); // active position or idle
           DsClickType clicktype = ct_none;
           if (state->get("clickType", o, true)) {
             clicktype = (DsClickType)(o->int32Value());
           }
-          if (position!=mPosition) {
+          if (position!=mPosition || clicktype==ct_complete) {
             // actual change of position
             switch(clicktype) {
               case ct_tip_1x:
