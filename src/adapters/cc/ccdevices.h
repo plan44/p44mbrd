@@ -202,6 +202,7 @@ protected:
   /// @name WindowCoveringDelegate
   /// @{
   virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) override;
+  virtual void simpleStartMovement(bool aUpOrOpen) override;
   virtual void stopMovement() override;
   /// @}
 

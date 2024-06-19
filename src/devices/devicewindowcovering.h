@@ -40,7 +40,13 @@ public:
   /// Initiate movement to target value(s)
   /// @param aMovementType indicates movement to perform (lift or tilt), hardware might need
   ///   to perform both at the same time
+  /// @note this is called for position-aware window coverings. Implementation must consult
+  ///   relevant attributes to decide what movement needs to be initiated
   virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) = 0;
+
+  /// Start simple movement for non-position-aware window coverings
+  /// @param aUpOrOpen if true, the movement should start in the "up or open" direction, otherwise "down or close"
+  virtual void simpleStartMovement(bool aUpOrOpen) = 0;
 
   /// Stop movement
   virtual void stopMovement() = 0;
@@ -67,6 +73,7 @@ public:
   /// @name Matter Cluster's delegate
   /// @{
   virtual CHIP_ERROR HandleMovement(WindowCovering::WindowCoveringType type) override;
+  virtual CHIP_ERROR StartNonPAMovement(WindowCovering::WindowCoveringType type, bool aUpOrOpen) override;
   virtual CHIP_ERROR HandleStopMotion() override;
   /// @}
 
@@ -77,6 +84,7 @@ protected:
 
 private:
 
+  
   // additional storage for windowCovering cluster
 
 };

@@ -415,7 +415,7 @@
 		ED072F612A69BA22007BBF71 /* devicewindowcovering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devicewindowcovering.h; sourceTree = "<group>"; };
 		ED072F642A69BBD6007BBF71 /* window-covering-delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-delegate.h"; sourceTree = "<group>"; };
 		ED072F652A69BBD6007BBF71 /* window-covering-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-server.h"; sourceTree = "<group>"; };
-		ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "window-covering-server.cpp"; sourceTree = "<group>"; };
+		ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "window-covering-server.cpp"; sourceTree = "<group>"; tabWidth = 4; };
 		ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoggingImpl.cpp; sourceTree = "<group>"; };
 		ED0B92D92949DDFF00FA3B04 /* Logging.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Logging.mm; sourceTree = "<group>"; };
 		ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPAddressSorter.cpp; sourceTree = "<group>"; };

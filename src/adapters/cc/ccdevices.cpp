@@ -385,6 +385,14 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
 }
 
 
+void CC_WindowCoveringImpl::simpleStartMovement(bool aUpOrOpen)
+{
+  #warning "todo"
+}
+
+
+
+
 void CC_WindowCoveringImpl::stopMovement()
 {
   // - get mode (for kMotorDirectionReversed)

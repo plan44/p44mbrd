@@ -85,6 +85,14 @@ CHIP_ERROR DeviceWindowCovering::HandleMovement(WindowCovering::WindowCoveringTy
 }
 
 
+CHIP_ERROR DeviceWindowCovering::StartNonPAMovement(WindowCovering::WindowCoveringType type, bool aUpOrOpen)
+{
+  OLOG(LOG_INFO, "WindowCoveringDelegate::StartNonPAMovement: start moving");
+  mWindowCoveringDelegate.simpleStartMovement(aUpOrOpen);
+  return CHIP_NO_ERROR;
+}
+
+
 CHIP_ERROR DeviceWindowCovering::HandleStopMotion()
 {
   OLOG(LOG_INFO, "WindowCoveringDelegate::HandleStopMotion: stop moving");
