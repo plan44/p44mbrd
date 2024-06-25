@@ -618,7 +618,7 @@ void P44_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aM
 }
 
 
-void P44_WindowCoveringImpl::simpleStartMovement(bool aUpOrOpen)
+void P44_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringType aMovementType, bool aUpOrOpen)
 {
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);

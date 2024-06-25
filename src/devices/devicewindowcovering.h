@@ -45,8 +45,10 @@ public:
   virtual void startMovement(WindowCovering::WindowCoveringType aMovementType) = 0;
 
   /// Start simple movement for non-position-aware window coverings
+  /// @param aMovementType indicates movement to perform (lift or tilt), hardware might need
+  ///   to perform both at the same time or be unable to differentiate at all
   /// @param aUpOrOpen if true, the movement should start in the "up or open" direction, otherwise "down or close"
-  virtual void simpleStartMovement(bool aUpOrOpen) = 0;
+  virtual void simpleStartMovement(WindowCovering::WindowCoveringType aMovementType, bool aUpOrOpen) = 0;
 
   /// Stop movement
   virtual void stopMovement() = 0;

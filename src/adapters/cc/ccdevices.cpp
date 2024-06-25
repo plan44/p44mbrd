@@ -386,7 +386,7 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
 }
 
 
-void CC_WindowCoveringImpl::simpleStartMovement(bool aUpOrOpen)
+void CC_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringType type, bool aUpOrOpen)
 {
   #warning "todo"
 }
