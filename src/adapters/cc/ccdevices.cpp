@@ -386,9 +386,30 @@ void CC_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aMo
 }
 
 
-void CC_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringType type, bool aUpOrOpen)
+void CC_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringType aMovementType, bool aUpOrOpen)
 {
-  #warning "todo"
+  // - get mode (for kMotorDirectionReversed)
+  BitMask<WindowCovering::Mode> mode;
+  WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
+
+  if (aMovementType == WindowCovering::WindowCoveringType::Lift)
+    {
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+      params->add ("command", JsonObject::newString ("move"));
+      params->add ("value", JsonObject::newDouble (matter2bridge(aUpOrOpen ? 100.0 : 0.0, mode.Has(WindowCovering::Mode::kMotorDirectionReversed)) > 0.01 ? 1 : -1));
+      DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+      CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
+    }
+  else if (aMovementType == WindowCovering::WindowCoveringType::Tilt)
+    {
+      JsonObjectPtr params = JsonObject::newObj();
+      params->add ("group_id", JsonObject::newInt32 (get_item_id ()));
+      params->add ("command", JsonObject::newString ("tilt"));
+      params->add ("value", JsonObject::newDouble (matter2bridge(aUpOrOpen ? 100.0 : 0.0, mode.Has(WindowCovering::Mode::kMotorDirectionReversed))));
+      DLOG(LOG_INFO, "sending deviced.group_send_command with params = %s", JsonObject::text(params));
+      CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_WindowCoveringImpl::windowCoveringResponse, this, _1, _2, _3));
+    }
 }
 
 
