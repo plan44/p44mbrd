@@ -623,7 +623,7 @@ void P44_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringT
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr params = JsonObject::newObj();
-  params->add("channelId", JsonObject::newString(mDefaultChannelId));
+  params->add("channelId", JsonObject::newString(aMovementType==WindowCovering::WindowCoveringType::Lift ? mDefaultChannelId : "shadeOpeningAngleOutside"));
   params->add("value", JsonObject::newDouble(aUpOrOpen!=mode.Has(WindowCovering::Mode::kMotorDirectionReversed) ? 100 : 0)); // dS standard: 100% = fully lifted/open
   params->add("apply_now", JsonObject::newBool(true)); // Apply now, together with tilt
   notify("setOutputChannelValue", params);
