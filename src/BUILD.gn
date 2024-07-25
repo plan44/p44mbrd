@@ -24,6 +24,12 @@ assert(chip_build_tools)
 # p44mbrd
 # =======
 
+
+declare_args() {
+  p44_application_version = "missing"
+}
+
+
 executable("p44mbrd") {
   sources = [
     "zap/include/CHIPProjectAppConfig.h",
@@ -110,6 +116,8 @@ executable("p44mbrd") {
 # global config added to everything via default_configs_extra in //args.gni
 config("p44mbrd_config_extra") {
   defines = [
+    # the app version should have been passed as build param
+    "P44_APPLICATION_VERSION=\"$p44_application_version\"",
     # we want log filtering
     "CHIP_LOG_FILTERING=1",
     # we may or may not want extensive attribute access logging
