@@ -134,6 +134,16 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
 
 // MARK: query and setup bridgeable devices
 
+void P44_BridgeImpl::updateBridgeStatus(bool aStarted)
+{
+  api().setProperty("root", "x-p44-bridge.bridgetype", JsonObject::newString("matter"));
+  api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
+  api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(""));
+  api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(aStarted));
+  api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(false));
+}
+
+
 #define NEEDED_DEVICE_PROPERTIES \
   "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
   "\"outputDescription\":null, \"outputSettings\": null, \"modelFeatures\":null, " \
@@ -149,11 +159,7 @@ void P44_BridgeImpl::bridgeApiConnectedHandler(ErrorPtr aStatus)
 void P44_BridgeImpl::queryBridge()
 {
   // first update (reset) bridge status
-  api().setProperty("root", "x-p44-bridge.bridgetype", JsonObject::newString("matter"));
-  api().setProperty("root", "x-p44-bridge.qrcodedata", JsonObject::newString(""));
-  api().setProperty("root", "x-p44-bridge.manualpairingcode", JsonObject::newString(""));
-  api().setProperty("root", "x-p44-bridge.started", JsonObject::newBool(false));
-  api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(false));
+  updateBridgeStatus(false);
   // query devices
   JsonObjectPtr params = JsonObject::objFromText(
     "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
@@ -558,6 +564,8 @@ void P44_BridgeImpl::bridgeApiReconnectQueryHandler(ErrorPtr aError, JsonObjectP
         }
       }
     }
+    // update status
+    updateBridgeStatus(hasBridgeableDevices()); // bridge is running when it has any bridgeable devices now
   }
   // TODO: maybe find and disable those that are no longer visible in the brige API
   OLOG(LOG_WARNING, "Reconnected devices after API server reconnect");

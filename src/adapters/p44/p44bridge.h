@@ -115,6 +115,7 @@ private:
 
   void bridgeApiConnectedHandler(ErrorPtr aStatus);
   void bridgeApiNotificationHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);
+  void updateBridgeStatus(bool aStarted);
   void queryBridge();
   DevicePtr bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON);
   void bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);

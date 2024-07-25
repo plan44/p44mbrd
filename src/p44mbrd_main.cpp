@@ -1114,6 +1114,9 @@ public:
   void chipAppCleanup()
   {
     if (mChipAppInitialized) {
+      // let adapters know
+      updateRunningStatus(false);
+      // shut down
       Server::GetInstance().Shutdown();
       DeviceLayer::PlatformMgr().Shutdown();
       #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
