@@ -191,6 +191,8 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
         JsonObjectPtr outputdesc = aDeviceJSON->get("outputDescription");
         string behaviourtype;
         JsonObjectPtr groups;
+        bool preventOutput = false;
+        bool preventInput = false;
         if (outputdesc && outputdesc->get("x-p44-behaviourType", o)) {
           behaviourtype = o->stringValue();
           if (aDeviceJSON->get("outputSettings", o)) {
@@ -214,6 +216,12 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           else if (bridgeAs=="window-covering") {
             dev = new P44_WindowCoveringDevice();
           }
+          else if (bridgeAs=="no-output") {
+            preventOutput = true;
+          }
+          else if (bridgeAs=="no-input") {
+            preventInput = true;
+          }
           if (dev) {
             OLOG(LOG_NOTICE, "found bridgeable device with x-p44-bridgeAs hint '%s': %s", bridgeAs.c_str(), dsuid.c_str());
             P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON);
@@ -223,7 +231,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
         if (!dev) {
           // no or unknown bridging hint - derive bridged device type(s) automatically
           // First: check output
-          if (outputdesc) {
+          if (outputdesc && !preventOutput) {
             if (outputdesc->get("function", o)) {
               int outputfunction = (int)o->int32Value();
               // output device
@@ -291,63 +299,64 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
             }
           }
           // Second: check inputs
-          enum { sensor, input, button, numInputTypes };
-          const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "buttonInput" };
-          for (int inputType = sensor; inputType<numInputTypes; inputType++) {
-            JsonObjectPtr inputdescs;
-            if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Descriptions").c_str(), inputdescs)) {
-              // iterate through this input type's items
-              string inputid;
-              JsonObjectPtr inputdesc;
-              inputdescs->resetKeyIteration();
-              bool moreInputs = false; // default to one input per device
-              while (inputdescs->nextKeyValue(inputid, inputdesc)) {
-                switch (inputType) {
-                  case sensor: {
-                    if (inputdesc->get("sensorType", o)) {
-                      int sensorType = o->int32Value();
-                      // determine sensor type
-                      switch(sensorType) {
-                        case sensorType_temperature: dev = new P44_TemperatureSensor(); break;
-                        case sensorType_humidity: dev = new P44_HumiditySensor(); break;
-                        case sensorType_illumination: dev = new P44_IlluminanceSensor(); break;
+          if (!preventInput) {
+            enum { sensor, input, button, numInputTypes };
+            const char* inputTypeNames[numInputTypes] = { "sensor", "binaryInput", "buttonInput" };
+            for (int inputType = sensor; inputType<numInputTypes; inputType++) {
+              JsonObjectPtr inputdescs;
+              if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Descriptions").c_str(), inputdescs)) {
+                // iterate through this input type's items
+                string inputid;
+                JsonObjectPtr inputdesc;
+                inputdescs->resetKeyIteration();
+                bool moreInputs = false; // default to one input per device
+                while (inputdescs->nextKeyValue(inputid, inputdesc)) {
+                  switch (inputType) {
+                    case sensor: {
+                      if (inputdesc->get("sensorType", o)) {
+                        int sensorType = o->int32Value();
+                        // determine sensor type
+                        switch(sensorType) {
+                          case sensorType_temperature: dev = new P44_TemperatureSensor(); break;
+                          case sensorType_humidity: dev = new P44_HumiditySensor(); break;
+                          case sensorType_illumination: dev = new P44_IlluminanceSensor(); break;
+                        }
                       }
+                      break;
                     }
-                    break;
-                  }
-                  case input:
-                    if (inputdesc->get("inputType", o)) {
-                      int binInpType = o->int32Value();
-                      // determine input type
-                      switch(binInpType) {
-                        // TODO: maybe some time motion will get separated from occupancy
-                        case binInpType_presence:
-                        case binInpType_presenceInDarkness:
-                        case binInpType_motion:
-                        case binInpType_motionInDarkness:
-                          // assume PIR, which is essentially motion, but commonly used for presence
-                          dev = new P44_OccupancySensor();
-                          break;
-                        default:
-                          // all others: create simple ContactSensors
-                          dev = new P44_ContactInput();
-                          break;
+                    case input:
+                      if (inputdesc->get("inputType", o)) {
+                        int binInpType = o->int32Value();
+                        // determine input type
+                        switch(binInpType) {
+                            // TODO: maybe some time motion will get separated from occupancy
+                          case binInpType_presence:
+                          case binInpType_presenceInDarkness:
+                          case binInpType_motion:
+                          case binInpType_motionInDarkness:
+                            // assume PIR, which is essentially motion, but commonly used for presence
+                            dev = new P44_OccupancySensor();
+                            break;
+                          default:
+                            // all others: create simple ContactSensors
+                            dev = new P44_ContactInput();
+                            break;
+                        }
                       }
-                    }
-                    break;
-                  case button:
-                    if (inputdesc->get("buttonType", o)) {
-                      int buttonType = o->int32Value();
-                      int buttonElementID = buttonElement_center; // default to single button/center
-                      if (inputdesc->get("buttonElementID", o)) {
-                        buttonElementID = o->int32Value();
-                      }
-                      // determine input type
-                      switch(buttonType) {
-                        case buttonType_undefined:
-                        case buttonType_single:
-                          // single pushbutton
-                          dev = new P44_Pushbutton();
+                      break;
+                    case button:
+                      if (inputdesc->get("buttonType", o)) {
+                        int buttonType = o->int32Value();
+                        int buttonElementID = buttonElement_center; // default to single button/center
+                        if (inputdesc->get("buttonElementID", o)) {
+                          buttonElementID = o->int32Value();
+                        }
+                        // determine input type
+                        switch(buttonType) {
+                          case buttonType_undefined:
+                          case buttonType_single:
+                            // single pushbutton
+                            dev = new P44_Pushbutton();
                           {
                             auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
                             if (switchDevP) {
@@ -355,46 +364,47 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                               switchDevP->setActivePosition(1, inputid);
                             }
                           }
-                          break;
-                        case buttonType_2way:
-                          // two-way rocker
-                          if (moreInputs) {
-                            // we were waiting for the second half of the rocker, this is it
-                            moreInputs = false;
-                            // add second position to existing device
-                            auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
-                            if (switchDevP) {
-                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
-                              switchDevP->setActivePosition(buttonElementID==buttonElement_up ? 1 : 2, inputid);
+                            break;
+                          case buttonType_2way:
+                            // two-way rocker
+                            if (moreInputs) {
+                              // we were waiting for the second half of the rocker, this is it
+                              moreInputs = false;
+                              // add second position to existing device
+                              auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
+                              if (switchDevP) {
+                                // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                                switchDevP->setActivePosition(buttonElementID==buttonElement_up ? 1 : 2, inputid);
+                              }
                             }
-                          }
-                          else {
-                            // we need to have more inputs to form the rocker device
-                            moreInputs = true;
-                            SwitchDevice* switchDevP = new P44_Pushbutton();
-                            dev = switchDevP;
-                            // add neutral and first position
-                            if (switchDevP) {
-                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
-                              switchDevP->setActivePosition(buttonElementID==buttonElement_down ? 2 : 1, inputid);
+                            else {
+                              // we need to have more inputs to form the rocker device
+                              moreInputs = true;
+                              SwitchDevice* switchDevP = new P44_Pushbutton();
+                              dev = switchDevP;
+                              // add neutral and first position
+                              if (switchDevP) {
+                                // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                                switchDevP->setActivePosition(buttonElementID==buttonElement_down ? 2 : 1, inputid);
+                              }
                             }
-                          }
-                          break;
+                            break;
+                        }
                       }
-                    }
-                    break;
-                  default:
-                    break;
-                }
-                if (dev && !moreInputs) {
-                  OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", name.c_str(), inputid.c_str(), dsuid.c_str());
-                  P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
-                  devices.push_back(dev);
-                  dev.reset();
-                }
-              } // iterating all inputs of one type
-            }
-          } // for all input types
+                      break;
+                    default:
+                      break;
+                  }
+                  if (dev && !moreInputs) {
+                    OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", name.c_str(), inputid.c_str(), dsuid.c_str());
+                    P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
+                    devices.push_back(dev);
+                    dev.reset();
+                  }
+                } // iterating all inputs of one type
+              }
+            } // for all input types
+          }
         }
         // Now we have a list of matter devices that are contained in this single briged device
         if (!devices.empty()) {
