@@ -651,6 +651,7 @@ P44_WindowCoveringImpl::P44_WindowCoveringImpl() :
 
 void P44_WindowCoveringImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
+  // basics first
   inherited::updateBridgedInfo(aDeviceInfo);
   // init attributes
   // - rollershade or tiltblind?
@@ -779,6 +780,7 @@ void P44_InputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInpu
 
 void P44_SensorImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
+  // basics first
   inherited::updateBridgedInfo(aDeviceInfo);
 
   JsonObjectPtr o;
@@ -844,6 +846,7 @@ void P44_SensorImpl::parseSensorValue(JsonObjectPtr aProperties, UpdateMode aUpd
 
 void P44_BinaryInputImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
+  // basics first
   inherited::updateBridgedInfo(aDeviceInfo);
   // get current value from xxxStates
   parseInputValue(aDeviceInfo, UpdateMode());
@@ -884,6 +887,9 @@ void P44_BinaryInputImpl::parseInputValue(JsonObjectPtr aProperties, UpdateMode 
 
 void P44_ButtonImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
+  // basics first
+  inherited::updateBridgedInfo(aDeviceInfo);
+  // now button specifics
   mClicks = 0;
   mPosition = 0;
   // configure switch

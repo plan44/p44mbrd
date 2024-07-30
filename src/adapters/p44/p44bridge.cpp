@@ -357,13 +357,13 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                           case buttonType_single:
                             // single pushbutton
                             dev = new P44_Pushbutton();
-                          {
-                            auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
-                            if (switchDevP) {
-                              // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
-                              switchDevP->setActivePosition(1, inputid);
+                            {
+                              auto switchDevP = dynamic_cast<SwitchDevice*>(dev.get());
+                              if (switchDevP) {
+                                // - matter positions (assumed from sample in switch cluster): 1=upper half, 2=lower half
+                                switchDevP->setActivePosition(1, inputid);
+                              }
                             }
-                          }
                             break;
                           case buttonType_2way:
                             // two-way rocker
