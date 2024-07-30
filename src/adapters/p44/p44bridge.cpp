@@ -151,7 +151,7 @@ void P44_BridgeImpl::updateBridgeStatus(bool aStarted)
   "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
   "\"channelStates\":null, \"channelDescriptions\":null, " \
   "\"sensorDescriptions\":null, \"sensorStates\":null, " \
-  "\"binaryInputDescriptions\":null, \"binaryInputStates\":null, " \
+  "\"binaryInputDescriptions\":null, \"binaryInputStates\":null, \"binaryInputSettings\":null, " \
   "\"buttonInputDescriptions\":null, \"buttonInputStates\":null, " \
   "\"active\":null, " \
   "\"x-p44-bridgeable\":null, \"x-p44-bridged\":null, \"x-p44-bridgeAs\":null }"
@@ -324,12 +324,23 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                       }
                       break;
                     }
-                    case input:
-                      if (inputdesc->get("inputType", o)) {
-                        int binInpType = o->int32Value();
+                    case input: {
+                      // binary inputs are a special case, these also need the settings because configured sensorFunction is relevant
+                      JsonObjectPtr inputsettings;
+                      JsonObjectPtr inputsetting;
+                      JsonObjectPtr sf;
+                      if (aDeviceJSON->get((string(inputTypeNames[inputType])+"Settings").c_str(), inputsettings)) {
+                        inputsetting = inputsettings->get(inputid.c_str());
+                        if (!inputsetting || !inputsetting->get("sensorFunction", sf)) {
+                          // no configured function, fall back to hardwareSensorFunction
+                          inputdesc->get("sensorFunction", sf);
+                        }
+                      }
+                      if (sf) {
+                        int binInpType = sf->int32Value();
                         // determine input type
                         switch(binInpType) {
-                            // TODO: maybe some time motion will get separated from occupancy
+                          // TODO: maybe some time motion will get separated from occupancy
                           case binInpType_presence:
                           case binInpType_presenceInDarkness:
                           case binInpType_motion:
@@ -344,7 +355,8 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                         }
                       }
                       break;
-                    case button:
+                    }
+                    case button: {
                       if (inputdesc->get("buttonType", o)) {
                         int buttonType = o->int32Value();
                         int buttonElementID = buttonElement_center; // default to single button/center
@@ -392,6 +404,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                         }
                       }
                       break;
+                    }
                     default:
                       break;
                   }
