@@ -961,6 +961,7 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 else {
                   // pressed
                   SwitchServer::Instance().OnInitialPress(endpointId(), position); // report new position
+                  mClicks++; // preliminary counting, will be overridden by (but should be equal to) regular click/tip count
                   if (mClicks>1) {
                     // actual progress beyond single click
                     SwitchServer::Instance().OnMultiPressOngoing(endpointId(), position, mClicks); // report new position
@@ -969,6 +970,7 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 break;
               case ct_complete:
                 if (position==0) {
+                  // Note: when we have multipress support, even single clicks need the OnMultiPressComplete event!
                   SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
                 }
                 mClicks = 0;
