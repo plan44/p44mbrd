@@ -148,7 +148,7 @@ void P44_BridgeImpl::updateBridgeStatus(bool aStarted)
   "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
   "\"outputDescription\":null, \"outputSettings\": null, \"modelFeatures\":null, " \
   "\"scenes\": { \"0\":null, \"5\":null }, " \
-  "\"vendorName\":null, \"model\":null, \"configURL\":null, " \
+  "\"vendorName\":null, \"model\":null, \"configURL\":null, \"displayId\":null, " \
   "\"channelStates\":null, \"channelDescriptions\":null, " \
   "\"sensorDescriptions\":null, \"sensorStates\":null, " \
   "\"binaryInputDescriptions\":null, \"binaryInputStates\":null, \"binaryInputSettings\":null, " \
