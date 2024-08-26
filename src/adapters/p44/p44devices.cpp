@@ -250,7 +250,12 @@ void P44_OutputImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInp
   while(o->nextKeyValue(cid, co)) {
     JsonObjectPtr o2;
     if (co->get("dsIndex", o2)) {
-      if (o2->int32Value()==0) { mDefaultChannelId = cid; break; }
+      if (o2->int32Value()==0) {
+        mDefaultChannelId = cid;
+        if (co->get("min", o2)) mDefaultChannelMin = o2->doubleValue();
+        if (co->get("max", o2)) mDefaultChannelMax = o2->doubleValue();
+        break;
+      }
     }
   }
 }
@@ -282,6 +287,17 @@ void P44_OutputImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties
 }
 
 
+double P44_OutputImpl::value2percent(double aValue)
+{
+  return (aValue-mDefaultChannelMin)*100/(mDefaultChannelMax-mDefaultChannelMin);
+}
+
+
+double P44_OutputImpl::percent2value(double aPercent)
+{
+  return mDefaultChannelMin+(aPercent/100*(mDefaultChannelMax-mDefaultChannelMin));
+}
+
 
 // MARK: - P44_OnOffImpl
 
@@ -292,7 +308,7 @@ void P44_OnOffImpl::setOnOffState(bool aOn)
   // call preset1 or off on the bridged device
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channel", JsonObject::newInt32(0)); // default channel
-  params->add("value", JsonObject::newDouble(aOn ? 100 : 0));
+  params->add("value", JsonObject::newDouble(aOn ? mDefaultChannelMax : mDefaultChannelMin));
   params->add("transitionTime", JsonObject::newDouble(0));
   params->add("apply_now", JsonObject::newBool(true));
   notify("setOutputChannelValue", params);
@@ -309,7 +325,7 @@ void P44_OnOffImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr a
     if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
       JsonObjectPtr vo;
       if (o->get("value", vo, true)) {
-        dev->updateOnOff(vo->doubleValue()>0, aUpdateMode);
+        dev->updateOnOff(vo->doubleValue()>mDefaultChannelMin, aUpdateMode);
       }
     }
   }
@@ -331,7 +347,7 @@ void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS
   //   but non-standard channels might arrive at another value (e.g. wrap around)
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channel", JsonObject::newInt32(0)); // default channel
-  params->add("value", JsonObject::newDouble(aNewLevel));
+  params->add("value", JsonObject::newDouble(percent2value(aNewLevel)));
   params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10.0));
   params->add("apply_now", JsonObject::newBool(true));
   notify("setOutputChannelValue", params);
@@ -346,8 +362,8 @@ void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
   params->add("channel", JsonObject::newInt32(0)); // default channel
   params->add("mode", JsonObject::newInt32(aDirection));
   params->add("autostop", JsonObject::newBool(false));
-  // matter rate is 0..0xFE units per second, p44 rate is 0..100 units per millisecond
-  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*100/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
+  // matter rate is 0..0xFE units per second, p44 rate is 0..mDefaultChannelMax units per millisecond
+  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*mDefaultChannelMax/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
   notify("dimChannel", params);
 }
 
@@ -382,7 +398,7 @@ void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
       if (o2->get("channels", o2)) {
         if (o2->get(mDefaultChannelId.c_str(), o2)) {
           if (o2->get("value", o2)) {
-            deviceP<LevelControlImplementationInterface>()->setDefaultOnLevel(o2->doubleValue());
+            deviceP<LevelControlImplementationInterface>()->setDefaultOnLevel(value2percent(o2->doubleValue()));
           }
         }
       }
@@ -401,9 +417,9 @@ void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
   if (aChannelStates && aChannelStates->get(mDefaultChannelId.c_str(), o)) {
     JsonObjectPtr vo;
     if (o->get("value", vo, true)) {
-      // bridge side is always 0..100%, mapped to minLevel()..maxLevel()
+      // bridge side is mDefaultChannelMin..mDefaultChannelMax, mapped to levelcontrol minLevel()..maxLevel()
       // Note: updating on/off attribute is handled automatically when needed (and OnOff is present at all)
-      deviceP<LevelControlImplementationInterface>()->updateLevel(vo->doubleValue(), aUpdateMode);
+      deviceP<LevelControlImplementationInterface>()->updateLevel(value2percent(vo->doubleValue()), aUpdateMode);
     }
   }
 }
@@ -553,35 +569,37 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
 //   (and don't when reversed is set)
 
 
-double P44_WindowCoveringImpl::matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed)
+double P44_WindowCoveringImpl::matter2bridge(const Percent100ths aPercent100th, bool aMotorDirectionReversed, bool aDefaultChannel)
 {
-  double v = (double)aPercent100th/100;
-  return !aMotorDirectionReversed ? 100-v : v; // reversed is dS standard (100% = fully lifted/open), so !aMotorDirectionReversed
+  double p = (double)aPercent100th/100;
+  if (!aMotorDirectionReversed) p = 100-p; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
+  return aDefaultChannel ? percent2value(p) : p;
 }
 
 
-bool P44_WindowCoveringImpl::matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed)
+bool P44_WindowCoveringImpl::matter2bridge(const DataModel::Nullable<Percent100ths>& aPercent100th, JsonObjectPtr &aBridgeValue, bool aMotorDirectionReversed, bool aDefaultChannel)
 {
   if (aPercent100th.IsNull()) {
     aBridgeValue = JsonObject::newNull();
     return false;
   }
-  aBridgeValue = JsonObject::newDouble(matter2bridge(aPercent100th.Value(), aMotorDirectionReversed));
+  aBridgeValue = JsonObject::newDouble(matter2bridge(aPercent100th.Value(), aMotorDirectionReversed, aDefaultChannel));
   return true;
 }
 
 
-Percent100ths P44_WindowCoveringImpl::bridge2matter(double aBridgeValue, bool aMotorDirectionReversed)
+Percent100ths P44_WindowCoveringImpl::bridge2matter(double aBridgeValue, bool aMotorDirectionReversed, bool aDefaultChannel)
 {
-  Percent100ths v = static_cast<Percent100ths>(aBridgeValue*100);
-  return !aMotorDirectionReversed ? static_cast<chip::Percent100ths> (100*100 - v) : v; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
+  double p = aDefaultChannel ? value2percent(aBridgeValue) : aBridgeValue;
+  if (!aMotorDirectionReversed) p = 100 - p; // reversed is dS standard (100% = fully lifted/open) so !aMotorDirectionReversed
+  return static_cast<Percent100ths>(p*100);
 }
 
 
-bool P44_WindowCoveringImpl::bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aMotorDirectionReversed)
+bool P44_WindowCoveringImpl::bridge2matter(JsonObjectPtr aBridgeValue, DataModel::Nullable<Percent100ths>& aPercent100th, bool aMotorDirectionReversed, bool aDefaultChannel)
 {
   if (aBridgeValue && !aBridgeValue->isType(json_type_null)) {
-    aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aMotorDirectionReversed));
+    aPercent100th.SetNonNull(bridge2matter(aBridgeValue->doubleValue(), aMotorDirectionReversed, aDefaultChannel));
     return true;
   }
   aPercent100th.SetNull();
@@ -600,7 +618,7 @@ void P44_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aM
   if (mHasTilt) {
     DataModel::Nullable<Percent100ths> tilt;
     WindowCovering::Attributes::TargetPositionTiltPercent100ths::Get(endpointId(), tilt);
-    if (matter2bridge(tilt, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed))) {
+    if (matter2bridge(tilt, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed), false)) {
       params = JsonObject::newObj();
       params->add("channelId", JsonObject::newString("shadeOpeningAngleOutside"));
       params->add("value", val);
@@ -608,7 +626,7 @@ void P44_WindowCoveringImpl::startMovement(WindowCovering::WindowCoveringType aM
       notify("setOutputChannelValue", params);
     }
   }
-  if (matter2bridge(lift, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed))) {
+  if (matter2bridge(lift, val, mode.Has(WindowCovering::Mode::kMotorDirectionReversed), true)) {
     params = JsonObject::newObj();
     params->add("channelId", JsonObject::newString(mDefaultChannelId));
     params->add("value", val);
@@ -623,8 +641,10 @@ void P44_WindowCoveringImpl::simpleStartMovement(WindowCovering::WindowCoveringT
   BitMask<WindowCovering::Mode> mode;
   WindowCovering::Attributes::Mode::Get(endpointId(), &mode);
   JsonObjectPtr params = JsonObject::newObj();
-  params->add("channelId", JsonObject::newString(aMovementType==WindowCovering::WindowCoveringType::Lift ? mDefaultChannelId : "shadeOpeningAngleOutside"));
-  params->add("value", JsonObject::newDouble(aUpOrOpen!=mode.Has(WindowCovering::Mode::kMotorDirectionReversed) ? 100 : 0)); // dS standard: 100% = fully lifted/open
+  bool isLift = aMovementType==WindowCovering::WindowCoveringType::Lift;
+  params->add("channelId", JsonObject::newString(isLift ? mDefaultChannelId : "shadeOpeningAngleOutside"));
+  double v = matter2bridge(aUpOrOpen ? 0 : 100*100, mode.Has(WindowCovering::Mode::kMotorDirectionReversed), isLift);
+  params->add("value", JsonObject::newDouble(v)); // dS standard: 100% = fully lifted/open
   params->add("apply_now", JsonObject::newBool(true)); // Apply now, together with tilt
   notify("setOutputChannelValue", params);
 }
@@ -718,12 +738,12 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
     // Lift channel
     if (o->get("value", vo, true)) {
       // non-null channel value
-      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed), true);
       // - always report target value, WindowCovering cluster relies on that
       WindowCovering::Attributes::TargetPositionLiftPercent100ths::Set(endpointId(), targetvalue);
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
-        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed), true);
         WindowCovering::LiftPositionSet(endpointId(), WindowCovering::NPercent100ths(currentvalue));
       }
       else {
@@ -739,12 +759,12 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
     // Tilt channel
     if (o->get("value", vo, true)) {
       // non-null channel value
-      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+      Percent100ths targetvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed), false);
       // - always report target value, WindowCovering cluster relies on that
       WindowCovering::Attributes::TargetPositionTiltPercent100ths::Set(endpointId(), targetvalue);
       if (moving && o->get("x-p44-transitional", vo, true)) {
         // we know the actual transitional current position value
-        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed));
+        Percent100ths currentvalue = bridge2matter(vo->doubleValue(), mode.Has(WindowCovering::Mode::kMotorDirectionReversed), false);
         WindowCovering::TiltPositionSet(endpointId(), WindowCovering::NPercent100ths(currentvalue));
       }
       else {
