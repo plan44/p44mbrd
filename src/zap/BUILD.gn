@@ -20,7 +20,6 @@ chip_data_model("zap") {
   zap_file = "p44mbrd.zap"
   external_clusters = [ "IDENTIFY_CLUSTER", "LEVEL_CONTROL_CLUSTER", "COLOR_CONTROL_CLUSTER" ]
 
-  zap_pregenerated_dir = "//zap-generated"
   is_server = true
 
   # TODO: the definition of DYNAMIC_ENDPOINT_COUNT needs find a common home!

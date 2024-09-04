@@ -23,7 +23,6 @@ void MatterOccupancySensingPluginServerInitCallback();
 void MatterOnOffPluginServerInitCallback();
 void MatterOperationalCredentialsPluginServerInitCallback();
 void MatterRelativeHumidityMeasurementPluginServerInitCallback();
-void MatterScenesPluginServerInitCallback();
 void MatterSoftwareDiagnosticsPluginServerInitCallback();
 void MatterSwitchPluginServerInitCallback();
 void MatterTemperatureMeasurementPluginServerInitCallback();
@@ -57,7 +56,6 @@ void MatterWindowCoveringPluginServerInitCallback();
     MatterOnOffPluginServerInitCallback(); \
     MatterOperationalCredentialsPluginServerInitCallback(); \
     MatterRelativeHumidityMeasurementPluginServerInitCallback(); \
-    MatterScenesPluginServerInitCallback(); \
     MatterSoftwareDiagnosticsPluginServerInitCallback(); \
     MatterSwitchPluginServerInitCallback(); \
     MatterTemperatureMeasurementPluginServerInitCallback(); \
