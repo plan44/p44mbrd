@@ -33,6 +33,8 @@ using namespace chip;
 using namespace app;
 using namespace Clusters;
 
+using Status = Protocols::InteractionModel::Status;
+
 string attrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId);
 void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, const AttributeId aAttributeId, string aString, p44::AbbreviationStyle aAbbreviationStyle);
 

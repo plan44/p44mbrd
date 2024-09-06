@@ -36,7 +36,7 @@
 
 #include <app-common/zap-generated/cluster-enums.h>
 #include <app-common/zap-generated/cluster-objects.h>
-#include <app-common/zap-generated/enums.h>
+#include <app-common/zap-generated/cluster-enums.h>
 
 #include <app/reporting/reporting.h>
 #include <app/util/util.h>

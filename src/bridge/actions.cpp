@@ -70,7 +70,7 @@ void Action::invoke(Optional<uint16_t> aTransitionTime)
 
 CHIP_ERROR ActionsManager::ReadActionListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
-  CHIP_ERROR err = aEncoder.EncodeList([&endpoint, this](const auto & encoder) -> CHIP_ERROR {
+  CHIP_ERROR err = aEncoder.EncodeList([this](const auto & encoder) -> CHIP_ERROR {
     for (auto action : mActions) {
       Actions::Structs::ActionStruct::Type actionStruct = {
         action.first, // map key is the action ID

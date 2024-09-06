@@ -35,8 +35,8 @@ string attrString(const EndpointId aEndpointId, const ClusterId aClusterId, cons
   uint8_t zclString[maxAttrString+2];
   EmberAfAttributeSearchRecord srch = { aEndpointId, aClusterId, aAttributeId };
   const EmberAfAttributeMetadata* mdP;
-  EmberAfStatus status = emAfReadOrWriteAttribute(&srch, &mdP, zclString, sizeof(zclString), false);
-  if (status==EMBER_ZCL_STATUS_SUCCESS) {
+  Status status = emAfReadOrWriteAttribute(&srch, &mdP, zclString, sizeof(zclString), false);
+  if (status==Status::Success) {
     if (emberAfIsStringAttributeType(mdP->attributeType)) {
       return string((char *)&zclString[1], emberAfStringLength(zclString));
     }
@@ -57,8 +57,8 @@ void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, con
   uint8_t zclString[maxStrLen+2];
   EmberAfAttributeSearchRecord srch = { aEndpointId, aClusterId, aAttributeId };
   const EmberAfAttributeMetadata* mdP;
-  EmberAfStatus status = emAfReadOrWriteAttribute(&srch, &mdP, nullptr, 0, false);
-  if (status==EMBER_ZCL_STATUS_SUCCESS) {
+  Status status = emAfReadOrWriteAttribute(&srch, &mdP, nullptr, 0, false);
+  if (status==Status::Success) {
     bool longString = emberAfIsLongStringAttributeType(mdP->attributeType);
     if (emberAfIsStringAttributeType(mdP->attributeType) || longString) {
       size_t netSz = mdP->size-(longString ? 2 : 1);
@@ -66,8 +66,8 @@ void setAttrString(const EndpointId aEndpointId, const ClusterId aClusterId, con
       abbreviate(aString, netSz, aAbbreviationStyle);
       if (longString) {
         memmove(zclString + 2, aString.data(), aString.size());
-        zclString[0] = EMBER_LOW_BYTE(aString.size());
-        zclString[1] = EMBER_HIGH_BYTE(aString.size());
+        zclString[0] = (uint8_t) ((aString.size()) & 0xFF);
+        zclString[1] = (uint8_t) ((aString.size() >> 8) & 0xFF);
       }
       else {
         memmove(zclString + 1, aString.data(), aString.size());

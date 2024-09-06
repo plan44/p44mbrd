@@ -104,14 +104,14 @@ public:
 
   /// @name handlers for external attribute implementation
   /// @{
-  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual Status handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
   /// @}
 
   /// @name handlers for command implementations
   /// @{
   Status moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
-  Status move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  Status move(LevelControl::MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   Status stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
   void effect(bool aNewValue);
   /// @}
@@ -169,6 +169,8 @@ protected:
 };
 
 
+#ifdef MATTER_DM_PLUGIN_SCENES
+
 // MARK: - Scene control
 // TODO: Modularize level-control server
 // - for now this is extracted from app/clusters/level-control as the original
@@ -184,4 +186,4 @@ namespace LevelControlServer {
 
 } // namespace LevelControlServer
 
-
+#endif // MATTER_DM_PLUGIN_SCENES

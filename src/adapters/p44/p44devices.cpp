@@ -363,7 +363,7 @@ void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
   params->add("mode", JsonObject::newInt32(aDirection));
   params->add("autostop", JsonObject::newBool(false));
   // matter rate is 0..0xFE units per second, p44 rate is 0..mDefaultChannelMax units per millisecond
-  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*mDefaultChannelMax/EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
+  if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*mDefaultChannelMax/MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
   notify("dimChannel", params);
 }
 

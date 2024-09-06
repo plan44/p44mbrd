@@ -23,6 +23,8 @@
 #pragma once
 
 #include "devicelevelcontrol.h"
+#include <app/clusters/color-control-server/color-control-server.h>
+
 
 using namespace chip;
 
@@ -79,10 +81,10 @@ public:
 
   /// @note: internal color mode, combined from ColorMode and EnhancedColorMode
   enum class InternalColorMode : uint8_t {
-    hs = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_CURRENT_HUE_AND_CURRENT_SATURATION,
-    xy = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_CURRENT_X_AND_CURRENT_Y,
-    ct = EmberAfColorMode::EMBER_ZCL_COLOR_MODE_COLOR_TEMPERATURE,
-    enhanced_hs = EmberAfEnhancedColorMode::EMBER_ZCL_ENHANCED_COLOR_MODE_ENHANCED_CURRENT_HUE_AND_CURRENT_SATURATION, // TODO: not yet implemented, is optional
+    hs = ColorControlServer::EnhancedColorMode::kCurrentHueAndCurrentSaturation,
+    xy = ColorControlServer::EnhancedColorMode::kCurrentXAndCurrentY,
+    ct = ColorControlServer::EnhancedColorMode::kColorTemperature,
+    enhanced_hs = ColorControlServer::EnhancedColorMode::kEnhancedCurrentHueAndCurrentSaturation, // TODO: not yet implemented, is optional
     unknown_mode = 0xFF // internal only, should not be exposed, matter attributes is non-nullable
   };
 
@@ -112,9 +114,9 @@ public:
   bool shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride);
 
   /// handler for external attribute read access
-  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
-  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual Status handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
   /// @name helpers for scene control
   /// @{
@@ -139,6 +141,8 @@ private:
 };
 
 
+#ifdef MATTER_DM_PLUGIN_SCENES
+
 // MARK: - Scene control
 // TODO: Modularize color-control-server
 // - for now this is extracted from app/clusters/control-control-server as the original
@@ -154,4 +158,4 @@ namespace ColorControlServer {
 
 } // namespace ColorControlServer
 
-
+#endif // MATTER_DM_PLUGIN_SCENES

@@ -48,8 +48,6 @@ using namespace Clusters;
 using namespace std;
 using namespace p44;
 
-using Status = Protocols::InteractionModel::Status;
-
 class Device;
 typedef boost::intrusive_ptr<Device> DevicePtr;
 
@@ -254,10 +252,10 @@ public:
   virtual void willBeDisabled();
 
   /// handler for external attribute read access
-  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
+  virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength);
 
   /// handler for external attribute write access
-  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
+  virtual Status handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer);
 
   /// handler for getting notified after attribute was changed via a client writing to it
   virtual void handleAttributeChange(ClusterId clusterId, chip::AttributeId attributeId);
@@ -291,23 +289,23 @@ protected:
   }
 
   /// utility for extracting attribute data in HandleReadAttribute implementations
-  template <typename T> static inline EmberAfStatus getAttr(uint8_t* aBuffer, uint16_t aMaxReadLength, T aValue)
+  template <typename T> static inline Status getAttr(uint8_t* aBuffer, uint16_t aMaxReadLength, T aValue)
   {
     using ST = typename app::NumericAttributeTraits<T>::StorageType;
     if (aMaxReadLength==sizeof(ST)) {
       *((ST*)aBuffer) = aValue;
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return Status::Success;
     }
     else {
-      return EMBER_ZCL_STATUS_FAILURE;
+      return Status::Failure;
     }
   }
 
   /// utility for preparing attribute data in HandleWriteAttribute implementations
-  template <typename T> static inline EmberAfStatus setAttr(T &aValue, uint8_t* aBuffer)
+  template <typename T> static inline Status setAttr(T &aValue, uint8_t* aBuffer)
   {
     aValue = *((T*)aBuffer);
-    return EMBER_ZCL_STATUS_SUCCESS;
+    return Status::Success;
   }
 
 };
@@ -359,8 +357,8 @@ public:
 
   virtual void didGetInstalled() override;
 
-  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
-  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual Status handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
   /// interface for identify cluster command implementations
   bool updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode aUpdateMode);

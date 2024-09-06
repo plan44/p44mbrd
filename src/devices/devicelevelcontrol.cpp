@@ -34,7 +34,7 @@
 
 // MARK: - LevelControl Device specific declarations
 
-#define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1
+#define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1 // not defined in SDK, but needed
 
 static ClusterId gLevelControlClusters[] = { LevelControl::Id };
 
@@ -65,10 +65,10 @@ void DeviceLevelControl::didGetInstalled()
 {
   Attributes::FeatureMap::Set(endpointId(), to_underlying(LevelControl::Feature::kOnOff));
   Attributes::OnOffTransitionTime::Set(endpointId(), 5); // default is 0.5 Seconds for transitions (approx dS default)
-  Attributes::OnLevel::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
-  Attributes::DefaultMoveRate::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7); // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
-  Attributes::MinLevel::Set(endpointId(), mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : EMBER_AF_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL);
-  Attributes::MaxLevel::Set(endpointId(), EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+  Attributes::OnLevel::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+  Attributes::DefaultMoveRate::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7); // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
+  Attributes::MinLevel::Set(endpointId(), mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : MATTER_DM_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL);
+  Attributes::MaxLevel::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
   // call base class last
   inherited::didGetInstalled();
 }
@@ -187,7 +187,7 @@ Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataM
 {
   Status status = Status::Success;
 
-  if (aAmount > EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) {
+  if (aAmount > MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL) {
     status = Status::InvalidCommand;
   }
   else if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
@@ -249,7 +249,7 @@ bool emberAfLevelControlClusterStepCallback(
   if (!dev) return false;
   commandObj->AddStatus(commandPath, dev->moveToLevel(
     commandData.stepSize,
-    commandData.stepMode==EMBER_ZCL_STEP_MODE_UP ? 1 : -1,
+    commandData.stepMode==StepModeEnum::kUp ? 1 : -1,
     commandData.transitionTime, false, commandData.optionsMask, commandData.optionsOverride
   ));
   return true;
@@ -264,7 +264,7 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
   if (!dev) return false;
   commandObj->AddStatus(commandPath, dev->moveToLevel(
     commandData.stepSize,
-    commandData.stepMode==EMBER_ZCL_STEP_MODE_UP ? 1 : -1,
+    commandData.stepMode==StepModeEnum::kUp ? 1 : -1,
     commandData.transitionTime, true, 0, 0
   ));
   return true;
@@ -272,7 +272,7 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
 
 
 
-Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
 {
   Status status = Status::Success;
 
@@ -286,14 +286,14 @@ Status DeviceLevelControl::move(uint8_t aMode, DataModel::Nullable<uint8_t> aRat
   }
   if ((!rate.IsNull() && rate.Value()!=0) || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
-      case EMBER_ZCL_MOVE_MODE_UP:
+      case MoveModeEnum::kUp:
         if (currentLevel()==0) {
           // start dimming from off level into on levels -> set onoff
           updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
         mLevelControlDelegate.dim(1, rate.Value());
         break;
-      case EMBER_ZCL_MOVE_MODE_DOWN:
+      case MoveModeEnum::kDown:
         mLevelControlDelegate.dim(-1, rate.Value());
         break;
       default:
@@ -367,13 +367,13 @@ bool emberAfLevelControlClusterStopWithOnOffCallback(
 
 void DeviceLevelControl::effect(bool aTurnOn)
 {
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+  Status status = Status::Success;
 
   // get the OnOffTransitionTime attribute.
   uint16_t transitionTime = 0xFFFF;
   if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnOffTransitionTime::Id)) {
     status = Attributes::OnOffTransitionTime::Get(endpointId(), &transitionTime);
-    if (status!=EMBER_ZCL_STATUS_SUCCESS) {
+    if (status!=Status::Success) {
       transitionTime = 0xFFFF;
     }
   }
@@ -384,12 +384,12 @@ void DeviceLevelControl::effect(bool aTurnOn)
     app::DataModel::Nullable<uint8_t> targetOnLevel;
     if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
       status = Attributes::OnLevel::Get(endpointId(), targetOnLevel);
-      if (status!=EMBER_ZCL_STATUS_SUCCESS || targetOnLevel.IsNull()) {
+      if (status!=Status::Success || targetOnLevel.IsNull()) {
         // no OnLevel value, use currentlevel
         targetOnLevel.SetNonNull(currentLevel());
       }
     }
-    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
+    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
     updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {
@@ -409,7 +409,7 @@ void emberAfOnOffClusterLevelControlEffectCallback(EndpointId endpoint, bool new
 
 void emberAfLevelControlClusterServerInitCallback(EndpointId endpoint)
 {
-  #ifdef EMBER_AF_PLUGIN_SCENES
+  #ifdef MATTER_DM_PLUGIN_SCENES
   // Registers Scene handlers for the level control cluster on the server
   app::Clusters::Scenes::ScenesServer::Instance().RegisterSceneHandler(endpoint, LevelControlServer::GetSceneHandler());
   #endif
@@ -434,7 +434,7 @@ bool LevelControlHasFeature(EndpointId endpoint, LevelControl::Feature feature)
 {
   bool success;
   uint32_t featureMap;
-  success = (Attributes::FeatureMap::Get(endpoint, &featureMap) == EMBER_ZCL_STATUS_SUCCESS);
+  success = (Attributes::FeatureMap::Get(endpoint, &featureMap) == Status::Success);
 
   return success ? ((featureMap & to_underlying(feature)) != 0) : false;
 }
@@ -442,7 +442,7 @@ bool LevelControlHasFeature(EndpointId endpoint, LevelControl::Feature feature)
 
 // MARK: attribute access
 
-EmberAfStatus DeviceLevelControl::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+Status DeviceLevelControl::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==LevelControl::Id) {
     if (attributeId == LevelControl::Attributes::CurrentLevel::Id) {
@@ -457,7 +457,7 @@ EmberAfStatus DeviceLevelControl::handleReadAttribute(ClusterId clusterId, chip:
 }
 
 
-EmberAfStatus DeviceLevelControl::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+Status DeviceLevelControl::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==LevelControl::Id) {
     /* none */
@@ -499,7 +499,7 @@ void DeviceDimmablePluginUnit::finalizeDeviceDeclaration()
 //   cluster does not allow overriding the ower level (actual transition stepping) parts of
 //   the cluster, which are NOT suitable for remote hardware control in bridging apps
 
-#ifdef EMBER_AF_PLUGIN_SCENES
+#ifdef MATTER_DM_PLUGIN_SCENES
 
 // MARK: Adapter from scene mechanics to our own implementation of Level-Control
 
@@ -562,12 +562,12 @@ public:
         using AttributeValuePair = Scenes::Structs::AttributeValuePair::Type;
 
         app::DataModel::Nullable<uint8_t> level;
-        VerifyOrReturnError(EMBER_ZCL_STATUS_SUCCESS == Attributes::CurrentLevel::Get(endpoint, level), CHIP_ERROR_READ_FAILED);
+        VerifyOrReturnError(Status::Success == Attributes::CurrentLevel::Get(endpoint, level), CHIP_ERROR_READ_FAILED);
 
         AttributeValuePair pairs[kLevelMaxScenableAttributes];
 
         uint8_t maxLevel;
-        VerifyOrReturnError(EMBER_ZCL_STATUS_SUCCESS == Attributes::MaxLevel::Get(endpoint, &maxLevel), CHIP_ERROR_READ_FAILED);
+        VerifyOrReturnError(Status::Success == Attributes::MaxLevel::Get(endpoint, &maxLevel), CHIP_ERROR_READ_FAILED);
 
         pairs[0].attributeID = Attributes::CurrentLevel::Id;
         if (!level.IsNull())
@@ -582,7 +582,7 @@ public:
         if (LevelControlHasFeature(endpoint, LevelControl::Feature::kFrequency))
         {
             uint16_t frequency;
-            VerifyOrReturnError(EMBER_ZCL_STATUS_SUCCESS == Attributes::CurrentFrequency::Get(endpoint, &frequency),
+            VerifyOrReturnError(Status::Success == Attributes::CurrentFrequency::Get(endpoint, &frequency),
                                 CHIP_ERROR_READ_FAILED);
             pairs[attributeCount].attributeID    = Attributes::CurrentFrequency::Id;
             pairs[attributeCount].attributeValue = frequency;
@@ -658,17 +658,17 @@ public:
 
 static DefaultLevelControlSceneHandler sLevelControlSceneHandler;
 
-#endif // EMBER_AF_PLUGIN_SCENES
-
 namespace LevelControlServer {
 
   chip::scenes::SceneHandler * GetSceneHandler()
   {
-    #ifdef EMBER_AF_PLUGIN_SCENES
+    #ifdef MATTER_DM_PLUGIN_SCENES
     return &sLevelControlSceneHandler;
     #else
     return nullptr;
-    #endif // EMBER_AF_PLUGIN_SCENES
+    #endif // MATTER_DM_PLUGIN_SCENES
   }
 
 } // namespace LevelControlServer
+
+#endif // MATTER_DM_PLUGIN_SCENES

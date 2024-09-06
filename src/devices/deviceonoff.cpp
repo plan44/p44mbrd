@@ -35,7 +35,13 @@ using namespace Clusters;
 // MARK: - OnOff Device specific declarations
 
 
-static ClusterId gOnOffDeviceClusters[] = { OnOff::Id, Groups::Id, Scenes::Id };
+static ClusterId gOnOffDeviceClusters[] = {
+  OnOff::Id,
+  Groups::Id
+#ifdef MATTER_DM_PLUGIN_SCENES
+  , Scenes::Id
+#endif
+};
 
 
 // MARK: - DeviceOnOff
@@ -44,11 +50,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   inherited(aIdentifyDelegate, aDeviceInfoDelegate),
   mOnOffDelegate(aOnOffDelegate),
   mLighting(aLighting),
-  mOn(false),
-  mGlobalSceneControl(false),
-  mOnTime(0),
-  mOffWaitTime(0),
-  mStartUpOnOff(to_underlying(OnOff::StartUpOnOffEnum::kOff))
+  mOn(false)
 {
   // - declare onoff device specific clusters
   useClusterTemplates(Span<ClusterId>(gOnOffDeviceClusters));
@@ -81,7 +83,7 @@ bool DeviceOnOff::updateOnOff(bool aOn, UpdateMode aUpdateMode)
 
 // MARK: Attribute access
 
-EmberAfStatus DeviceOnOff::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+Status DeviceOnOff::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==OnOff::Id) {
     if (attributeId == OnOff::Attributes::OnOff::Id) {
@@ -94,13 +96,13 @@ EmberAfStatus DeviceOnOff::handleReadAttribute(ClusterId clusterId, chip::Attrib
 
 
 
-EmberAfStatus DeviceOnOff::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+Status DeviceOnOff::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==OnOff::Id) {
     // Non-writable from outside, but written by standard OnOff cluster implementation
     if (attributeId == OnOff::Attributes::OnOff::Id) {
       updateOnOff(*buffer, UpdateMode(UpdateFlags::bridged));
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return Status::Success;
     }
   }
   // let base class try

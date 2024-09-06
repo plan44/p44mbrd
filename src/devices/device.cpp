@@ -129,7 +129,7 @@ bool Device::addAsDeviceEndpoint()
   // allocate storage
   auto endpointStorage = new uint8_t[mEndpointDefinition.endpointSize];
   // add as dynamic endpoint
-  EmberAfStatus ret = emberAfSetDynamicEndpoint(
+  CHIP_ERROR ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
     endpointId(),
     &mEndpointDefinition,
@@ -138,11 +138,11 @@ bool Device::addAsDeviceEndpoint()
     mParentEndpointId,
     endpointStorage
   );
-  if (ret==EMBER_ZCL_STATUS_SUCCESS) {
+  if (ret==CHIP_NO_ERROR) {
     OLOG(LOG_INFO, "added at dynamic endpoint index #%d", mDynamicEndpointIdx);
   }
   else {
-    OLOG(LOG_ERR, "emberAfSetDynamicEndpoint failed with EmberAfStatus=%d", ret);
+    OLOG(LOG_ERR, "emberAfSetDynamicEndpoint failed with CHIP_ERROR=%" CHIP_ERROR_FORMAT, ret.Format());
     return false;
   }
   return true;
@@ -222,7 +222,7 @@ void Device::updateNodeLabel(const string aNodeLabel, UpdateMode aUpdateMode)
 
 // MARK: Attribute access
 
-EmberAfStatus Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+Status Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==BasicInformation::Id) {
     OLOG(LOG_WARNING, "****** tried to access basic infomation cluster *****");
@@ -237,14 +237,14 @@ EmberAfStatus Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId
       FOCUSOLOG("reading node label: %s", mNodeLabel.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mNodeLabel.substr(0,maxReadLength-1).c_str());
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return Status::Success;
     }
   }
-  return EMBER_ZCL_STATUS_FAILURE;
+  return Status::Failure;
 }
 
 
-EmberAfStatus Device::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+Status Device::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   // handle common device attributes
   if (clusterId==BridgedDeviceBasicInformation::Id) {
@@ -253,10 +253,10 @@ EmberAfStatus Device::handleWriteAttribute(ClusterId clusterId, chip::AttributeI
       string newName((const char*)buffer+1, (size_t)buffer[0]);
       FOCUSOLOG("writing nodel label: new label = '%s'", newName.c_str());
       updateNodeLabel(newName, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return Status::Success;
     }
   }
-  return EMBER_ZCL_STATUS_FAILURE;
+  return Status::Failure;
 }
 
 
@@ -348,7 +348,7 @@ void IdentifiableDevice::identifyTick(uint16_t aRemainingSeconds)
 
 
 
-EmberAfStatus IdentifiableDevice::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
+Status IdentifiableDevice::handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength)
 {
   if (clusterId==Identify::Id) {
     if (attributeId == Identify::Attributes::IdentifyTime::Id) {
@@ -360,12 +360,12 @@ EmberAfStatus IdentifiableDevice::handleReadAttribute(ClusterId clusterId, chip:
 }
 
 
-EmberAfStatus IdentifiableDevice::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
+Status IdentifiableDevice::handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer)
 {
   if (clusterId==Identify::Id) {
     if (attributeId == Identify::Attributes::IdentifyTime::Id) {
       updateIdentifyTime(*((uint16_t*)buffer), UpdateMode(UpdateFlags::bridged));
-      return EMBER_ZCL_STATUS_SUCCESS;
+      return Status::Success;
     }
   }
   // let base class try

@@ -57,9 +57,9 @@ public:
   bool updateOnOff(bool aOn, UpdateMode aUpdateMode);
 
   /// handler for external attribute read access
-  virtual EmberAfStatus handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
+  virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;
   /// handler for external attribute write access
-  virtual EmberAfStatus handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
+  virtual Status handleWriteAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer) override;
 
 protected:
 
@@ -69,12 +69,6 @@ protected:
 
 private:
   bool mOn;
-
-  // additional storage for onoff cluster
-  bool mGlobalSceneControl;
-  uint16_t mOnTime;
-  uint16_t mOffWaitTime;
-  uint8_t mStartUpOnOff;
 
 };
 

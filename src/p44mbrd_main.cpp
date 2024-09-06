@@ -937,16 +937,18 @@ public:
     }
     if (getOption("dynamicpin")) {
       // auto-generate dynamic pin, loop to skip specifically forbidden trivial values
+      uint32_t dp;
       do {
-        i = (rand() % (kMaxSetupPasscode-kMinSetupPasscode+1))+kMinSetupPasscode;
-      } while(!PayloadContents::IsValidSetupPIN(i));
-      onBoardingPayload.setUpPINCode = i;
+        dp = ((uint32_t)rand() % (kMaxSetupPasscode-kMinSetupPasscode+1))+kMinSetupPasscode;
+      } while(!PayloadContents::IsValidSetupPIN(dp));
+      onBoardingPayload.setUpPINCode = dp;
     }
     else if (getIntOption("setuppin", i)) {
-      if (!PayloadContents::IsValidSetupPIN(i)) {
+      uint32_t sp = (uint32_t)i;
+      if (!PayloadContents::IsValidSetupPIN(sp)) {
         return TextError::err("Invalid setup pin, must be 1..%d, and exclude trivial values like 11111111", kMaxSetupPasscode);
       }
-      onBoardingPayload.setUpPINCode = i;
+      onBoardingPayload.setUpPINCode = sp;
     }
 
     // MARK: basically reduced ChipLinuxAppInit() from here
@@ -1218,13 +1220,13 @@ bool emberAfActionsClusterInstantActionWithTransitionCallback(
 }
 
 
-EmberAfStatus emberAfExternalAttributeReadCallback(
+Status emberAfExternalAttributeReadCallback(
   EndpointId endpoint, ClusterId clusterId,
   const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer,
   uint16_t maxReadLength
 )
 {
-  EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
+  Status ret = Status::Failure;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
     POLOG(dev, LOG_DEBUG,
@@ -1232,7 +1234,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
       (int)attributeMetadata->attributeId, (int)clusterId, (int)maxReadLength, (int)attributeMetadata->size
     );
     ret = dev->handleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
-    if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
+    if (ret!=Status::Success) {
       POLOG(dev, LOG_ERR, "NOT HANDLED: reading external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
     else {
@@ -1243,18 +1245,18 @@ EmberAfStatus emberAfExternalAttributeReadCallback(
 }
 
 
-EmberAfStatus emberAfExternalAttributeWriteCallback(
+Status emberAfExternalAttributeWriteCallback(
   EndpointId endpoint, ClusterId clusterId,
   const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer
 )
 {
-  EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
+  Status ret = Status::Failure;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
     POLOG(dev, LOG_DEBUG, "write external attr 0x%04x in cluster 0x%04x, attr.size=%d", (int)attributeMetadata->attributeId, (int)clusterId, (int)attributeMetadata->size);
     POLOG(dev, LOG_DEBUG, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
     ret = dev->handleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
-    if (ret!=EMBER_ZCL_STATUS_SUCCESS) {
+    if (ret!=Status::Success) {
       POLOG(dev, LOG_ERR, "NOT HANDLED: writing external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
     else {
