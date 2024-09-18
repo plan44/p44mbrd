@@ -148,6 +148,8 @@ config("p44mbrd_config_extra") {
   libs = [
     # for libev based event handling
     "ev",
+    # needed by 1.3 SDK, for some reason not implicitly added in OpenWrt/MIPS builds
+    "atomic",
   ]
 }
 
