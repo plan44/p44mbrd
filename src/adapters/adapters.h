@@ -105,21 +105,6 @@ protected:
   typedef std::map<string, DevicePtr> DeviceUIDMap;
   DeviceUIDMap mDeviceUIDMap;
 
-  /// callback for starting an adapter
-  typedef boost::function<void (ErrorPtr aError, BridgeAdapter& aBridgeAdapter)> AdapterStartedCB;
-
-  /// @brief startup the bridge adapter
-  /// The bridge adapter should query its API, discover devices to bridge to matter, instantiate them,
-  /// and add them via registerInitialDevice() for publishing to matter when the stack is started up.
-  /// @note must call startupComplete() later to signal startup is complete.
-  virtual void startup() = 0;
-
-  /// must be called after startup() when the adapter has started up and has discovered
-  ///   and registered the devices that should get bridged to matter at stack startup.
-  /// @param aError OK when startup has not fatally failed. Recoverable errors should not
-  ///   be reported here.
-  void startupComplete(ErrorPtr aError);
-
 private:
 
   /// delegate for calling main-level functionality from adapters
@@ -127,12 +112,29 @@ private:
 
 public:
 
+  /// @name entry points **for the main application only**, to operate the adapter
+  /// @{
+
   /// entry point for main program to start this adapter
   /// @param aBridgeMainDelegate the delegate for the adapter to request global functionality
   void startup(BridgeMainDelegate& aBridgeMainDelegate);
 
   /// will be called to have adapter install the devices collected during startup()..startupComplete().
   void installInitialDevices(CHIP_ERROR& aChipErr);
+
+  /// @return true if the adapter has at least one bridgeable device registered
+  bool hasBridgeableDevices();
+
+  /// @}
+
+  /// @name functionality **to implement** in the adapter
+  /// @{
+
+  /// @brief called to startup the bridge adapter
+  /// The bridge adapter should query its API, discover devices to bridge to matter, instantiate them,
+  /// and add them via registerInitialDevice() for publishing to matter when the stack is started up.
+  /// @note must call startupComplete() later to signal startup is complete.
+  virtual void startup() = 0;
 
   /// @return UID of this adapter (or the device it bridges)
   virtual string UID() = 0;
@@ -149,10 +151,7 @@ public:
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() = 0;
 
-  /// @return true if the adapter as at least on bridgeable device
-  bool hasBridgeableDevices();
-
-  /// @brief update commissioning info
+  /// @brief is called by matter side to update commissioning info in bridge adapters
   /// @note the adapter should be ready to receive and store this data independently of the
   ///    current commissioning status.
   /// @param aQRCodeData string data that must go into QR Code presented to the user who
@@ -162,33 +161,39 @@ public:
   ///   Empty string if there is no manual pairing code available
   virtual void updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode) = 0;
 
-  /// @brief reports commissionable status
+  /// @brief is called by matter side to report current commissionable status
   /// @param aIsCommissionable true when matter side is commissionable (which may
   ///    cause adapter implementation to show or hide QR code and/or setup code in its UI)
   virtual void reportCommissionable(bool aIsCommissionable) = 0;
 
-  /// @brief can be called to request opening or closing the commissioning window
-  /// @param aCommissionable requested commissionable status
-  /// @note reportCommissionable() will be called to report when commissioning window status
-  ///   actually has changed.
-  /// @return Ok or error when requested commission status cannot be established
-  ErrorPtr requestCommissioning(bool aCommissionable);
-
-  /// @brief update matter bridge running status
+  /// @brief is called when matter stack is up and running or shut down
   /// @param aRunning true when matter bridge is running
+  /// @note before this method is called on the adapter, most of the utility methods below
+  ///   do not work.
   virtual void setBridgeRunning(bool aRunning) = 0;
 
-  /// @brief cleanup (disconnect API, etc) the adapter
+  /// @brief is called when matter stack shuts down to cleanup (disconnect API, etc) the adapter
   virtual void cleanup();
+
+  /// @}
+
+  /// @name functionality **available** to adapter implementations
+  /// @{
 
   /// @brief register a device to appear initially (at start of the matter stack) as a bridged device
   /// @param aDevice the device to register.
-  /// @note this must be called as part of the adapter startup procedure, and may NOT be called
-  ///    when the bridge is already operational. Use bridgeAdditionalDevice() for that.
+  /// @note this may ONLY be called as part of the adapter startup procedure, and MUST NOT
+  ///    be called when the bridge is already operational. Use bridgeAdditionalDevice() for that.
   /// @note register only bridge-level devices, not subdevices of a composed device!
   ///   Subdevices must be added to the composed device via addSubdevice() BEFORE the
   ///   composed device is registered, and will be published to the matter side automatically.
   void registerInitialDevice(DevicePtr aDevice);
+
+  /// must be called after startup(), when the adapter has started up and has discovered
+  ///   and registered the devices that should get bridged to matter at stack startup.
+  /// @param aError OK when startup has not fatally failed. Recoverable errors should not
+  ///   be reported here.
+  void startupComplete(ErrorPtr aError);
 
   /// @brief add an additional device to the matter bridge while it is already operational
   /// @param aDevice the device to register.
@@ -205,6 +210,13 @@ public:
   /// @param aDevice the device to remove.
   void removeDevice(DevicePtr aDevice);
 
+  /// @brief can be called to request opening or closing the commissioning window
+  /// @param aCommissionable requested commissionable status
+  /// @note reportCommissionable() will be called to report when commissioning window status
+  ///   actually has changed.
+  /// @return Ok or error when requested commission status cannot be established (or bridge is not running)
+  ErrorPtr requestCommissioning(bool aCommissionable);
+
   /// can be called to register an action
   /// @param aAction pointer to action object
   void addOrReplaceAction(ActionPtr aAction);
@@ -212,6 +224,8 @@ public:
   /// can be called to register an endpoint list (for the actions cluster)
   /// @param aEndPointList pointer to endpoint list object
   void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList);
+
+  /// @}
 
 };
 
