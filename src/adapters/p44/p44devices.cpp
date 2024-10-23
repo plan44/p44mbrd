@@ -889,8 +889,8 @@ void P44_BinaryInputImpl::parseInputValue(JsonObjectPtr aProperties, UpdateMode 
       JsonObjectPtr o;
       BinaryInputDevice* dev = deviceP<BinaryInputDevice>();
       if (state->get("value", o, true)) {
-        // non-NULL value
-        dev->updateCurrentState(o->boolValue(), true, aUpdateMode);
+        // non-NULL value, forward value, possibly inverted
+        dev->updateCurrentState(o->boolValue()!=mInverted, true, aUpdateMode);
       }
       else {
         // NULL value or no value contained in state at all

@@ -337,10 +337,18 @@ class P44_BinaryInputImpl : public P44_InputImpl
 {
   typedef P44_InputImpl inherited;
 
+protected:
+
+  bool mInverted; ///< P44 side meaning is inverted compared to matter side
+
 public:
+
+  P44_BinaryInputImpl() : mInverted(false) {};
 
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
   virtual void handleBridgePushProperties(JsonObjectPtr aChangedProperties) override;
+
+  void setInverted(bool aInverted) { mInverted = aInverted; }
 
 private:
 

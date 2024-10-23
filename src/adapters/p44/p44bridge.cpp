@@ -348,6 +348,19 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                             // assume PIR, which is essentially motion, but commonly used for presence
                             dev = new P44_OccupancySensor();
                             break;
+                          case binInpType_windowHandle:
+                            // DS Semantics for Window handle:
+                            //   Window closed (0), open (1) [and tilted (2) in extendedValue, value still 1 for that]
+                            // Matter Semantics for contact sensor are opposite to that:
+                            //   FALSE (0) = open or no contact
+                            //   TRUE (1)  = closed or contact
+                            // So: use INVERTED contact input
+                            dev = new P44_ContactInput();
+                            {
+                              auto contactDevP = dynamic_cast<P44_ContactInput*>(dev.get());
+                              contactDevP->setInverted(true);
+                            }
+                            break;
                           default:
                             // all others: create simple ContactSensors
                             dev = new P44_ContactInput();
