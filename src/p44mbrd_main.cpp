@@ -722,6 +722,7 @@ public:
 
   ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) override
   {
+    if (!isRunning()) return TextError::err("bridge not running, cannot make it commissionable");
     makeCommissionable(aCommissionable);
     return ErrorPtr();
   }
