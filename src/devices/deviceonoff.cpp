@@ -35,11 +35,11 @@ using namespace Clusters;
 // MARK: - OnOff Device specific declarations
 
 
-static ClusterId gOnOffDeviceClusters[] = {
-  OnOff::Id,
-  Groups::Id
+static EmberAfClusterSpec gOnOffDeviceClusters[] = {
+  { OnOff::Id, CLUSTER_MASK_SERVER },
+  { Groups::Id, CLUSTER_MASK_SERVER }
 #ifdef MATTER_DM_PLUGIN_SCENES
-  , Scenes::Id
+  , { Scenes::Id, CLUSTER_MASK_SERVER }
 #endif
 };
 
@@ -53,7 +53,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   mOn(false)
 {
   // - declare onoff device specific clusters
-  useClusterTemplates(Span<ClusterId>(gOnOffDeviceClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gOnOffDeviceClusters));
 }
 
 

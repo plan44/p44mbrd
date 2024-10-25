@@ -36,7 +36,7 @@ using namespace Clusters;
 
 // MARK: - DeviceWindowCovering
 
-static ClusterId gWindowCoveringClusters[] = { WindowCovering::Id };
+static EmberAfClusterSpec gWindowCoveringClusters[] = { { WindowCovering::Id, CLUSTER_MASK_SERVER } };
 
 static const EmberAfDeviceType gWindowCoveringTypes[] = {
   { DEVICE_TYPE_MA_WINDOW_COVERING, DEVICE_VERSION_DEFAULT },
@@ -48,7 +48,7 @@ DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveri
   mWindowCoveringDelegate(aWindowCoveringDelegate)
 {
   // - declare onoff device specific clusters
-  useClusterTemplates(Span<ClusterId>(gWindowCoveringClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gWindowCoveringClusters));
 }
 
 

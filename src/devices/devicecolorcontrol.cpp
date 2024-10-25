@@ -53,7 +53,7 @@ static const EmberAfDeviceType gColorLightTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-static ClusterId gColorLightClusters[] = { ColorControl::Id };
+static EmberAfClusterSpec gColorLightClusters[] = { { ColorControl::Id, CLUSTER_MASK_SERVER } };
 
 
 // MARK: - DeviceColorControl
@@ -72,7 +72,7 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColo
   mY(0)
 {
   // - declare specific clusters
-  useClusterTemplates(Span<ClusterId>(gColorLightClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gColorLightClusters));
 }
 
 

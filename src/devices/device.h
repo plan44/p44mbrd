@@ -122,7 +122,7 @@ class Device : public p44::P44LoggingObj
   Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
   EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
-  std::list<Span<ClusterId>> mTemplateClusterIdsSpanList; ///< used to dynamically collect template cluster ids
+  std::list<Span<EmberAfClusterSpec>> mTemplateClusterSpecSpanList; ///< used to dynamically collect template cluster ids
   /// @}
 
   /// @name matter endpointIds and device structure
@@ -274,7 +274,7 @@ protected:
   /// @param aTemplateClusterIdList a list of clusterIds. These must be present in the last fixed endpoint
   ///   (which must be defined in ZAP to generate accessors and cluster implementation, and contains all clusters
   ///   of all to-be-bridged devices. This template endpoint must be set to disabled)
-  void useClusterTemplates(const Span<ClusterId>& aTemplateClusterIdList);
+  void useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateClusterSpecList);
 
   /// called to have the final leaf class declare the correct device type list
   virtual void finalizeDeviceDeclaration() = 0;

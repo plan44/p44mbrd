@@ -36,7 +36,7 @@
 
 #define LEVEL_CONTROL_LIGHTING_MIN_LEVEL 1 // not defined in SDK, but needed
 
-static ClusterId gLevelControlClusters[] = { LevelControl::Id };
+static EmberAfClusterSpec gLevelControlClusters[] = { { LevelControl::Id, CLUSTER_MASK_SERVER } };
 
 // MARK: - DeviceLevelControl
 
@@ -49,7 +49,7 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
   mLevel(0)
 {
   // - declare specific clusters
-  useClusterTemplates(Span<ClusterId>(gLevelControlClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gLevelControlClusters));
 }
 
 

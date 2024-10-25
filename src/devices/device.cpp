@@ -35,7 +35,10 @@ using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-static ClusterId gBridgedDeviceCommonClusters[] = { Descriptor::Id, BridgedDeviceBasicInformation::Id };
+static EmberAfClusterSpec gBridgedDeviceCommonClusters[] = {
+  { Descriptor::Id, CLUSTER_MASK_SERVER },
+  { BridgedDeviceBasicInformation::Id, CLUSTER_MASK_SERVER },
+};
 
 // MARK: - Device
 
@@ -46,14 +49,15 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
 {
   // matter side init
   mEndpointId = kInvalidEndpointId;
-  // - endpoint declaration info
+  // - endpoint declaration info: must be reset to call emberAfSetupDynamicEndpointDeclaration on
   mEndpointDefinition.clusterCount = 0;
   mEndpointDefinition.cluster = nullptr;
   mEndpointDefinition.endpointSize = 0; // dynamic endpoints do not have any non-external attributes
+  // - internal
   mClusterDataVersionsP = nullptr; // we'll need
   mParentEndpointId = kInvalidEndpointId;
   // - declare common bridged device clusters
-  useClusterTemplates(Span<ClusterId>(gBridgedDeviceCommonClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gBridgedDeviceCommonClusters));
 }
 
 
@@ -85,9 +89,9 @@ Device::~Device()
 
 // MARK: cluster declaration
 
-void Device::useClusterTemplates(const Span<ClusterId>& aTemplateClusterIdList)
+void Device::useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateClusterSpecList)
 {
-  mTemplateClusterIdsSpanList.push_back(aTemplateClusterIdList);
+  mTemplateClusterSpecSpanList.push_back(aTemplateClusterSpecList);
 }
 
 
@@ -98,24 +102,24 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
   // now finally populate the endpoint definition
   // - generate the template clusterId list
   size_t i = 0;
-  for (std::list<Span<ClusterId>>::iterator pos = mTemplateClusterIdsSpanList.begin(); pos!=mTemplateClusterIdsSpanList.end(); ++pos) {
+  for (std::list<Span<EmberAfClusterSpec>>::iterator pos = mTemplateClusterSpecSpanList.begin(); pos!=mTemplateClusterSpecSpanList.end(); ++pos) {
     i += pos->size();
   }
-  ClusterId *tl = new ClusterId[i];
+  EmberAfClusterSpec *tl = new EmberAfClusterSpec[i];
   i = 0;
-  for (std::list<Span<ClusterId>>::iterator pos = mTemplateClusterIdsSpanList.begin(); pos!=mTemplateClusterIdsSpanList.end(); ++pos) {
+  for (std::list<Span<EmberAfClusterSpec>>::iterator pos = mTemplateClusterSpecSpanList.begin(); pos!=mTemplateClusterSpecSpanList.end(); ++pos) {
     for (size_t j=0; j<pos->size(); j++) {
       tl[i] = *(pos->data()+j);
       i++;
     }
   }
   // set up the endpoint declaration
-  setupDynamicEndpointDeclaration(
+  emberAfSetupDynamicEndpointDeclaration(
     mEndpointDefinition,
     static_cast<chip::EndpointId>(emberAfFixedEndpointCount()-1), // last fixed endpoint is the template endpoint
-    Span<ClusterId>(tl, i)
+    Span<EmberAfClusterSpec>(tl, i)
   );
-  mTemplateClusterIdsSpanList.clear(); // don't need this any more
+  mTemplateClusterSpecSpanList.clear(); // don't need this any more
   // - allocate the cluster data versions storage
   if (mClusterDataVersionsP) delete mClusterDataVersionsP;
   mClusterDataVersionsP = new DataVersion[mEndpointDefinition.clusterCount];
@@ -127,7 +131,7 @@ bool Device::addAsDeviceEndpoint()
   // finalize the declaration
   finalizeDeviceDeclaration();
   // allocate storage
-  auto endpointStorage = new uint8_t[mEndpointDefinition.endpointSize];
+  auto endpointStorage = Span<uint8_t>(new uint8_t[mEndpointDefinition.endpointSize], mEndpointDefinition.endpointSize);
   // add as dynamic endpoint
   CHIP_ERROR ret = emberAfSetDynamicEndpoint(
     mDynamicEndpointIdx,
@@ -284,7 +288,7 @@ string Device::description()
 
 using namespace Identify;
 
-static ClusterId gIdentifiableDeviceClusters[] = { Identify::Id };
+static EmberAfClusterSpec gIdentifiableDeviceClusters[] = { { Identify::Id, CLUSTER_MASK_SERVER } };
 
 IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
   Device(aDeviceInfoDelegate),
@@ -292,7 +296,7 @@ IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, Devi
   mIdentifyTime(0)
 {
   // - declare identify cluster
-  useClusterTemplates(Span<ClusterId>(gIdentifiableDeviceClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gIdentifiableDeviceClusters));
 }
 
 

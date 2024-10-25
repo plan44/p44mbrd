@@ -36,7 +36,10 @@ using namespace Attributes;
 
 // MARK: - DeviceFanControl
 
-static ClusterId gFanControlClusters[] = { FanControl::Id, Groups::Id };
+static EmberAfClusterSpec gFanControlClusters[] = {
+  { FanControl::Id, CLUSTER_MASK_SERVER },
+  { Groups::Id, CLUSTER_MASK_SERVER }
+};
 
 static const EmberAfDeviceType gFanDeviceTypes[] = {
   { DEVICE_TYPE_MA_FAN_DEVICE, DEVICE_VERSION_DEFAULT },
@@ -51,7 +54,7 @@ DeviceFanControl::DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControl
   mFanControlExtrasDelegateP(aOptionalFanControlExtrasDelegate)
 {
   // - declare onoff device specific clusters
-  useClusterTemplates(Span<ClusterId>(gFanControlClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(gFanControlClusters));
 }
 
 
