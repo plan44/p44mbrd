@@ -419,7 +419,8 @@ bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chi
 // MARK: - ComposedDevice
 
 static const EmberAfDeviceType gComposedDeviceTypes[] = {
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT },
+  { DEVICE_TYPE_MA_AGGREGATOR, DEVICE_VERSION_DEFAULT }
 };
 
 

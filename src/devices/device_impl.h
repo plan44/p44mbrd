@@ -32,8 +32,10 @@ const int kDescriptorAttributeArraySize = 254;
 
 
 // Device types for dynamic endpoints: TODO Need a generated file from ZAP to define these!
-// (taken from third_party/zap/repo/zcl-builtin/matter/matter-devices.xml)
-#define DEVICE_TYPE_MA_BRIDGED_DEVICE 0x0013
+// (taken from third_party/connectedhomeip/src/app/zap-templates/zcl/data-model/chip/matter-devices.xml)
+
+#define DEVICE_TYPE_MA_AGGREGATOR 0x000E
+#define DEVICE_TYPE_MA_BRIDGED_DEVICE 0x0013 // called "Bridged Node" in the Device Library
 #define DEVICE_TYPE_MA_ON_OFF_LIGHT 0x0100
 #define DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT 0x010A
 #define DEVICE_TYPE_MA_DIMMABLE_LIGHT 0x0101
