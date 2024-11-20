@@ -1,6 +1,6 @@
 {
   "fileFormat": 2,
-  "featureLevel": 104,
+  "featureLevel": 106,
   "creator": "zap",
   "keyValuePairs": [
     {
@@ -40,14 +40,16 @@
         "code": 22,
         "profileId": 259,
         "label": "MA-rootdevice",
-        "name": "MA-rootdevice"
+        "name": "MA-rootdevice",
+        "deviceTypeOrder": 0
       },
       "deviceTypes": [
         {
           "code": 22,
           "profileId": 259,
           "label": "MA-rootdevice",
-          "name": "MA-rootdevice"
+          "name": "MA-rootdevice",
+          "deviceTypeOrder": 0
         }
       ],
       "deviceVersions": [
@@ -3031,14 +3033,16 @@
         "code": 14,
         "profileId": 259,
         "label": "MA-aggregator",
-        "name": "MA-aggregator"
+        "name": "MA-aggregator",
+        "deviceTypeOrder": 0
       },
       "deviceTypes": [
         {
           "code": 14,
           "profileId": 259,
           "label": "MA-aggregator",
-          "name": "MA-aggregator"
+          "name": "MA-aggregator",
+          "deviceTypeOrder": 0
         }
       ],
       "deviceVersions": [
@@ -3510,14 +3514,16 @@
         "code": 269,
         "profileId": 259,
         "label": "MA-extendedcolorlight",
-        "name": "MA-extendedcolorlight"
+        "name": "MA-extendedcolorlight",
+        "deviceTypeOrder": 0
       },
       "deviceTypes": [
         {
           "code": 269,
           "profileId": 259,
           "label": "MA-extendedcolorlight",
-          "name": "MA-extendedcolorlight"
+          "name": "MA-extendedcolorlight",
+          "deviceTypeOrder": 0
         }
       ],
       "deviceVersions": [
@@ -3541,14 +3547,6 @@
             {
               "name": "Identify",
               "code": 0,
-              "mfgCode": null,
-              "source": "client",
-              "isIncoming": 1,
-              "isEnabled": 1
-            },
-            {
-              "name": "TriggerEffect",
-              "code": 64,
               "mfgCode": null,
               "source": "client",
               "isIncoming": 1,
