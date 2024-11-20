@@ -172,6 +172,14 @@ public:
   ///   do not work.
   virtual void setBridgeRunning(bool aRunning) = 0;
 
+  /// @brief is called when bridge should identify itself. This is the case whenever a
+  ///   device is not able to identify itself individually.
+  /// @param aDurationS >0: number of seconds the identification action
+  ///   should perform, such as blinking or beeping.
+  ///   0: use default duration of hardware device
+  ///   <0: stop ongoing identification
+  virtual void identifyBridge(int aDurationS) = 0;
+
   /// @brief is called when matter stack shuts down to cleanup (disconnect API, etc) the adapter
   virtual void cleanup();
 

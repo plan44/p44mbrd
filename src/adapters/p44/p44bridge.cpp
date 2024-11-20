@@ -71,6 +71,17 @@ void P44_BridgeImpl::setBridgeRunning(bool aRunning)
 }
 
 
+void P44_BridgeImpl::identifyBridge(int aDurationS)
+{
+  // (re)start or stop identify in bridge itself
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("dSUID", JsonObject::newString("root"));
+  // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
+  params->add("duration", JsonObject::newDouble(aDurationS<=0 ? -1 : aDurationS));
+  api().notify("identify", params);
+}
+
+
 void P44_BridgeImpl::cleanup()
 {
   api().closeConnection();

@@ -86,6 +86,12 @@ void CC_BridgeImpl::updateCommissioningInfo(const string aQRCodeData, const stri
 }
 
 
+void CC_BridgeImpl::identifyBridge(int aDurationS)
+{
+  // TODO: maybe inform the gateway to do some sort of self-identification (beep, blink...)
+}
+
+
 void CC_BridgeImpl::setBridgeRunning(bool aRunning)
 {
   // TODO: maybe inform the gateway about bridge running status
