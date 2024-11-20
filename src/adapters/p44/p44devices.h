@@ -129,10 +129,19 @@ class P44_IdentifiableImpl : public P44_DeviceImpl, public IdentifyDelegate
 {
   typedef P44_DeviceImpl inherited;
 
+  bool mCanIdentifyToUser;
+
   /// @name IdentifyDelegate
   /// @{
   virtual void identify(int aDurationS) override;
   /// @}
+
+protected:
+
+  P44_IdentifiableImpl() : mCanIdentifyToUser(false) {};
+
+  virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo) override;
+
 };
 
 

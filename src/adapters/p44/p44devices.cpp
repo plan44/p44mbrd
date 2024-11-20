@@ -226,11 +226,28 @@ void P44_ComposedImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperti
 
 void P44_IdentifiableImpl::identify(int aDurationS)
 {
-  // (re)start or stop identify in the bridged device
-  JsonObjectPtr params = JsonObject::newObj();
-  // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
-  params->add("duration", JsonObject::newDouble(aDurationS<=0 ? -1 : aDurationS));
-  notify("identify", params);
+  // Actually have the device identifying itself when it is supported
+  if (mCanIdentifyToUser) {
+    // (re)start or stop identify in the bridged device
+    JsonObjectPtr params = JsonObject::newObj();
+    // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
+    params->add("duration", JsonObject::newDouble(aDurationS<=0 ? -1 : aDurationS));
+    notify("identify", params);
+  }
+  else {
+    // Note: as most matter device types require identification, but many bridged devices don't have it,
+    //   just have controller identify itself instead.
+    P44_BridgeImpl::adapter().identifyBridge(aDurationS);
+  }
+}
+
+
+void P44_IdentifiableImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
+{
+  // basics first
+  inherited::updateBridgedInfo(aDeviceInfo);
+  // specifics
+  mCanIdentifyToUser = P44_BridgeImpl::hasModelFeature(aDeviceInfo, "identification");
 }
 
 
