@@ -410,6 +410,12 @@ bool emberAfIdentifyClusterIdentifyCallback(
   const Commands::Identify::DecodableType & commandData
 )
 {
+  if (commandPath.mEndpointId==MATTER_BRIDGE_ENDPOINT) {
+    // this is the bridge itself which does have a ZAP-statically declared identify cluster
+    bridgeGlobalIdentify(commandData.identifyTime);
+    // immediately mark done
+    Identify::Attributes::IdentifyTime::Set(MATTER_BRIDGE_ENDPOINT, 0);
+  }
   auto dev = DeviceEndpoints::getDevice<IdentifiableDevice>(commandPath.mEndpointId);
   if (!dev) return false;
   dev->updateIdentifyTime(commandData.identifyTime, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));

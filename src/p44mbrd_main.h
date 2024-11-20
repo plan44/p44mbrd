@@ -27,5 +27,9 @@
 
 #include "application.hpp"
 
+// TODO: take this somehow out of generated ZAP
+// For now: Endpoint 1 must be the Matter Bridge (Endpoint 0 is the Root node)
+#define MATTER_BRIDGE_ENDPOINT 1
 
-
+/// cause all adapters to identify bridge
+void bridgeGlobalIdentify(int aDurationS);

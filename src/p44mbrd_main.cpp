@@ -108,10 +108,6 @@ using namespace chip::Transport;
 using namespace chip::DeviceLayer;
 using namespace chip::app::Clusters;
 
-// TODO: take this somehow out of generated ZAP
-// For now: Endpoint 1 must be the Matter Bridge (Endpoint 0 is the Root node)
-#define MATTER_BRIDGE_ENDPOINT 1
-
 // chipmain
 
 #define kP44mbrNamespace "/ch.plan44.p44mbrd/"
@@ -297,6 +293,15 @@ public:
     OLOG(LOG_NOTICE, "Commissioning Window changes to %scommissionable)", aIsCommissionable ? "OPEN (" : "CLOSED (not ");
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
       (*pos)->reportCommissionable(aIsCommissionable);
+    }
+  }
+
+
+  virtual void bridgeGlobalIdentify(int aDurationS) override
+  {
+    OLOG(LOG_WARNING, "bridgeGlobalIdentify");
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->identifyBridge(aDurationS);
     }
   }
 
@@ -1148,7 +1153,17 @@ DevicePtr deviceForEndPointId(EndpointId aEndpointId)
 }
 
 
-// MARK: - gloabl CHIP callbacks
+// MARK: other global utilities
+
+void bridgeGlobalIdentify(int aDurationS)
+{
+  P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+  app.bridgeGlobalIdentify(aDurationS);
+}
+
+
+
+// MARK: - global CHIP callbacks
 
 
 void MatterActionsPluginServerInitCallback()

@@ -88,6 +88,9 @@ public:
   /// @param aEndPointList pointer to endpoint list object
   virtual void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, BridgeAdapter& aAdapter) = 0;
 
+  /// cause all adapters to identify bridge
+  virtual void bridgeGlobalIdentify(int aDurationS) = 0;
+
 };
 
 
