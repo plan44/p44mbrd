@@ -64,7 +64,7 @@ class DeviceWindowCovering : public IdentifiableDevice, public WindowCovering::D
 
 public:
 
-  DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual void didGetInstalled() override;
 

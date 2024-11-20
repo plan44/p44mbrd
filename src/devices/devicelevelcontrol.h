@@ -86,7 +86,7 @@ protected:
 
 public:
 
-  DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual void didGetInstalled() override;
 
@@ -136,8 +136,8 @@ class DeviceDimmableLight : public DeviceLevelControl
   typedef DeviceLevelControl inherited;
 public:
 
-  DeviceDimmableLight(LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-    inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate)
+  DeviceDimmableLight(LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate)
   {};
 
   virtual const char *deviceType() override { return "dimmable light"; }
@@ -155,8 +155,8 @@ class DeviceDimmablePluginUnit : public DeviceLevelControl
   typedef DeviceLevelControl inherited;
 public:
 
-  DeviceDimmablePluginUnit(LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-    inherited(false, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate)
+  DeviceDimmablePluginUnit(LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(false, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate)
   {};
 
   virtual const char *deviceType() override { return "dimmable plug-in unit"; }

@@ -46,8 +46,8 @@ static EmberAfClusterSpec gOnOffDeviceClusters[] = {
 
 // MARK: - DeviceOnOff
 
-DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aIdentifyDelegate, aDeviceInfoDelegate),
+DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
   mOnOffDelegate(aOnOffDelegate),
   mLighting(aLighting),
   mOn(false)

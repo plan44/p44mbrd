@@ -44,8 +44,8 @@ static const EmberAfDeviceType gTemperatureSensorTypes[] = {
 static EmberAfClusterSpec gTemperatureSensorClusters[] = { { TemperatureMeasurement::Id, CLUSTER_MASK_SERVER } };
 
 
-DeviceTemperature::DeviceTemperature(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+DeviceTemperature::DeviceTemperature(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gTemperatureSensorClusters));
@@ -95,8 +95,8 @@ static const EmberAfDeviceType gIlluminanceSensorTypes[] = {
 static EmberAfClusterSpec gIlluminanceSensorClusters[] = { { IlluminanceMeasurement::Id, CLUSTER_MASK_SERVER } };
 
 
-DeviceIlluminance::DeviceIlluminance(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+DeviceIlluminance::DeviceIlluminance(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gIlluminanceSensorClusters));
@@ -145,8 +145,8 @@ static const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
 static EmberAfClusterSpec gRelativeHumiditySensorClusters[] = { { RelativeHumidityMeasurement::Id, CLUSTER_MASK_SERVER } };
 
 
-DeviceHumidity::DeviceHumidity(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+DeviceHumidity::DeviceHumidity(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gRelativeHumiditySensorClusters));

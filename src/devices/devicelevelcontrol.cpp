@@ -42,8 +42,8 @@ static EmberAfClusterSpec gLevelControlClusters[] = { { LevelControl::Id, CLUSTE
 
 using namespace LevelControl;
 
-DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aLighting, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate),
+DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aLighting, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
   // external attribute defaults
   mLevel(0)

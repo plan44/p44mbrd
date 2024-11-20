@@ -43,8 +43,8 @@ static const EmberAfDeviceType gGenericSwitchTypes[] = {
 static EmberAfClusterSpec gGenericSwitchClusters[] = { { Switch::Id, CLUSTER_MASK_SERVER } };
 
 
-SwitchDevice::SwitchDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+SwitchDevice::SwitchDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gGenericSwitchClusters));

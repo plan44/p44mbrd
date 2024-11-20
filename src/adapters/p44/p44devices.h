@@ -297,9 +297,9 @@ public:
 
 // MARK: - Input devices
 
-class P44_InputImpl : public P44_DeviceImpl
+class P44_InputImpl : public P44_IdentifiableImpl
 {
-  typedef P44_DeviceImpl inherited;
+  typedef P44_IdentifiableImpl inherited;
 
 protected:
 
@@ -399,7 +399,7 @@ class P44_OnOffLightDevice final :
   public P44_OnOffImpl // the P44 side delegate implementation
 {
 public:
-  P44_OnOffLightDevice() : DeviceOnOffLight(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_OnOffLightDevice() : DeviceOnOffLight(DG(OnOff), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
   DEVICE_ACCESSOR;
 };
@@ -410,7 +410,7 @@ class P44_OnOffPluginUnitDevice final :
   public P44_OnOffImpl // the P44 side delegate implementation
 {
 public:
-  P44_OnOffPluginUnitDevice() : DeviceOnOffPluginUnit(DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_OnOffPluginUnitDevice() : DeviceOnOffPluginUnit(DG(OnOff), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   DEVICE_ACCESSOR;
 };
@@ -421,7 +421,7 @@ class P44_DimmableLightDevice final :
   public P44_LevelControlImpl // the P44 side delegate implementation
 {
 public:
-  P44_DimmableLightDevice() : DeviceDimmableLight(DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_DimmableLightDevice() : DeviceDimmableLight(DG(LevelControl), DG(OnOff), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
   DEVICE_ACCESSOR;
 };
@@ -432,7 +432,7 @@ class P44_DimmablePluginUnitDevice final :
   public P44_LevelControlImpl // the P44 side delegate implementation
 {
 public:
-  P44_DimmablePluginUnitDevice() : DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_DimmablePluginUnitDevice() : DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
   DEVICE_ACCESSOR;
 };
@@ -443,7 +443,7 @@ class P44_ColorLightDevice final :
   public P44_ColorControlImpl // the P44 side delegate implementation
 {
 public:
-  P44_ColorLightDevice(bool aCtOnly) : DeviceColorControl(aCtOnly, DG(ColorControl), DG(LevelControl), DG(OnOff), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_ColorLightDevice(bool aCtOnly) : DeviceColorControl(aCtOnly, DG(ColorControl), DG(LevelControl), DG(OnOff), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -453,7 +453,7 @@ class P44_WindowCoveringDevice final :
   public P44_WindowCoveringImpl // the P44 side delegate implementation
 {
 public:
-  P44_WindowCoveringDevice() : DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_WindowCoveringDevice() : DeviceWindowCovering(DG(WindowCovering), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -463,7 +463,7 @@ class P44_SimpleFanDevice final :
   public P44_SimpleFanControlImpl // the P44 side delegate implementation
 {
 public:
-  P44_SimpleFanDevice() : DeviceFanControl(nullptr, DG(LevelControl), DG(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_SimpleFanDevice() : DeviceFanControl(nullptr, DG(LevelControl), DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -477,7 +477,7 @@ class P44_TemperatureSensor final :
   public P44_SensorImpl // the P44 side implementation
 {
 public:
-  P44_TemperatureSensor() : DeviceTemperature(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_TemperatureSensor() : DeviceTemperature(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -487,7 +487,7 @@ class P44_IlluminanceSensor final :
   public P44_SensorImpl // the P44 side implementation
 {
 public:
-  P44_IlluminanceSensor() : DeviceIlluminance(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_IlluminanceSensor() : DeviceIlluminance(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -497,7 +497,7 @@ class P44_HumiditySensor final :
   public P44_SensorImpl // the P44 side implementation
 {
 public:
-  P44_HumiditySensor() : DeviceHumidity(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_HumiditySensor() : DeviceHumidity(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -510,7 +510,7 @@ class P44_OccupancySensor final :
   public P44_BinaryInputImpl // the P44 side implementation
 {
 public:
-  P44_OccupancySensor() : OccupancySensingDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_OccupancySensor() : OccupancySensingDevice(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -520,7 +520,7 @@ class P44_ContactInput final :
   public P44_BinaryInputImpl // the P44 side implementation
 {
 public:
-  P44_ContactInput() : ContactSensorDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_ContactInput() : ContactSensorDevice(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 
@@ -533,7 +533,7 @@ class P44_Pushbutton final :
   public P44_ButtonImpl // the P44 side implementation
 {
 public:
-  P44_Pushbutton() : DevicePushbutton(DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_Pushbutton() : DevicePushbutton(DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 

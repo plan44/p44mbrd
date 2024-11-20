@@ -49,7 +49,7 @@ class DeviceOnOff : public IdentifiableDevice
 
 public:
 
-  DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual string description() override;
 
@@ -78,8 +78,8 @@ class DeviceOnOffLight : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceOnOffLight(OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-    inherited(true, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate) {};
+  DeviceOnOffLight(OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(true, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate) {};
 
   virtual const char *deviceType() override { return "on-off light"; }
 
@@ -96,8 +96,8 @@ class DeviceOnOffPluginUnit : public DeviceOnOff
   typedef DeviceOnOff inherited;
 public:
 
-  DeviceOnOffPluginUnit(OnOffDelegate& aOnOffDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-    inherited(false, aOnOffDelegate, aIdentifyDelegate, aDeviceInfoDelegate) {};
+  DeviceOnOffPluginUnit(OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+    inherited(false, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate) {};
 
   virtual const char *deviceType() override { return "on-off plug-in unit"; }
 

@@ -36,6 +36,7 @@
 
 #define DEVICE_ACCESSOR virtual Device &device() override { return static_cast<Device&>(*this); }
 #define DG(DelegateBasename) (static_cast<DelegateBasename##Delegate&>(*this))
+#define DGP(DelegateBasename) (static_cast<DelegateBasename##Delegate*>(this))
 
 
 class BridgeAdapter;

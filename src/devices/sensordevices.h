@@ -30,13 +30,13 @@ using namespace app;
 
 // MARK: - SensorDevice, common base class for sensors
 
-class SensorDevice : public Device
+class SensorDevice : public IdentifiableDevice
 {
-  typedef Device inherited;
+  typedef IdentifiableDevice inherited;
 
 public:
 
-  SensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aDeviceInfoDelegate) {};
+  SensorDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aIdentifyDelegateP, aDeviceInfoDelegate) {};
 
   /// @brief convenience generic method to set sensor params
   /// @param aMin minimal value the sensor can take
@@ -60,7 +60,7 @@ class DeviceTemperature : public SensorDevice
 {
   typedef SensorDevice inherited;
 public:
-  DeviceTemperature(DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceTemperature(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
   virtual const char *deviceType() override { return "temperature sensor"; }
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
@@ -76,7 +76,7 @@ class DeviceIlluminance : public SensorDevice
 {
   typedef SensorDevice inherited;
 public:
-  DeviceIlluminance(DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceIlluminance(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
   virtual const char *deviceType() override { return "illuminance sensor"; }
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
@@ -92,7 +92,7 @@ class DeviceHumidity : public SensorDevice
 {
   typedef SensorDevice inherited;
 public:
-  DeviceHumidity(DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceHumidity(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
   virtual const char *deviceType() override { return "humidity sensor"; }
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;

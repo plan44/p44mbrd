@@ -336,7 +336,7 @@ class IdentifiableDevice : public Device
   typedef Device inherited;
 
   /// identify delegate
-  IdentifyDelegate& mIdentifyDelegate;
+  IdentifyDelegate* mIdentifyDelegateP;
 
   /// @name external attributes
   /// @{
@@ -349,9 +349,9 @@ class IdentifiableDevice : public Device
 
 public:
 
-  /// @param aIdentifyDelegate object reference for implementation of device identification (sound, blinking etc.)
+  /// @param aIdentifyDelegateP pointer for implementation of device level identification (sound, blinking etc.), null if none available
   /// @param aDeviceInfoDelegate object reference for implementation of device info handling
-  IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+  IdentifiableDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual ~IdentifiableDevice();
 

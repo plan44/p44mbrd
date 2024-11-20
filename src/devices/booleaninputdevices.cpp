@@ -36,8 +36,8 @@ using namespace Clusters;
 
 // MARK: - BinaryInputDevice
 
-BinaryInputDevice::BinaryInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+BinaryInputDevice::BinaryInputDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
 }
 
@@ -54,8 +54,8 @@ string BinaryInputDevice::description()
 
 static EmberAfClusterSpec gBooleanStateClusters[] = { { BooleanState::Id, CLUSTER_MASK_SERVER } };
 
-BoolanStateDevice::BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+BoolanStateDevice::BoolanStateDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gBooleanStateClusters));
@@ -80,8 +80,8 @@ static const EmberAfDeviceType gContactSensorTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-ContactSensorDevice::ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+ContactSensorDevice::ContactSensorDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
 }
 
@@ -101,8 +101,8 @@ static const EmberAfDeviceType gOccupancySensingTypes[] = {
 };
 
 
-OccupancySensingDevice::OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aDeviceInfoDelegate)
+OccupancySensingDevice::OccupancySensingDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gOccupancySensingClusters));

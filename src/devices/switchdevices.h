@@ -30,16 +30,16 @@ using namespace app;
 
 // MARK: - SensorDevice, common base class for sensors
 
-class SwitchDevice : public Device
+class SwitchDevice : public IdentifiableDevice
 {
-  typedef Device inherited;
+  typedef IdentifiableDevice inherited;
 
 public:
 
   typedef std::map<int, string> PositionsMap;
   PositionsMap mActivePositions;
 
-  SwitchDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  SwitchDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   void setActivePosition(int aPosition, const string& aPositionName);
 
@@ -52,7 +52,7 @@ class DevicePushbutton : public SwitchDevice
 {
   typedef SwitchDevice inherited;
 public:
-  DevicePushbutton(DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aDeviceInfoDelegate) {};
+  DevicePushbutton(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) : inherited(aIdentifyDelegateP, aDeviceInfoDelegate) {};
   virtual const char *deviceType() override { return "push button"; }
   virtual bool isLatching() { return false; };
 protected:

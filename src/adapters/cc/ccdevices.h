@@ -250,7 +250,7 @@ class CC_OnOffLightDevice final :
   typedef CC_OnOffImpl inherited;
 public:
   CC_OnOffLightDevice(int _item_id) :
-      DeviceOnOffLight(DG(OnOff), DG(Identify), DG(DeviceInfo)),
+      DeviceOnOffLight(DG(OnOff), DGP(Identify), DG(DeviceInfo)),
       inherited(_item_id)
   {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
@@ -264,7 +264,7 @@ class CC_OnOffPluginUnitDevice final :
   typedef CC_OnOffImpl inherited;
 public:
   CC_OnOffPluginUnitDevice(int _item_id) :
-      DeviceOnOffPluginUnit(DG(OnOff), DG(Identify), DG(DeviceInfo)),
+      DeviceOnOffPluginUnit(DG(OnOff), DGP(Identify), DG(DeviceInfo)),
       inherited(_item_id)
   { }; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
@@ -279,7 +279,7 @@ class CC_DimmableLightDevice final :
 public:
   CC_DimmableLightDevice(int _item_id) :
       DeviceDimmableLight(DG(LevelControl), DG(OnOff),
-                          DG(Identify), DG(DeviceInfo)),
+                          DGP(Identify), DG(DeviceInfo)),
       inherited(_item_id)
   {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kLightOutput; }
@@ -295,7 +295,7 @@ class CC_DimmablePluginUnitDevice final :
 public:
   CC_DimmablePluginUnitDevice(int _item_id) :
       DeviceDimmablePluginUnit(DG(LevelControl), DG(OnOff),
-                               DG(Identify), DG(DeviceInfo)),
+                               DGP(Identify), DG(DeviceInfo)),
       inherited(_item_id)
   {}; // this class itself implements all needed delegates
   virtual Identify::IdentifyTypeEnum identifyType() override { return Identify::IdentifyTypeEnum::kActuator; }
@@ -311,7 +311,7 @@ class CC_WindowCoveringDevice final :
 public:
 public:
   CC_WindowCoveringDevice(int _item_id, WindowCovering::Type _type, WindowCovering::EndProductType _end_product_type) :
-      DeviceWindowCovering(DG(WindowCovering), DG(Identify), DG(DeviceInfo)),
+      DeviceWindowCovering(DG(WindowCovering), DGP(Identify), DG(DeviceInfo)),
       inherited(_item_id, _type, _end_product_type)
   {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;

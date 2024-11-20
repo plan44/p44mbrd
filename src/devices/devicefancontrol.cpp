@@ -47,8 +47,8 @@ static const EmberAfDeviceType gFanDeviceTypes[] = {
 };
 
 
-DeviceFanControl::DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegate, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aIdentifyDelegate, aDeviceInfoDelegate),
+DeviceFanControl::DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegate, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
   FanControl::Delegate(kInvalidEndpointId), // nobody needs that ID stored in the delegate, and we want to instantiate it here where we don't know the
   mLevelControlDelegate(aLevelControlDelegate),
   mFanControlExtrasDelegateP(aOptionalFanControlExtrasDelegate)

@@ -43,8 +43,8 @@ static const EmberAfDeviceType gWindowCoveringTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aIdentifyDelegate, aDeviceInfoDelegate),
+DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
   mWindowCoveringDelegate(aWindowCoveringDelegate)
 {
   // - declare onoff device specific clusters

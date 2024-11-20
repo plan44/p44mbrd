@@ -31,13 +31,13 @@ using namespace app;
 // MARK: - BinaryInputDevice
 
 
-class BinaryInputDevice : public Device
+class BinaryInputDevice : public IdentifiableDevice
 {
-  typedef Device inherited;
+  typedef IdentifiableDevice inherited;
 
 public:
 
-  BinaryInputDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  BinaryInputDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual string description() override;
 
@@ -67,7 +67,7 @@ class BoolanStateDevice  : public BinaryInputDevice
 
 public:
 
-  BoolanStateDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  BoolanStateDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   /// update state in boolean state cluster
   virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) override;
@@ -81,7 +81,7 @@ class ContactSensorDevice : public BoolanStateDevice
   
 public:
 
-  ContactSensorDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  ContactSensorDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual const char *deviceType() override { return "contact sensor"; }
 
@@ -101,7 +101,7 @@ class OccupancySensingDevice : public BinaryInputDevice
 
 public:
 
-  OccupancySensingDevice(DeviceInfoDelegate& aDeviceInfoDelegate);
+  OccupancySensingDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual const char *deviceType() override { return "occupancy sensor"; }
 

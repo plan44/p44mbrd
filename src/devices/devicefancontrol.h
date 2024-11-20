@@ -57,7 +57,7 @@ class DeviceFanControl : public IdentifiableDevice, public LevelControlImplement
 
 public:
 
-  DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegate, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate);
+  DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegate, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
 
   virtual void didGetInstalled() override;
 

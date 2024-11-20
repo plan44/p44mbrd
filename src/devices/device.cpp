@@ -290,9 +290,9 @@ using namespace Identify;
 
 static EmberAfClusterSpec gIdentifiableDeviceClusters[] = { { Identify::Id, CLUSTER_MASK_SERVER } };
 
-IdentifiableDevice::IdentifiableDevice(IdentifyDelegate& aIdentifyDelegate, DeviceInfoDelegate& aDeviceInfoDelegate) :
+IdentifiableDevice::IdentifiableDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   Device(aDeviceInfoDelegate),
-  mIdentifyDelegate(aIdentifyDelegate),
+  mIdentifyDelegateP(aIdentifyDelegateP),
   mIdentifyTime(0)
 {
   // - declare identify cluster
@@ -308,7 +308,14 @@ IdentifiableDevice::~IdentifiableDevice()
 void IdentifiableDevice::didGetInstalled()
 {
   // override static attribute defaults
-  Identify::Attributes::IdentifyType::Set(endpointId(), mIdentifyDelegate.identifyType());
+  if (mIdentifyDelegateP) {
+    // device has a identify delegate
+    Identify::Attributes::IdentifyType::Set(endpointId(), mIdentifyDelegateP->identifyType());
+  }
+  else {
+    // device does not have an individual identify delegate: no support for identify
+    Identify::Attributes::IdentifyType::Set(endpointId(), Identify::IdentifyTypeEnum::kNone);
+  }
   // call base class last
   inherited::didGetInstalled();
 }
@@ -322,11 +329,13 @@ bool IdentifiableDevice::updateIdentifyTime(uint16_t aIdentifyTime, UpdateMode a
     mIdentifyTime = aIdentifyTime;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       mIdentifyTickTimer.cancel();
-      // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
-      mIdentifyDelegate.identify(mIdentifyTime<=0 ? -1 : mIdentifyTime);
-      if (mIdentifyTime>0) {
-        // start ticker
-        identifyTick(mIdentifyTime);
+      if (mIdentifyDelegateP) {
+        // <0 = stop, >0 = duration (duration==0 would mean default duration, not used here)
+        mIdentifyDelegateP->identify(mIdentifyTime<=0 ? -1 : mIdentifyTime);
+        if (mIdentifyTime>0) {
+          // start ticker
+          identifyTick(mIdentifyTime);
+        }
       }
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
@@ -412,7 +421,7 @@ bool emberAfIdentifyClusterIdentifyCallback(
 bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chip::app::ConcreteCommandPath const&, chip::app::Clusters::Identify::Commands::TriggerEffect::DecodableType const&)
 {
   // needs to be here because it is referenced from a dispatcher outside the cluster implementation
-  return false; // we do not implement this
+  return false; // we do not implement this (as per Nov 2024, ZAP says it is mandatory, 1.3+1.4 Specs say it is optional)
 }
 
 
