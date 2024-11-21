@@ -27,6 +27,7 @@ assert(chip_build_tools)
 
 declare_args() {
   p44_application_version = "missing"
+  p44_debug_attr_access = 0
 }
 
 
@@ -121,7 +122,7 @@ config("p44mbrd_config_extra") {
     # we want log filtering
     "CHIP_LOG_FILTERING=1",
     # we may or may not want extensive attribute access logging
-    "DEBUG_ATTR_ACCESS=0"
+    "DEBUG_ATTR_ACCESS=$p44_debug_attr_access"
   ]
   cflags = [
     # ev_loop shadows struct constructor in libev@openwrt22.03
