@@ -85,9 +85,9 @@ ContactSensorDevice::ContactSensorDevice(IdentifyDelegate* aIdentifyDelegateP, D
 {
 }
 
-void ContactSensorDevice::finalizeDeviceDeclaration()
+bool ContactSensorDevice::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gContactSensorTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gContactSensorTypes));
 }
 
 
@@ -109,9 +109,9 @@ OccupancySensingDevice::OccupancySensingDevice(IdentifyDelegate* aIdentifyDelega
 }
 
 
-void OccupancySensingDevice::finalizeDeviceDeclaration()
+bool OccupancySensingDevice::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOccupancySensingTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOccupancySensingTypes));
 }
 
 

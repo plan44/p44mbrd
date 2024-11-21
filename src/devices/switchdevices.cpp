@@ -60,8 +60,8 @@ void SwitchDevice::setActivePosition(int aPosition, const string& aPositionName)
 // MARK: - DevicePushbutton
 
 
-void DevicePushbutton::finalizeDeviceDeclaration()
+bool DevicePushbutton::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gGenericSwitchTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gGenericSwitchTypes));
 }
 

@@ -65,7 +65,7 @@ public:
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
   static int16_t matterValue(double aValue);
 };
 
@@ -81,7 +81,7 @@ public:
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
   static uint16_t matterValue(double aValue);
 };
 
@@ -97,6 +97,6 @@ public:
   virtual void setupSensorParams(bool aHasMin, double aMin, bool aHasMax, double aMax, double aTolerance) override;
   virtual void updateMeasuredValue(double aMeasuredValue, bool aIsValid, UpdateMode aUpdateMode) override;
 protected:
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
   static uint16_t matterValue(double aValue);
 };

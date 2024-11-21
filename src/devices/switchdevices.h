@@ -56,5 +56,5 @@ public:
   virtual const char *deviceType() override { return "push button"; }
   virtual bool isLatching() { return false; };
 protected:
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
 };

@@ -277,10 +277,11 @@ protected:
   void useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateClusterSpecList);
 
   /// called to have the final leaf class declare the correct device type list
-  virtual void finalizeDeviceDeclaration() = 0;
+  virtual bool finalizeDeviceDeclaration() = 0;
 
   /// utility for implementing finalizeDeviceDeclaration()
-  void finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList);
+  /// @return true when successful
+  bool finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList);
 
   /// utility for returning attribute values in external attribute storage callbacks
   template <typename T> static inline void storeInBuffer(uint8_t* aBuffer, T& aValue)
@@ -389,6 +390,6 @@ public:
 
 protected:
 
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
 
 };

@@ -76,13 +76,13 @@ DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColo
 }
 
 
-void DeviceColorControl::finalizeDeviceDeclaration()
+bool DeviceColorControl::finalizeDeviceDeclaration()
 {
   if (mCtOnly) {
-    finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gCTLightTypes));
+    return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gCTLightTypes));
   }
   else {
-    finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
+    return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gColorLightTypes));
   }
 }
 

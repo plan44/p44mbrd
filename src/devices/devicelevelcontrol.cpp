@@ -474,9 +474,9 @@ static const EmberAfDeviceType gDimmableLightTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-void DeviceDimmableLight::finalizeDeviceDeclaration()
+bool DeviceDimmableLight::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmableLightTypes));
 }
 
 
@@ -487,9 +487,9 @@ static const EmberAfDeviceType gDimmablePluginTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-void DeviceDimmablePluginUnit::finalizeDeviceDeclaration()
+bool DeviceDimmablePluginUnit::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmablePluginTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gDimmablePluginTypes));
 }
 
 

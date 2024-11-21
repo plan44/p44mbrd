@@ -95,7 +95,7 @@ void Device::useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateCluste
 }
 
 
-void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
+bool Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
 {
   // save the device type list
   mDeviceTypeList = aDeviceTypeList;
@@ -114,22 +114,30 @@ void Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceTy
     }
   }
   // set up the endpoint declaration
-  emberAfSetupDynamicEndpointDeclaration(
+  CHIP_ERROR ret = emberAfSetupDynamicEndpointDeclaration(
     mEndpointDefinition,
     static_cast<chip::EndpointId>(emberAfFixedEndpointCount()-1), // last fixed endpoint is the template endpoint
     Span<EmberAfClusterSpec>(tl, i)
   );
+  if (ret!=CHIP_NO_ERROR) {
+    OLOG(LOG_ERR, "emberAfSetupDynamicEndpointDeclaration failed with CHIP_ERROR=%" CHIP_ERROR_FORMAT, ret.Format());
+  }
   mTemplateClusterSpecSpanList.clear(); // don't need this any more
   // - allocate the cluster data versions storage
   if (mClusterDataVersionsP) delete mClusterDataVersionsP;
   mClusterDataVersionsP = new DataVersion[mEndpointDefinition.clusterCount];
+  // OK when allocation is ok
+  return (mClusterDataVersionsP!=nullptr);
 }
 
 
 bool Device::addAsDeviceEndpoint()
 {
   // finalize the declaration
-  finalizeDeviceDeclaration();
+  if (!finalizeDeviceDeclaration()) {
+    OLOG(LOG_ERR, "finalizeDeviceDeclaration failed");
+    return false;
+  }
   // allocate storage
   auto endpointStorage = Span<uint8_t>(new uint8_t[mEndpointDefinition.endpointSize], mEndpointDefinition.endpointSize);
   // add as dynamic endpoint
@@ -453,7 +461,7 @@ void ComposedDevice::addSubdevice(DevicePtr aSubDevice)
 }
 
 
-void ComposedDevice::finalizeDeviceDeclaration()
+bool ComposedDevice::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gComposedDeviceTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gComposedDeviceTypes));
 }

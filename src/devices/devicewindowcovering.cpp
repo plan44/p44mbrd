@@ -60,9 +60,9 @@ string DeviceWindowCovering::description()
 }
 
 
-void DeviceWindowCovering::finalizeDeviceDeclaration()
+bool DeviceWindowCovering::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gWindowCoveringTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gWindowCoveringTypes));
 }
 
 

@@ -52,9 +52,9 @@ DeviceTemperature::DeviceTemperature(IdentifyDelegate* aIdentifyDelegateP, Devic
 }
 
 
-void DeviceTemperature::finalizeDeviceDeclaration()
+bool DeviceTemperature::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gTemperatureSensorTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gTemperatureSensorTypes));
 }
 
 
@@ -103,9 +103,9 @@ DeviceIlluminance::DeviceIlluminance(IdentifyDelegate* aIdentifyDelegateP, Devic
 }
 
 
-void DeviceIlluminance::finalizeDeviceDeclaration()
+bool DeviceIlluminance::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gIlluminanceSensorTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gIlluminanceSensorTypes));
 }
 
 
@@ -153,9 +153,9 @@ DeviceHumidity::DeviceHumidity(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoD
 }
 
 
-void DeviceHumidity::finalizeDeviceDeclaration()
+bool DeviceHumidity::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gRelativeHumiditySensorTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gRelativeHumiditySensorTypes));
 }
 
 

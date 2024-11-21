@@ -66,9 +66,9 @@ string DeviceFanControl::description()
 }
 
 
-void DeviceFanControl::finalizeDeviceDeclaration()
+bool DeviceFanControl::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gFanDeviceTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gFanDeviceTypes));
 }
 
 

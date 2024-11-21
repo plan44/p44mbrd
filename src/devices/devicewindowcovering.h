@@ -82,7 +82,7 @@ public:
 protected:
 
   /// called to have the final leaf class declare the correct device type list
-  virtual void finalizeDeviceDeclaration() override;
+  virtual bool finalizeDeviceDeclaration() override;
 
 private:
 

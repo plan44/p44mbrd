@@ -134,9 +134,9 @@ static const EmberAfDeviceType gOnOffLightTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-void DeviceOnOffLight::finalizeDeviceDeclaration()
+bool DeviceOnOffLight::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffLightTypes));
 }
 
 
@@ -147,9 +147,9 @@ static const EmberAfDeviceType gOnOffPluginTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
-void DeviceOnOffPluginUnit::finalizeDeviceDeclaration()
+bool DeviceOnOffPluginUnit::finalizeDeviceDeclaration()
 {
-  finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffPluginTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOnOffPluginTypes));
 }
 
 
