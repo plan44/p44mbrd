@@ -57,6 +57,15 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
 }
 
 
+void DeviceOnOff::didGetInstalled()
+{
+  OnOff::Attributes::FeatureMap::Set(endpointId(), mLighting ? to_underlying(OnOff::Feature::kLighting) : 0);
+  // call base class last
+  inherited::didGetInstalled();
+}
+
+
+
 void DeviceOnOff::changeOnOff_impl(bool aOn)
 {
   mOnOffDelegate.setOnOffState(aOn);

@@ -63,6 +63,8 @@ public:
 
 protected:
 
+  virtual void didGetInstalled() override;
+
   virtual void changeOnOff_impl(bool aOn);
 
   bool mLighting; // lighting feature
