@@ -1211,17 +1211,13 @@
 		ED36DDED286DDB7700CA28EC /* Accessors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Accessors.h; sourceTree = "<group>"; };
 		ED36DDF0286DDBC900CA28EC /* cluster-objects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "cluster-objects.cpp"; sourceTree = "<group>"; };
 		ED36DDF2286DDBC900CA28EC /* attribute-type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "attribute-type.h"; sourceTree = "<group>"; };
-		ED36DDF5286DDBC900CA28EC /* att-storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "att-storage.h"; sourceTree = "<group>"; };
-		ED36DDF6286DDBCA00CA28EC /* attribute-size.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "attribute-size.h"; sourceTree = "<group>"; };
 		ED36DDF8286DDBCA00CA28EC /* Events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Events.h; sourceTree = "<group>"; };
 		ED36DDF9286DDBCA00CA28EC /* Attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Attributes.h; sourceTree = "<group>"; };
 		ED36DDFA286DDBCA00CA28EC /* Commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Commands.h; sourceTree = "<group>"; };
 		ED36DDFB286DDBCA00CA28EC /* Clusters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Clusters.h; sourceTree = "<group>"; };
-		ED36DDFC286DDBCA00CA28EC /* enums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enums.h; sourceTree = "<group>"; };
 		ED36DDFD286DDBCA00CA28EC /* callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
 		ED36DDFE286DDBCA00CA28EC /* cluster-enums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cluster-enums.h"; sourceTree = "<group>"; };
 		ED36DE00286DDBCA00CA28EC /* cluster-objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cluster-objects.h"; sourceTree = "<group>"; };
-		ED36DE01286DDBCA00CA28EC /* print-cluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "print-cluster.h"; sourceTree = "<group>"; };
 		ED36DE11286DDC9500CA28EC /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		ED36DE14286DDD5200CA28EC /* ASN1OID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASN1OID.h; sourceTree = "<group>"; };
 		ED36DE16286DDD5200CA28EC /* CryptoBuildConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptoBuildConfig.h; sourceTree = "<group>"; };
@@ -3140,16 +3136,12 @@
 		ED36DDEF286DDB8F00CA28EC /* app-common */ = {
 			isa = PBXGroup;
 			children = (
-				ED36DDF5286DDBC900CA28EC /* att-storage.h */,
-				ED36DDF6286DDBCA00CA28EC /* attribute-size.h */,
 				ED36DDF2286DDBC900CA28EC /* attribute-type.h */,
 				ED36DDFD286DDBCA00CA28EC /* callback.h */,
 				ED36DDFE286DDBCA00CA28EC /* cluster-enums.h */,
 				ED36DDF0286DDBC900CA28EC /* cluster-objects.cpp */,
 				ED36DE00286DDBCA00CA28EC /* cluster-objects.h */,
-				ED36DDFC286DDBCA00CA28EC /* enums.h */,
 				ED36DDF7286DDBCA00CA28EC /* ids */,
-				ED36DE01286DDBCA00CA28EC /* print-cluster.h */,
 			);
 			name = "app-common";
 			path = "app-common/app-common/zap-generated";
