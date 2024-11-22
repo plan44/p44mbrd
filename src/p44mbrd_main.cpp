@@ -1263,15 +1263,23 @@ Status emberAfExternalAttributeReadCallback(
 
 Status emberAfExternalAttributeWriteCallback(
   EndpointId endpoint, ClusterId clusterId,
-  const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer
+  const EmberAfAttributeMetadata * attributeMetadata, uint8_t * bufferOrZeroes
 )
 {
   Status ret = Status::Failure;
   DevicePtr dev = deviceForEndPointId(endpoint);
   if (dev) {
     POLOG(dev, LOG_DEBUG, "write external attr 0x%04x in cluster 0x%04x, attr.size=%d", (int)attributeMetadata->attributeId, (int)clusterId, (int)attributeMetadata->size);
-    POLOG(dev, LOG_DEBUG, "- new data = %s", dataToHexString(buffer, attributeMetadata->size, ' ').c_str());
-    ret = dev->handleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
+    POLOG(dev, LOG_DEBUG, "- new data = %s", bufferOrZeroes ? dataToHexString(bufferOrZeroes, attributeMetadata->size, ' ').c_str() : "<no data provided: treat as all zeroes>");
+    if (!bufferOrZeroes) {
+      auto zeroBuffer = new uint8_t[attributeMetadata->size];
+      memset(zeroBuffer, 0, attributeMetadata->size);
+      ret = dev->handleWriteAttribute(clusterId, attributeMetadata->attributeId, zeroBuffer);
+      delete [] zeroBuffer;
+    }
+    else {
+      ret = dev->handleWriteAttribute(clusterId, attributeMetadata->attributeId, bufferOrZeroes);
+    }
     if (ret!=Status::Success) {
       POLOG(dev, LOG_ERR, "NOT HANDLED: writing external attr 0x%04x in cluster 0x%04x", (int)attributeMetadata->attributeId, (int)clusterId);
     }
