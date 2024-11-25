@@ -46,12 +46,13 @@ static const EmberAfDeviceType gFanDeviceTypes[] = {
   { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
+#define FAN_MULTISPEED 0 // if set, the (IMHO) redundant speed setting is enabled
 
-DeviceFanControl::DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegate, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+DeviceFanControl::DeviceFanControl(FanControlExtrasDelegate* aOptionalFanControlExtrasDelegateP, LevelControlDelegate& aLevelControlDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
   FanControl::Delegate(kInvalidEndpointId), // nobody needs that ID stored in the delegate, and we want to instantiate it here where we don't know the
   mLevelControlDelegate(aLevelControlDelegate),
-  mFanControlExtrasDelegateP(aOptionalFanControlExtrasDelegate)
+  mFanControlExtrasDelegateP(aOptionalFanControlExtrasDelegateP)
 {
   // - declare onoff device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gFanControlClusters));
@@ -79,7 +80,11 @@ void DeviceFanControl::didGetInstalled()
   // static settings
   bool hasAuto = mFanControlExtrasDelegateP && mFanControlExtrasDelegateP->hasAutoMode();
   FanModeSequence::Set(endpointId(), hasAuto ? FanModeSequenceEnum::kOffLowMedHighAuto : FanModeSequenceEnum::kOffLowMedHigh);
+  #if FAN_MULTISPEED
   FeatureMap::Set(endpointId(), to_underlying(Feature::kMultiSpeed) | (hasAuto ? to_underlying(Feature::kAuto) : 0));
+  #else
+  FeatureMap::Set(endpointId(), (hasAuto ? to_underlying(Feature::kAuto) : 0));
+  #endif
   // call base class last
   inherited::didGetInstalled();
 }
