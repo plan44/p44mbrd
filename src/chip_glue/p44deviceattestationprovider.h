@@ -33,7 +33,7 @@
 using namespace chip;
 using namespace Credentials;
 
-class P44mbrdDeviceAttestationProvider : public DeviceAttestationCredentialsProvider
+class P44DeviceAttestationProvider : public DeviceAttestationCredentialsProvider
 {
 
   string mCD; ///< the certification declaration

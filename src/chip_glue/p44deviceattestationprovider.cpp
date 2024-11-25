@@ -22,7 +22,7 @@
 //
 
 
-#include "deviceattestationprovider.h"
+#include "p44deviceattestationprovider.h"
 
 #include <crypto/CHIPCryptoPAL.h>
 #include <lib/core/CHIPError.h>
@@ -139,7 +139,7 @@ const uint8_t kDevelopmentDAC_PrivateKey_FFF1_8002[32] = {
 #endif // INCLUDE_DEVEL_FALLBACK
 
 
-void P44mbrdDeviceAttestationProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
+void P44DeviceAttestationProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
 {
   // initialize from factory data provider
   assert(aFactoryDataProvider);
@@ -152,7 +152,7 @@ void P44mbrdDeviceAttestationProvider::loadFromFactoryData(FactoryDataProviderPt
 }
 
 
-CHIP_ERROR P44mbrdDeviceAttestationProvider::GetCertificationDeclaration(MutableByteSpan& out_span)
+CHIP_ERROR P44DeviceAttestationProvider::GetCertificationDeclaration(MutableByteSpan& out_span)
 {
   #if INCLUDE_DEVEL_FALLBACK
   if (mCD.empty()) {
@@ -163,13 +163,13 @@ CHIP_ERROR P44mbrdDeviceAttestationProvider::GetCertificationDeclaration(Mutable
 }
 
 
-CHIP_ERROR P44mbrdDeviceAttestationProvider::GetFirmwareInformation(MutableByteSpan & out_firmware_info_buffer)
+CHIP_ERROR P44DeviceAttestationProvider::GetFirmwareInformation(MutableByteSpan & out_firmware_info_buffer)
 {
   return CopySpanToMutableSpan(ByteSpan((uint8_t *)mFirmwareInfo.c_str(), mFirmwareInfo.size()), out_firmware_info_buffer);
 }
 
 
-CHIP_ERROR P44mbrdDeviceAttestationProvider::GetDeviceAttestationCert(MutableByteSpan & out_span)
+CHIP_ERROR P44DeviceAttestationProvider::GetDeviceAttestationCert(MutableByteSpan & out_span)
 {
   #if INCLUDE_DEVEL_FALLBACK
   if (mDAC.empty()) {
@@ -180,7 +180,7 @@ CHIP_ERROR P44mbrdDeviceAttestationProvider::GetDeviceAttestationCert(MutableByt
 }
 
 
-CHIP_ERROR P44mbrdDeviceAttestationProvider::GetProductAttestationIntermediateCert(MutableByteSpan & out_span)
+CHIP_ERROR P44DeviceAttestationProvider::GetProductAttestationIntermediateCert(MutableByteSpan & out_span)
 {
   #if INCLUDE_DEVEL_FALLBACK
   if (mDAC.empty()) {
@@ -202,7 +202,7 @@ static CHIP_ERROR LoadKeypairFromRaw(ByteSpan private_key, ByteSpan public_key, 
 }
 
 
-CHIP_ERROR P44mbrdDeviceAttestationProvider::SignWithDeviceAttestationKey(const ByteSpan & message_to_sign, MutableByteSpan & out_span)
+CHIP_ERROR P44DeviceAttestationProvider::SignWithDeviceAttestationKey(const ByteSpan & message_to_sign, MutableByteSpan & out_span)
 {
   ByteSpan privKey;
   ByteSpan pubKey;

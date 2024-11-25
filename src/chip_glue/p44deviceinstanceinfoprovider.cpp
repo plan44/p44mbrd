@@ -21,10 +21,10 @@
 //  along with p44mbrd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "deviceinfoprovider.h"
+#include "p44deviceinstanceinfoprovider.h"
 
 
-void P44mbrdDeviceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
+void P44DeviceInstanceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
 {
   // initialize from factory data provider
   assert(aFactoryDataProvider);
@@ -48,21 +48,21 @@ void P44mbrdDeviceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFact
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetVendorName(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetVendorName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mVendorName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strncpy(buf, mVendorName.c_str(), bufSize);
   return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetVendorId(uint16_t & vendorId)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetVendorId(uint16_t & vendorId)
 {
   vendorId = mVendorId;
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductName(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mProductName.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strncpy(buf, mProductName.c_str(), bufSize);
@@ -70,21 +70,21 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductName(char * buf, size_t bufSize)
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductId(uint16_t & productId)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductId(uint16_t & productId)
 {
   productId = mProductId;
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetHardwareVersion(uint16_t & hardwareVersion)
 {
   hardwareVersion = mHWVersion;
   return CHIP_NO_ERROR;
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetHardwareVersionString(char * buf, size_t bufSize)
 {
   if (mHWVersionStr.empty()) {
     uint16_t hwv;
@@ -99,7 +99,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetHardwareVersionString(char * buf, size_
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetPartNumber(char * buf, size_t bufSize) {
   // Optional: Human readable Part Number (same ProductID may have different packages, colors etc.)
   if (mPartNumber.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
   ReturnErrorCodeIf(bufSize < mPartNumber.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
@@ -108,7 +108,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetPartNumber(char * buf, size_t bufSize) 
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductURL(char * buf, size_t bufSize) {
   // Optional: Product Website URL
   if (mProductURL.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
   ReturnErrorCodeIf(bufSize < mProductURL.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
@@ -117,7 +117,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductURL(char * buf, size_t bufSize) 
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductLabel(char * buf, size_t bufSize) {
   // Optional: More user-friendly version of ProductName, not containing VendorName
   if (mProductLabel.empty()) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
   ReturnErrorCodeIf(bufSize < mProductLabel.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
@@ -126,7 +126,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetProductLabel(char * buf, size_t bufSize
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetSerialNumber(char * buf, size_t bufSize)
 {
   ReturnErrorCodeIf(bufSize < mSerial.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   strncpy(buf, mSerial.c_str(), bufSize);
@@ -134,7 +134,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetSerialNumber(char * buf, size_t bufSize
 }
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day)
 {
   // Optional: when the node was manufactured, ISO8601 date in the first 8 chars
   if (mManuYear==0) return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
@@ -146,7 +146,7 @@ CHIP_ERROR P44mbrdDeviceInfoProvider::GetManufacturingDate(uint16_t & year, uint
 
 
 
-CHIP_ERROR P44mbrdDeviceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan)
 {
   // TODO: implement actual rotation mechanism (maybe hash from UID, but see specs to see if that's allowed)
   ReturnErrorCodeIf(mUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);

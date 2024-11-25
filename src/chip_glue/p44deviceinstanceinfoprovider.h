@@ -33,7 +33,7 @@
 using namespace chip;
 using namespace std;
 
-class P44mbrdDeviceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
+class P44DeviceInstanceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
 {
 
   uint16_t mVendorId; ///< Matter vendor ID
@@ -49,7 +49,7 @@ class P44mbrdDeviceInfoProvider : public DeviceLayer::DeviceInstanceInfoProvider
 
 public:
 
-  virtual ~P44mbrdDeviceInfoProvider() = default;
+  virtual ~P44DeviceInstanceInfoProvider() = default;
 
   void loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider);
 

@@ -27,7 +27,6 @@
 
 #include "device.h"
 #include "actions.h"
-#include "deviceinfoprovider.h"
 
 // commonly needed matter headers
 #include <app-common/zap-generated/attributes/Accessors.h>

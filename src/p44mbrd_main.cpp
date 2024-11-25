@@ -66,8 +66,10 @@
 
 // p44mbrd specific includes
 #include "chip_glue/chip_error.h"
-#include "chip_glue/deviceinfoprovider.h"
-#include "chip_glue/deviceattestationprovider.h"
+#include "chip_glue/p44deviceinstanceinfoprovider.h" // information about vendor, name, serial, URL etc.
+// FIXME: implement
+//#include "chip_glue/p44deviceinfoprovider.h" // infos like Fixed and User Tags,
+#include "chip_glue/p44deviceattestationprovider.h"
 
 #include "actions.h"
 #include "device.h"
@@ -138,10 +140,10 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
 
   // CHIP "globals"
   bool mChipAppInitialized;
-  LinuxCommissionableDataProvider mCommissionableDataProvider;
-  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: example? do we need our own?
-  P44mbrdDeviceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
-  P44mbrdDeviceAttestationProvider mP44mbrdDeviceAttestationProvider; ///< our own attestation provider
+  LinuxCommissionableDataProvider mCommissionableDataProvider; // TODO: maybe replace it with our own
+  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: FIXME: we need our own!
+  P44DeviceInstanceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
+  P44DeviceAttestationProvider mP44mbrdDeviceAttestationProvider; ///< our own attestation provider
 
   // Bridged devices info
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
