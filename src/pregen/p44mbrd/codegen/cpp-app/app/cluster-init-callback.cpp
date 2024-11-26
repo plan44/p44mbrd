@@ -34,12 +34,6 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case app::Clusters::Descriptor::Id:
         emberAfDescriptorClusterInitCallback(endpoint);
         break;
-    case app::Clusters::DiagnosticLogs::Id:
-        emberAfDiagnosticLogsClusterInitCallback(endpoint);
-        break;
-    case app::Clusters::EthernetNetworkDiagnostics::Id:
-        emberAfEthernetNetworkDiagnosticsClusterInitCallback(endpoint);
-        break;
     case app::Clusters::FanControl::Id:
         emberAfFanControlClusterInitCallback(endpoint);
         break;
@@ -82,23 +76,11 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case app::Clusters::RelativeHumidityMeasurement::Id:
         emberAfRelativeHumidityMeasurementClusterInitCallback(endpoint);
         break;
-    case app::Clusters::SoftwareDiagnostics::Id:
-        emberAfSoftwareDiagnosticsClusterInitCallback(endpoint);
-        break;
     case app::Clusters::Switch::Id:
         emberAfSwitchClusterInitCallback(endpoint);
         break;
     case app::Clusters::TemperatureMeasurement::Id:
         emberAfTemperatureMeasurementClusterInitCallback(endpoint);
-        break;
-    case app::Clusters::TimeFormatLocalization::Id:
-        emberAfTimeFormatLocalizationClusterInitCallback(endpoint);
-        break;
-    case app::Clusters::UnitLocalization::Id:
-        emberAfUnitLocalizationClusterInitCallback(endpoint);
-        break;
-    case app::Clusters::UserLabel::Id:
-        emberAfUserLabelClusterInitCallback(endpoint);
         break;
     case app::Clusters::WindowCovering::Id:
         emberAfWindowCoveringClusterInitCallback(endpoint);

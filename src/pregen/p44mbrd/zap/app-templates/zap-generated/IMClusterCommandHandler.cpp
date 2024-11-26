@@ -229,46 +229,6 @@ void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPa
         }
         break;
       }
-      case Commands::EnhancedMoveToHue::Id: {
-        Commands::EnhancedMoveToHue::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfColorControlClusterEnhancedMoveToHueCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      case Commands::EnhancedMoveHue::Id: {
-        Commands::EnhancedMoveHue::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfColorControlClusterEnhancedMoveHueCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      case Commands::EnhancedStepHue::Id: {
-        Commands::EnhancedStepHue::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfColorControlClusterEnhancedStepHueCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      case Commands::EnhancedMoveToHueAndSaturation::Id: {
-        Commands::EnhancedMoveToHueAndSaturation::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfColorControlClusterEnhancedMoveToHueAndSaturationCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      case Commands::ColorLoopSet::Id: {
-        Commands::ColorLoopSet::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfColorControlClusterColorLoopSetCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
       case Commands::StopMoveStep::Id: {
         Commands::StopMoveStep::DecodableType commandData;
         TLVError = DataModel::Decode(aDataTlv, commandData);
@@ -290,74 +250,6 @@ void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPa
         TLVError = DataModel::Decode(aDataTlv, commandData);
         if (TLVError == CHIP_NO_ERROR) {
           wasHandled = emberAfColorControlClusterStepColorTemperatureCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      default: {
-        // Unrecognized command ID, error status will apply.
-        apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::UnsupportedCommand);
-        ChipLogError(Zcl, "Unknown command " ChipLogFormatMEI " for cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mCommandId), ChipLogValueMEI(aCommandPath.mClusterId));
-        return;
-      }
-    }
-  }
-
-  if (CHIP_NO_ERROR != TLVError || !wasHandled) {
-    apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::InvalidCommand);
-    ChipLogProgress(Zcl, "Failed to dispatch command, TLVError=%" CHIP_ERROR_FORMAT, TLVError.Format());
-  }
-}
-
-}
-
-namespace DiagnosticLogs
-{
-
-void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPath& aCommandPath, TLV::TLVReader& aDataTlv)
-{
-  CHIP_ERROR TLVError = CHIP_NO_ERROR;
-  bool wasHandled = false;
-  {
-    switch (aCommandPath.mCommandId) {
-      case Commands::RetrieveLogsRequest::Id: {
-        Commands::RetrieveLogsRequest::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfDiagnosticLogsClusterRetrieveLogsRequestCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      default: {
-        // Unrecognized command ID, error status will apply.
-        apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::UnsupportedCommand);
-        ChipLogError(Zcl, "Unknown command " ChipLogFormatMEI " for cluster " ChipLogFormatMEI, ChipLogValueMEI(aCommandPath.mCommandId), ChipLogValueMEI(aCommandPath.mClusterId));
-        return;
-      }
-    }
-  }
-
-  if (CHIP_NO_ERROR != TLVError || !wasHandled) {
-    apCommandObj->AddStatus(aCommandPath, Protocols::InteractionModel::Status::InvalidCommand);
-    ChipLogProgress(Zcl, "Failed to dispatch command, TLVError=%" CHIP_ERROR_FORMAT, TLVError.Format());
-  }
-}
-
-}
-
-namespace EthernetNetworkDiagnostics
-{
-
-void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPath& aCommandPath, TLV::TLVReader& aDataTlv)
-{
-  CHIP_ERROR TLVError = CHIP_NO_ERROR;
-  bool wasHandled = false;
-  {
-    switch (aCommandPath.mCommandId) {
-      case Commands::ResetCounts::Id: {
-        Commands::ResetCounts::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfEthernetNetworkDiagnosticsClusterResetCountsCallback(apCommandObj, aCommandPath, commandData);
         }
         break;
       }
@@ -442,6 +334,14 @@ void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPa
         TLVError = DataModel::Decode(aDataTlv, commandData);
         if (TLVError == CHIP_NO_ERROR) {
           wasHandled = emberAfGeneralDiagnosticsClusterTestEventTriggerCallback(apCommandObj, aCommandPath, commandData);
+        }
+        break;
+      }
+      case Commands::TimeSnapshot::Id: {
+        Commands::TimeSnapshot::DecodableType commandData;
+        TLVError = DataModel::Decode(aDataTlv, commandData);
+        if (TLVError == CHIP_NO_ERROR) {
+          wasHandled = emberAfGeneralDiagnosticsClusterTimeSnapshotCallback(apCommandObj, aCommandPath, commandData);
         }
         break;
       }
@@ -608,14 +508,6 @@ void DispatchServerCommand(CommandHandler* apCommandObj, const ConcreteCommandPa
         TLVError = DataModel::Decode(aDataTlv, commandData);
         if (TLVError == CHIP_NO_ERROR) {
           wasHandled = emberAfIdentifyClusterIdentifyCallback(apCommandObj, aCommandPath, commandData);
-        }
-        break;
-      }
-      case Commands::TriggerEffect::Id: {
-        Commands::TriggerEffect::DecodableType commandData;
-        TLVError = DataModel::Decode(aDataTlv, commandData);
-        if (TLVError == CHIP_NO_ERROR) {
-          wasHandled = emberAfIdentifyClusterTriggerEffectCallback(apCommandObj, aCommandPath, commandData);
         }
         break;
       }
@@ -969,12 +861,6 @@ void DispatchSingleClusterCommand(const ConcreteCommandPath& aCommandPath, TLV::
       break;
     case Clusters::ColorControl::Id:
       Clusters::ColorControl::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
-      break;
-    case Clusters::DiagnosticLogs::Id:
-      Clusters::DiagnosticLogs::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
-      break;
-    case Clusters::EthernetNetworkDiagnostics::Id:
-      Clusters::EthernetNetworkDiagnostics::DispatchServerCommand(apCommandObj, aCommandPath, aReader);
       break;
     case Clusters::GeneralCommissioning::Id:
       Clusters::GeneralCommissioning::DispatchServerCommand(apCommandObj, aCommandPath, aReader);

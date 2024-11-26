@@ -7,8 +7,6 @@ void MatterBooleanStatePluginServerInitCallback();
 void MatterBridgedDeviceBasicInformationPluginServerInitCallback();
 void MatterColorControlPluginServerInitCallback();
 void MatterDescriptorPluginServerInitCallback();
-void MatterDiagnosticLogsPluginServerInitCallback();
-void MatterEthernetNetworkDiagnosticsPluginServerInitCallback();
 void MatterFanControlPluginServerInitCallback();
 void MatterGeneralCommissioningPluginServerInitCallback();
 void MatterGeneralDiagnosticsPluginServerInitCallback();
@@ -23,12 +21,8 @@ void MatterOccupancySensingPluginServerInitCallback();
 void MatterOnOffPluginServerInitCallback();
 void MatterOperationalCredentialsPluginServerInitCallback();
 void MatterRelativeHumidityMeasurementPluginServerInitCallback();
-void MatterSoftwareDiagnosticsPluginServerInitCallback();
 void MatterSwitchPluginServerInitCallback();
 void MatterTemperatureMeasurementPluginServerInitCallback();
-void MatterTimeFormatLocalizationPluginServerInitCallback();
-void MatterUnitLocalizationPluginServerInitCallback();
-void MatterUserLabelPluginServerInitCallback();
 void MatterWindowCoveringPluginServerInitCallback();
 
 #define MATTER_PLUGINS_INIT \
@@ -40,8 +34,6 @@ void MatterWindowCoveringPluginServerInitCallback();
     MatterBridgedDeviceBasicInformationPluginServerInitCallback(); \
     MatterColorControlPluginServerInitCallback(); \
     MatterDescriptorPluginServerInitCallback(); \
-    MatterDiagnosticLogsPluginServerInitCallback(); \
-    MatterEthernetNetworkDiagnosticsPluginServerInitCallback(); \
     MatterFanControlPluginServerInitCallback(); \
     MatterGeneralCommissioningPluginServerInitCallback(); \
     MatterGeneralDiagnosticsPluginServerInitCallback(); \
@@ -56,11 +48,7 @@ void MatterWindowCoveringPluginServerInitCallback();
     MatterOnOffPluginServerInitCallback(); \
     MatterOperationalCredentialsPluginServerInitCallback(); \
     MatterRelativeHumidityMeasurementPluginServerInitCallback(); \
-    MatterSoftwareDiagnosticsPluginServerInitCallback(); \
     MatterSwitchPluginServerInitCallback(); \
     MatterTemperatureMeasurementPluginServerInitCallback(); \
-    MatterTimeFormatLocalizationPluginServerInitCallback(); \
-    MatterUnitLocalizationPluginServerInitCallback(); \
-    MatterUserLabelPluginServerInitCallback(); \
     MatterWindowCoveringPluginServerInitCallback();
 
