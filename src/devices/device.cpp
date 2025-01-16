@@ -476,6 +476,7 @@ string ComposedDevice::description()
 
 void ComposedDevice::addSubdevice(DevicePtr aSubDevice)
 {
+  aSubDevice->flagAsPartOfComposedDevice();
   subDevices().push_back(aSubDevice);
 }
 

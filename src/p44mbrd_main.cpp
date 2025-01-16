@@ -642,7 +642,6 @@ public:
     if (chiperr==CHIP_NO_ERROR) {
       // also add subdevices AFTER the main device (if any)
       for (DevicesList::iterator pos = aDevice->subDevices().begin(); pos!=aDevice->subDevices().end(); ++pos) {
-        (*pos)->flagAsPartOfComposedDevice();
         installSingleBridgedDevice(*pos, aDevice->endpointId());
       }
     }
