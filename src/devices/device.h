@@ -119,7 +119,7 @@ class Device : public p44::P44LoggingObj
 
   /// @name matter device and cluster representations
   /// @{
-  Span<const EmberAfDeviceType> mDeviceTypeList; ///< span pointing to device type list
+  Span<EmberAfDeviceType> mDeviceTypeList; ///< span pointing to (allocated) device type list
   EmberAfEndpointType mEndpointDefinition; ///< endpoint declaration info
   DataVersion* mClusterDataVersionsP; ///< storage for cluster versions, one for each .cluster in mEndpointDefinition
   std::list<Span<EmberAfClusterSpec>> mTemplateClusterSpecSpanList; ///< used to dynamically collect template cluster ids

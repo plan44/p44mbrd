@@ -35,9 +35,8 @@ using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-static EmberAfClusterSpec gBridgedDeviceCommonClusters[] = {
-  { Descriptor::Id, CLUSTER_MASK_SERVER },
-  { BridgedDeviceBasicInformation::Id, CLUSTER_MASK_SERVER },
+static EmberAfClusterSpec gAllDevicesCommonClusters[] = {
+  { Descriptor::Id, CLUSTER_MASK_SERVER }
 };
 
 // MARK: - Device
@@ -56,8 +55,8 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
   // - internal
   mClusterDataVersionsP = nullptr; // we'll need
   mParentEndpointId = kInvalidEndpointId;
-  // - declare common bridged device clusters
-  useClusterTemplates(Span<EmberAfClusterSpec>(gBridgedDeviceCommonClusters));
+  // - declare common device clusters
+  useClusterTemplates(Span<EmberAfClusterSpec>(gAllDevicesCommonClusters));
 }
 
 
@@ -84,6 +83,11 @@ Device::~Device()
     delete mClusterDataVersionsP;
     mClusterDataVersionsP = nullptr;
   }
+  if (!mDeviceTypeList.empty()) {
+    delete mDeviceTypeList.data();
+    mDeviceTypeList = Span<EmberAfDeviceType>(); // empty
+  }
+  emberAfResetDynamicEndpointDeclaration(mEndpointDefinition);
 }
 
 
@@ -97,27 +101,48 @@ void Device::useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateCluste
 
 bool Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
 {
-  // save the device type list
-  mDeviceTypeList = aDeviceTypeList;
   // now finally populate the endpoint definition
-  // - generate the template clusterId list
-  size_t i = 0;
-  for (std::list<Span<EmberAfClusterSpec>>::iterator pos = mTemplateClusterSpecSpanList.begin(); pos!=mTemplateClusterSpecSpanList.end(); ++pos) {
-    i += pos->size();
+  size_t numtmpl = 0;
+  size_t numdts = aDeviceTypeList.size();
+  // unless we are a subdevice of a composed device:
+  // - we need to have a BridgedDeviceBasicInformation cluster
+  // - we need to have the DEVICE_TYPE_MA_BRIDGED_DEVICE device type
+  if (!isPartOfComposedDevice()) {
+    numtmpl++; // reserve room for BridgedDeviceBasicInformation cluster template spec (added below)
+    numdts++; // reserve room for DEVICE_TYPE_MA_BRIDGED_DEVICE
   }
-  EmberAfClusterSpec *tl = new EmberAfClusterSpec[i];
-  i = 0;
+  // count the other templates
+  for (std::list<Span<EmberAfClusterSpec>>::iterator pos = mTemplateClusterSpecSpanList.begin(); pos!=mTemplateClusterSpecSpanList.end(); ++pos) {
+    numtmpl += pos->size();
+  }
+  // single list for all template cluster specifications
+  EmberAfClusterSpec *tl = new EmberAfClusterSpec[numtmpl];
+  size_t i = 0;
+  // - add BridgedDeviceBasicInformation unless this is only part of a composed device
+  if (!isPartOfComposedDevice()) {
+    tl[i++] = { BridgedDeviceBasicInformation::Id, CLUSTER_MASK_SERVER };
+  }
+  // - add from lists
   for (std::list<Span<EmberAfClusterSpec>>::iterator pos = mTemplateClusterSpecSpanList.begin(); pos!=mTemplateClusterSpecSpanList.end(); ++pos) {
     for (size_t j=0; j<pos->size(); j++) {
-      tl[i] = *(pos->data()+j);
-      i++;
+      tl[i++] = *(pos->data()+j);
     }
+  }
+  // single list for device types
+  // - add DEVICE_TYPE_MA_BRIDGED_DEVICE unless this is only part of a composed device
+  mDeviceTypeList = Span<EmberAfDeviceType>(new EmberAfDeviceType[numdts], numdts);
+  i = 0;
+  if (!isPartOfComposedDevice()) {
+    mDeviceTypeList[i++] = { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT };
+  }
+  for(size_t j=0; j<aDeviceTypeList.size(); j++) {
+    mDeviceTypeList[i++] = aDeviceTypeList[j];
   }
   // set up the endpoint declaration
   CHIP_ERROR ret = emberAfSetupDynamicEndpointDeclaration(
     mEndpointDefinition,
     static_cast<chip::EndpointId>(emberAfFixedEndpointCount()-1), // last fixed endpoint is the template endpoint
-    Span<EmberAfClusterSpec>(tl, i)
+    Span<EmberAfClusterSpec>(tl, numtmpl)
   );
   if (ret!=CHIP_NO_ERROR) {
     OLOG(LOG_ERR, "emberAfSetupDynamicEndpointDeclaration failed with CHIP_ERROR=%" CHIP_ERROR_FORMAT, ret.Format());
@@ -441,12 +466,6 @@ bool emberAfIdentifyClusterTriggerEffectCallback(chip::app::CommandHandler*, chi
 
 // MARK: - ComposedDevice
 
-static const EmberAfDeviceType gComposedDeviceTypes[] = {
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_AGGREGATOR, DEVICE_VERSION_DEFAULT }
-};
-
-
 string ComposedDevice::description()
 {
   string s = inherited::description();
@@ -463,5 +482,5 @@ void ComposedDevice::addSubdevice(DevicePtr aSubDevice)
 
 bool ComposedDevice::finalizeDeviceDeclaration()
 {
-  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gComposedDeviceTypes));
+  return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>());
 }
