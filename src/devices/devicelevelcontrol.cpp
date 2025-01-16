@@ -470,8 +470,7 @@ Status DeviceLevelControl::handleWriteAttribute(ClusterId clusterId, chip::Attri
 // MARK: - DeviceDimmableLight
 
 static const EmberAfDeviceType gDimmableLightTypes[] = {
-  { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_DIMMABLE_LIGHT, DEVICE_VERSION_DEFAULT }
 };
 
 bool DeviceDimmableLight::finalizeDeviceDeclaration()
@@ -483,8 +482,7 @@ bool DeviceDimmableLight::finalizeDeviceDeclaration()
 // MARK: - DeviceDimmablePluginUnit
 
 static const EmberAfDeviceType gDimmablePluginTypes[] = {
-  { DEVICE_TYPE_MA_DIMMABLE_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_DIMMABLE_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT }
 };
 
 bool DeviceDimmablePluginUnit::finalizeDeviceDeclaration()

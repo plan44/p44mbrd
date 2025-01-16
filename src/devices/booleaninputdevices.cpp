@@ -76,8 +76,7 @@ void BoolanStateDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMod
 // MARK: - ContactSensorDevice
 
 static const EmberAfDeviceType gContactSensorTypes[] = {
-  { DEVICE_TYPE_MA_CONTACT_SENSOR, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_CONTACT_SENSOR, DEVICE_VERSION_DEFAULT }
 };
 
 ContactSensorDevice::ContactSensorDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
@@ -96,8 +95,7 @@ bool ContactSensorDevice::finalizeDeviceDeclaration()
 static EmberAfClusterSpec gOccupancySensingClusters[] = { { OccupancySensing::Id, CLUSTER_MASK_SERVER } };
 
 static const EmberAfDeviceType gOccupancySensingTypes[] = {
-  { DEVICE_TYPE_MA_OCCUPANCY_SENSOR, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_OCCUPANCY_SENSOR, DEVICE_VERSION_DEFAULT }
 };
 
 

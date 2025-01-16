@@ -130,8 +130,7 @@ string DeviceOnOff::description()
 // MARK: - DeviceOnOffLight
 
 static const EmberAfDeviceType gOnOffLightTypes[] = {
-  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_ON_OFF_LIGHT, DEVICE_VERSION_DEFAULT }
 };
 
 bool DeviceOnOffLight::finalizeDeviceDeclaration()
@@ -143,8 +142,7 @@ bool DeviceOnOffLight::finalizeDeviceDeclaration()
 // MARK: - DeviceOnOffPluginUnit
 
 static const EmberAfDeviceType gOnOffPluginTypes[] = {
-  { DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_ON_OFF_PLUGIN_UNIT, DEVICE_VERSION_DEFAULT }
 };
 
 bool DeviceOnOffPluginUnit::finalizeDeviceDeclaration()

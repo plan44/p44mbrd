@@ -37,8 +37,7 @@ using namespace Clusters;
 // MARK: - Temperature Sensor Device
 
 static const EmberAfDeviceType gTemperatureSensorTypes[] = {
-  { DEVICE_TYPE_MA_TEMP_SENSOR, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_TEMP_SENSOR, DEVICE_VERSION_DEFAULT }
 };
 
 static EmberAfClusterSpec gTemperatureSensorClusters[] = { { TemperatureMeasurement::Id, CLUSTER_MASK_SERVER } };
@@ -88,8 +87,7 @@ void DeviceTemperature::updateMeasuredValue(double aMeasuredValue, bool aIsValid
 // MARK: - Illumination Sensor Device
 
 static const EmberAfDeviceType gIlluminanceSensorTypes[] = {
-  { DEVICE_TYPE_MA_ILLUM_SENSOR, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_ILLUM_SENSOR, DEVICE_VERSION_DEFAULT }
 };
 
 static EmberAfClusterSpec gIlluminanceSensorClusters[] = { { IlluminanceMeasurement::Id, CLUSTER_MASK_SERVER } };
@@ -138,8 +136,7 @@ void DeviceIlluminance::updateMeasuredValue(double aMeasuredValue, bool aIsValid
 // MARK: - Humidity Sensor Device
 
 static const EmberAfDeviceType gRelativeHumiditySensorTypes[] = {
-  { DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_RELATIVE_HUMIDITY_SENSOR, DEVICE_VERSION_DEFAULT }
 };
 
 static EmberAfClusterSpec gRelativeHumiditySensorClusters[] = { { RelativeHumidityMeasurement::Id, CLUSTER_MASK_SERVER } };

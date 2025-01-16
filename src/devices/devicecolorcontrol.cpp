@@ -44,13 +44,11 @@ using namespace Clusters;
 #define COLOR_TEMP_DEFAULT (370) // 2500K = warm white
 
 static const EmberAfDeviceType gCTLightTypes[] = {
-  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT }
 };
 
 static const EmberAfDeviceType gColorLightTypes[] = {
-  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_COLOR_LIGHT, DEVICE_VERSION_DEFAULT }
 };
 
 static EmberAfClusterSpec gColorLightClusters[] = { { ColorControl::Id, CLUSTER_MASK_SERVER } };

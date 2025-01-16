@@ -36,8 +36,7 @@ using namespace Clusters;
 // MARK: - SwitchDevice
 
 static const EmberAfDeviceType gGenericSwitchTypes[] = {
-  { DEVICE_TYPE_MA_GENERIC_SWITCH, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_GENERIC_SWITCH, DEVICE_VERSION_DEFAULT }
 };
 
 static EmberAfClusterSpec gGenericSwitchClusters[] = { { Switch::Id, CLUSTER_MASK_SERVER } };

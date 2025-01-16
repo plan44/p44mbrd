@@ -39,8 +39,7 @@ using namespace Clusters;
 static EmberAfClusterSpec gWindowCoveringClusters[] = { { WindowCovering::Id, CLUSTER_MASK_SERVER } };
 
 static const EmberAfDeviceType gWindowCoveringTypes[] = {
-  { DEVICE_TYPE_MA_WINDOW_COVERING, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_WINDOW_COVERING, DEVICE_VERSION_DEFAULT }
 };
 
 DeviceWindowCovering::DeviceWindowCovering(WindowCoveringDelegate& aWindowCoveringDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :

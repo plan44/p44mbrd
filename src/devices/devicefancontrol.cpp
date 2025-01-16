@@ -42,8 +42,7 @@ static EmberAfClusterSpec gFanControlClusters[] = {
 };
 
 static const EmberAfDeviceType gFanDeviceTypes[] = {
-  { DEVICE_TYPE_MA_FAN_DEVICE, DEVICE_VERSION_DEFAULT },
-  { DEVICE_TYPE_MA_BRIDGED_DEVICE, DEVICE_VERSION_DEFAULT }
+  { DEVICE_TYPE_MA_FAN_DEVICE, DEVICE_VERSION_DEFAULT }
 };
 
 #define FAN_MULTISPEED 0 // if set, the (IMHO) redundant speed setting is enabled
