@@ -203,21 +203,21 @@ void Device::didGetInstalled()
 
 void Device::didBecomeOperational()
 {
-  OLOG(LOG_INFO,
-    "did become operational:"
-    "\n- (internal) UID: %s"
-    "\n- NodeLabel: %s"
-    "\n- VendorName: %s"
-    "\n- ProductName: %s"
-    "\n- SerialNumber: %s"
-    "\n- ProductURL: %s",
-    mDeviceInfoDelegate.endpointUID().c_str(),
-    ATTR_STRING(BridgedDeviceBasicInformation, NodeLabel, endpointId()).c_str(),
-    ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str(),
-    ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str(),
-    ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str(),
-    ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str()
-  );
+  OLOG(LOG_INFO, "did become operational: (internal) UID: %s", mDeviceInfoDelegate.endpointUID().c_str());
+  if (!isPartOfComposedDevice()) {
+    OLOG(LOG_INFO, "Bridged Device Basic Information:"
+      "\n- NodeLabel: %s"
+      "\n- VendorName: %s"
+      "\n- ProductName: %s"
+      "\n- SerialNumber: %s"
+      "\n- ProductURL: %s",
+      ATTR_STRING(BridgedDeviceBasicInformation, NodeLabel, endpointId()).c_str(),
+      ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str(),
+      ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str(),
+      ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId()).c_str(),
+      ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId()).c_str()
+    );
+  }
 }
 
 

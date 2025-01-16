@@ -130,26 +130,29 @@ void P44_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
 {
   JsonObjectPtr o;
   // propagate locally stored info to matter attributes
-  device().updateNodeLabel(mName, UpdateMode());
-  device().updateReachable(isReachable(), UpdateMode());
-  // TODO: implement
-  //device().updateZone(mZone, UpdateMode());
-  // get some more info, store in Attributes
-  if (aDeviceInfo->get("displayId", o)) {
-    SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId(), o->stringValue());
-  }
-  else {
-    // use UID as serial number, MUST NOT BE >32 chars
-    SET_ATTR_STRING_M(BridgedDeviceBasicInformation, SerialNumber, endpointId(), mBridgedDSUID); // abbreviate in the middle
-  }
-  if (aDeviceInfo->get("vendorName", o)) {
-    SET_ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId(), o->stringValue());
-  }
-  if (aDeviceInfo->get("model", o)) {
-    SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId(), o->stringValue());
-  }
-  if (aDeviceInfo->get("configURL", o)) {
-    SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId(), o->stringValue());
+  if (!device().isPartOfComposedDevice()) {
+    // only main devices have BridgedDeviceBasicInformation
+    device().updateNodeLabel(mName, UpdateMode());
+    device().updateReachable(isReachable(), UpdateMode());
+    // TODO: implement
+    //device().updateZone(mZone, UpdateMode());
+    // get some more info, store in Attributes
+    if (aDeviceInfo->get("displayId", o)) {
+      SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId(), o->stringValue());
+    }
+    else {
+      // use UID as serial number, MUST NOT BE >32 chars
+      SET_ATTR_STRING_M(BridgedDeviceBasicInformation, SerialNumber, endpointId(), mBridgedDSUID); // abbreviate in the middle
+    }
+    if (aDeviceInfo->get("vendorName", o)) {
+      SET_ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId(), o->stringValue());
+    }
+    if (aDeviceInfo->get("model", o)) {
+      SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId(), o->stringValue());
+    }
+    if (aDeviceInfo->get("configURL", o)) {
+      SET_ATTR_STRING(BridgedDeviceBasicInformation, ProductURL, endpointId(), o->stringValue());
+    }
   }
 }
 
@@ -177,17 +180,20 @@ bool P44_DeviceImpl::handleBridgeNotification(const string aNotification, JsonOb
 void P44_DeviceImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
 {
   JsonObjectPtr o;
-  if (aChangedProperties->get("active", o)) {
-    mActive = o->boolValue();
-    device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
-  }
-  if (aChangedProperties->get("name", o)) {
-    device().updateNodeLabel(o->stringValue(), UpdateMode(UpdateFlags::matter));
-  }
-  if (aChangedProperties->get("x-p44-bridgeable", o)) {
-    // note: non-bridgeable status just makes device unreachable
-    mBridgeable = o->boolValue();
-    device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+  if (!device().isPartOfComposedDevice()) {
+    // only main devices have BridgedDeviceBasicInformation
+    if (aChangedProperties->get("active", o)) {
+      mActive = o->boolValue();
+      device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+    }
+    if (aChangedProperties->get("name", o)) {
+      device().updateNodeLabel(o->stringValue(), UpdateMode(UpdateFlags::matter));
+    }
+    if (aChangedProperties->get("x-p44-bridgeable", o)) {
+      // note: non-bridgeable status just makes device unreachable
+      mBridgeable = o->boolValue();
+      device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+    }
   }
 }
 
