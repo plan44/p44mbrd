@@ -26,6 +26,13 @@
 
 /// @note: this is an excerpt from p44vdc/vdc_common/dsdefs.h
 
+typedef uint16_t DsZoneID; ///< Digital Strom Zone ID (= room ID)
+typedef enum {
+  zoneId_global = 0 ///< global (appartment, all rooms) zone
+} DsZones;
+
+typedef uint8_t SceneNo; ///< DS scene number
+
 /// color/class
 typedef enum {
   class_undefined = 0,

@@ -49,6 +49,9 @@ protected:
 
 public:
 
+  using UpdateMode = Device::UpdateMode;
+  using UpdateFlags = Device::UpdateFlags;
+
   /// must be called after BridgeAdapter::startup(), when adapter has started up and
   virtual void adapterStartupComplete(ErrorPtr aError, BridgeAdapter &aAdapter) = 0;
 
@@ -81,11 +84,11 @@ public:
 
   /// can be called to register an action
   /// @param aAction pointer to action object
-  virtual void addOrReplaceAction(ActionPtr aAction, BridgeAdapter& aAdapter) = 0;
+  virtual void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) = 0;
 
   /// can be called to register an endpoint list (for the actions cluster)
   /// @param aEndPointList pointer to endpoint list object
-  virtual void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, BridgeAdapter& aAdapter) = 0;
+  virtual void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) = 0;
 
   /// cause all adapters to identify bridge
   virtual void bridgeGlobalIdentify(int aDurationS) = 0;
@@ -114,6 +117,9 @@ private:
   BridgeMainDelegate* mBridgeMainDelegateP = nullptr;
 
 public:
+
+  using UpdateMode = Device::UpdateMode;
+  using UpdateFlags = Device::UpdateFlags;
 
   /// @name entry points **for the main application only**, to operate the adapter
   /// @{
@@ -175,6 +181,10 @@ public:
   ///   do not work.
   virtual void setBridgeRunning(bool aRunning) = 0;
 
+  /// @brief is called when all initial devices are installed
+  ///   (and thus have a valid endpointID and can access attributes)
+  virtual void initialDevicesInstalled() = 0;
+
   /// @brief is called when bridge should identify itself. This is the case whenever a
   ///   device is not able to identify itself individually.
   /// @param aDurationS >0: number of seconds the identification action
@@ -230,11 +240,11 @@ public:
 
   /// can be called to register an action
   /// @param aAction pointer to action object
-  void addOrReplaceAction(ActionPtr aAction);
+  void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode);
 
   /// can be called to register an endpoint list (for the actions cluster)
   /// @param aEndPointList pointer to endpoint list object
-  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList);
+  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode);
 
   /// @}
 

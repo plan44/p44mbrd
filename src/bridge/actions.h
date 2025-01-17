@@ -72,7 +72,7 @@ public:
   inline uint16_t getSupportedCommands() { return mSupportedCommands; };
 
   /// invoke action
-  void invoke(Optional<uint16_t> aTransitionTime);
+  virtual void invoke(Optional<uint16_t> aTransitionTime);
 
 private:
   std::string mName;

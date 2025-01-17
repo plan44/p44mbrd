@@ -55,7 +55,6 @@ class CC_DeviceImpl :
   /// @{
 
   string mName; ///< current CC side name of the device
-  string mZone; ///< current CC side name of the zone
 
   /// @}
 
@@ -76,9 +75,6 @@ public:
 
   virtual string name() const override;
   virtual bool changeName(const string aNewName) override;
-
-  virtual string zone() const override;
-  //virtual bool changeZone(const string aNewZone) override; // TODO: implement
 
   /// @}
 

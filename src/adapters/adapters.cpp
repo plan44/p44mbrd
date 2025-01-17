@@ -110,13 +110,13 @@ ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable)
 }
 
 
-void BridgeAdapter::addOrReplaceAction(ActionPtr aAction)
+void BridgeAdapter::addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode)
 {
-  return mBridgeMainDelegateP->addOrReplaceAction(aAction, *this);
+  return mBridgeMainDelegateP->addOrReplaceAction(aAction, aUpdateMode, *this);
 }
 
 
-void BridgeAdapter::addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList)
+void BridgeAdapter::addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode)
 {
-  return mBridgeMainDelegateP->addOrReplaceEndpointsList(aEndPointList, *this);
+  return mBridgeMainDelegateP->addOrReplaceEndpointsList(aEndPointList, aUpdateMode, *this);
 }

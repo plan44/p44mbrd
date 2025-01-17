@@ -107,6 +107,10 @@ public:
   /// @param aRunning true when matter bridge is running
   virtual void setBridgeRunning(bool aRunning) override;
 
+  /// @brief is called when all initial devices are installed
+  ///   (and thus have a valid endpointID and can access attributes)
+  virtual void initialDevicesInstalled() override {};
+
   /// @brief is called when bridge should identify itself. This is the case whenever a
   ///   device is not able to identify itself individually.
   /// @param aDurationS >0: number of seconds the identification action

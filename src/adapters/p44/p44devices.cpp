@@ -38,7 +38,8 @@ using namespace Clusters;
 
 P44_DeviceImpl::P44_DeviceImpl() :
   mBridgeable(true), // assume bridgeable, otherwise device wouldn't be instantiated
-  mActive(false) // not yet active
+  mActive(false), // not yet active
+  mZoneId(zoneId_global) // no zoneID known yet
 {
 }
 
@@ -90,10 +91,14 @@ bool P44_DeviceImpl::changeName(const string aNewName)
 }
 
 
-string P44_DeviceImpl::zone() const
+/* TODO: remove later
+string P44_DeviceImpl::zoneName() const
 {
-  return mZone;
+  P44_BridgeImpl::ZoneMap::iterator z = P44_BridgeImpl::adapter().mZoneMap.find(mZoneId);
+  if (z==P44_BridgeImpl::adapter().mZoneMap.end()) return "<unknown>";
+  return z->second;
 }
+ */
 
 
 // MARK: P44 specific methods
@@ -109,11 +114,6 @@ void P44_DeviceImpl::initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInp
   // - default name
   if (aDeviceInfo->get("name", o)) {
     mName = o->stringValue();
-    // Note: propagate only after device is installed
-  }
-  // - default zone name
-  if (aDeviceInfo->get("x-p44-zonename", o)) {
-    mZone = o->stringValue();
     // Note: propagate only after device is installed
   }
   // - initial reachability
@@ -134,8 +134,7 @@ void P44_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
     // only main devices have BridgedDeviceBasicInformation
     device().updateNodeLabel(mName, UpdateMode());
     device().updateReachable(isReachable(), UpdateMode());
-    // TODO: implement
-    //device().updateZone(mZone, UpdateMode());
+    updateZoneInfo(aDeviceInfo, UpdateMode());
     // get some more info, store in Attributes
     if (aDeviceInfo->get("displayId", o)) {
       SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId(), o->stringValue());
@@ -177,10 +176,35 @@ bool P44_DeviceImpl::handleBridgeNotification(const string aNotification, JsonOb
 }
 
 
+void P44_DeviceImpl::updateZoneInfo(JsonObjectPtr aDeviceInfo, UpdateMode aUpdateMode)
+{
+  JsonObjectPtr o;
+  if (aDeviceInfo->get("zoneID", o)) {
+    mZoneId = static_cast<DsZoneID>(o->int32Value());
+    if (mZoneId!=zoneId_global) {
+      // - assign or update zonename
+      string zonename;
+      bool explicitName = false;
+      if (aDeviceInfo->get("x-p44-zonename", o)) {
+        zonename = o->stringValue();
+        explicitName = true;
+      }
+      else {
+        zonename = string_format("Zone_%d", mZoneId);
+      }
+      P44_BridgeImpl::adapter().addOrUpdateZone(mZoneId, zonename, explicitName, aUpdateMode);
+    }
+  }
+}
+
+
+
 void P44_DeviceImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
 {
   JsonObjectPtr o;
   if (!device().isPartOfComposedDevice()) {
+    // zone change
+    updateZoneInfo(aChangedProperties, UpdateMode(UpdateFlags::matter));
     // only main devices have BridgedDeviceBasicInformation
     if (aChangedProperties->get("active", o)) {
       mActive = o->boolValue();

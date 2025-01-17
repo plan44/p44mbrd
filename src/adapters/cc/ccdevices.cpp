@@ -99,12 +99,6 @@ bool CC_DeviceImpl::changeName(const string aNewName)
 }
 
 
-string CC_DeviceImpl::zone() const
-{
-  return mZone;
-}
-
-
 int CC_DeviceImpl::get_item_id()
 {
   return item_id;

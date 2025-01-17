@@ -568,6 +568,10 @@ public:
         mDevices[i]->didGetInstalled();
       }
     }
+    // inform the adapters of installed devices
+    for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
+      (*pos)->initialDevicesInstalled();
+    }
   }
 
 
@@ -734,17 +738,21 @@ public:
   }
 
 
-  void addOrReplaceAction(ActionPtr aAction, BridgeAdapter& aAdapter) override
+  void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) override
   {
     mActions[aAction->getActionId()] = aAction;
-    MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::ActionList::Id);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::ActionList::Id);
+    }
   }
 
 
-  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, BridgeAdapter& aAdapter) override
+  void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) override
   {
     mEndPointLists[aEndPointList->GetEndpointListId()] = aEndPointList;
-    MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::EndpointLists::Id);
+    if (aUpdateMode.Has(UpdateFlags::matter)) {
+      MatterReportingAttributeChangeCallback(MATTER_BRIDGE_ENDPOINT, Actions::Id, Actions::Attributes::EndpointLists::Id);
+    }
   }
 
 

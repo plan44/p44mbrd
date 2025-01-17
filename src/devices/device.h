@@ -66,6 +66,16 @@ public:
 
 typedef std::list<DevicePtr> DevicesList;
 
+template <class T>
+class OwningSpan : public Span<T>
+{
+public:
+  ~OwningSpan() {
+    if (!this->empty()) {
+      delete this->data();
+    }
+  };
+};
 
 
 // @brief delegate for obtaining device information
@@ -100,14 +110,6 @@ public:
   /// @note this is called when matter side receives a nodeLabel change. Implementation can reject the change.
   /// @return true if name could be changed in the bridged device
   virtual bool changeName(const string aNewName) { return false; /* not changeable from matter side by default */ }
-
-  /// @return name of the zone (area, room) the device is in as seen at the far end of the bridge
-  virtual string zone() const = 0;
-
-  /// Request to change the zone
-  /// @return true if zone could be changed in the bridged device
-  virtual bool changeZone(const string aNewZone) { return false; /* not changeable from matter side by default */ }
-
 };
 
 
@@ -140,7 +142,6 @@ class Device : public p44::P44LoggingObj
   /// @{
   bool mReachable; ///< currently reported reachable state, usually synchronized with actual hardware device reachability state
   string mNodeLabel; ///< currently reported node label, usually synchronized with actual device name
-  string mZone;
   /// @}
 
 public:
@@ -226,7 +227,6 @@ public:
   inline void SetDynamicEndpointIdx(chip::EndpointId aIdx) { mDynamicEndpointIdx = aIdx; };
   inline void SetParentEndpointId(chip::EndpointId aID) { mParentEndpointId = aID; };
   inline void initNodeLabel(const string aName) { mNodeLabel = aName; };
-  inline void initZone(string aZone) { mZone = aZone; };
 
   /// @brief Set this device to behave as part of a composed device
   inline void flagAsPartOfComposedDevice() { mPartOfComposedDevice = true; };
@@ -276,7 +276,7 @@ protected:
   ///   clusters over the class hierachy, and preventing re-declaration of clusters and attributes that are
   ///   already declared in ZAP. Together with dynamic attribute storage for RAM and NVRAM attributes,
   ///   this reduces setup of dynamic endpoints to a few lines, ensuring consistency with the ZAP definitions automatically.
-  /// @param aTemplateClusterIdList a list of clusterIds. These must be present in the last fixed endpoint
+  /// @param aTemplateClusterSpecList a list of clusterIds. These must be present in the last fixed endpoint
   ///   (which must be defined in ZAP to generate accessors and cluster implementation, and contains all clusters
   ///   of all to-be-bridged devices. This template endpoint must be set to disabled)
   void useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateClusterSpecList);

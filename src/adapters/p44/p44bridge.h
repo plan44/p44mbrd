@@ -51,6 +51,9 @@ class P44_BridgeImpl : public BridgeAdapter, public P44LoggingObj
 
 public:
 
+  typedef std::map<DsZoneID, string> ZoneMap;
+  ZoneMap mZoneMap;
+
   /// singleton getter / on demand constructor for a P44 adapter
   static P44_BridgeImpl& adapter();
 
@@ -63,6 +66,19 @@ public:
 
   /// @return the P44 bridge API for this adapter
   P44BridgeApi& api() { return mBridgeApi; };
+
+  /// add or update zone info
+  /// @param aZoneID DS ZoneID
+  /// @param aZoneName the name of the zone
+  /// @param aOverwriteName if set and the zone already exists, overwrite existing name
+  void addOrUpdateZone(DsZoneID aZoneID, const string aZoneName, bool aOverwriteName, UpdateMode aUpdateMode);
+
+  /// update zone info dependencies (actions, mostly)
+  /// @param aZoneID the zone to update
+  void updateZoneDependencies(DsZoneID aZoneID, UpdateMode aUpdateMode);
+
+  /// update all zone dependencies
+  void updateAllZoneDependencies(UpdateMode aUpdateMode);
 
   /// @name BridgeAdapter implementation
   /// @{
@@ -81,6 +97,7 @@ public:
 
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }
+
 
   /// @brief start the P44 bridge adapter implementation
   /// The adapter should query its API, discover devices to bridge to matter, instantiate them,
@@ -101,6 +118,10 @@ public:
   /// @brief update matter bridge running status
   /// @param aRunning true when matter bridge is running
   virtual void setBridgeRunning(bool aRunning) override;
+
+  /// @brief is called when all initial devices are installed
+  ///   (and thus have a valid endpointID and can access attributes)
+  virtual void initialDevicesInstalled() override;
 
   /// @brief is called when bridge should identify itself. This is the case whenever a
   ///   device is not able to identify itself individually.
@@ -134,6 +155,33 @@ private:
   void newDeviceInfoQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg);
 
 };
+
+
+class P44SceneAction : public Action
+{
+  typedef Action inherited;
+
+  DsZoneID mZoneId;
+  DsGroup mGroup;
+  SceneNo mSceneNo;
+
+public:
+
+  P44SceneAction(
+    DsZoneID aZoneID, DsGroup aGroup, SceneNo aSceneNo,
+    uint16_t actionId, std::string name, chip::app::Clusters::Actions::ActionTypeEnum type, uint16_t endpointListId,
+    uint16_t supportedCommands, chip::app::Clusters::Actions::ActionStateEnum status
+  ) :
+    inherited(actionId, name, type, endpointListId, supportedCommands, status),
+    mZoneId(aZoneID),
+    mGroup(aGroup),
+    mSceneNo(aSceneNo)
+  {};
+
+  virtual void invoke(Optional<uint16_t> aTransitionTime) override;
+
+};
+
 
 #endif // P44_ADAPTERS
 

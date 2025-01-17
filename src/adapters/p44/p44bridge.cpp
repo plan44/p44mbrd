@@ -71,6 +71,15 @@ void P44_BridgeImpl::setBridgeRunning(bool aRunning)
 }
 
 
+void P44_BridgeImpl::initialDevicesInstalled()
+{
+  // now that all devices are there, we can create zones
+  updateAllZoneDependencies(UpdateMode(UpdateFlags::forced));
+}
+
+
+
+
 void P44_BridgeImpl::identifyBridge(int aDurationS)
 {
   // (re)start or stop identify in bridge itself
@@ -102,6 +111,19 @@ bool P44_BridgeImpl::hasModelFeature(JsonObjectPtr aDeviceInfo, const char* aMod
     }
   }
   return false;
+}
+
+
+// MARK: zone handling
+
+void P44_BridgeImpl::addOrUpdateZone(DsZoneID aZoneID, const string aZoneName, bool aOverwriteName, UpdateMode aUpdateMode)
+{
+  ZoneMap::iterator z = mZoneMap.find(aZoneID);
+  if (z==mZoneMap.end() || (aOverwriteName && aZoneName!=z->second)) {
+    // new entry or explicit zone name change
+    mZoneMap[aZoneID] = aZoneName;
+    updateZoneDependencies(aZoneID, aUpdateMode);
+  }
 }
 
 
@@ -156,7 +178,8 @@ void P44_BridgeImpl::updateBridgeStatus(bool aStarted)
 
 
 #define NEEDED_DEVICE_PROPERTIES \
-  "{\"dSUID\":null, \"name\":null, \"function\": null, \"x-p44-zonename\": null, " \
+  "{\"dSUID\":null, \"name\":null, \"function\": null, " \
+  "\"zoneID\": null, \"x-p44-zonename\": null, " \
   "\"outputDescription\":null, \"outputSettings\": null, \"modelFeatures\":null, " \
   "\"scenes\": { \"0\":null, \"5\":null }, " \
   "\"vendorName\":null, \"model\":null, \"configURL\":null, \"displayId\":null, " \
@@ -556,6 +579,8 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
       }
     }
   }
+  // create a endpoint list for each known zone
+  /*
   // TODO: actually derive actions from rooms and scenes
   // register one endpoint list
   EndpointListInfoPtr endpointList = new EndpointListInfo(
@@ -564,7 +589,7 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
     Actions::EndpointListTypeEnum::kOther
   );
   endpointList->addEndpoint(1); // FIXME: get action endpoint id from somewhere reliableb
-  addOrReplaceEndpointsList(endpointList);
+  addOrReplaceEndpointsList(endpointList, UpdateMode());
   // register one test action
   ActionPtr testAction = new Action(
     0x4242, // actionId,
@@ -574,10 +599,79 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
     0x03, // instant and instantWithTransition // FIXME: use names
     Actions::ActionStateEnum::kInactive // FIXME: real value
   );
-  addOrReplaceAction(testAction);
+  addOrReplaceAction(testAction, UpdateMode());
+  */
   // report started (ONCE!)
   startupComplete(ErrorPtr());
 }
+
+
+// MARK: - Zones and Actions
+
+void P44_BridgeImpl::updateAllZoneDependencies(UpdateMode aUpdateMode)
+{
+  for (ZoneMap::iterator zpos = mZoneMap.begin(); zpos!=mZoneMap.end(); ++zpos) {
+    updateZoneDependencies(zpos->first, aUpdateMode);
+  }
+}
+
+
+void P44_BridgeImpl::updateZoneDependencies(DsZoneID aZoneID, UpdateMode aUpdateMode)
+{
+  if (aUpdateMode.Has(UpdateFlags::matter) || aUpdateMode.Has(UpdateFlags::forced)) {
+    ZoneMap::iterator zpos = mZoneMap.find(aZoneID);
+    if (zpos!=mZoneMap.end()) {
+      // create an endpoint list of devices in this zone
+      EndpointListInfoPtr endpointList = new EndpointListInfo(
+        aZoneID, // endpoint list ID is compatible with DS zone ID (both uint16)
+        zpos->second, // zone name
+        Actions::EndpointListTypeEnum::kRoom // kRoom means device can be in only one, whereas a device can be in multiple kZones
+      );
+      for (DeviceUIDMap::iterator pos = mDeviceUIDMap.begin(); pos!=mDeviceUIDMap.end(); ++pos) {
+        if (P44_DeviceImpl::impl(pos->second)->zoneId()==aZoneID) {
+          endpointList->addEndpoint(pos->second->endpointId());
+        }
+      }
+      addOrReplaceEndpointsList(endpointList, aUpdateMode);
+      // TODO: actually implement the action
+      // FIXME: for now, just generate a deep-off action with same ID as the room
+      // register one test action
+      ActionPtr deepOffAction = new P44SceneAction(
+        aZoneID, // the zone to act
+        group_undefined, // deep off affects all
+        68, // DEEP_OFF - deep off scene
+        aZoneID, // use the zoneID==actionID
+        "deep off", // FIXME: better name
+        Actions::ActionTypeEnum::kScene,
+        aZoneID, // reference the endpointlist for the zone
+        0x03, // instant and instantWithTransition // FIXME: use names
+        Actions::ActionStateEnum::kInactive // FIXME: real value
+      );
+      addOrReplaceAction(deepOffAction, aUpdateMode);
+      // TODO: generate more different actions for different scenes
+      // - generate actions for those groups we have devices for (light, shadow)
+      // - need to find a way to generate IDs that do not collide with zone ids
+    }  
+  }
+}
+
+
+void P44SceneAction::invoke(Optional<uint16_t> aTransitionTime)
+{
+  // TODO: check: is aTransitionTime time really 1/10th seconds?
+  // { "notification":"callScene", "zone_id":0, "group":1, "scene":5, "force":false, "transitionTime":5.5 }
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("zone_id", JsonObject::newInt32(mZoneId));
+  params->add("group", JsonObject::newInt32(mGroup));
+  params->add("scene", JsonObject::newInt32(mSceneNo));
+  params->add("force", JsonObject::newBool(false));
+  if (aTransitionTime.HasValue()) {
+    params->add("transitionTime", params->newDouble((double)aTransitionTime.Value()/10));
+  }
+  P44_BridgeImpl::adapter().api().notify("callScene", params);
+}
+
+
 
 // MARK: - reconnect bridge API
 

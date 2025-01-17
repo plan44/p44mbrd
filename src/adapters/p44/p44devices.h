@@ -59,7 +59,7 @@ class P44_DeviceImpl :
   bool mBridgeable; ///< device considered bridgeable from P44 side
   bool mActive; ///< device active (hardware reachable) from P44 side
   string mName; ///< current P44 side name of the device
-  string mZone; ///< current P44 side name of the zone
+  DsZoneID mZoneId; ///< P44 side zone ID
 
   /// @}
 
@@ -80,8 +80,7 @@ public:
   virtual string name() const override;
   virtual bool changeName(const string aNewName) override;
 
-  virtual string zone() const override;
-  //virtual bool changeZone(const string aNewZone) override; // TODO: implement
+  inline DsZoneID zoneId() { return mZoneId; }
 
   /// @}
 
@@ -118,6 +117,9 @@ protected:
   ///   and CAN ACCESS ATTRIBUTES.
   /// @param aDeviceInfo the JSON object for the entire bridge-side device
   virtual void updateBridgedInfo(JsonObjectPtr aDeviceInfo);
+
+  /// @param aDeviceInfo device-level properties
+  void updateZoneInfo(JsonObjectPtr aDeviceInfo, UpdateMode aUpdateMode);
 
   /// @}
 
