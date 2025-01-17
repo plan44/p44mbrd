@@ -173,19 +173,6 @@
 		ED36DB64286DD2CE00CA28EC /* TxtFields.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAED286DD2CD00CA28EC /* TxtFields.cpp */; };
 		ED36DB65286DD2CE00CA28EC /* Discovery_ImplPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAEF286DD2CD00CA28EC /* Discovery_ImplPlatform.cpp */; };
 		ED36DB6B286DD2CE00CA28EC /* ServiceNaming.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAFD286DD2CD00CA28EC /* ServiceNaming.cpp */; };
-		ED36DB6E286DD2CE00CA28EC /* IP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB08286DD2CE00CA28EC /* IP.cpp */; };
-		ED36DB72286DD2CE00CA28EC /* QueryResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB0F286DD2CE00CA28EC /* QueryResponder.cpp */; };
-		ED36DB73286DD2CE00CA28EC /* ResourceRecord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB16286DD2CE00CA28EC /* ResourceRecord.cpp */; };
-		ED36DB74286DD2CE00CA28EC /* IP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB1A286DD2CE00CA28EC /* IP.cpp */; };
-		ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB29286DD2CE00CA28EC /* QName.cpp */; };
-		ED36DB7F286DD2CE00CA28EC /* RecordWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB35286DD2CE00CA28EC /* RecordWriter.cpp */; };
-		ED36DB86286DD2CE00CA28EC /* ResponseSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB48286DD2CE00CA28EC /* ResponseSender.cpp */; };
-		ED36DB87286DD2CE00CA28EC /* RecordData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB49286DD2CE00CA28EC /* RecordData.cpp */; };
-		ED36DB88286DD2CE00CA28EC /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB4B286DD2CE00CA28EC /* Parser.cpp */; };
-		ED36DB89286DD2CE00CA28EC /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB4D286DD2CE00CA28EC /* Server.cpp */; };
-		ED36DB8B286DD2CE00CA28EC /* MinimalMdnsServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB51286DD2CE00CA28EC /* MinimalMdnsServer.cpp */; };
-		ED36DB8D286DD2CE00CA28EC /* IncrementalResolve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB53286DD2CE00CA28EC /* IncrementalResolve.cpp */; };
-		ED36DB8E286DD2CE00CA28EC /* ActiveResolveAttempts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB55286DD2CE00CA28EC /* ActiveResolveAttempts.cpp */; };
 		ED36DB8F286DD2CE00CA28EC /* ASN1Reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB57286DD2CE00CA28EC /* ASN1Reader.cpp */; };
 		ED36DB90286DD2CE00CA28EC /* ASN1Writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB5A286DD2CE00CA28EC /* ASN1Writer.cpp */; };
 		ED36DB92286DD2CE00CA28EC /* ASN1OID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB60286DD2CE00CA28EC /* ASN1OID.cpp */; };
@@ -332,12 +319,9 @@
 		ED3B0CCA2CEE1DEE00C80694 /* reporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC72CEE1DEE00C80694 /* reporting.cpp */; };
 		ED3B0CCB2CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC92CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp */; };
 		ED3B0CCD2CEE1EE400C80694 /* cluster-init-callback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CCC2CEE1EE400C80694 /* cluster-init-callback.cpp */; };
-		ED3B0CCE2CEE267900C80694 /* DeviceInstanceInfoProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC85286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.cpp */; };
 		ED3B0CD12CEE2C2700C80694 /* CommandResponseSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CD02CEE2C2700C80694 /* CommandResponseSender.cpp */; };
 		ED3B0E8F2CF4F93300C80694 /* fixed-label-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0E8D2CF4F93300C80694 /* fixed-label-server.cpp */; };
 		ED60FD0428BF88EE00FE950E /* chip_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0228BF88ED00FE950E /* chip_error.cpp */; };
-		ED60FD0B28BFCA9C00FE950E /* AddressPolicy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0628BFCA9B00FE950E /* AddressPolicy.cpp */; };
-		ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */; };
 		ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0E28C7D0B900FE950E /* extutils.cpp */; };
 		ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */; };
 		ED692E9D2A9782A700A378D7 /* switchdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED692E9C2A9782A700A378D7 /* switchdevices.cpp */; };
@@ -381,7 +365,9 @@
 		EDCA04492A7AB1A200225B0A /* ccbridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA04462A7AB1A200225B0A /* ccbridge.cpp */; };
 		EDCA044D2A81214200225B0A /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA044B2A81214200225B0A /* actions.cpp */; };
 		EDCA29572A79135200465C00 /* devicewindowcovering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED072F602A69BA22007BBF71 /* devicewindowcovering.cpp */; };
-		EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F4A0288B4C6500A82418 /* QNameString.cpp */; };
+		EDD0DAF52D3AC4DF00E4362C /* ResolverProxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDD0DAF42D3AC4DF00E4362C /* ResolverProxy.cpp */; };
+		EDD0DAFC2D3AC72C00E4362C /* Advertiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDD0DAFA2D3AC72C00E4362C /* Advertiser.cpp */; };
+		EDD0DAFD2D3AC72C00E4362C /* Resolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDD0DAFB2D3AC72C00E4362C /* Resolver.cpp */; };
 		EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F52D289AA96000A82418 /* groups-server.cpp */; };
 		EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D7EB286DCDA300CA28EC /* on-off-server.cpp */; };
 		EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */; };
@@ -849,55 +835,11 @@
 		ED36DAED286DD2CD00CA28EC /* TxtFields.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TxtFields.cpp; sourceTree = "<group>"; };
 		ED36DAEF286DD2CD00CA28EC /* Discovery_ImplPlatform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Discovery_ImplPlatform.cpp; sourceTree = "<group>"; };
 		ED36DAF0286DD2CD00CA28EC /* ServiceNaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceNaming.h; sourceTree = "<group>"; };
-		ED36DAFC286DD2CD00CA28EC /* ActiveResolveAttempts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveResolveAttempts.h; sourceTree = "<group>"; };
 		ED36DAFD286DD2CD00CA28EC /* ServiceNaming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServiceNaming.cpp; sourceTree = "<group>"; };
 		ED36DAFE286DD2CD00CA28EC /* TxtFields.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TxtFields.h; sourceTree = "<group>"; };
 		ED36DAFF286DD2CE00CA28EC /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		ED36DB01286DD2CE00CA28EC /* ResolverProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResolverProxy.h; sourceTree = "<group>"; };
-		ED36DB05286DD2CE00CA28EC /* Srv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Srv.h; sourceTree = "<group>"; };
-		ED36DB07286DD2CE00CA28EC /* RecordResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordResponder.h; sourceTree = "<group>"; };
-		ED36DB08286DD2CE00CA28EC /* IP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IP.cpp; sourceTree = "<group>"; };
-		ED36DB09286DD2CE00CA28EC /* QueryResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueryResponder.h; sourceTree = "<group>"; };
-		ED36DB0F286DD2CE00CA28EC /* QueryResponder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QueryResponder.cpp; sourceTree = "<group>"; };
-		ED36DB10286DD2CE00CA28EC /* Ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ptr.h; sourceTree = "<group>"; };
-		ED36DB11286DD2CE00CA28EC /* IP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IP.h; sourceTree = "<group>"; };
-		ED36DB12286DD2CE00CA28EC /* ReplyFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReplyFilter.h; sourceTree = "<group>"; };
-		ED36DB13286DD2CE00CA28EC /* Responder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Responder.h; sourceTree = "<group>"; };
-		ED36DB14286DD2CE00CA28EC /* Txt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Txt.h; sourceTree = "<group>"; };
-		ED36DB16286DD2CE00CA28EC /* ResourceRecord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceRecord.cpp; sourceTree = "<group>"; };
-		ED36DB17286DD2CE00CA28EC /* Srv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Srv.h; sourceTree = "<group>"; };
-		ED36DB19286DD2CE00CA28EC /* ResourceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResourceRecord.h; sourceTree = "<group>"; };
-		ED36DB1A286DD2CE00CA28EC /* IP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IP.cpp; sourceTree = "<group>"; };
-		ED36DB22286DD2CE00CA28EC /* Ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ptr.h; sourceTree = "<group>"; };
-		ED36DB23286DD2CE00CA28EC /* IP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IP.h; sourceTree = "<group>"; };
-		ED36DB24286DD2CE00CA28EC /* Txt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Txt.h; sourceTree = "<group>"; };
-		ED36DB26286DD2CE00CA28EC /* DnsHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DnsHeader.h; sourceTree = "<group>"; };
-		ED36DB27286DD2CE00CA28EC /* RecordWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordWriter.h; sourceTree = "<group>"; };
-		ED36DB28286DD2CE00CA28EC /* QName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QName.h; sourceTree = "<group>"; };
-		ED36DB29286DD2CE00CA28EC /* QName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QName.cpp; sourceTree = "<group>"; };
-		ED36DB32286DD2CE00CA28EC /* BytesRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BytesRange.h; sourceTree = "<group>"; };
-		ED36DB33286DD2CE00CA28EC /* FlatAllocatedQName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatAllocatedQName.h; sourceTree = "<group>"; };
-		ED36DB34286DD2CE00CA28EC /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
-		ED36DB35286DD2CE00CA28EC /* RecordWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecordWriter.cpp; sourceTree = "<group>"; };
-		ED36DB36286DD2CE00CA28EC /* HeapQName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeapQName.h; sourceTree = "<group>"; };
-		ED36DB38286DD2CE00CA28EC /* Query.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Query.h; sourceTree = "<group>"; };
-		ED36DB3A286DD2CE00CA28EC /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
-		ED36DB43286DD2CE00CA28EC /* QueryReplyFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueryReplyFilter.h; sourceTree = "<group>"; };
-		ED36DB45286DD2CE00CA28EC /* ResponseBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResponseBuilder.h; sourceTree = "<group>"; };
-		ED36DB46286DD2CE00CA28EC /* ResponseSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResponseSender.h; sourceTree = "<group>"; };
-		ED36DB47286DD2CE00CA28EC /* QueryBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueryBuilder.h; sourceTree = "<group>"; };
-		ED36DB48286DD2CE00CA28EC /* ResponseSender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResponseSender.cpp; sourceTree = "<group>"; };
-		ED36DB49286DD2CE00CA28EC /* RecordData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecordData.cpp; sourceTree = "<group>"; };
-		ED36DB4A286DD2CE00CA28EC /* Server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Server.h; sourceTree = "<group>"; };
-		ED36DB4B286DD2CE00CA28EC /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
-		ED36DB4C286DD2CE00CA28EC /* RecordData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordData.h; sourceTree = "<group>"; };
-		ED36DB4D286DD2CE00CA28EC /* Server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Server.cpp; sourceTree = "<group>"; };
-		ED36DB4E286DD2CE00CA28EC /* IncrementalResolve.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IncrementalResolve.h; sourceTree = "<group>"; };
 		ED36DB4F286DD2CE00CA28EC /* Resolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Resolver.h; sourceTree = "<group>"; };
-		ED36DB51286DD2CE00CA28EC /* MinimalMdnsServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MinimalMdnsServer.cpp; sourceTree = "<group>"; };
-		ED36DB53286DD2CE00CA28EC /* IncrementalResolve.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IncrementalResolve.cpp; sourceTree = "<group>"; };
-		ED36DB54286DD2CE00CA28EC /* MinimalMdnsServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinimalMdnsServer.h; sourceTree = "<group>"; };
-		ED36DB55286DD2CE00CA28EC /* ActiveResolveAttempts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActiveResolveAttempts.cpp; sourceTree = "<group>"; };
 		ED36DB57286DD2CE00CA28EC /* ASN1Reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASN1Reader.cpp; sourceTree = "<group>"; };
 		ED36DB59286DD2CE00CA28EC /* ASN1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASN1.h; sourceTree = "<group>"; };
 		ED36DB5A286DD2CE00CA28EC /* ASN1Writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASN1Writer.cpp; sourceTree = "<group>"; };
@@ -1313,12 +1255,6 @@
 		ED5C379A2B5ED5030081B309 /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		ED60FD0228BF88ED00FE950E /* chip_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chip_error.cpp; sourceTree = "<group>"; };
 		ED60FD0328BF88ED00FE950E /* chip_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chip_error.h; sourceTree = "<group>"; };
-		ED60FD0528BFCA9B00FE950E /* ServerIPAddresses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerIPAddresses.h; sourceTree = "<group>"; };
-		ED60FD0628BFCA9B00FE950E /* AddressPolicy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddressPolicy.cpp; sourceTree = "<group>"; };
-		ED60FD0728BFCA9B00FE950E /* ListenIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListenIterator.h; sourceTree = "<group>"; };
-		ED60FD0828BFCA9B00FE950E /* AddressPolicy_DefaultImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressPolicy_DefaultImpl.h; sourceTree = "<group>"; };
-		ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddressPolicy_DefaultImpl.cpp; sourceTree = "<group>"; };
-		ED60FD0A28BFCA9C00FE950E /* AddressPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressPolicy.h; sourceTree = "<group>"; };
 		ED60FD0E28C7D0B900FE950E /* extutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extutils.cpp; sourceTree = "<group>"; };
 		ED60FD0F28C7D0BA00FE950E /* extutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = extutils.hpp; sourceTree = "<group>"; };
 		ED690B52286DC79500069215 /* p44mbrd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = p44mbrd; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1406,8 +1342,10 @@
 		EDCA044F2A82681E00225B0A /* p44deviceattestationprovider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = p44deviceattestationprovider.cpp; sourceTree = "<group>"; };
 		EDCA04502A82681E00225B0A /* p44deviceattestationprovider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44deviceattestationprovider.h; sourceTree = "<group>"; };
 		EDCA29592A7A7C9100465C00 /* .clang-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".clang-format"; sourceTree = "<group>"; };
-		EDF3F4A0288B4C6500A82418 /* QNameString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QNameString.cpp; sourceTree = "<group>"; };
-		EDF3F4A1288B4C6500A82418 /* QNameString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QNameString.h; sourceTree = "<group>"; };
+		EDD0DAF42D3AC4DF00E4362C /* ResolverProxy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ResolverProxy.cpp; sourceTree = "<group>"; };
+		EDD0DAFA2D3AC72C00E4362C /* Advertiser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Advertiser.cpp; sourceTree = "<group>"; };
+		EDD0DAFB2D3AC72C00E4362C /* Resolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Resolver.cpp; sourceTree = "<group>"; };
+		EDD0DAFE2D3AC8A100E4362C /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
 		EDF3F4A328916F9A00A82418 /* InetLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InetLayer.h; sourceTree = "<group>"; };
 		EDF3F4BE2893EC9700A82418 /* DeviceInfoProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInfoProvider.h; sourceTree = "<group>"; };
 		EDF3F4BF2893EC9700A82418 /* ConnectivityManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectivityManager.h; sourceTree = "<group>"; };
@@ -2477,104 +2415,24 @@
 		ED36DAE8286DD2CD00CA28EC /* dnssd */ = {
 			isa = PBXGroup;
 			children = (
+				EDD0DAFE2D3AC8A100E4362C /* BUILD.gn */,
+				EDD0DAFA2D3AC72C00E4362C /* Advertiser.cpp */,
+				ED36DAE9286DD2CD00CA28EC /* Advertiser.h */,
 				ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */,
 				ED14F426294A2E4D001C9D2E /* IPAddressSorter.h */,
-				ED36DB55286DD2CE00CA28EC /* ActiveResolveAttempts.cpp */,
-				ED36DAFC286DD2CD00CA28EC /* ActiveResolveAttempts.h */,
-				ED36DAE9286DD2CD00CA28EC /* Advertiser.h */,
+				EDD0DAFB2D3AC72C00E4362C /* Resolver.cpp */,
+				ED36DB4F286DD2CE00CA28EC /* Resolver.h */,
+				EDD0DAF42D3AC4DF00E4362C /* ResolverProxy.cpp */,
+				ED36DB01286DD2CE00CA28EC /* ResolverProxy.h */,
+				ED36DAED286DD2CD00CA28EC /* TxtFields.cpp */,
+				ED36DAFE286DD2CD00CA28EC /* TxtFields.h */,
 				ED36DAFF286DD2CE00CA28EC /* Constants.h */,
 				ED36DAEF286DD2CD00CA28EC /* Discovery_ImplPlatform.cpp */,
 				ED36DAEB286DD2CD00CA28EC /* Discovery_ImplPlatform.h */,
-				ED36DB53286DD2CE00CA28EC /* IncrementalResolve.cpp */,
-				ED36DB4E286DD2CE00CA28EC /* IncrementalResolve.h */,
-				ED36DB03286DD2CE00CA28EC /* minimal_mdns */,
-				ED36DB51286DD2CE00CA28EC /* MinimalMdnsServer.cpp */,
-				ED36DB54286DD2CE00CA28EC /* MinimalMdnsServer.h */,
-				ED36DB4F286DD2CE00CA28EC /* Resolver.h */,
-				ED36DB01286DD2CE00CA28EC /* ResolverProxy.h */,
 				ED36DAFD286DD2CD00CA28EC /* ServiceNaming.cpp */,
 				ED36DAF0286DD2CD00CA28EC /* ServiceNaming.h */,
-				ED36DAED286DD2CD00CA28EC /* TxtFields.cpp */,
-				ED36DAFE286DD2CD00CA28EC /* TxtFields.h */,
 			);
 			path = dnssd;
-			sourceTree = "<group>";
-		};
-		ED36DB03286DD2CE00CA28EC /* minimal_mdns */ = {
-			isa = PBXGroup;
-			children = (
-				ED60FD0928BFCA9B00FE950E /* AddressPolicy_DefaultImpl.cpp */,
-				ED60FD0828BFCA9B00FE950E /* AddressPolicy_DefaultImpl.h */,
-				ED60FD0628BFCA9B00FE950E /* AddressPolicy.cpp */,
-				ED60FD0A28BFCA9C00FE950E /* AddressPolicy.h */,
-				ED60FD0728BFCA9B00FE950E /* ListenIterator.h */,
-				ED60FD0528BFCA9B00FE950E /* ServerIPAddresses.h */,
-				ED36DB25286DD2CE00CA28EC /* core */,
-				ED36DB4B286DD2CE00CA28EC /* Parser.cpp */,
-				ED36DB3A286DD2CE00CA28EC /* Parser.h */,
-				ED36DB38286DD2CE00CA28EC /* Query.h */,
-				ED36DB47286DD2CE00CA28EC /* QueryBuilder.h */,
-				ED36DB43286DD2CE00CA28EC /* QueryReplyFilter.h */,
-				ED36DB49286DD2CE00CA28EC /* RecordData.cpp */,
-				ED36DB4C286DD2CE00CA28EC /* RecordData.h */,
-				ED36DB15286DD2CE00CA28EC /* records */,
-				ED36DB04286DD2CE00CA28EC /* responders */,
-				ED36DB45286DD2CE00CA28EC /* ResponseBuilder.h */,
-				ED36DB48286DD2CE00CA28EC /* ResponseSender.cpp */,
-				ED36DB46286DD2CE00CA28EC /* ResponseSender.h */,
-				ED36DB4D286DD2CE00CA28EC /* Server.cpp */,
-				ED36DB4A286DD2CE00CA28EC /* Server.h */,
-			);
-			path = minimal_mdns;
-			sourceTree = "<group>";
-		};
-		ED36DB04286DD2CE00CA28EC /* responders */ = {
-			isa = PBXGroup;
-			children = (
-				ED36DB05286DD2CE00CA28EC /* Srv.h */,
-				ED36DB07286DD2CE00CA28EC /* RecordResponder.h */,
-				ED36DB08286DD2CE00CA28EC /* IP.cpp */,
-				ED36DB09286DD2CE00CA28EC /* QueryResponder.h */,
-				ED36DB0F286DD2CE00CA28EC /* QueryResponder.cpp */,
-				ED36DB10286DD2CE00CA28EC /* Ptr.h */,
-				ED36DB11286DD2CE00CA28EC /* IP.h */,
-				ED36DB12286DD2CE00CA28EC /* ReplyFilter.h */,
-				ED36DB13286DD2CE00CA28EC /* Responder.h */,
-				ED36DB14286DD2CE00CA28EC /* Txt.h */,
-			);
-			path = responders;
-			sourceTree = "<group>";
-		};
-		ED36DB15286DD2CE00CA28EC /* records */ = {
-			isa = PBXGroup;
-			children = (
-				ED36DB16286DD2CE00CA28EC /* ResourceRecord.cpp */,
-				ED36DB17286DD2CE00CA28EC /* Srv.h */,
-				ED36DB19286DD2CE00CA28EC /* ResourceRecord.h */,
-				ED36DB1A286DD2CE00CA28EC /* IP.cpp */,
-				ED36DB22286DD2CE00CA28EC /* Ptr.h */,
-				ED36DB23286DD2CE00CA28EC /* IP.h */,
-				ED36DB24286DD2CE00CA28EC /* Txt.h */,
-			);
-			path = records;
-			sourceTree = "<group>";
-		};
-		ED36DB25286DD2CE00CA28EC /* core */ = {
-			isa = PBXGroup;
-			children = (
-				EDF3F4A0288B4C6500A82418 /* QNameString.cpp */,
-				EDF3F4A1288B4C6500A82418 /* QNameString.h */,
-				ED36DB26286DD2CE00CA28EC /* DnsHeader.h */,
-				ED36DB27286DD2CE00CA28EC /* RecordWriter.h */,
-				ED36DB28286DD2CE00CA28EC /* QName.h */,
-				ED36DB29286DD2CE00CA28EC /* QName.cpp */,
-				ED36DB32286DD2CE00CA28EC /* BytesRange.h */,
-				ED36DB33286DD2CE00CA28EC /* FlatAllocatedQName.h */,
-				ED36DB34286DD2CE00CA28EC /* Constants.h */,
-				ED36DB35286DD2CE00CA28EC /* RecordWriter.cpp */,
-				ED36DB36286DD2CE00CA28EC /* HeapQName.h */,
-			);
-			path = core;
 			sourceTree = "<group>";
 		};
 		ED36DB56286DD2CE00CA28EC /* asn1 */ = {
@@ -3747,12 +3605,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED36DB8B286DD2CE00CA28EC /* MinimalMdnsServer.cpp in Sources */,
 				ED36DEA4286E043500CA28EC /* DiagnosticDataProvider.cpp in Sources */,
 				ED36DC46286DD65900CA28EC /* CHIPError.cpp in Sources */,
 				ED36DE9F286E043500CA28EC /* CommissionableDataProvider.cpp in Sources */,
 				ED24BDC628A6709E0025CC14 /* deviceonoff.cpp in Sources */,
 				EDC58B582A65ADF300F48DEF /* p44devices.cpp in Sources */,
+				EDD0DAF52D3AC4DF00E4362C /* ResolverProxy.cpp in Sources */,
 				ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */,
 				ED36D86B286DCDED00CA28EC /* AttributeDataIBs.cpp in Sources */,
 				ED36DAA2286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp in Sources */,
@@ -3767,7 +3625,6 @@
 				ED9845E32A6FD98C0057C0D8 /* DnssdType.cpp in Sources */,
 				ED36DBAB286DD48C00CA28EC /* Meta.cpp in Sources */,
 				ED36D866286DCDED00CA28EC /* MessageParser.cpp in Sources */,
-				EDF3F4A2288B4C7C00A82418 /* QNameString.cpp in Sources */,
 				ED36D86F286DCDED00CA28EC /* ClusterPathIB.cpp in Sources */,
 				ED36DA8B286DD14F00CA28EC /* GenerateChipX509Cert.cpp in Sources */,
 				ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */,
@@ -3790,10 +3647,8 @@
 				ED014C802A8EDF8300071593 /* TimerDelegates.cpp in Sources */,
 				ED36DC03286DD57B00CA28EC /* BufferReader.cpp in Sources */,
 				EDB388D929E6EF2700BDAED4 /* basic-information.cpp in Sources */,
-				ED60FD0B28BFCA9C00FE950E /* AddressPolicy.cpp in Sources */,
 				ED36DAD1286DD27200CA28EC /* TCPEndPoint.cpp in Sources */,
 				ED36DA8A286DD14F00CA28EC /* CHIPCert.cpp in Sources */,
-				ED36DB7F286DD2CE00CA28EC /* RecordWriter.cpp in Sources */,
 				ED36DCF7286DD8A000CA28EC /* StatusCode.cpp in Sources */,
 				ED36DC0C286DD57B00CA28EC /* FibonacciUtils.cpp in Sources */,
 				ED36DE8B286E02CD00CA28EC /* attribute-table.cpp in Sources */,
@@ -3811,7 +3666,6 @@
 				ED36D7FE286DCDA300CA28EC /* diagnostic-logs-server.cpp in Sources */,
 				ED36D8F0286DCF0B00CA28EC /* ChunkedWriteCallback.cpp in Sources */,
 				ED36D784286DCB8A00CA28EC /* TraceDecoder.cpp in Sources */,
-				ED36DB88286DD2CE00CA28EC /* Parser.cpp in Sources */,
 				EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */,
 				ED36DE9B286E043500CA28EC /* PersistedStorage.cpp in Sources */,
 				ED36D87F286DCDED00CA28EC /* WriteRequestMessage.cpp in Sources */,
@@ -3875,7 +3729,6 @@
 				ED36D7FF286DCDA300CA28EC /* administrator-commissioning-server.cpp in Sources */,
 				ED2330232886A69700D934D7 /* logger.cpp in Sources */,
 				ED36DC09286DD57B00CA28EC /* UnitTestUtils.cpp in Sources */,
-				ED36DB6E286DD2CE00CA28EC /* IP.cpp in Sources */,
 				ED36DC10286DD57B00CA28EC /* Base64.cpp in Sources */,
 				ED36D88C286DCDED00CA28EC /* ArrayParser.cpp in Sources */,
 				ED36DE89286E02CD00CA28EC /* ember-compatibility-functions.cpp in Sources */,
@@ -3926,9 +3779,7 @@
 				EDCA04492A7AB1A200225B0A /* ccbridge.cpp in Sources */,
 				EDAEF94A2BD02E61000B3FE0 /* ExchangeContext.cpp in Sources */,
 				ED36DE81286E02CD00CA28EC /* attribute-storage.cpp in Sources */,
-				ED36DB8D286DD2CE00CA28EC /* IncrementalResolve.cpp in Sources */,
 				ED36DDC7286DDA0300CA28EC /* GroupPeerMessageCounter.cpp in Sources */,
-				ED3B0CCE2CEE267900C80694 /* DeviceInstanceInfoProviderImpl.cpp in Sources */,
 				ED36DEAE286E086300CA28EC /* DeviceInfoProviderImpl.cpp in Sources */,
 				ED36DAD4286DD27200CA28EC /* UDPEndPoint.cpp in Sources */,
 				ED36DD07286DD8A000CA28EC /* StatusReport.cpp in Sources */,
@@ -3948,6 +3799,8 @@
 				ED36DC67286DD6A400CA28EC /* ReliableMessageContext.cpp in Sources */,
 				EDC58B572A65ADF300F48DEF /* p44bridge.cpp in Sources */,
 				ED36DD06286DD8A000CA28EC /* SessionEstablishmentExchangeDispatch.cpp in Sources */,
+				EDD0DAFC2D3AC72C00E4362C /* Advertiser.cpp in Sources */,
+				EDD0DAFD2D3AC72C00E4362C /* Resolver.cpp in Sources */,
 				ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */,
 				ED36DCF9286DD8A000CA28EC /* EchoServer.cpp in Sources */,
 				ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */,
@@ -3982,8 +3835,6 @@
 				ED36D90D286DCF5100CA28EC /* CommissioningWindowManager.cpp in Sources */,
 				ED36D889286DCDED00CA28EC /* StatusIB.cpp in Sources */,
 				ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */,
-				ED36DB87286DD2CE00CA28EC /* RecordData.cpp in Sources */,
-				ED36DB89286DD2CE00CA28EC /* Server.cpp in Sources */,
 				ED24BDE228A68AE20025CC14 /* application.cpp in Sources */,
 				ED36D887286DCDED00CA28EC /* DataVersionFilterIB.cpp in Sources */,
 				ED36D803286DCDA300CA28EC /* ethernet-network-diagnostics-server.cpp in Sources */,
@@ -4011,12 +3862,9 @@
 				ED36DB90286DD2CE00CA28EC /* ASN1Writer.cpp in Sources */,
 				ED36DD41286DD91500CA28EC /* AdditionalDataPayloadGenerator.cpp in Sources */,
 				ED36DBAA286DD48C00CA28EC /* Base64.cpp in Sources */,
-				ED36DB74286DD2CE00CA28EC /* IP.cpp in Sources */,
 				ED36D7F2286DCDA300CA28EC /* general-commissioning-server.cpp in Sources */,
 				ED36DD3F286DD91500CA28EC /* Base38Encode.cpp in Sources */,
-				ED36DB73286DD2CE00CA28EC /* ResourceRecord.cpp in Sources */,
 				EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */,
-				ED36DB86286DD2CE00CA28EC /* ResponseSender.cpp in Sources */,
 				ED36D783286DCB8A00CA28EC /* TraceHandlers.cpp in Sources */,
 				ED36DA87286DD14F00CA28EC /* CertificationDeclaration.cpp in Sources */,
 				ED36DEA3286E043500CA28EC /* LockTracker.cpp in Sources */,
@@ -4047,8 +3895,6 @@
 				ED36D7F0286DCDA300CA28EC /* switch-server.cpp in Sources */,
 				ED36D884286DCDED00CA28EC /* ListBuilder.cpp in Sources */,
 				ED36DC0B286DD57B00CA28EC /* BytesCircularBuffer.cpp in Sources */,
-				ED36DB72286DD2CE00CA28EC /* QueryResponder.cpp in Sources */,
-				ED60FD0C28BFCA9C00FE950E /* AddressPolicy_DefaultImpl.cpp in Sources */,
 				ED36DD72286DD9A400CA28EC /* SystemLayerImplSelect.cpp in Sources */,
 				ED9845FE2A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp in Sources */,
 				ED36DDE9286DDAF300CA28EC /* json_reader.cpp in Sources */,
@@ -4062,7 +3908,6 @@
 				ED36D865286DCDED00CA28EC /* ReadRequestMessage.cpp in Sources */,
 				ED36DD0B286DD8A000CA28EC /* CASESession.cpp in Sources */,
 				ED36DA86286DD14F00CA28EC /* GroupDataProviderImpl.cpp in Sources */,
-				ED36DB8E286DD2CE00CA28EC /* ActiveResolveAttempts.cpp in Sources */,
 				ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */,
 				ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */,
 				ED36D7A4286DCC4100CA28EC /* LinuxCommissionableDataProvider.cpp in Sources */,
@@ -4086,7 +3931,6 @@
 				ED36DD75286DD9A400CA28EC /* SystemMutex.cpp in Sources */,
 				ED36DAE5286DD29600CA28EC /* AddressResolve_DefaultImpl.cpp in Sources */,
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
-				ED36DB7A286DD2CE00CA28EC /* QName.cpp in Sources */,
 				ED36D7EF286DCDA300CA28EC /* operational-credentials-server.cpp in Sources */,
 				ED36DB92286DD2CE00CA28EC /* ASN1OID.cpp in Sources */,
 				EDCA04482A7AB1A200225B0A /* ccdevices.cpp in Sources */,
@@ -4274,12 +4118,15 @@
 				DEVELOPMENT_TEAM = RQ57RZ75M9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
+					"P44_INTERNAL_XCODE_BUILD=1",
 					"CHIP_HAVE_CONFIG_H=1",
 					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
 					"ICD_MAX_NOTIFICATION_SUBSCRIBERS=1",
 					"CHIP_CONFIG_ENABLE_ICD_SERVER=0",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
+					"CHIP_USE_TRANSITIONAL_COMMISSIONABLE_DATA_PROVIDER=1",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
+					"CHIP_DNSSD_DEFAULT_PLATFORM=1",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",
 					"CHIP_LOG_FILTERING=1",
 					"DYNAMIC_ENDPOINT_COUNT=42",
@@ -4339,12 +4186,15 @@
 				DEVELOPMENT_TEAM = RQ57RZ75M9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
+					"P44_INTERNAL_XCODE_BUILD=1",
 					"CHIP_HAVE_CONFIG_H=1",
 					"CHIP_DEVICE_CONFIG_MAX_DISCOVERED_IP_ADDRESSES=10",
 					"ICD_MAX_NOTIFICATION_SUBSCRIBERS=1",
 					"CHIP_CONFIG_ENABLE_ICD_SERVER=0",
 					"\"CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER=<lib/address_resolve/AddressResolve_DefaultImpl.h>\"",
+					"CHIP_USE_TRANSITIONAL_COMMISSIONABLE_DATA_PROVIDER=1",
 					"CHIP_MINMDNS_USE_EPHEMERAL_UNICAST_PORT=0",
+					"CHIP_DNSSD_DEFAULT_PLATFORM=1",
 					"CHIP_MINMDNS_HIGH_VERBOSITY=0",
 					"CHIP_LOG_FILTERING=1",
 					"DYNAMIC_ENDPOINT_COUNT=42",

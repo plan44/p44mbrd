@@ -1001,6 +1001,10 @@ public:
 //    err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
 //    SuccessOrExit(err);
 
+
+    // Set our own device info provider (before initializing server, which wants to see it installed)
+    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
+
     // Show device config
     ConfigurationMgr().LogDeviceConfig();
     OLOG(LOG_NOTICE, "==== Onboarding payload for %s Commissioning Flow ====",
@@ -1063,9 +1067,6 @@ public:
     dacProvider->GetProductAttestationIntermediateCert(certDeclSpan);
 
     #endif // CERT_DEBUG
-
-    // Set our own device info provider (before initializing server, which wants to see it installed)
-    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
 
     // prepare the onboarding payload
 
