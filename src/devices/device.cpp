@@ -91,6 +91,14 @@ Device::~Device()
 }
 
 
+// MARK: semantic tags
+
+void Device::setSemanticTags(Span<const Clusters::Descriptor::Structs::SemanticTagStruct::Type> aTagList)
+{
+  mTagList = aTagList;
+}
+
+
 // MARK: cluster declaration
 
 void Device::useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateClusterSpecList)
@@ -195,6 +203,7 @@ void Device::willBeInstalled()
 
 void Device::didGetInstalled()
 {
+  SetTagList(endpointId(), mTagList);
   mDeviceInfoDelegate.deviceDidGetInstalled();
   OLOG(LOG_DEBUG, "did get installed");
 }

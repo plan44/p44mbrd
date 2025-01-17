@@ -182,6 +182,19 @@ void P44_BridgeImpl::queryBridge()
   api().call("getProperty", params, boost::bind(&P44_BridgeImpl::bridgeApiCollectQueryHandler, this, _1, _2));
 }
 
+#define SEMANTIC_TAG_COMMON_LOCATION_NS 0x06
+#define SEMANTIC_TAG_COMMON_LOCATION_INDOOR 0x00
+#define SEMANTIC_TAG_COMMON_LOCATION_OUTDOOR 0x01
+
+using SemanticTag = Clusters::Descriptor::Structs::SemanticTagStruct::Type;
+
+static SemanticTag gInDoorTags[] = {
+  { .namespaceID = SEMANTIC_TAG_COMMON_LOCATION_NS, .tag = SEMANTIC_TAG_COMMON_LOCATION_INDOOR }
+};
+static SemanticTag gOutDoorTags[] = {
+  { .namespaceID = SEMANTIC_TAG_COMMON_LOCATION_NS, .tag = SEMANTIC_TAG_COMMON_LOCATION_OUTDOOR }
+};
+
 
 DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
 {
@@ -322,6 +335,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                 inputdescs->resetKeyIteration();
                 bool moreInputs = false; // default to one input per device
                 while (inputdescs->nextKeyValue(inputid, inputdesc)) {
+                  VdcUsageHint usage = usage_undefined;
                   switch (inputType) {
                     case sensor: {
                       if (inputdesc->get("sensorType", o)) {
@@ -331,6 +345,10 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                           case sensorType_temperature: dev = new P44_TemperatureSensor(); break;
                           case sensorType_humidity: dev = new P44_HumiditySensor(); break;
                           case sensorType_illumination: dev = new P44_IlluminanceSensor(); break;
+                        }
+                        // get usage if sensor specifies any
+                        if (dev && inputdesc->get("sensorUsage", o)) {
+                          usage = static_cast<VdcUsageHint>(o->int32Value());
                         }
                       }
                       break;
@@ -376,6 +394,10 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                             // all others: create simple ContactSensors
                             dev = new P44_ContactInput();
                             break;
+                        }
+                        // get usage if input specifies any
+                        if (dev && inputdesc->get("inputUsage", o)) {
+                          usage = static_cast<VdcUsageHint>(o->int32Value());
                         }
                       }
                       break;
@@ -433,6 +455,18 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                       break;
                   }
                   if (dev && !moreInputs) {
+                    // apply usage semantic tags
+                    switch (usage) {
+                      case usage_undefined: // must NOT have a usage tag!
+                      default:
+                        break;
+                      case usage_room: // indoor
+                        dev->setSemanticTags(Span<SemanticTag>(gInDoorTags));
+                        break;
+                      case usage_outdoors: // outdoor
+                        dev->setSemanticTags(Span<SemanticTag>(gOutDoorTags));
+                        break;
+                    }
                     OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", name.c_str(), inputid.c_str(), dsuid.c_str());
                     P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
                     devices.push_back(dev);

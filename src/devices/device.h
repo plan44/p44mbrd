@@ -133,6 +133,7 @@ class Device : public p44::P44LoggingObj
   EndpointId mEndpointId; ///< endpoint ID
   EndpointId mParentEndpointId; ///< endpointId of the parent (composed device or bridge itself)
   EndpointId mDynamicEndpointIdx; ///< the dynamic endpoint index to be used for this device
+  Span<const Descriptor::Structs::SemanticTagStruct::Type> mTagList; ///< the tag list, can be empty
   /// @}
 
   /// @name runtime variable attributes
@@ -181,6 +182,10 @@ public:
 
   /// @return true when this device endpoint is part of a composed device
   inline bool isPartOfComposedDevice() const { return mPartOfComposedDevice; };
+
+  /// set semantic tag list for this device
+  /// @param aTagList span pointing to the tag list for this device, which must live as long as the device
+  void setSemanticTags(Span<const Clusters::Descriptor::Structs::SemanticTagStruct::Type> aTagList);
 
   /// @}
 
