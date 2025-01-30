@@ -487,8 +487,11 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const JsonObjectP
           o->isType (json_type_boolean) &&
           o->boolValue ())
         {
+          int exitcode = 5;  // special case handling in the shell envelope script: remove KVS file.
+
           mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
-          exit (5);
+          OLOG(LOG_NOTICE, "Terminating application with exitcode=%d", exitcode);
+          Application::sharedApplication()->terminateApp(exitcode);
         }
       else
         {
