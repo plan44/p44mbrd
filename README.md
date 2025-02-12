@@ -82,12 +82,16 @@ echo "src-git --force matter https://github.com/project-chip/matter-openwrt.git"
 # add the plan44 openwrt feed
 echo "src-git plan44 https://github.com/plan44/plan44-feed.git;main" >>feeds.conf
 
+# get the feed
+./scripts/feeds update matter
+./scripts/feeds update plan44
+
 # install the gn and p44mbrd packages
 ./scripts/feeds install -p matter gn
 ./scripts/feeds install -p plan44 p44mbrd
 
 # enable `gn` in menuconfig under `Development`
-# enabled `p44mbrd` in menuconfig under `plan44->products->p44mbrd`
+# enable `p44mbrd` in menuconfig under `plan44->products->p44mbrd`
 make menuconfig
 # - exit and save
 
@@ -200,4 +204,4 @@ Or, if you have a CC41 bridge, you can tell *p44mbrd* using `--ccapihost` and `-
 4. build cool new device integrations and contribute those
 5. Buy plan44.ch [products](https://plan44.ch/automation/products.php) - sales revenue is paying the time for contributing to opensource projects 😀
 
-*(c) 2022-2023 by Lukas Zeller / [plan44.ch](http://www.plan44.ch/automation)*
+*(c) 2022-2025 by Lukas Zeller / [plan44.ch](http://www.plan44.ch/automation)*
