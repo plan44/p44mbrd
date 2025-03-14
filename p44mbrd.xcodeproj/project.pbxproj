@@ -115,12 +115,9 @@
 		ED36D891286DCDED00CA28EC /* MessageDefHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D85F286DCDEC00CA28EC /* MessageDefHelper.cpp */; };
 		ED36D8DF286DCF0B00CA28EC /* DefaultAttributePersistenceProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D896286DCF0800CA28EC /* DefaultAttributePersistenceProvider.cpp */; };
 		ED36D8E0286DCF0B00CA28EC /* EventManagement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D899286DCF0800CA28EC /* EventManagement.cpp */; };
-		ED36D8E1286DCF0B00CA28EC /* AttributePathExpandIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D89C286DCF0800CA28EC /* AttributePathExpandIterator.cpp */; };
 		ED36D8E2286DCF0B00CA28EC /* InteractionModelEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D89D286DCF0800CA28EC /* InteractionModelEngine.cpp */; };
 		ED36D8E3286DCF0B00CA28EC /* CASEClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8A0286DCF0800CA28EC /* CASEClient.cpp */; };
 		ED36D8E6286DCF0B00CA28EC /* ReadHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */; };
-		ED36D8E7286DCF0B00CA28EC /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8BA286DCF0900CA28EC /* Engine.cpp */; };
-		ED36D8E9286DCF0B00CA28EC /* AttributeAccessInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8BD286DCF0900CA28EC /* AttributeAccessInterface.cpp */; };
 		ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8C1286DCF0900CA28EC /* WriteHandler.cpp */; };
 		ED36D8EC286DCF0B00CA28EC /* DeviceProxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8C5286DCF0900CA28EC /* DeviceProxy.cpp */; };
 		ED36D8ED286DCF0B00CA28EC /* CommandHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D8C6286DCF0A00CA28EC /* CommandHandler.cpp */; };
@@ -182,7 +179,6 @@
 		ED36DB9E286DD42300CA28EC /* streamer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB9A286DD42300CA28EC /* streamer.cpp */; };
 		ED36DB9F286DD42300CA28EC /* MainLoopDefault.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DB9B286DD42300CA28EC /* MainLoopDefault.cpp */; };
 		ED36DBA9286DD48C00CA28EC /* Config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBA1286DD48C00CA28EC /* Config.cpp */; };
-		ED36DBAA286DD48C00CA28EC /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBA2286DD48C00CA28EC /* Base64.cpp */; };
 		ED36DBAB286DD48C00CA28EC /* Meta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBA3286DD48C00CA28EC /* Meta.cpp */; };
 		ED36DBAC286DD48C00CA28EC /* OnboardingCodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBA4286DD48C00CA28EC /* OnboardingCodes.cpp */; };
 		ED36DBAD286DD48C00CA28EC /* Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBA6286DD48C00CA28EC /* Device.cpp */; };
@@ -192,7 +188,6 @@
 		ED36DC01286DD57B00CA28EC /* CHIPMem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */; };
 		ED36DC03286DD57B00CA28EC /* BufferReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBBC286DD57900CA28EC /* BufferReader.cpp */; };
 		ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBC0286DD57900CA28EC /* ThreadOperationalDataset.cpp */; };
-		ED36DC05286DD57B00CA28EC /* UnitTestRegistration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBC7286DD57900CA28EC /* UnitTestRegistration.cpp */; };
 		ED36DC06286DD57B00CA28EC /* CHIPPlatformMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBC9286DD57900CA28EC /* CHIPPlatformMemory.cpp */; };
 		ED36DC07286DD57B00CA28EC /* CHIPArgParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBCB286DD57900CA28EC /* CHIPArgParser.cpp */; };
 		ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DBCE286DD57900CA28EC /* FixedBufferAllocator.cpp */; };
@@ -219,7 +214,6 @@
 		ED36DC66286DD6A400CA28EC /* ReliableMessageProtocolConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC59286DD6A300CA28EC /* ReliableMessageProtocolConfig.cpp */; };
 		ED36DC67286DD6A400CA28EC /* ReliableMessageContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC5F286DD6A300CA28EC /* ReliableMessageContext.cpp */; };
 		ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC75286DD7F000CA28EC /* KeyValueStoreManagerImpl.mm */; };
-		ED36DC9F286DD7F200CA28EC /* UUIDHelperImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC7A286DD7F100CA28EC /* UUIDHelperImpl.mm */; };
 		ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */; };
 		ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */; };
 		ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */; };
@@ -316,8 +310,6 @@
 		ED3B0CC42CEE1C7F00C80694 /* attribute-metadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CBE2CEE1C7F00C80694 /* attribute-metadata.cpp */; };
 		ED3B0CC52CEE1C7F00C80694 /* MatterCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC32CEE1C7F00C80694 /* MatterCallbacks.cpp */; };
 		ED3B0CC62CEE1C7F00C80694 /* ember-strings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC12CEE1C7F00C80694 /* ember-strings.cpp */; };
-		ED3B0CCA2CEE1DEE00C80694 /* reporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC72CEE1DEE00C80694 /* reporting.cpp */; };
-		ED3B0CCB2CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CC92CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp */; };
 		ED3B0CCD2CEE1EE400C80694 /* cluster-init-callback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CCC2CEE1EE400C80694 /* cluster-init-callback.cpp */; };
 		ED3B0CD12CEE2C2700C80694 /* CommandResponseSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0CD02CEE2C2700C80694 /* CommandResponseSender.cpp */; };
 		ED3B0E8F2CF4F93300C80694 /* fixed-label-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3B0E8D2CF4F93300C80694 /* fixed-label-server.cpp */; };
@@ -328,11 +320,40 @@
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
+		ED91CC762D849B2500F68DF2 /* AccessRestrictionProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC752D849B2500F68DF2 /* AccessRestrictionProvider.cpp */; };
+		ED91CC862D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC7C2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp */; };
+		ED91CC872D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC7E2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp */; };
+		ED91CC882D849BA000F68DF2 /* AttributePathExpandIterator-Ember.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC802D849BA000F68DF2 /* AttributePathExpandIterator-Ember.cpp */; };
+		ED91CC892D849BA000F68DF2 /* AttributeReportBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC822D849BA000F68DF2 /* AttributeReportBuilder.cpp */; };
+		ED91CC8A2D849BA000F68DF2 /* AttributeValueEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC852D849BA000F68DF2 /* AttributeValueEncoder.cpp */; };
+		ED91CC8B2D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC792D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.cpp */; };
+		ED91CCA42D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC942D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.cpp */; };
+		ED91CCA52D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC9E2D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.cpp */; };
+		ED91CCA62D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCA12D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.cpp */; };
+		ED91CCA72D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC962D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.cpp */; };
+		ED91CCA82D84AB7D00F68DF2 /* CommandHandlerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC8E2D84AB7D00F68DF2 /* CommandHandlerImpl.cpp */; };
+		ED91CCA92D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC902D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.cpp */; };
+		ED91CCAA2D84AB7D00F68DF2 /* InteractionModelDelegatePointers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC982D84AB7D00F68DF2 /* InteractionModelDelegatePointers.cpp */; };
+		ED91CCAB2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC9B2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.cpp */; };
+		ED91CCBA2D84BB4700F68DF2 /* ember-io-storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCB92D84BB4700F68DF2 /* ember-io-storage.cpp */; };
+		ED91CCBB2D84BB4700F68DF2 /* ember-global-attribute-access-interface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCB72D84BB4700F68DF2 /* ember-global-attribute-access-interface.cpp */; };
+		ED91CCBE2D84BD8100F68DF2 /* UserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCBD2D84BD8100F68DF2 /* UserDefaults.mm */; };
+		ED91CCED2D84BE2700F68DF2 /* FabricScopedPreEncodedValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCCA2D84BE2700F68DF2 /* FabricScopedPreEncodedValue.cpp */; };
+		ED91CCEF2D84BE2700F68DF2 /* ActionReturnStatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCDE2D84BE2700F68DF2 /* ActionReturnStatus.cpp */; };
+		ED91CCF02D84BE2700F68DF2 /* PreEncodedValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCD02D84BE2700F68DF2 /* PreEncodedValue.cpp */; };
+		ED91CCF32D84BE2700F68DF2 /* MetadataTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCE32D84BE2700F68DF2 /* MetadataTypes.cpp */; };
+		ED91CD192D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD172D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp */; };
+		ED91CD1C2D84BFD800F68DF2 /* Read-Ember.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */; };
+		ED91CD1E2D84BFD800F68DF2 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD092D84BFD800F68DF2 /* Engine.cpp */; };
+		ED91CD212D84BFD800F68DF2 /* ReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD152D84BFD800F68DF2 /* ReportSchedulerImpl.cpp */; };
+		ED91CD222D84BFD800F68DF2 /* reporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD122D84BFD800F68DF2 /* reporting.cpp */; };
+		ED91CD272D84C06D00F68DF2 /* json_tracing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD252D84C06D00F68DF2 /* json_tracing.cpp */; };
+		ED91CD292D84C13D00F68DF2 /* StringBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD282D84C13D00F68DF2 /* StringBuilder.cpp */; };
+		ED91CD2C2D84C1CB00F68DF2 /* CommandSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD2B2D84C1CB00F68DF2 /* CommandSet.cpp */; };
 		ED9845972A6ED77E0057C0D8 /* RawKeySessionKeystore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845942A6ED77D0057C0D8 /* RawKeySessionKeystore.cpp */; };
 		ED98459A2A6ED9200057C0D8 /* libssl.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9845982A6ED9200057C0D8 /* libssl.3.dylib */; };
 		ED98459B2A6ED9200057C0D8 /* libcrypto.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */; };
 		ED98459D2A6ED9FB0057C0D8 /* libev.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */; };
-		ED9845DF2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */; };
 		ED9845E32A6FD98C0057C0D8 /* DnssdType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */; };
 		ED9845FE2A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED9845F82A72543E0057C0D8 /* ExtensionFieldSetsImpl.cpp */; };
 		ED9846402A73C6270057C0D8 /* matter_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED98463E2A73C6270057C0D8 /* matter_utils.cpp */; };
@@ -403,7 +424,6 @@
 		ED072F642A69BBD6007BBF71 /* window-covering-delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-delegate.h"; sourceTree = "<group>"; };
 		ED072F652A69BBD6007BBF71 /* window-covering-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-covering-server.h"; sourceTree = "<group>"; };
 		ED072F662A69BBD6007BBF71 /* window-covering-server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "window-covering-server.cpp"; sourceTree = "<group>"; tabWidth = 4; };
-		ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoggingImpl.cpp; sourceTree = "<group>"; };
 		ED0B92D92949DDFF00FA3B04 /* Logging.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Logging.mm; sourceTree = "<group>"; };
 		ED14F425294A2E4D001C9D2E /* IPAddressSorter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPAddressSorter.cpp; sourceTree = "<group>"; };
 		ED14F426294A2E4D001C9D2E /* IPAddressSorter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPAddressSorter.h; sourceTree = "<group>"; };
@@ -636,12 +656,10 @@
 		ED36D894286DCF0800CA28EC /* DataVersionFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataVersionFilter.h; sourceTree = "<group>"; };
 		ED36D895286DCF0800CA28EC /* CASESessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CASESessionManager.h; sourceTree = "<group>"; };
 		ED36D896286DCF0800CA28EC /* DefaultAttributePersistenceProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DefaultAttributePersistenceProvider.cpp; sourceTree = "<group>"; };
-		ED36D897286DCF0800CA28EC /* DataModelRevision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataModelRevision.h; sourceTree = "<group>"; };
 		ED36D898286DCF0800CA28EC /* EventHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventHeader.h; sourceTree = "<group>"; };
 		ED36D899286DCF0800CA28EC /* EventManagement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EventManagement.cpp; sourceTree = "<group>"; };
 		ED36D89A286DCF0800CA28EC /* DeviceProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceProxy.h; sourceTree = "<group>"; };
 		ED36D89B286DCF0800CA28EC /* DefaultAttributePersistenceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultAttributePersistenceProvider.h; sourceTree = "<group>"; };
-		ED36D89C286DCF0800CA28EC /* AttributePathExpandIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AttributePathExpandIterator.cpp; sourceTree = "<group>"; };
 		ED36D89D286DCF0800CA28EC /* InteractionModelEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InteractionModelEngine.cpp; sourceTree = "<group>"; };
 		ED36D89E286DCF0800CA28EC /* ChunkedWriteCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChunkedWriteCallback.h; sourceTree = "<group>"; };
 		ED36D89F286DCF0800CA28EC /* EventLoggingDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventLoggingDelegate.h; sourceTree = "<group>"; };
@@ -665,10 +683,6 @@
 		ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReadHandler.cpp; sourceTree = "<group>"; };
 		ED36D8B5286DCF0900CA28EC /* CommandResponseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandResponseHelper.h; sourceTree = "<group>"; };
 		ED36D8B6286DCF0900CA28EC /* CommandSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandSender.h; sourceTree = "<group>"; };
-		ED36D8B8286DCF0900CA28EC /* Engine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Engine.h; sourceTree = "<group>"; };
-		ED36D8B9286DCF0900CA28EC /* reporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reporting.h; sourceTree = "<group>"; };
-		ED36D8BA286DCF0900CA28EC /* Engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Engine.cpp; sourceTree = "<group>"; };
-		ED36D8BD286DCF0900CA28EC /* AttributeAccessInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AttributeAccessInterface.cpp; sourceTree = "<group>"; };
 		ED36D8BE286DCF0900CA28EC /* AttributeAccessInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AttributeAccessInterface.h; sourceTree = "<group>"; };
 		ED36D8BF286DCF0900CA28EC /* BufferedReadCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BufferedReadCallback.cpp; sourceTree = "<group>"; };
 		ED36D8C0286DCF0900CA28EC /* ConcreteCommandPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConcreteCommandPath.h; sourceTree = "<group>"; };
@@ -856,7 +870,6 @@
 		ED36DB9A286DD42300CA28EC /* streamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamer.cpp; sourceTree = "<group>"; };
 		ED36DB9B286DD42300CA28EC /* MainLoopDefault.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MainLoopDefault.cpp; sourceTree = "<group>"; };
 		ED36DBA1286DD48C00CA28EC /* Config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Config.cpp; sourceTree = "<group>"; };
-		ED36DBA2286DD48C00CA28EC /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Base64.cpp; sourceTree = "<group>"; };
 		ED36DBA3286DD48C00CA28EC /* Meta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Meta.cpp; sourceTree = "<group>"; };
 		ED36DBA4286DD48C00CA28EC /* OnboardingCodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnboardingCodes.cpp; sourceTree = "<group>"; };
 		ED36DBA5286DD48C00CA28EC /* Help.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Help.h; sourceTree = "<group>"; };
@@ -864,7 +877,6 @@
 		ED36DBA7286DD48C00CA28EC /* Dns.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dns.cpp; sourceTree = "<group>"; };
 		ED36DBA8286DD48C00CA28EC /* Help.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Help.cpp; sourceTree = "<group>"; };
 		ED36DBB2286DD57800CA28EC /* BytesToHex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BytesToHex.cpp; sourceTree = "<group>"; };
-		ED36DBB3286DD57800CA28EC /* UnitTestContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTestContext.h; sourceTree = "<group>"; };
 		ED36DBB5286DD57800CA28EC /* CodeUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeUtils.h; sourceTree = "<group>"; };
 		ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPMem.cpp; sourceTree = "<group>"; };
 		ED36DBB7286DD57800CA28EC /* TestGroupData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestGroupData.h; sourceTree = "<group>"; };
@@ -880,8 +892,6 @@
 		ED36DBC4286DD57900CA28EC /* ThreadOperationalDataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadOperationalDataset.h; sourceTree = "<group>"; };
 		ED36DBC5286DD57900CA28EC /* DefaultStorageKeyAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultStorageKeyAllocator.h; sourceTree = "<group>"; };
 		ED36DBC6286DD57900CA28EC /* DLLUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLLUtil.h; sourceTree = "<group>"; };
-		ED36DBC7286DD57900CA28EC /* UnitTestRegistration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnitTestRegistration.cpp; sourceTree = "<group>"; };
-		ED36DBC8286DD57900CA28EC /* UnitTestRegistration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTestRegistration.h; sourceTree = "<group>"; };
 		ED36DBC9286DD57900CA28EC /* CHIPPlatformMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPPlatformMemory.cpp; sourceTree = "<group>"; };
 		ED36DBCA286DD57900CA28EC /* ZclString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZclString.h; sourceTree = "<group>"; };
 		ED36DBCB286DD57900CA28EC /* CHIPArgParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPArgParser.cpp; sourceTree = "<group>"; };
@@ -899,7 +909,6 @@
 		ED36DBD7286DD57900CA28EC /* UnitTestUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTestUtils.h; sourceTree = "<group>"; };
 		ED36DBD8286DD57A00CA28EC /* Iterators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Iterators.h; sourceTree = "<group>"; };
 		ED36DBD9286DD57A00CA28EC /* CHIPMem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPMem.h; sourceTree = "<group>"; };
-		ED36DBDA286DD57A00CA28EC /* UnitTestExtendedAssertions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTestExtendedAssertions.h; sourceTree = "<group>"; };
 		ED36DBDB286DD57A00CA28EC /* LifetimePersistedCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LifetimePersistedCounter.h; sourceTree = "<group>"; };
 		ED36DBDC286DD57A00CA28EC /* BitMask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BitMask.h; sourceTree = "<group>"; };
 		ED36DBDD286DD57A00CA28EC /* BytesCircularBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BytesCircularBuffer.cpp; sourceTree = "<group>"; };
@@ -978,8 +987,6 @@
 		ED36DC71286DD70000CA28EC /* LogV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogV.h; sourceTree = "<group>"; };
 		ED36DC75286DD7F000CA28EC /* KeyValueStoreManagerImpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyValueStoreManagerImpl.mm; sourceTree = "<group>"; };
 		ED36DC77286DD7F100CA28EC /* PlatformManagerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformManagerImpl.h; sourceTree = "<group>"; };
-		ED36DC78286DD7F100CA28EC /* UUIDHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UUIDHelper.h; sourceTree = "<group>"; };
-		ED36DC7A286DD7F100CA28EC /* UUIDHelperImpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UUIDHelperImpl.mm; sourceTree = "<group>"; };
 		ED36DC7B286DD7F100CA28EC /* MdnsError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MdnsError.h; sourceTree = "<group>"; };
 		ED36DC7C286DD7F100CA28EC /* BLEManagerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEManagerImpl.h; sourceTree = "<group>"; };
 		ED36DC7D286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInstanceInfoProviderImpl.h; sourceTree = "<group>"; };
@@ -1198,7 +1205,6 @@
 		ED36DE5D286E02CD00CA28EC /* DataModelHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataModelHandler.cpp; sourceTree = "<group>"; };
 		ED36DE68286E02CD00CA28EC /* im-client-callbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "im-client-callbacks.h"; sourceTree = "<group>"; };
 		ED36DE69286E02CD00CA28EC /* attribute-storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "attribute-storage.h"; sourceTree = "<group>"; };
-		ED36DE6B286E02CD00CA28EC /* af.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = af.h; sourceTree = "<group>"; };
 		ED36DE6D286E02CD00CA28EC /* privilege-storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "privilege-storage.cpp"; sourceTree = "<group>"; };
 		ED36DE70286E02CD00CA28EC /* types_stub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types_stub.h; sourceTree = "<group>"; };
 		ED36DE71286E02CD00CA28EC /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
@@ -1236,9 +1242,6 @@
 		ED3B0CC12CEE1C7F00C80694 /* ember-strings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "ember-strings.cpp"; sourceTree = "<group>"; };
 		ED3B0CC22CEE1C7F00C80694 /* endpoint-config-api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "endpoint-config-api.h"; sourceTree = "<group>"; };
 		ED3B0CC32CEE1C7F00C80694 /* MatterCallbacks.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MatterCallbacks.cpp; sourceTree = "<group>"; };
-		ED3B0CC72CEE1DEE00C80694 /* reporting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reporting.cpp; sourceTree = "<group>"; };
-		ED3B0CC82CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SynchronizedReportSchedulerImpl.h; sourceTree = "<group>"; };
-		ED3B0CC92CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SynchronizedReportSchedulerImpl.cpp; sourceTree = "<group>"; };
 		ED3B0CCC2CEE1EE400C80694 /* cluster-init-callback.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "cluster-init-callback.cpp"; sourceTree = "<group>"; };
 		ED3B0CCF2CEE2C2700C80694 /* CommandResponseSender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandResponseSender.h; sourceTree = "<group>"; };
 		ED3B0CD02CEE2C2700C80694 /* CommandResponseSender.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CommandResponseSender.cpp; sourceTree = "<group>"; };
@@ -1270,6 +1273,98 @@
 		ED7F9A292904328F00A7CB48 /* Protocols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Protocols.cpp; sourceTree = "<group>"; };
 		ED7F9A2B290433FB00A7CB48 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioningDriver.h; sourceTree = "<group>"; };
+		ED91CC722D84996100F68DF2 /* AccessBuildConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessBuildConfig.h; sourceTree = "<group>"; };
+		ED91CC742D849B2500F68DF2 /* AccessRestrictionProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessRestrictionProvider.h; sourceTree = "<group>"; };
+		ED91CC752D849B2500F68DF2 /* AccessRestrictionProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AccessRestrictionProvider.cpp; sourceTree = "<group>"; };
+		ED91CC772D849BA000F68DF2 /* AttributeAccessInterfaceCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeAccessInterfaceCache.h; sourceTree = "<group>"; };
+		ED91CC782D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeAccessInterfaceRegistry.h; sourceTree = "<group>"; };
+		ED91CC792D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AttributeAccessInterfaceRegistry.cpp; sourceTree = "<group>"; };
+		ED91CC7A2D849BA000F68DF2 /* AttributeEncodeState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeEncodeState.h; sourceTree = "<group>"; };
+		ED91CC7B2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AttributePathExpandIterator-Checked.h"; sourceTree = "<group>"; };
+		ED91CC7C2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "AttributePathExpandIterator-Checked.cpp"; sourceTree = "<group>"; };
+		ED91CC7D2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AttributePathExpandIterator-DataModel.h"; sourceTree = "<group>"; };
+		ED91CC7E2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "AttributePathExpandIterator-DataModel.cpp"; sourceTree = "<group>"; };
+		ED91CC7F2D849BA000F68DF2 /* AttributePathExpandIterator-Ember.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AttributePathExpandIterator-Ember.h"; sourceTree = "<group>"; };
+		ED91CC802D849BA000F68DF2 /* AttributePathExpandIterator-Ember.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "AttributePathExpandIterator-Ember.cpp"; sourceTree = "<group>"; };
+		ED91CC812D849BA000F68DF2 /* AttributeReportBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeReportBuilder.h; sourceTree = "<group>"; };
+		ED91CC822D849BA000F68DF2 /* AttributeReportBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AttributeReportBuilder.cpp; sourceTree = "<group>"; };
+		ED91CC832D849BA000F68DF2 /* AttributeValueDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeValueDecoder.h; sourceTree = "<group>"; };
+		ED91CC842D849BA000F68DF2 /* AttributeValueEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributeValueEncoder.h; sourceTree = "<group>"; };
+		ED91CC852D849BA000F68DF2 /* AttributeValueEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AttributeValueEncoder.cpp; sourceTree = "<group>"; };
+		ED91CC8C2D84AB7D00F68DF2 /* CommandHandlerExchangeInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandHandlerExchangeInterface.h; sourceTree = "<group>"; };
+		ED91CC8D2D84AB7D00F68DF2 /* CommandHandlerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandHandlerImpl.h; sourceTree = "<group>"; };
+		ED91CC8E2D84AB7D00F68DF2 /* CommandHandlerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CommandHandlerImpl.cpp; sourceTree = "<group>"; };
+		ED91CC8F2D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandHandlerInterfaceRegistry.h; sourceTree = "<group>"; };
+		ED91CC902D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CommandHandlerInterfaceRegistry.cpp; sourceTree = "<group>"; };
+		ED91CC912D84AB7D00F68DF2 /* CommandPathRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandPathRegistry.h; sourceTree = "<group>"; };
+		ED91CC922D84AB7D00F68DF2 /* CommandSenderLegacyCallback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandSenderLegacyCallback.h; sourceTree = "<group>"; };
+		ED91CC932D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeferredAttributePersistenceProvider.h; sourceTree = "<group>"; };
+		ED91CC942D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DeferredAttributePersistenceProvider.cpp; sourceTree = "<group>"; };
+		ED91CC952D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GenericEventManagementTestEventTriggerHandler.h; sourceTree = "<group>"; };
+		ED91CC962D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GenericEventManagementTestEventTriggerHandler.cpp; sourceTree = "<group>"; };
+		ED91CC972D84AB7D00F68DF2 /* InteractionModelDelegatePointers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InteractionModelDelegatePointers.h; sourceTree = "<group>"; };
+		ED91CC982D84AB7D00F68DF2 /* InteractionModelDelegatePointers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InteractionModelDelegatePointers.cpp; sourceTree = "<group>"; };
+		ED91CC992D84AB7D00F68DF2 /* PendingResponseTracker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PendingResponseTracker.h; sourceTree = "<group>"; };
+		ED91CC9A2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PendingResponseTrackerImpl.h; sourceTree = "<group>"; };
+		ED91CC9B2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PendingResponseTrackerImpl.cpp; sourceTree = "<group>"; };
+		ED91CC9C2D84AB7D00F68DF2 /* SafeAttributePersistenceProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SafeAttributePersistenceProvider.h; sourceTree = "<group>"; };
+		ED91CC9D2D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimpleSubscriptionResumptionStorage.h; sourceTree = "<group>"; };
+		ED91CC9E2D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleSubscriptionResumptionStorage.cpp; sourceTree = "<group>"; };
+		ED91CC9F2D84AB7D00F68DF2 /* SpecificationDefinedRevisions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpecificationDefinedRevisions.h; sourceTree = "<group>"; };
+		ED91CCA02D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubscriptionResumptionSessionEstablisher.h; sourceTree = "<group>"; };
+		ED91CCA12D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SubscriptionResumptionSessionEstablisher.cpp; sourceTree = "<group>"; };
+		ED91CCA22D84AB7D00F68DF2 /* SubscriptionResumptionStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubscriptionResumptionStorage.h; sourceTree = "<group>"; };
+		ED91CCA32D84AB7D00F68DF2 /* SubscriptionsInfoProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubscriptionsInfoProvider.h; sourceTree = "<group>"; };
+		ED91CCB62D84BB4700F68DF2 /* ember-global-attribute-access-interface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ember-global-attribute-access-interface.h"; sourceTree = "<group>"; };
+		ED91CCB72D84BB4700F68DF2 /* ember-global-attribute-access-interface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "ember-global-attribute-access-interface.cpp"; sourceTree = "<group>"; };
+		ED91CCB82D84BB4700F68DF2 /* ember-io-storage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ember-io-storage.h"; sourceTree = "<group>"; };
+		ED91CCB92D84BB4700F68DF2 /* ember-io-storage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "ember-io-storage.cpp"; sourceTree = "<group>"; };
+		ED91CCBC2D84BD8100F68DF2 /* UserDefaults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserDefaults.h; sourceTree = "<group>"; };
+		ED91CCBD2D84BD8100F68DF2 /* UserDefaults.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = UserDefaults.mm; sourceTree = "<group>"; };
+		ED91CCC22D84BE2700F68DF2 /* BasicTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BasicTypes.h; sourceTree = "<group>"; };
+		ED91CCC42D84BE2700F68DF2 /* DecodableList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DecodableList.h; sourceTree = "<group>"; };
+		ED91CCC52D84BE2700F68DF2 /* Decode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Decode.h; sourceTree = "<group>"; };
+		ED91CCC62D84BE2700F68DF2 /* EncodableToTLV.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EncodableToTLV.h; sourceTree = "<group>"; };
+		ED91CCC72D84BE2700F68DF2 /* Encode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Encode.h; sourceTree = "<group>"; };
+		ED91CCC82D84BE2700F68DF2 /* FabricScoped.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FabricScoped.h; sourceTree = "<group>"; };
+		ED91CCC92D84BE2700F68DF2 /* FabricScopedPreEncodedValue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FabricScopedPreEncodedValue.h; sourceTree = "<group>"; };
+		ED91CCCA2D84BE2700F68DF2 /* FabricScopedPreEncodedValue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FabricScopedPreEncodedValue.cpp; sourceTree = "<group>"; };
+		ED91CCCB2D84BE2700F68DF2 /* List.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = List.h; sourceTree = "<group>"; };
+		ED91CCCC2D84BE2700F68DF2 /* ListLargeSystemExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListLargeSystemExtensions.h; sourceTree = "<group>"; };
+		ED91CCCD2D84BE2700F68DF2 /* Nullable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Nullable.h; sourceTree = "<group>"; };
+		ED91CCCE2D84BE2700F68DF2 /* NullObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NullObject.h; sourceTree = "<group>"; };
+		ED91CCCF2D84BE2700F68DF2 /* PreEncodedValue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PreEncodedValue.h; sourceTree = "<group>"; };
+		ED91CCD02D84BE2700F68DF2 /* PreEncodedValue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PreEncodedValue.cpp; sourceTree = "<group>"; };
+		ED91CCD12D84BE2700F68DF2 /* WrappedStructEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WrappedStructEncoder.h; sourceTree = "<group>"; };
+		ED91CCDC2D84BE2700F68DF2 /* ActionContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionContext.h; sourceTree = "<group>"; };
+		ED91CCDD2D84BE2700F68DF2 /* ActionReturnStatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionReturnStatus.h; sourceTree = "<group>"; };
+		ED91CCDE2D84BE2700F68DF2 /* ActionReturnStatus.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ActionReturnStatus.cpp; sourceTree = "<group>"; };
+		ED91CCE02D84BE2700F68DF2 /* Context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Context.h; sourceTree = "<group>"; };
+		ED91CCE12D84BE2700F68DF2 /* EventsGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventsGenerator.h; sourceTree = "<group>"; };
+		ED91CCE22D84BE2700F68DF2 /* MetadataTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetadataTypes.h; sourceTree = "<group>"; };
+		ED91CCE32D84BE2700F68DF2 /* MetadataTypes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MetadataTypes.cpp; sourceTree = "<group>"; };
+		ED91CCE42D84BE2700F68DF2 /* OperationTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationTypes.h; sourceTree = "<group>"; };
+		ED91CCE52D84BE2700F68DF2 /* Provider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Provider.h; sourceTree = "<group>"; };
+		ED91CCE62D84BE2700F68DF2 /* ProviderChangeListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProviderChangeListener.h; sourceTree = "<group>"; };
+		ED91CCF82D84BFD800F68DF2 /* CompatEnumNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CompatEnumNames.h; sourceTree = "<group>"; };
+		ED91CD032D84BFD800F68DF2 /* EventPathValidity.mixin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventPathValidity.mixin.h; sourceTree = "<group>"; };
+		ED91CD082D84BFD800F68DF2 /* Engine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Engine.h; sourceTree = "<group>"; };
+		ED91CD092D84BFD800F68DF2 /* Engine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Engine.cpp; sourceTree = "<group>"; };
+		ED91CD0A2D84BFD800F68DF2 /* Read.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Read.h; sourceTree = "<group>"; };
+		ED91CD0F2D84BFD800F68DF2 /* Read-Ember.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Read-Ember.h"; sourceTree = "<group>"; };
+		ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Read-Ember.cpp"; sourceTree = "<group>"; };
+		ED91CD112D84BFD800F68DF2 /* reporting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reporting.h; sourceTree = "<group>"; };
+		ED91CD122D84BFD800F68DF2 /* reporting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reporting.cpp; sourceTree = "<group>"; };
+		ED91CD132D84BFD800F68DF2 /* ReportScheduler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReportScheduler.h; sourceTree = "<group>"; };
+		ED91CD142D84BFD800F68DF2 /* ReportSchedulerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReportSchedulerImpl.h; sourceTree = "<group>"; };
+		ED91CD152D84BFD800F68DF2 /* ReportSchedulerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ReportSchedulerImpl.cpp; sourceTree = "<group>"; };
+		ED91CD162D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SynchronizedReportSchedulerImpl.h; sourceTree = "<group>"; };
+		ED91CD172D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SynchronizedReportSchedulerImpl.cpp; sourceTree = "<group>"; };
+		ED91CD242D84C06D00F68DF2 /* json_tracing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = json_tracing.h; sourceTree = "<group>"; };
+		ED91CD252D84C06D00F68DF2 /* json_tracing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = json_tracing.cpp; sourceTree = "<group>"; };
+		ED91CD282D84C13D00F68DF2 /* StringBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringBuilder.cpp; sourceTree = "<group>"; };
+		ED91CD2A2D84C1CB00F68DF2 /* CommandSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandSet.h; sourceTree = "<group>"; };
+		ED91CD2B2D84C1CB00F68DF2 /* CommandSet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CommandSet.cpp; sourceTree = "<group>"; };
 		ED98458B2A6ED6C10057C0D8 /* CurrentFabricRemover.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CurrentFabricRemover.cpp; sourceTree = "<group>"; };
 		ED98458C2A6ED6C10057C0D8 /* CurrentFabricRemover.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurrentFabricRemover.h; sourceTree = "<group>"; };
 		ED9845902A6ED77D0057C0D8 /* RawKeySessionKeystore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawKeySessionKeystore.h; sourceTree = "<group>"; };
@@ -1277,9 +1372,6 @@
 		ED9845982A6ED9200057C0D8 /* libssl.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libssl.3.dylib"; sourceTree = "<group>"; };
 		ED9845992A6ED9200057C0D8 /* libcrypto.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.3.dylib; path = "../../../../../../opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libcrypto.3.dylib"; sourceTree = "<group>"; };
 		ED98459C2A6ED9FB0057C0D8 /* libev.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libev.4.dylib; path = ../../../../../../opt/homebrew/Cellar/libev/4.33/lib/libev.4.dylib; sourceTree = "<group>"; };
-		ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReportSchedulerImpl.cpp; sourceTree = "<group>"; };
-		ED9845DC2A6FD9040057C0D8 /* ReportSchedulerImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportSchedulerImpl.h; sourceTree = "<group>"; };
-		ED9845DE2A6FD9040057C0D8 /* ReportScheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportScheduler.h; sourceTree = "<group>"; };
 		ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DnssdType.cpp; sourceTree = "<group>"; };
 		ED9845E22A6FD98C0057C0D8 /* DnssdType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DnssdType.h; sourceTree = "<group>"; };
 		ED9845F22A72543E0057C0D8 /* SceneTableImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneTableImpl.h; sourceTree = "<group>"; };
@@ -1758,6 +1850,8 @@
 		ED36D7A6286DCC6D00CA28EC /* access */ = {
 			isa = PBXGroup;
 			children = (
+				ED91CC742D849B2500F68DF2 /* AccessRestrictionProvider.h */,
+				ED91CC752D849B2500F68DF2 /* AccessRestrictionProvider.cpp */,
 				ED36D7A9286DCCBB00CA28EC /* AccessControl.cpp */,
 				ED36D7A8286DCCBB00CA28EC /* AccessControl.h */,
 				ED36D7AF286DCCBB00CA28EC /* AuthMode.h */,
@@ -1772,85 +1866,125 @@
 		ED36D7A7286DCC8100CA28EC /* app */ = {
 			isa = PBXGroup;
 			children = (
-				ED3B0CCF2CEE2C2700C80694 /* CommandResponseSender.h */,
-				ED3B0CD02CEE2C2700C80694 /* CommandResponseSender.cpp */,
-				ED36D8BD286DCF0900CA28EC /* AttributeAccessInterface.cpp */,
 				ED36D8BE286DCF0900CA28EC /* AttributeAccessInterface.h */,
+				ED91CC772D849BA000F68DF2 /* AttributeAccessInterfaceCache.h */,
+				ED91CC782D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.h */,
+				ED91CC792D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.cpp */,
 				ED36D8D0286DCF0A00CA28EC /* AttributeAccessToken.h */,
-				ED36D89C286DCF0800CA28EC /* AttributePathExpandIterator.cpp */,
+				ED91CC7A2D849BA000F68DF2 /* AttributeEncodeState.h */,
 				ED36D8A6286DCF0800CA28EC /* AttributePathExpandIterator.h */,
+				ED91CC7B2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.h */,
+				ED91CC7C2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp */,
+				ED91CC7D2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.h */,
+				ED91CC7E2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp */,
+				ED91CC7F2D849BA000F68DF2 /* AttributePathExpandIterator-Ember.h */,
+				ED91CC802D849BA000F68DF2 /* AttributePathExpandIterator-Ember.cpp */,
 				ED36D8B1286DCF0900CA28EC /* AttributePathParams.h */,
 				ED36D8AA286DCF0900CA28EC /* AttributePersistenceProvider.h */,
-				ED36D8BF286DCF0900CA28EC /* BufferedReadCallback.cpp */,
+				ED91CC812D849BA000F68DF2 /* AttributeReportBuilder.h */,
+				ED91CC822D849BA000F68DF2 /* AttributeReportBuilder.cpp */,
+				ED91CC832D849BA000F68DF2 /* AttributeValueDecoder.h */,
+				ED91CC842D849BA000F68DF2 /* AttributeValueEncoder.h */,
+				ED91CC852D849BA000F68DF2 /* AttributeValueEncoder.cpp */,
 				ED36D8C4286DCF0900CA28EC /* BufferedReadCallback.h */,
-				ED36D8A0286DCF0800CA28EC /* CASEClient.cpp */,
+				ED36D8BF286DCF0900CA28EC /* BufferedReadCallback.cpp */,
 				ED36D8A3286DCF0800CA28EC /* CASEClient.h */,
+				ED36D8A0286DCF0800CA28EC /* CASEClient.cpp */,
 				ED36D8D2286DCF0A00CA28EC /* CASEClientPool.h */,
-				ED36D8CF286DCF0A00CA28EC /* CASESessionManager.cpp */,
 				ED36D895286DCF0800CA28EC /* CASESessionManager.h */,
-				ED36D8CC286DCF0A00CA28EC /* ChunkedWriteCallback.cpp */,
+				ED36D8CF286DCF0A00CA28EC /* CASESessionManager.cpp */,
 				ED36D89E286DCF0800CA28EC /* ChunkedWriteCallback.h */,
+				ED36D8CC286DCF0A00CA28EC /* ChunkedWriteCallback.cpp */,
 				ED36D7B6286DCD0900CA28EC /* clusters */,
-				ED36D8B2286DCF0900CA28EC /* ClusterStateCache.cpp */,
 				ED36D8A5286DCF0800CA28EC /* ClusterStateCache.h */,
-				ED36D8C6286DCF0A00CA28EC /* CommandHandler.cpp */,
+				ED36D8B2286DCF0900CA28EC /* ClusterStateCache.cpp */,
 				ED36D8CA286DCF0A00CA28EC /* CommandHandler.h */,
+				ED36D8C6286DCF0A00CA28EC /* CommandHandler.cpp */,
+				ED91CC8C2D84AB7D00F68DF2 /* CommandHandlerExchangeInterface.h */,
+				ED91CC8D2D84AB7D00F68DF2 /* CommandHandlerImpl.h */,
+				ED91CC8E2D84AB7D00F68DF2 /* CommandHandlerImpl.cpp */,
 				ED36D8D4286DCF0A00CA28EC /* CommandHandlerInterface.h */,
+				ED91CC8F2D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.h */,
+				ED91CC902D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.cpp */,
 				ED36D8C3286DCF0900CA28EC /* CommandPathParams.h */,
+				ED91CC912D84AB7D00F68DF2 /* CommandPathRegistry.h */,
 				ED36D8B5286DCF0900CA28EC /* CommandResponseHelper.h */,
-				ED36D8C7286DCF0A00CA28EC /* CommandSender.cpp */,
+				ED3B0CCF2CEE2C2700C80694 /* CommandResponseSender.h */,
+				ED3B0CD02CEE2C2700C80694 /* CommandResponseSender.cpp */,
 				ED36D8B6286DCF0900CA28EC /* CommandSender.h */,
+				ED36D8C7286DCF0A00CA28EC /* CommandSender.cpp */,
+				ED91CC922D84AB7D00F68DF2 /* CommandSenderLegacyCallback.h */,
+				ED91CCF92D84BFD800F68DF2 /* common */,
 				ED36D8DA286DCF0A00CA28EC /* ConcreteAttributePath.h */,
 				ED36D8AD286DCF0900CA28EC /* ConcreteClusterPath.h */,
 				ED36D8C0286DCF0900CA28EC /* ConcreteCommandPath.h */,
 				ED36D8DC286DCF0A00CA28EC /* ConcreteEventPath.h */,
-				ED36D897286DCF0800CA28EC /* DataModelRevision.h */,
+				ED91CCD22D84BE2700F68DF2 /* data-model */,
+				ED91CCE92D84BE2700F68DF2 /* data-model-provider */,
 				ED36D894286DCF0800CA28EC /* DataVersionFilter.h */,
-				ED36D896286DCF0800CA28EC /* DefaultAttributePersistenceProvider.cpp */,
 				ED36D89B286DCF0800CA28EC /* DefaultAttributePersistenceProvider.h */,
-				ED36D8C5286DCF0900CA28EC /* DeviceProxy.cpp */,
+				ED36D896286DCF0800CA28EC /* DefaultAttributePersistenceProvider.cpp */,
+				ED91CC932D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.h */,
+				ED91CC942D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.cpp */,
 				ED36D89A286DCF0800CA28EC /* DeviceProxy.h */,
+				ED36D8C5286DCF0900CA28EC /* DeviceProxy.cpp */,
+				ED91CD042D84BFD800F68DF2 /* ember_coupling */,
 				ED36D898286DCF0800CA28EC /* EventHeader.h */,
 				ED36D8C8286DCF0A00CA28EC /* EventLogging.h */,
 				ED36D89F286DCF0800CA28EC /* EventLoggingDelegate.h */,
 				ED36D8DB286DCF0A00CA28EC /* EventLoggingTypes.h */,
-				ED36D899286DCF0800CA28EC /* EventManagement.cpp */,
 				ED36D8D9286DCF0A00CA28EC /* EventManagement.h */,
+				ED36D899286DCF0800CA28EC /* EventManagement.cpp */,
 				ED36D8AB286DCF0900CA28EC /* EventPathParams.h */,
-				ED36D8B0286DCF0900CA28EC /* FailSafeContext.cpp */,
 				ED36D8D7286DCF0A00CA28EC /* FailSafeContext.h */,
+				ED36D8B0286DCF0900CA28EC /* FailSafeContext.cpp */,
+				ED91CC952D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.h */,
+				ED91CC962D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.cpp */,
 				ED36D8CE286DCF0A00CA28EC /* GlobalAttributes.h */,
-				ED36D89D286DCF0800CA28EC /* InteractionModelEngine.cpp */,
+				ED91CC972D84AB7D00F68DF2 /* InteractionModelDelegatePointers.h */,
+				ED91CC982D84AB7D00F68DF2 /* InteractionModelDelegatePointers.cpp */,
 				ED36D8AF286DCF0900CA28EC /* InteractionModelEngine.h */,
+				ED36D89D286DCF0800CA28EC /* InteractionModelEngine.cpp */,
 				ED36D8A2286DCF0800CA28EC /* InteractionModelHelper.h */,
 				ED36D8DE286DCF0B00CA28EC /* InteractionModelTimeout.h */,
 				ED36D804286DCDEC00CA28EC /* MessageDef */,
-				EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */,
 				EDF3F54628A521ED00A82418 /* OperationalSessionSetup.h */,
+				EDF3F54528A521ED00A82418 /* OperationalSessionSetup.cpp */,
 				EDF3F54428A521ED00A82418 /* OperationalSessionSetupPool.h */,
 				ED36D8CD286DCF0A00CA28EC /* OTAUserConsentCommon.h */,
-				ED36D8DD286DCF0A00CA28EC /* ReadClient.cpp */,
+				ED91CC992D84AB7D00F68DF2 /* PendingResponseTracker.h */,
+				ED91CC9A2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.h */,
+				ED91CC9B2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.cpp */,
 				ED36D8C2286DCF0900CA28EC /* ReadClient.h */,
-				ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */,
+				ED36D8DD286DCF0A00CA28EC /* ReadClient.cpp */,
 				ED36D8A1286DCF0800CA28EC /* ReadHandler.h */,
+				ED36D8B4286DCF0900CA28EC /* ReadHandler.cpp */,
 				EDF3F54328A521ED00A82418 /* ReadPrepareParams.h */,
-				ED36D8B7286DCF0900CA28EC /* reporting */,
+				ED91CD182D84BFD800F68DF2 /* reporting */,
 				ED36D8D8286DCF0A00CA28EC /* RequiredPrivilege.h */,
+				ED91CC9C2D84AB7D00F68DF2 /* SafeAttributePersistenceProvider.h */,
 				ED36D8F7286DCF1400CA28EC /* server */,
-				ED36D8D1286DCF0A00CA28EC /* StatusResponse.cpp */,
+				ED91CC9D2D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.h */,
+				ED91CC9E2D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.cpp */,
+				ED91CC9F2D84AB7D00F68DF2 /* SpecificationDefinedRevisions.h */,
 				ED36D8AE286DCF0900CA28EC /* StatusResponse.h */,
+				ED36D8D1286DCF0A00CA28EC /* StatusResponse.cpp */,
+				ED91CCA02D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.h */,
+				ED91CCA12D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.cpp */,
+				ED91CCA22D84AB7D00F68DF2 /* SubscriptionResumptionStorage.h */,
+				ED91CCA32D84AB7D00F68DF2 /* SubscriptionsInfoProvider.h */,
 				ED36D892286DCF0800CA28EC /* TestEventTriggerDelegate.h */,
-				ED36D8D3286DCF0A00CA28EC /* TimedHandler.cpp */,
 				ED36D8A8286DCF0800CA28EC /* TimedHandler.h */,
-				ED36D8C9286DCF0A00CA28EC /* TimedRequest.cpp */,
+				ED36D8D3286DCF0A00CA28EC /* TimedHandler.cpp */,
 				ED36D8A4286DCF0800CA28EC /* TimedRequest.h */,
-				ED014C7F2A8EDF3200071593 /* TimerDelegates.cpp */,
+				ED36D8C9286DCF0A00CA28EC /* TimedRequest.cpp */,
 				ED014C7E2A8EDF3200071593 /* TimerDelegates.h */,
+				ED014C7F2A8EDF3200071593 /* TimerDelegates.cpp */,
 				ED36DE4F286E02CD00CA28EC /* util */,
-				ED36D8D5286DCF0A00CA28EC /* WriteClient.cpp */,
 				ED36D8A9286DCF0800CA28EC /* WriteClient.h */,
-				ED36D8C1286DCF0900CA28EC /* WriteHandler.cpp */,
+				ED36D8D5286DCF0A00CA28EC /* WriteClient.cpp */,
 				ED36D893286DCF0800CA28EC /* WriteHandler.h */,
+				ED36D8C1286DCF0900CA28EC /* WriteHandler.cpp */,
 			);
 			path = app;
 			sourceTree = "<group>";
@@ -2181,22 +2315,6 @@
 			path = MessageDef;
 			sourceTree = "<group>";
 		};
-		ED36D8B7286DCF0900CA28EC /* reporting */ = {
-			isa = PBXGroup;
-			children = (
-				ED3B0CC72CEE1DEE00C80694 /* reporting.cpp */,
-				ED3B0CC82CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.h */,
-				ED3B0CC92CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp */,
-				ED9845DE2A6FD9040057C0D8 /* ReportScheduler.h */,
-				ED9845DA2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp */,
-				ED9845DC2A6FD9040057C0D8 /* ReportSchedulerImpl.h */,
-				ED36D8B8286DCF0900CA28EC /* Engine.h */,
-				ED36D8B9286DCF0900CA28EC /* reporting.h */,
-				ED36D8BA286DCF0900CA28EC /* Engine.cpp */,
-			);
-			path = reporting;
-			sourceTree = "<group>";
-		};
 		ED36D8F7286DCF1400CA28EC /* server */ = {
 			isa = PBXGroup;
 			children = (
@@ -2456,12 +2574,14 @@
 			children = (
 				ED36DBA0286DD43F00CA28EC /* commands */,
 				ED36DB99286DD42300CA28EC /* Commands.h */,
-				ED36DB96286DD42300CA28EC /* Engine.cpp */,
+				ED91CD2A2D84C1CB00F68DF2 /* CommandSet.h */,
+				ED91CD2B2D84C1CB00F68DF2 /* CommandSet.cpp */,
 				ED36DB97286DD42300CA28EC /* Engine.h */,
+				ED36DB96286DD42300CA28EC /* Engine.cpp */,
 				ED36DB9B286DD42300CA28EC /* MainLoopDefault.cpp */,
-				ED36DB98286DD42300CA28EC /* streamer_stdio.cpp */,
-				ED36DB9A286DD42300CA28EC /* streamer.cpp */,
 				ED36DB95286DD42300CA28EC /* streamer.h */,
+				ED36DB9A286DD42300CA28EC /* streamer.cpp */,
+				ED36DB98286DD42300CA28EC /* streamer_stdio.cpp */,
 			);
 			path = shell;
 			sourceTree = "<group>";
@@ -2470,7 +2590,6 @@
 			isa = PBXGroup;
 			children = (
 				EDAEF94F2BD03707000B3FE0 /* Stat.cpp */,
-				ED36DBA2286DD48C00CA28EC /* Base64.cpp */,
 				ED36DBA1286DD48C00CA28EC /* Config.cpp */,
 				ED36DBA6286DD48C00CA28EC /* Device.cpp */,
 				ED36DBA7286DD48C00CA28EC /* Dns.cpp */,
@@ -2485,47 +2604,47 @@
 		ED36DBB0286DD4A100CA28EC /* support */ = {
 			isa = PBXGroup;
 			children = (
-				ED36DBED286DD57A00CA28EC /* Base64.cpp */,
 				ED36DBE3286DD57A00CA28EC /* Base64.h */,
+				ED36DBED286DD57A00CA28EC /* Base64.cpp */,
 				ED36DBEE286DD57A00CA28EC /* BitFlags.h */,
 				ED36DBDC286DD57A00CA28EC /* BitMask.h */,
-				ED36DBBC286DD57900CA28EC /* BufferReader.cpp */,
 				ED36DBF0286DD57B00CA28EC /* BufferReader.h */,
-				ED36DBE0286DD57A00CA28EC /* BufferWriter.cpp */,
+				ED36DBBC286DD57900CA28EC /* BufferReader.cpp */,
 				ED36DBD3286DD57900CA28EC /* BufferWriter.h */,
-				ED36DBDD286DD57A00CA28EC /* BytesCircularBuffer.cpp */,
+				ED36DBE0286DD57A00CA28EC /* BufferWriter.cpp */,
 				ED36DBB9286DD57800CA28EC /* BytesCircularBuffer.h */,
-				ED36DBB2286DD57800CA28EC /* BytesToHex.cpp */,
+				ED36DBDD286DD57A00CA28EC /* BytesCircularBuffer.cpp */,
 				ED36DBE8286DD57A00CA28EC /* BytesToHex.h */,
-				ED36DBCB286DD57900CA28EC /* CHIPArgParser.cpp */,
+				ED36DBB2286DD57800CA28EC /* BytesToHex.cpp */,
 				ED36DBBE286DD57900CA28EC /* CHIPArgParser.hpp */,
+				ED36DBCB286DD57900CA28EC /* CHIPArgParser.cpp */,
 				ED36DBE6286DD57A00CA28EC /* CHIPCounter.h */,
-				ED36DBFE286DD57B00CA28EC /* CHIPMem-Malloc.cpp */,
-				ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */,
 				ED36DBD9286DD57A00CA28EC /* CHIPMem.h */,
+				ED36DBB6286DD57800CA28EC /* CHIPMem.cpp */,
+				ED36DBFE286DD57B00CA28EC /* CHIPMem-Malloc.cpp */,
 				ED36DBEF286DD57B00CA28EC /* CHIPMemString.h */,
-				ED36DBC9286DD57900CA28EC /* CHIPPlatformMemory.cpp */,
 				ED36DBE1286DD57A00CA28EC /* CHIPPlatformMemory.h */,
+				ED36DBC9286DD57900CA28EC /* CHIPPlatformMemory.cpp */,
 				ED36DBB5286DD57800CA28EC /* CodeUtils.h */,
 				ED36DBC5286DD57900CA28EC /* DefaultStorageKeyAllocator.h */,
 				ED36DBDF286DD57A00CA28EC /* Defer.h */,
 				ED36DBC6286DD57900CA28EC /* DLLUtil.h */,
 				ED36DBBD286DD57900CA28EC /* EnforceFormat.h */,
-				ED36DBDE286DD57A00CA28EC /* FibonacciUtils.cpp */,
 				ED36DBBB286DD57800CA28EC /* FibonacciUtils.h */,
-				ED36DBCE286DD57900CA28EC /* FixedBufferAllocator.cpp */,
+				ED36DBDE286DD57A00CA28EC /* FibonacciUtils.cpp */,
 				ED36DBD4286DD57900CA28EC /* FixedBufferAllocator.h */,
+				ED36DBCE286DD57900CA28EC /* FixedBufferAllocator.cpp */,
 				ED36DBF9286DD57B00CA28EC /* Fold.h */,
 				ED36DBCD286DD57900CA28EC /* FunctionTraits.h */,
 				ED36DBBF286DD57900CA28EC /* IntrusiveList.h */,
 				ED36DBD8286DD57A00CA28EC /* Iterators.h */,
 				ED36DBDB286DD57A00CA28EC /* LifetimePersistedCounter.h */,
 				ED36DC18286DD5A300CA28EC /* logging */,
-				ED36DBFA286DD57B00CA28EC /* Pool.cpp */,
 				ED36DBBA286DD57800CA28EC /* Pool.h */,
+				ED36DBFA286DD57B00CA28EC /* Pool.cpp */,
 				ED36DBEB286DD57A00CA28EC /* PoolWrapper.h */,
-				ED36DBD5286DD57900CA28EC /* PrivateHeap.cpp */,
 				ED36DBE7286DD57A00CA28EC /* PrivateHeap.h */,
+				ED36DBD5286DD57900CA28EC /* PrivateHeap.cpp */,
 				ED36DBCC286DD57900CA28EC /* ReferenceCountedHandle.h */,
 				ED36DBFD286DD57B00CA28EC /* SafeInt.h */,
 				ED36DBC3286DD57900CA28EC /* SafePointerCast.h */,
@@ -2535,23 +2654,20 @@
 				ED36DBFB286DD57B00CA28EC /* Span.h */,
 				ED36DBCF286DD57900CA28EC /* StateMachine.h */,
 				ED36DBD0286DD57900CA28EC /* StringBuilder.h */,
+				ED91CD282D84C13D00F68DF2 /* StringBuilder.cpp */,
 				ED36DBB7286DD57800CA28EC /* TestGroupData.h */,
 				ED36DBE4286DD57A00CA28EC /* TestPersistentStorageDelegate.h */,
-				ED36DBC0286DD57900CA28EC /* ThreadOperationalDataset.cpp */,
 				ED36DBC4286DD57900CA28EC /* ThreadOperationalDataset.h */,
-				ED36DBE5286DD57A00CA28EC /* TimeUtils.cpp */,
+				ED36DBC0286DD57900CA28EC /* ThreadOperationalDataset.cpp */,
 				ED36DBD1286DD57900CA28EC /* TimeUtils.h */,
+				ED36DBE5286DD57A00CA28EC /* TimeUtils.cpp */,
 				ED36DBE9286DD57A00CA28EC /* TypeTraits.h */,
-				ED36DBB3286DD57800CA28EC /* UnitTestContext.h */,
-				ED36DBDA286DD57A00CA28EC /* UnitTestExtendedAssertions.h */,
-				ED36DBC7286DD57900CA28EC /* UnitTestRegistration.cpp */,
-				ED36DBC8286DD57900CA28EC /* UnitTestRegistration.h */,
-				ED36DBD2286DD57900CA28EC /* UnitTestUtils.cpp */,
 				ED36DBD7286DD57900CA28EC /* UnitTestUtils.h */,
+				ED36DBD2286DD57900CA28EC /* UnitTestUtils.cpp */,
 				ED36DBEA286DD57A00CA28EC /* Variant.h */,
 				ED36DBF1286DD57B00CA28EC /* verhoeff */,
-				ED36DBE2286DD57A00CA28EC /* ZclString.cpp */,
 				ED36DBCA286DD57900CA28EC /* ZclString.h */,
+				ED36DBE2286DD57A00CA28EC /* ZclString.cpp */,
 			);
 			path = support;
 			sourceTree = "<group>";
@@ -2691,49 +2807,48 @@
 		ED36DC74286DD72B00CA28EC /* Darwin */ = {
 			isa = PBXGroup;
 			children = (
-				ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */,
-				ED9845E22A6FD98C0057C0D8 /* DnssdType.h */,
 				ED36DC82286DD7F100CA28EC /* BleApplicationDelegate.h */,
 				ED36DC95286DD7F200CA28EC /* BleApplicationDelegateImpl.mm */,
 				ED36DC8C286DD7F100CA28EC /* BleConnectionDelegate.h */,
 				ED36DC7E286DD7F100CA28EC /* BleConnectionDelegateImpl.mm */,
-				ED36DC87286DD7F100CA28EC /* BLEManagerImpl.cpp */,
 				ED36DC7C286DD7F100CA28EC /* BLEManagerImpl.h */,
+				ED36DC87286DD7F100CA28EC /* BLEManagerImpl.cpp */,
 				ED36DC92286DD7F200CA28EC /* BlePlatformConfig.h */,
 				ED36DC86286DD7F100CA28EC /* BlePlatformDelegate.h */,
 				ED36DC94286DD7F200CA28EC /* BlePlatformDelegateImpl.mm */,
 				ED36DC84286DD7F100CA28EC /* CHIPDevicePlatformConfig.h */,
 				ED36DC97286DD7F200CA28EC /* CHIPDevicePlatformEvent.h */,
 				ED36DC93286DD7F200CA28EC /* CHIPPlatformConfig.h */,
-				ED36DC96286DD7F200CA28EC /* ConfigurationManagerImpl.cpp */,
 				ED36DC9A286DD7F200CA28EC /* ConfigurationManagerImpl.h */,
-				ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */,
+				ED36DC96286DD7F200CA28EC /* ConfigurationManagerImpl.cpp */,
 				ED36DC8D286DD7F100CA28EC /* ConnectivityManagerImpl.h */,
-				ED36DC85286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.cpp */,
+				ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */,
 				ED36DC7D286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.h */,
-				ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */,
+				ED36DC85286DD7F100CA28EC /* DeviceInstanceInfoProviderImpl.cpp */,
 				ED36DC99286DD7F200CA28EC /* DiagnosticDataProviderImpl.h */,
+				ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */,
 				ED36DC8E286DD7F100CA28EC /* DnssdContexts.cpp */,
-				ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */,
 				ED7F9A262904312300A7CB48 /* DnssdHostNameRegistrar.h */,
-				ED36DC9B286DD7F200CA28EC /* DnssdImpl.cpp */,
+				ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */,
 				ED36DC8B286DD7F100CA28EC /* DnssdImpl.h */,
+				ED36DC9B286DD7F200CA28EC /* DnssdImpl.cpp */,
+				ED9845E22A6FD98C0057C0D8 /* DnssdType.h */,
+				ED9845E12A6FD98C0057C0D8 /* DnssdType.cpp */,
 				ED36DC98286DD7F200CA28EC /* InetPlatformConfig.h */,
 				ED36DC9C286DD7F200CA28EC /* KeyValueStoreManagerImpl.h */,
 				ED36DC75286DD7F000CA28EC /* KeyValueStoreManagerImpl.mm */,
 				ED0B92D92949DDFF00FA3B04 /* Logging.mm */,
-				ED0B92D82949DDFE00FA3B04 /* LoggingImpl.cpp */,
-				ED36DC8F286DD7F100CA28EC /* MdnsError.cpp */,
 				ED36DC7B286DD7F100CA28EC /* MdnsError.h */,
+				ED36DC8F286DD7F100CA28EC /* MdnsError.cpp */,
 				ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */,
-				ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */,
 				ED36DC77286DD7F100CA28EC /* PlatformManagerImpl.h */,
-				ED36DC90286DD7F100CA28EC /* PosixConfig.cpp */,
+				ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */,
 				ED36DC83286DD7F100CA28EC /* PosixConfig.h */,
+				ED36DC90286DD7F100CA28EC /* PosixConfig.cpp */,
 				ED36DC81286DD7F100CA28EC /* SystemPlatformConfig.h */,
 				ED36DC91286DD7F200CA28EC /* SystemTimeSupport.cpp */,
-				ED36DC78286DD7F100CA28EC /* UUIDHelper.h */,
-				ED36DC7A286DD7F100CA28EC /* UUIDHelperImpl.mm */,
+				ED91CCBC2D84BD8100F68DF2 /* UserDefaults.h */,
+				ED91CCBD2D84BD8100F68DF2 /* UserDefaults.mm */,
 			);
 			path = Darwin;
 			sourceTree = "<group>";
@@ -2899,6 +3014,7 @@
 		ED36DD79286DD9C100CA28EC /* tracing */ = {
 			isa = PBXGroup;
 			children = (
+				ED91CD262D84C06D00F68DF2 /* json */,
 			);
 			path = tracing;
 			sourceTree = "<group>";
@@ -3031,6 +3147,7 @@
 		ED36DE12286DDD5200CA28EC /* xcode-include */ = {
 			isa = PBXGroup;
 			children = (
+				ED91CC732D84996100F68DF2 /* access */,
 				ED36DE13286DDD5200CA28EC /* asn1 */,
 				ED36DE15286DDD5200CA28EC /* crypto */,
 				ED36DE17286DDD5200CA28EC /* core */,
@@ -3192,39 +3309,42 @@
 		ED36DE4F286E02CD00CA28EC /* util */ = {
 			isa = PBXGroup;
 			children = (
+				ED36DE5C286E02CD00CA28EC /* af-types.h */,
 				ED3B0CBD2CEE1C7F00C80694 /* att-storage.h */,
+				ED36DE72286E02CD00CA28EC /* attribute-metadata.h */,
 				ED3B0CBE2CEE1C7F00C80694 /* attribute-metadata.cpp */,
+				ED36DE69286E02CD00CA28EC /* attribute-storage.h */,
+				ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */,
+				ED36DE79286E02CD00CA28EC /* attribute-storage-null-handling.h */,
+				ED36DE50286E02CD00CA28EC /* attribute-table.h */,
+				ED36DE7E286E02CD00CA28EC /* attribute-table.cpp */,
+				ED36DE77286E02CD00CA28EC /* basic-types.h */,
+				ED36DE5A286E02CD00CA28EC /* binding-table.h */,
+				ED36DE74286E02CD00CA28EC /* binding-table.cpp */,
+				ED36DE58286E02CD00CA28EC /* config.h */,
+				ED36DE53286E02CD00CA28EC /* DataModelHandler.h */,
+				ED36DE5D286E02CD00CA28EC /* DataModelHandler.cpp */,
 				ED3B0CBF2CEE1C7F00C80694 /* ember-compatibility-functions.h */,
+				ED36DE7A286E02CD00CA28EC /* ember-compatibility-functions.cpp */,
+				ED91CCB62D84BB4700F68DF2 /* ember-global-attribute-access-interface.h */,
+				ED91CCB72D84BB4700F68DF2 /* ember-global-attribute-access-interface.cpp */,
+				ED91CCB82D84BB4700F68DF2 /* ember-io-storage.h */,
+				ED91CCB92D84BB4700F68DF2 /* ember-io-storage.cpp */,
 				ED3B0CC02CEE1C7F00C80694 /* ember-strings.h */,
 				ED3B0CC12CEE1C7F00C80694 /* ember-strings.cpp */,
 				ED3B0CC22CEE1C7F00C80694 /* endpoint-config-api.h */,
-				ED3B0CC32CEE1C7F00C80694 /* MatterCallbacks.cpp */,
-				ED36DE5C286E02CD00CA28EC /* af-types.h */,
-				ED36DE6B286E02CD00CA28EC /* af.h */,
-				ED36DE72286E02CD00CA28EC /* attribute-metadata.h */,
-				ED36DE79286E02CD00CA28EC /* attribute-storage-null-handling.h */,
-				ED36DE56286E02CD00CA28EC /* attribute-storage.cpp */,
-				ED36DE69286E02CD00CA28EC /* attribute-storage.h */,
-				ED36DE7E286E02CD00CA28EC /* attribute-table.cpp */,
-				ED36DE50286E02CD00CA28EC /* attribute-table.h */,
-				ED36DE77286E02CD00CA28EC /* basic-types.h */,
-				ED36DE74286E02CD00CA28EC /* binding-table.cpp */,
-				ED36DE5A286E02CD00CA28EC /* binding-table.h */,
-				ED36DE58286E02CD00CA28EC /* config.h */,
-				ED36DE5D286E02CD00CA28EC /* DataModelHandler.cpp */,
-				ED36DE53286E02CD00CA28EC /* DataModelHandler.h */,
-				ED36DE7A286E02CD00CA28EC /* ember-compatibility-functions.cpp */,
 				EDB388F429E6F2AC00BDAED4 /* endpoint-config-defines.h */,
 				EDB388F329E6F2AC00BDAED4 /* generic-callback-stubs.cpp */,
 				EDB388F229E6F2AC00BDAED4 /* generic-callbacks.h */,
 				ED36DE68286E02CD00CA28EC /* im-client-callbacks.h */,
 				ED36DE76286E02CD00CA28EC /* MatterCallbacks.h */,
+				ED3B0CC32CEE1C7F00C80694 /* MatterCallbacks.cpp */,
 				ED36DE7B286E02CD00CA28EC /* odd-sized-integers.h */,
-				ED36DE6D286E02CD00CA28EC /* privilege-storage.cpp */,
 				ED36DE75286E02CD00CA28EC /* privilege-storage.h */,
+				ED36DE6D286E02CD00CA28EC /* privilege-storage.cpp */,
 				ED36DE70286E02CD00CA28EC /* types_stub.h */,
-				ED36DE52286E02CD00CA28EC /* util.cpp */,
 				ED36DE71286E02CD00CA28EC /* util.h */,
+				ED36DE52286E02CD00CA28EC /* util.cpp */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -3296,6 +3416,97 @@
 			);
 			name = connectedhomeip;
 			path = third_party/connectedhomeip;
+			sourceTree = "<group>";
+		};
+		ED91CC732D84996100F68DF2 /* access */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CC722D84996100F68DF2 /* AccessBuildConfig.h */,
+			);
+			path = access;
+			sourceTree = "<group>";
+		};
+		ED91CCD22D84BE2700F68DF2 /* data-model */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CCC22D84BE2700F68DF2 /* BasicTypes.h */,
+				ED91CCC42D84BE2700F68DF2 /* DecodableList.h */,
+				ED91CCC52D84BE2700F68DF2 /* Decode.h */,
+				ED91CCC62D84BE2700F68DF2 /* EncodableToTLV.h */,
+				ED91CCC72D84BE2700F68DF2 /* Encode.h */,
+				ED91CCC82D84BE2700F68DF2 /* FabricScoped.h */,
+				ED91CCC92D84BE2700F68DF2 /* FabricScopedPreEncodedValue.h */,
+				ED91CCCA2D84BE2700F68DF2 /* FabricScopedPreEncodedValue.cpp */,
+				ED91CCCB2D84BE2700F68DF2 /* List.h */,
+				ED91CCCC2D84BE2700F68DF2 /* ListLargeSystemExtensions.h */,
+				ED91CCCD2D84BE2700F68DF2 /* Nullable.h */,
+				ED91CCCE2D84BE2700F68DF2 /* NullObject.h */,
+				ED91CCCF2D84BE2700F68DF2 /* PreEncodedValue.h */,
+				ED91CCD02D84BE2700F68DF2 /* PreEncodedValue.cpp */,
+				ED91CCD12D84BE2700F68DF2 /* WrappedStructEncoder.h */,
+			);
+			path = "data-model";
+			sourceTree = "<group>";
+		};
+		ED91CCE92D84BE2700F68DF2 /* data-model-provider */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CCDC2D84BE2700F68DF2 /* ActionContext.h */,
+				ED91CCDD2D84BE2700F68DF2 /* ActionReturnStatus.h */,
+				ED91CCDE2D84BE2700F68DF2 /* ActionReturnStatus.cpp */,
+				ED91CCE02D84BE2700F68DF2 /* Context.h */,
+				ED91CCE12D84BE2700F68DF2 /* EventsGenerator.h */,
+				ED91CCE22D84BE2700F68DF2 /* MetadataTypes.h */,
+				ED91CCE32D84BE2700F68DF2 /* MetadataTypes.cpp */,
+				ED91CCE42D84BE2700F68DF2 /* OperationTypes.h */,
+				ED91CCE52D84BE2700F68DF2 /* Provider.h */,
+				ED91CCE62D84BE2700F68DF2 /* ProviderChangeListener.h */,
+			);
+			path = "data-model-provider";
+			sourceTree = "<group>";
+		};
+		ED91CCF92D84BFD800F68DF2 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CCF82D84BFD800F68DF2 /* CompatEnumNames.h */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		ED91CD042D84BFD800F68DF2 /* ember_coupling */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CD032D84BFD800F68DF2 /* EventPathValidity.mixin.h */,
+			);
+			path = ember_coupling;
+			sourceTree = "<group>";
+		};
+		ED91CD182D84BFD800F68DF2 /* reporting */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CD082D84BFD800F68DF2 /* Engine.h */,
+				ED91CD092D84BFD800F68DF2 /* Engine.cpp */,
+				ED91CD0A2D84BFD800F68DF2 /* Read.h */,
+				ED91CD0F2D84BFD800F68DF2 /* Read-Ember.h */,
+				ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */,
+				ED91CD112D84BFD800F68DF2 /* reporting.h */,
+				ED91CD122D84BFD800F68DF2 /* reporting.cpp */,
+				ED91CD132D84BFD800F68DF2 /* ReportScheduler.h */,
+				ED91CD142D84BFD800F68DF2 /* ReportSchedulerImpl.h */,
+				ED91CD152D84BFD800F68DF2 /* ReportSchedulerImpl.cpp */,
+				ED91CD162D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.h */,
+				ED91CD172D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp */,
+			);
+			path = reporting;
+			sourceTree = "<group>";
+		};
+		ED91CD262D84C06D00F68DF2 /* json */ = {
+			isa = PBXGroup;
+			children = (
+				ED91CD242D84C06D00F68DF2 /* json_tracing.h */,
+				ED91CD252D84C06D00F68DF2 /* json_tracing.cpp */,
+			);
+			path = json;
 			sourceTree = "<group>";
 		};
 		ED9845F12A72543E0057C0D8 /* scenes-server */ = {
@@ -3669,11 +3880,11 @@
 				EDF3F534289BF23C00A82418 /* on-off-server.cpp in Sources */,
 				ED36DE9B286E043500CA28EC /* PersistedStorage.cpp in Sources */,
 				ED36D87F286DCDED00CA28EC /* WriteRequestMessage.cpp in Sources */,
-				ED36DC9F286DD7F200CA28EC /* UUIDHelperImpl.mm in Sources */,
 				EDF3F532289AA96000A82418 /* groups-server.cpp in Sources */,
 				ED36DA8D286DD14F00CA28EC /* FabricTable.cpp in Sources */,
 				ED36DD15286DD8A000CA28EC /* UserDirectedCommissioningServer.cpp in Sources */,
 				ED36D8EF286DCF0B00CA28EC /* TimedRequest.cpp in Sources */,
+				ED91CD292D84C13D00F68DF2 /* StringBuilder.cpp in Sources */,
 				ED36DCA7286DD7F200CA28EC /* DnssdContexts.cpp in Sources */,
 				ED36D90B286DCF5100CA28EC /* Dnssd.cpp in Sources */,
 				ED36DCFC286DD8A000CA28EC /* PASESession.cpp in Sources */,
@@ -3699,8 +3910,19 @@
 				ED36DAD7286DD27200CA28EC /* IPPacketInfo.cpp in Sources */,
 				ED36D7F9286DCDA300CA28EC /* wifi-network-diagnostics-server.cpp in Sources */,
 				ED36DC62286DD6A400CA28EC /* ReliableMessageMgr.cpp in Sources */,
+				ED91CCA42D84AB7D00F68DF2 /* DeferredAttributePersistenceProvider.cpp in Sources */,
+				ED91CCA52D84AB7D00F68DF2 /* SimpleSubscriptionResumptionStorage.cpp in Sources */,
+				ED91CCA62D84AB7D00F68DF2 /* SubscriptionResumptionSessionEstablisher.cpp in Sources */,
+				ED91CCA72D84AB7D00F68DF2 /* GenericEventManagementTestEventTriggerHandler.cpp in Sources */,
+				ED91CCA82D84AB7D00F68DF2 /* CommandHandlerImpl.cpp in Sources */,
+				ED91CCA92D84AB7D00F68DF2 /* CommandHandlerInterfaceRegistry.cpp in Sources */,
+				ED91CCAA2D84AB7D00F68DF2 /* InteractionModelDelegatePointers.cpp in Sources */,
+				ED91CCED2D84BE2700F68DF2 /* FabricScopedPreEncodedValue.cpp in Sources */,
+				ED91CCEF2D84BE2700F68DF2 /* ActionReturnStatus.cpp in Sources */,
+				ED91CCF02D84BE2700F68DF2 /* PreEncodedValue.cpp in Sources */,
+				ED91CCF32D84BE2700F68DF2 /* MetadataTypes.cpp in Sources */,
+				ED91CCAB2D84AB7D00F68DF2 /* PendingResponseTrackerImpl.cpp in Sources */,
 				ED36D873286DCDED00CA28EC /* CommandStatusIB.cpp in Sources */,
-				ED9845DF2A6FD9040057C0D8 /* ReportSchedulerImpl.cpp in Sources */,
 				ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */,
 				ED2B994A2A85166B007AD119 /* factorydataprovider.cpp in Sources */,
 				ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */,
@@ -3744,7 +3966,6 @@
 				ED36DC60286DD6A400CA28EC /* ErrorCategory.cpp in Sources */,
 				ED36D78B286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36DBAD286DD48C00CA28EC /* Device.cpp in Sources */,
-				ED36D8E7286DCF0B00CA28EC /* Engine.cpp in Sources */,
 				ED24BDE028A68AE20025CC14 /* fdcomm.cpp in Sources */,
 				ED36DA88286DD14F00CA28EC /* CHIPCertToX509.cpp in Sources */,
 				ED36DC0D286DD57B00CA28EC /* BufferWriter.cpp in Sources */,
@@ -3758,7 +3979,6 @@
 				ED36DAB4286DD20600CA28EC /* CHIPCryptoPAL.cpp in Sources */,
 				ED36D877286DCDED00CA28EC /* WriteResponseMessage.cpp in Sources */,
 				ED36D88B286DCDED00CA28EC /* EventFilterIB.cpp in Sources */,
-				ED36D8E1286DCF0B00CA28EC /* AttributePathExpandIterator.cpp in Sources */,
 				ED36D789286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36DC01286DD57B00CA28EC /* CHIPMem.cpp in Sources */,
 				EDB388EF29E6EF8E00BDAED4 /* TLVUtilities.cpp in Sources */,
@@ -3786,7 +4006,7 @@
 				ED36D785286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36DAD2286DD27200CA28EC /* IPAddress.cpp in Sources */,
 				ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */,
-				ED36D8E9286DCF0B00CA28EC /* AttributeAccessInterface.cpp in Sources */,
+				ED91CC762D849B2500F68DF2 /* AccessRestrictionProvider.cpp in Sources */,
 				ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */,
 				ED072F672A69BBD6007BBF71 /* window-covering-server.cpp in Sources */,
 				ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */,
@@ -3794,6 +4014,12 @@
 				ED36DA89286DD14F00CA28EC /* CHIPCertFromX509.cpp in Sources */,
 				ED36D87E286DCDED00CA28EC /* InvokeResponseIB.cpp in Sources */,
 				ED36DCA9286DD7F200CA28EC /* PosixConfig.cpp in Sources */,
+				ED91CC862D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp in Sources */,
+				ED91CC872D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp in Sources */,
+				ED91CC882D849BA000F68DF2 /* AttributePathExpandIterator-Ember.cpp in Sources */,
+				ED91CC892D849BA000F68DF2 /* AttributeReportBuilder.cpp in Sources */,
+				ED91CC8A2D849BA000F68DF2 /* AttributeValueEncoder.cpp in Sources */,
+				ED91CC8B2D849BA000F68DF2 /* AttributeAccessInterfaceRegistry.cpp in Sources */,
 				ED36DDD5286DDA0300CA28EC /* CryptoContext.cpp in Sources */,
 				ED36DC17286DD57B00CA28EC /* CHIPMem-Malloc.cpp in Sources */,
 				ED36DC67286DD6A400CA28EC /* ReliableMessageContext.cpp in Sources */,
@@ -3806,6 +4032,7 @@
 				ED36DC47286DD65900CA28EC /* CHIPKeyIds.cpp in Sources */,
 				ED36D874286DCDED00CA28EC /* AttributeStatusIB.cpp in Sources */,
 				ED36DDE8286DDAF300CA28EC /* json_writer.cpp in Sources */,
+				ED91CCBE2D84BD8100F68DF2 /* UserDefaults.mm in Sources */,
 				ED36D871286DCDED00CA28EC /* EventPathIBs.cpp in Sources */,
 				ED36DD10286DD8A000CA28EC /* BdxMessages.cpp in Sources */,
 				ED36DD08286DD8A000CA28EC /* SimpleSessionResumptionStorage.cpp in Sources */,
@@ -3845,10 +4072,10 @@
 				EDF3F54728A521EE00A82418 /* OperationalSessionSetup.cpp in Sources */,
 				ED36D7EE286DCDA300CA28EC /* localization-configuration-server.cpp in Sources */,
 				ED36DD71286DD9A400CA28EC /* SystemClock.cpp in Sources */,
-				ED36DC05286DD57B00CA28EC /* UnitTestRegistration.cpp in Sources */,
 				ED36DDD6286DDA0300CA28EC /* SessionManager.cpp in Sources */,
 				ED36DCFA286DD8A000CA28EC /* MessageCounterManager.cpp in Sources */,
 				ED36D868286DCDED00CA28EC /* StructBuilder.cpp in Sources */,
+				ED91CD272D84C06D00F68DF2 /* json_tracing.cpp in Sources */,
 				EDAEF94C2BD03605000B3FE0 /* FailSafeContext.cpp in Sources */,
 				ED36DAB3286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp in Sources */,
 				ED36D883286DCDED00CA28EC /* AttributeReportIBs.cpp in Sources */,
@@ -3861,7 +4088,6 @@
 				ED36DD73286DD9A400CA28EC /* TLVPacketBufferBackingStore.cpp in Sources */,
 				ED36DB90286DD2CE00CA28EC /* ASN1Writer.cpp in Sources */,
 				ED36DD41286DD91500CA28EC /* AdditionalDataPayloadGenerator.cpp in Sources */,
-				ED36DBAA286DD48C00CA28EC /* Base64.cpp in Sources */,
 				ED36D7F2286DCDA300CA28EC /* general-commissioning-server.cpp in Sources */,
 				ED36DD3F286DD91500CA28EC /* Base38Encode.cpp in Sources */,
 				EDB388EC29E6EF8E00BDAED4 /* TLVReader.cpp in Sources */,
@@ -3902,6 +4128,7 @@
 				ED36DCFE286DD8A000CA28EC /* PairingSession.cpp in Sources */,
 				ED36DD0C286DD8A000CA28EC /* BdxUri.cpp in Sources */,
 				ED36DE7F286E02CD00CA28EC /* util.cpp in Sources */,
+				ED91CD2C2D84C1CB00F68DF2 /* CommandSet.cpp in Sources */,
 				ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */,
 				ED36D872286DCDED00CA28EC /* TimedRequestMessage.cpp in Sources */,
 				ED36D90A286DCF5100CA28EC /* EchoHandler.cpp in Sources */,
@@ -3929,6 +4156,11 @@
 				ED36D87C286DCDED00CA28EC /* InvokeResponseIBs.cpp in Sources */,
 				EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */,
 				ED36DD75286DD9A400CA28EC /* SystemMutex.cpp in Sources */,
+				ED91CD192D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp in Sources */,
+				ED91CD1C2D84BFD800F68DF2 /* Read-Ember.cpp in Sources */,
+				ED91CD1E2D84BFD800F68DF2 /* Engine.cpp in Sources */,
+				ED91CD212D84BFD800F68DF2 /* ReportSchedulerImpl.cpp in Sources */,
+				ED91CD222D84BFD800F68DF2 /* reporting.cpp in Sources */,
 				ED36DAE5286DD29600CA28EC /* AddressResolve_DefaultImpl.cpp in Sources */,
 				ED36DC08286DD57B00CA28EC /* FixedBufferAllocator.cpp in Sources */,
 				ED36D7EF286DCDA300CA28EC /* operational-credentials-server.cpp in Sources */,
@@ -3938,6 +4170,8 @@
 				ED36D8DF286DCF0B00CA28EC /* DefaultAttributePersistenceProvider.cpp in Sources */,
 				ED36D788286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36D869286DCDED00CA28EC /* AttributeDataIB.cpp in Sources */,
+				ED91CCBA2D84BB4700F68DF2 /* ember-io-storage.cpp in Sources */,
+				ED91CCBB2D84BB4700F68DF2 /* ember-global-attribute-access-interface.cpp in Sources */,
 				ED2B994B2A852BC2007AD119 /* p44deviceattestationprovider.cpp in Sources */,
 				ED14F427294A2E8F001C9D2E /* IPAddressSorter.cpp in Sources */,
 				ED36DCAA286DD7F200CA28EC /* SystemTimeSupport.cpp in Sources */,
@@ -3948,8 +4182,6 @@
 				ED36DADB286DD27200CA28EC /* TCPEndPointImplSockets.cpp in Sources */,
 				ED36DADA286DD27200CA28EC /* IPAddress-StringFuncts.cpp in Sources */,
 				ED36D890286DCDED00CA28EC /* Parser.cpp in Sources */,
-				ED3B0CCA2CEE1DEE00C80694 /* reporting.cpp in Sources */,
-				ED3B0CCB2CEE1DEE00C80694 /* SynchronizedReportSchedulerImpl.cpp in Sources */,
 				ED36DAD5286DD27200CA28EC /* UDPEndPointImplSockets.cpp in Sources */,
 				ED36DCA8286DD7F200CA28EC /* MdnsError.cpp in Sources */,
 				ED3B0CD12CEE2C2700C80694 /* CommandResponseSender.cpp in Sources */,
