@@ -77,14 +77,18 @@ class DeviceColorControl : public DeviceLevelControl
 
   bool mCtOnly;
 
+protected:
+
+  typedef chip::BitMask<ColorControl::OptionsBitmap> ColorControlOptionsType;
+
 public:
 
   /// @note: internal color mode, combined from ColorMode and EnhancedColorMode
   enum class InternalColorMode : uint8_t {
-    hs = ColorControlServer::EnhancedColorMode::kCurrentHueAndCurrentSaturation,
-    xy = ColorControlServer::EnhancedColorMode::kCurrentXAndCurrentY,
-    ct = ColorControlServer::EnhancedColorMode::kColorTemperature,
-    enhanced_hs = ColorControlServer::EnhancedColorMode::kEnhancedCurrentHueAndCurrentSaturation, // TODO: not yet implemented, is optional
+    hs = to_underlying(ColorControl::EnhancedColorMode::kCurrentHueAndCurrentSaturation),
+    xy = to_underlying(ColorControl::EnhancedColorMode::kCurrentXAndCurrentY),
+    ct = to_underlying(ColorControl::EnhancedColorMode::kColorTemperatureMireds),
+    enhanced_hs = to_underlying(ColorControl::EnhancedColorMode::kEnhancedCurrentHueAndCurrentSaturation), // TODO: not yet implemented, is optional
     unknown_mode = 0xFF // internal only, should not be exposed, matter attributes is non-nullable
   };
 
@@ -111,7 +115,7 @@ public:
   bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
 
-  bool shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride);
+  bool shouldExecuteColorChange(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride);
 
   /// handler for external attribute read access
   virtual Status handleReadAttribute(ClusterId clusterId, chip::AttributeId attributeId, uint8_t * buffer, uint16_t maxReadLength) override;

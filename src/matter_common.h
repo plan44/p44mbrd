@@ -41,4 +41,5 @@
 #include <app/reporting/reporting.h>
 #include <app/util/util.h>
 #include <app/util/attribute-storage-null-handling.h>
+#include <app/AttributeAccessInterface.h>
 

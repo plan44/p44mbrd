@@ -156,7 +156,7 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
 // MARK: levelControl cluster command implementation callbacks
 
 
-bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride)
 {
   // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
   //   "Command execution SHALL NOT continue beyond the Options processing if
@@ -183,7 +183,7 @@ bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, OptType aOpti
 
 
 
-Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, OptType aOptionMask,OptType aOptionOverride)
+Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTime, bool aWithOnOff, LevelControlOptionsType aOptionMask,LevelControlOptionsType aOptionOverride)
 {
   Status status = Status::Success;
 
@@ -272,7 +272,7 @@ bool emberAfLevelControlClusterStepWithOnOffCallback(
 
 
 
-Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride)
 {
   Status status = Status::Success;
 
@@ -328,7 +328,7 @@ bool emberAfLevelControlClusterMoveWithOnOffCallback(
 }
 
 
-Status DeviceLevelControl::stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride)
+Status DeviceLevelControl::stop(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride)
 {
   Status status = Status::Success;
 

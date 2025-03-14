@@ -102,8 +102,8 @@ void DeviceColorControl::didGetInstalled()
   Attributes::FeatureMap::Set(endpointId(), featureMap());
   Attributes::ColorCapabilities::Set(
     endpointId(),
-    (uint16_t)to_underlying(ColorControl::ColorCapabilities::kColorTemperatureSupported) |
-    (uint16_t)(mCtOnly ? 0 : to_underlying(ColorControl::ColorCapabilities::kHueSaturationSupported)|to_underlying(ColorControl::ColorCapabilities::kXYAttributesSupported))
+    (uint16_t)to_underlying(ColorControl::ColorCapabilities::ColorTemperatureSupported) |
+    (uint16_t)(mCtOnly ? 0 : to_underlying(ColorControl::ColorCapabilities::HueSaturationSupported)|to_underlying(ColorControl::ColorCapabilities::XYAttributesSupported))
   );
   Attributes::CoupleColorTempToLevelMinMireds::Set(endpointId(), COLOR_TEMP_PHYSICAL_MIN);
   Attributes::NumberOfPrimaries::Set(endpointId(), 0);
@@ -277,7 +277,7 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
 
 // MARK: color control cluster command implementation callbacks
 
-bool DeviceColorControl::shouldExecuteColorChange(OptType aOptionMask, OptType aOptionOverride)
+bool DeviceColorControl::shouldExecuteColorChange(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride)
 {
   // From 3.10.2.2.8.1 of ZCL7 document 14-0127-20j-zcl-ch-3-general.docx:
   //   "Command execution SHALL NOT continue beyond the Options processing if
@@ -293,9 +293,9 @@ bool DeviceColorControl::shouldExecuteColorChange(OptType aOptionMask, OptType a
     return true;
   }
   // now the options bit decides about executing or not
-  uint8_t opt;
+  chip::BitMask<chip::app::Clusters::ColorControl::OptionsBitmap> opt;
   ColorControl::Attributes::Options::Get(endpointId(), &opt);
-  return (opt & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
+  return (opt.Raw() & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
 }
 
 

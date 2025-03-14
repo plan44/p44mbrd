@@ -82,7 +82,7 @@ class DeviceLevelControl : public DeviceOnOff, public LevelControlImplementation
 
 protected:
 
-  typedef chip::BitMask<LevelControl::LevelControlOptions> OptType;
+  typedef chip::BitMask<LevelControl::LevelControlOptions> LevelControlOptionsType;
 
 public:
 
@@ -110,9 +110,9 @@ public:
 
   /// @name handlers for command implementations
   /// @{
-  Status moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
-  Status move(LevelControl::MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
-  Status stop(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  Status moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
+  Status move(LevelControl::MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
+  Status stop(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
   void effect(bool aNewValue);
   /// @}
 
@@ -126,7 +126,7 @@ private:
   uint8_t mLevel;
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
-  bool shouldExecuteLevelChange(bool aWithOnOff, OptType aOptionMask, OptType aOptionOverride);
+  bool shouldExecuteLevelChange(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
 };
 
 

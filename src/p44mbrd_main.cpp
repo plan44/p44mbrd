@@ -30,14 +30,12 @@
 #include <app-common/zap-generated/ids/Clusters.h>
 
 #include <app/EventLogging.h>
-//#include <app/chip-zcl-zpro-codec.h>
 #include <app/reporting/reporting.h>
 #include <app/util/af-types.h>
-#include <app/util/af.h>
 #include <app/util/attribute-storage.h>
 #include <app/server/CommissioningWindowManager.h>
-//#include <app/util/attribute-table.h>
 #include <app/util/util.h>
+#include <app/AttributeAccessInterfaceRegistry.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 #include <lib/core/CHIPError.h>
@@ -1180,7 +1178,7 @@ void MatterActionsPluginServerInitCallback()
 {
   // register actions server attribute access class
   P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
-  registerAttributeAccessOverride(&app.getActionsManager());
+  chip::app::AttributeAccessInterfaceRegistry::Instance().Register(&app.getActionsManager());
 }
 
 
