@@ -26,7 +26,6 @@
 #include "matter_common.h"
 #include "p44mbrd_common.h"
 
-
 using namespace chip;
 using namespace app;
 using namespace Clusters;
@@ -85,6 +84,8 @@ private:
 typedef boost::intrusive_ptr<Action> ActionPtr;
 
 
+class BridgeAdapter;
+
 class ActionsManager : public AttributeAccessInterface
 {
 public:
@@ -96,8 +97,11 @@ public:
   ActionsManager(ActionsMap& aActions, EndPointListsMap& aEndPointLists) :
     AttributeAccessInterface(Optional<EndpointId>::Missing(), Actions::Id),
     mActions(aActions),
-    mEndPointLists(aEndPointLists)
+    mEndPointLists(aEndPointLists),
+    mBridgeAdapterP(nullptr)
   {}
+
+  void setBridgeAdapter(BridgeAdapter* aBridgeAdapterP) { mBridgeAdapterP = aBridgeAdapterP; }
 
   CHIP_ERROR Read(const ConcreteReadAttributePath & aPath, AttributeValueEncoder & aEncoder) override;
 
@@ -113,11 +117,11 @@ private:
 
   ActionsMap& mActions;
   EndPointListsMap& mEndPointLists;
+  BridgeAdapter* mBridgeAdapterP;
 
   CHIP_ERROR ReadActionListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
   CHIP_ERROR ReadEndpointListAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
   CHIP_ERROR ReadSetupUrlAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder);
-  CHIP_ERROR ReadClusterRevision(EndpointId endpoint, AttributeValueEncoder & aEncoder);
 };
 
 

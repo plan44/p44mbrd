@@ -87,6 +87,10 @@ public:
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }
 
+  /// @return setup URL (WebUI) of this bridge (or the device(s) it bridges)
+  /// TODO: add actual CC WebUI URL here (for now, needed only when we have actions)
+  virtual string setupURL() override { return ""; }
+
   /// @brief start the CC bridge adapter implementation
   /// The adapter should query its API, discover devices to bridge to matter, instantiate them,
   /// and add them via registerInitialDevice() for publishing to matter when the stack has started up.

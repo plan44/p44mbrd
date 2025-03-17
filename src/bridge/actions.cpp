@@ -22,7 +22,7 @@
 //
 
 #include "actions.h"
-
+#include "adapters.h"
 
 // MARK: - EndpointListInfo
 
@@ -106,6 +106,15 @@ CHIP_ERROR ActionsManager::ReadEndpointListAttribute(EndpointId endpoint, Attrib
 }
 
 
+CHIP_ERROR ActionsManager::ReadSetupUrlAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
+{
+  string setupURL;
+  if (mBridgeAdapterP) setupURL = mBridgeAdapterP->setupURL();
+  return aEncoder.Encode(chip::Span<const char>(setupURL.c_str(), setupURL.size()));
+}
+
+
+
 CHIP_ERROR ActionsManager::Read(const ConcreteReadAttributePath & aPath, AttributeValueEncoder & aEncoder)
 {
   VerifyOrDie(aPath.mClusterId == Actions::Id);
@@ -116,7 +125,9 @@ CHIP_ERROR ActionsManager::Read(const ConcreteReadAttributePath & aPath, Attribu
       return ReadActionListAttribute(aPath.mEndpointId, aEncoder);
     case Actions::Attributes::EndpointLists::Id:
       return ReadEndpointListAttribute(aPath.mEndpointId, aEncoder);
-    // Note: we let ember storage handle URL and cluster version
+    case Actions::Attributes::SetupURL::Id:
+      return ReadSetupUrlAttribute(aPath.mEndpointId, aEncoder);
+    // Note: we let ember storage handle cluster version
     default:
       // As long as we don't touch aEncoder (which would set TriedEncode())
       // exiting here will fall back to automatic ember storage

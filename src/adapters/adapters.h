@@ -160,6 +160,10 @@ public:
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() = 0;
 
+  /// @return setup URL (WebUI) of this bridge (or the device(s) it bridges)
+  virtual string setupURL() = 0;
+
+
   /// @brief is called by matter side to update commissioning info in bridge adapters
   /// @note the adapter should be ready to receive and store this data independently of the
   ///    current commissioning status.

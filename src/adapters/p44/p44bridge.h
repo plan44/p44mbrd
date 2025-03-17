@@ -48,6 +48,7 @@ class P44_BridgeImpl : public BridgeAdapter, public P44LoggingObj
   string mLabel;
   string mModel;
   string mSerial;
+  string mSetupURL;
 
 public:
 
@@ -97,6 +98,9 @@ public:
 
   /// @return serial number of this bridge (or the device it bridges)
   virtual string serial() override { return mSerial; }
+
+  /// @return setup URL (WebUI) of this bridge (or the device(s) it bridges)
+  virtual string setupURL() override { return mSetupURL; }
 
 
   /// @brief start the P44 bridge adapter implementation

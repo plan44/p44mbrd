@@ -619,6 +619,10 @@ public:
       bool startnow = false;
       for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
         if ((*pos)->hasBridgeableDevices()) {
+          if (!startnow) {
+            // first bridge's setup will be used in actions (setupURL for example)
+            mActionsManager.setBridgeAdapter(*pos);
+          }
           startnow = true;
         }
       }

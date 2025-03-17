@@ -197,7 +197,7 @@ void P44_BridgeImpl::queryBridge()
   // query devices
   JsonObjectPtr params = JsonObject::objFromText(
     "{ \"method\":\"getProperty\", \"dSUID\":\"root\", \"query\":{ "
-    "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, "
+    "\"dSUID\":null, \"model\":null, \"name\":null, \"x-p44-deviceHardwareId\":null, \"configURL\":null, "
     "\"x-p44-vdcs\": { \"*\":{ \"x-p44-devices\": { \"*\": "
     NEEDED_DEVICE_PROPERTIES
     "} }} }}"
@@ -558,6 +558,9 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
     if (result->get("x-p44-deviceHardwareId", o)) {
       mSerial = o->stringValue();
     }
+    if (result->get("configURL", o)) {
+      mSetupURL = o->stringValue();
+    }
     // process device list
     JsonObjectPtr vdcs;
     // devices
@@ -579,28 +582,6 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
       }
     }
   }
-  // create a endpoint list for each known zone
-  /*
-  // TODO: actually derive actions from rooms and scenes
-  // register one endpoint list
-  EndpointListInfoPtr endpointList = new EndpointListInfo(
-    0xEEEE,
-    "TestZoneBridge",
-    Actions::EndpointListTypeEnum::kOther
-  );
-  endpointList->addEndpoint(1); // FIXME: get action endpoint id from somewhere reliableb
-  addOrReplaceEndpointsList(endpointList, UpdateMode());
-  // register one test action
-  ActionPtr testAction = new Action(
-    0x4242, // actionId,
-    "testAction",
-    Actions::ActionTypeEnum::kScene,
-    0xEEEE, // FIXME: reference real list
-    0x03, // instant and instantWithTransition // FIXME: use names
-    Actions::ActionStateEnum::kInactive // FIXME: real value
-  );
-  addOrReplaceAction(testAction, UpdateMode());
-  */
   // report started (ONCE!)
   startupComplete(ErrorPtr());
 }
@@ -633,7 +614,6 @@ void P44_BridgeImpl::updateZoneDependencies(DsZoneID aZoneID, UpdateMode aUpdate
         }
       }
       addOrReplaceEndpointsList(endpointList, aUpdateMode);
-      // TODO: actually implement the action
       // FIXME: for now, just generate a deep-off action with same ID as the room
       // register one test action
       ActionPtr deepOffAction = new P44SceneAction(
