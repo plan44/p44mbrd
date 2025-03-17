@@ -15,7 +15,6 @@ void MatterGroupsPluginServerInitCallback();
 void MatterIdentifyPluginServerInitCallback();
 void MatterIlluminanceMeasurementPluginServerInitCallback();
 void MatterLevelControlPluginServerInitCallback();
-void MatterLocalizationConfigurationPluginServerInitCallback();
 void MatterNetworkCommissioningPluginServerInitCallback();
 void MatterOccupancySensingPluginServerInitCallback();
 void MatterOnOffPluginServerInitCallback();
@@ -42,7 +41,6 @@ void MatterWindowCoveringPluginServerInitCallback();
     MatterIdentifyPluginServerInitCallback(); \
     MatterIlluminanceMeasurementPluginServerInitCallback(); \
     MatterLevelControlPluginServerInitCallback(); \
-    MatterLocalizationConfigurationPluginServerInitCallback(); \
     MatterNetworkCommissioningPluginServerInitCallback(); \
     MatterOccupancySensingPluginServerInitCallback(); \
     MatterOnOffPluginServerInitCallback(); \
