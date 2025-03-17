@@ -215,11 +215,13 @@ void Device::didBecomeOperational()
   OLOG(LOG_INFO, "did become operational: (internal) UID: %s", mDeviceInfoDelegate.endpointUID().c_str());
   if (!isPartOfComposedDevice()) {
     OLOG(LOG_INFO, "Bridged Device Basic Information:"
+      "\n- UniqueID: %s"
       "\n- NodeLabel: %s"
       "\n- VendorName: %s"
       "\n- ProductName: %s"
       "\n- SerialNumber: %s"
       "\n- ProductURL: %s",
+      ATTR_STRING(BridgedDeviceBasicInformation, UniqueID, endpointId()).c_str(),
       ATTR_STRING(BridgedDeviceBasicInformation, NodeLabel, endpointId()).c_str(),
       ATTR_STRING(BridgedDeviceBasicInformation, VendorName, endpointId()).c_str(),
       ATTR_STRING(BridgedDeviceBasicInformation, ProductName, endpointId()).c_str(),
@@ -278,12 +280,20 @@ Status Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId attrib
     if (attributeId == BridgedDeviceBasicInformation::Attributes::Reachable::Id) {
       return getAttr(buffer, maxReadLength, mDeviceInfoDelegate.isReachable());
     }
+    // UniqueID
+    if (attributeId == BridgedDeviceBasicInformation::Attributes::UniqueID::Id) {
+      string uniqueID = mDeviceInfoDelegate.endpointUID();
+      FOCUSOLOG("reading UniqueID (max: %hd bytes): %s", maxReadLength-1, uniqueID.c_str());
+      MutableByteSpan zclNameSpan(buffer, maxReadLength);
+      MakeZclCharString(zclNameSpan, uniqueID.substr(0,maxReadLength-1).c_str());
+      return Status::Success; // do not return MakeZclCharString failures
+    }
     // Writable Node Label
     if (attributeId == BridgedDeviceBasicInformation::Attributes::NodeLabel::Id) {
-      FOCUSOLOG("reading node label: %s", mNodeLabel.c_str());
+      FOCUSOLOG("reading node label (max: %hd bytes): %s", maxReadLength-1, mNodeLabel.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, mNodeLabel.substr(0,maxReadLength-1).c_str());
-      return Status::Success;
+      return Status::Success; // do not return MakeZclCharString failures
     }
   }
   return Status::Failure;

@@ -153,6 +153,10 @@ void CC_BridgeImpl::jsonRpcConnectionStatusHandler(ErrorPtr aStatus)
     // - call `registerInitialDevice()` for the (possibly composed) device
 
     // TODO: implement
+    #ifndef __APPLE__
+    // This is for Simon as a reminder to prevent actual implementation to lack UIDs
+    #error "need to implement UID on bridge level and device level, related matter attributes got mandatory in 1.4"
+    #endif
 
     // Query the API for device discovery
 
