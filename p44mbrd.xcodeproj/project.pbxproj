@@ -317,6 +317,14 @@
 		ED60FD1028C7D0BA00FE950E /* extutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED60FD0E28C7D0B900FE950E /* extutils.cpp */; };
 		ED690B62286DC7F600069215 /* p44mbrd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */; };
 		ED692E9D2A9782A700A378D7 /* switchdevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED692E9C2A9782A700A378D7 /* switchdevices.cpp */; };
+		ED742AAC2D87835200E3C0B0 /* CodegenDataModelProvider_Read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AA32D87835200E3C0B0 /* CodegenDataModelProvider_Read.cpp */; };
+		ED742AAD2D87835200E3C0B0 /* CodegenDataModelProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AA22D87835200E3C0B0 /* CodegenDataModelProvider.cpp */; };
+		ED742AAF2D87835200E3C0B0 /* EmberMetadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AA62D87835200E3C0B0 /* EmberMetadata.cpp */; };
+		ED742AB02D87835200E3C0B0 /* CodegenDataModelProvider_Write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AA42D87835200E3C0B0 /* CodegenDataModelProvider_Write.cpp */; };
+		ED742AB42D87835200E3C0B0 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AA82D87835200E3C0B0 /* Instance.cpp */; };
+		ED742AB92D87846200E3C0B0 /* Read-Checked.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AB62D87846200E3C0B0 /* Read-Checked.cpp */; };
+		ED742ABB2D8784A900E3C0B0 /* Read-DataModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED742AB82D87846200E3C0B0 /* Read-DataModel.cpp */; };
+		ED742ABC2D8785EC00E3C0B0 /* Read-Ember.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */; };
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
@@ -343,7 +351,6 @@
 		ED91CCF02D84BE2700F68DF2 /* PreEncodedValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCD02D84BE2700F68DF2 /* PreEncodedValue.cpp */; };
 		ED91CCF32D84BE2700F68DF2 /* MetadataTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CCE32D84BE2700F68DF2 /* MetadataTypes.cpp */; };
 		ED91CD192D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD172D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp */; };
-		ED91CD1C2D84BFD800F68DF2 /* Read-Ember.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */; };
 		ED91CD1E2D84BFD800F68DF2 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD092D84BFD800F68DF2 /* Engine.cpp */; };
 		ED91CD212D84BFD800F68DF2 /* ReportSchedulerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD152D84BFD800F68DF2 /* ReportSchedulerImpl.cpp */; };
 		ED91CD222D84BFD800F68DF2 /* reporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CD122D84BFD800F68DF2 /* reporting.cpp */; };
@@ -1264,6 +1271,20 @@
 		ED690B5C286DC7F600069215 /* p44mbrd_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44mbrd_main.cpp; sourceTree = "<group>"; };
 		ED692E9B2A9782A700A378D7 /* switchdevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = switchdevices.h; sourceTree = "<group>"; };
 		ED692E9C2A9782A700A378D7 /* switchdevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = switchdevices.cpp; sourceTree = "<group>"; };
+		ED742AA02D87835200E3C0B0 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
+		ED742AA12D87835200E3C0B0 /* CodegenDataModelProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CodegenDataModelProvider.h; sourceTree = "<group>"; };
+		ED742AA22D87835200E3C0B0 /* CodegenDataModelProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenDataModelProvider.cpp; sourceTree = "<group>"; };
+		ED742AA32D87835200E3C0B0 /* CodegenDataModelProvider_Read.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenDataModelProvider_Read.cpp; sourceTree = "<group>"; };
+		ED742AA42D87835200E3C0B0 /* CodegenDataModelProvider_Write.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenDataModelProvider_Write.cpp; sourceTree = "<group>"; };
+		ED742AA52D87835200E3C0B0 /* EmberMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EmberMetadata.h; sourceTree = "<group>"; };
+		ED742AA62D87835200E3C0B0 /* EmberMetadata.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EmberMetadata.cpp; sourceTree = "<group>"; };
+		ED742AA72D87835200E3C0B0 /* Instance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Instance.h; sourceTree = "<group>"; };
+		ED742AA82D87835200E3C0B0 /* Instance.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Instance.cpp; sourceTree = "<group>"; };
+		ED742AAA2D87835200E3C0B0 /* model.gni */ = {isa = PBXFileReference; lastKnownFileType = text; path = model.gni; sourceTree = "<group>"; };
+		ED742AB52D87846200E3C0B0 /* Read-Checked.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Read-Checked.h"; sourceTree = "<group>"; };
+		ED742AB62D87846200E3C0B0 /* Read-Checked.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Read-Checked.cpp"; sourceTree = "<group>"; };
+		ED742AB72D87846200E3C0B0 /* Read-DataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Read-DataModel.h"; sourceTree = "<group>"; };
+		ED742AB82D87846200E3C0B0 /* Read-DataModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Read-DataModel.cpp"; sourceTree = "<group>"; };
 		ED7F9A1C2902C31B00A7CB48 /* sensordevices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensordevices.cpp; sourceTree = "<group>"; };
 		ED7F9A1D2902C31B00A7CB48 /* sensordevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensordevices.h; sourceTree = "<group>"; };
 		ED7F9A222902DE5C00A7CB48 /* p44bridgeapi_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = p44bridgeapi_defs.h; sourceTree = "<group>"; };
@@ -1898,6 +1919,7 @@
 				ED36D7B6286DCD0900CA28EC /* clusters */,
 				ED36D8A5286DCF0800CA28EC /* ClusterStateCache.h */,
 				ED36D8B2286DCF0900CA28EC /* ClusterStateCache.cpp */,
+				ED742AAB2D87835200E3C0B0 /* codegen-data-model-provider */,
 				ED36D8CA286DCF0A00CA28EC /* CommandHandler.h */,
 				ED36D8C6286DCF0A00CA28EC /* CommandHandler.cpp */,
 				ED91CC8C2D84AB7D00F68DF2 /* CommandHandlerExchangeInterface.h */,
@@ -3418,6 +3440,23 @@
 			path = third_party/connectedhomeip;
 			sourceTree = "<group>";
 		};
+		ED742AAB2D87835200E3C0B0 /* codegen-data-model-provider */ = {
+			isa = PBXGroup;
+			children = (
+				ED742AA02D87835200E3C0B0 /* BUILD.gn */,
+				ED742AA12D87835200E3C0B0 /* CodegenDataModelProvider.h */,
+				ED742AA22D87835200E3C0B0 /* CodegenDataModelProvider.cpp */,
+				ED742AA32D87835200E3C0B0 /* CodegenDataModelProvider_Read.cpp */,
+				ED742AA42D87835200E3C0B0 /* CodegenDataModelProvider_Write.cpp */,
+				ED742AA52D87835200E3C0B0 /* EmberMetadata.h */,
+				ED742AA62D87835200E3C0B0 /* EmberMetadata.cpp */,
+				ED742AA72D87835200E3C0B0 /* Instance.h */,
+				ED742AA82D87835200E3C0B0 /* Instance.cpp */,
+				ED742AAA2D87835200E3C0B0 /* model.gni */,
+			);
+			path = "codegen-data-model-provider";
+			sourceTree = "<group>";
+		};
 		ED91CC732D84996100F68DF2 /* access */ = {
 			isa = PBXGroup;
 			children = (
@@ -3487,6 +3526,10 @@
 				ED91CD082D84BFD800F68DF2 /* Engine.h */,
 				ED91CD092D84BFD800F68DF2 /* Engine.cpp */,
 				ED91CD0A2D84BFD800F68DF2 /* Read.h */,
+				ED742AB52D87846200E3C0B0 /* Read-Checked.h */,
+				ED742AB62D87846200E3C0B0 /* Read-Checked.cpp */,
+				ED742AB72D87846200E3C0B0 /* Read-DataModel.h */,
+				ED742AB82D87846200E3C0B0 /* Read-DataModel.cpp */,
 				ED91CD0F2D84BFD800F68DF2 /* Read-Ember.h */,
 				ED91CD102D84BFD800F68DF2 /* Read-Ember.cpp */,
 				ED91CD112D84BFD800F68DF2 /* reporting.h */,
@@ -3895,6 +3938,11 @@
 				ED24BDDE28A68AE20025CC14 /* mainloop.cpp in Sources */,
 				ED36D90C286DCF5100CA28EC /* Server.cpp in Sources */,
 				ED36DE9C286E043500CA28EC /* DeviceInstanceInfoProvider.cpp in Sources */,
+				ED742AAC2D87835200E3C0B0 /* CodegenDataModelProvider_Read.cpp in Sources */,
+				ED742AAD2D87835200E3C0B0 /* CodegenDataModelProvider.cpp in Sources */,
+				ED742AAF2D87835200E3C0B0 /* EmberMetadata.cpp in Sources */,
+				ED742AB02D87835200E3C0B0 /* CodegenDataModelProvider_Write.cpp in Sources */,
+				ED742AB42D87835200E3C0B0 /* Instance.cpp in Sources */,
 				ED36D8EB286DCF0B00CA28EC /* WriteHandler.cpp in Sources */,
 				ED36DE88286E02CD00CA28EC /* binding-table.cpp in Sources */,
 				EDAEF94E2BD0369D000B3FE0 /* InetInterfaceImplDefault.cpp in Sources */,
@@ -3903,6 +3951,7 @@
 				ED36DA8C286DD14F00CA28EC /* DeviceAttestationConstructor.cpp in Sources */,
 				ED36D8F3286DCF0B00CA28EC /* TimedHandler.cpp in Sources */,
 				ED36DDC5286DDA0300CA28EC /* SecureSession.cpp in Sources */,
+				ED742AB92D87846200E3C0B0 /* Read-Checked.cpp in Sources */,
 				ED36DD42286DD91500CA28EC /* QRCodeSetupPayloadGenerator.cpp in Sources */,
 				ED36D8EC286DCF0B00CA28EC /* DeviceProxy.cpp in Sources */,
 				ED36D8ED286DCF0B00CA28EC /* CommandHandler.cpp in Sources */,
@@ -3957,6 +4006,7 @@
 				ED9B79172AC5A16E00B09890 /* IMClusterCommandHandler.cpp in Sources */,
 				ED36D864286DCDED00CA28EC /* ArrayBuilder.cpp in Sources */,
 				ED36D87A286DCDED00CA28EC /* AttributeReportIB.cpp in Sources */,
+				ED742ABB2D8784A900E3C0B0 /* Read-DataModel.cpp in Sources */,
 				EDAEF9532BD11E8A000B3FE0 /* DecoderCustomLog.cpp in Sources */,
 				ED36D8E0286DCF0B00CA28EC /* EventManagement.cpp in Sources */,
 				ED36DDD0286DDA0300CA28EC /* Session.cpp in Sources */,
@@ -3979,6 +4029,7 @@
 				ED36DAB4286DD20600CA28EC /* CHIPCryptoPAL.cpp in Sources */,
 				ED36D877286DCDED00CA28EC /* WriteResponseMessage.cpp in Sources */,
 				ED36D88B286DCDED00CA28EC /* EventFilterIB.cpp in Sources */,
+				ED742ABC2D8785EC00E3C0B0 /* Read-Ember.cpp in Sources */,
 				ED36D789286DCB8A00CA28EC /* Decoder.cpp in Sources */,
 				ED36DC01286DD57B00CA28EC /* CHIPMem.cpp in Sources */,
 				EDB388EF29E6EF8E00BDAED4 /* TLVUtilities.cpp in Sources */,
@@ -4157,7 +4208,6 @@
 				EDB388ED29E6EF8E00BDAED4 /* TLVUpdater.cpp in Sources */,
 				ED36DD75286DD9A400CA28EC /* SystemMutex.cpp in Sources */,
 				ED91CD192D84BFD800F68DF2 /* SynchronizedReportSchedulerImpl.cpp in Sources */,
-				ED91CD1C2D84BFD800F68DF2 /* Read-Ember.cpp in Sources */,
 				ED91CD1E2D84BFD800F68DF2 /* Engine.cpp in Sources */,
 				ED91CD212D84BFD800F68DF2 /* ReportSchedulerImpl.cpp in Sources */,
 				ED91CD222D84BFD800F68DF2 /* reporting.cpp in Sources */,
