@@ -335,6 +335,15 @@ public:
   void makeCommissionable(bool aIsCommissionable)
   {
     if (aIsCommissionable) {
+      // Open the basic commissioning window (BCM, Basic commissioning method, like for factory-reset device)
+      // Note: enhanced commissioning window (ECM, Enhanced commissioning method) may be triggered from
+      //   an administrator in an already operational devices, and will NOT need QR code and/or setup code
+      //   to be displayed by the devices. Instead, current administrator picks a random setup code and
+      //   provides the to-be-commissioned device(s) (such as this bridge) with a PAKE verifier for that
+      //   temporary setup code. Then, the *administrator* presents the random setup code / QR code to the user,
+      //   who then can use it to let *another* administrator (app) to commission the device(s) as well
+      //   (hence: *multi* admin).
+      //   So, ECM does not need any bridge UI support.
       Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow();
     }
     else {
