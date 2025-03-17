@@ -99,8 +99,9 @@ static const EmberAfDeviceType gOccupancySensingTypes[] = {
 };
 
 
-OccupancySensingDevice::OccupancySensingDevice(IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
-  inherited(aIdentifyDelegateP, aDeviceInfoDelegate)
+OccupancySensingDevice::OccupancySensingDevice(HalOccupancySensorType aType, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+  inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
+  mOccupancySensorType(aType)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gOccupancySensingClusters));
@@ -113,29 +114,17 @@ bool OccupancySensingDevice::finalizeDeviceDeclaration()
 }
 
 
-void OccupancySensingDevice::didGetInstalled()
-{
-  // override static attribute defaults
-  // Note: actual device implementation might override these if it has better information
-  //   about the type of sensor
-  using namespace OccupancySensing;
-  Attributes::OccupancySensorType::Set(endpointId(), OccupancySensorTypeEnum::kPir);
-  Attributes::OccupancySensorTypeBitmap::Set(endpointId(), BitMask<OccupancySensorTypeBitmap>(OccupancySensorTypeBitmap::kPir));
-  // call base class last (which will call implementation delegate, which then can override the defaults above)
-  inherited::didGetInstalled();
-}
-
-
-
 void OccupancySensingDevice::updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode)
 {
   using namespace OccupancySensing;
   if (aIsValid) {
-    BitMask<OccupancyBitmap> b;
-    if (aState) b.Set(OccupancyBitmap::kOccupied);
-    Attributes::Occupancy::Set(endpointId(), b);
-    if (aUpdateMode.Has(UpdateFlags::matter)) {
-      reportAttributeChange(BooleanState::Id, BooleanState::Attributes::StateValue::Id);
-    }
+    halOccupancyStateChangedCallback(endpointId(), aState ? HAL_OCCUPANCY_STATE_OCCUPIED : HAL_OCCUPANCY_STATE_UNOCCUPIED );
   }
+}
+
+HalOccupancySensorType halOccupancyGetSensorType(EndpointId aEndpointId)
+{
+  auto dev = DeviceEndpoints::getDevice<OccupancySensingDevice>(aEndpointId);
+  if (dev) return dev->getOccupancySensorType();
+  return HAL_OCCUPANCY_SENSOR_TYPE_PIR; // default, should not happen
 }
