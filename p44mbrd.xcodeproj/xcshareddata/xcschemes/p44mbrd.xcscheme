@@ -58,11 +58,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--dynamicpin --discriminator 3292"
-            isEnabled = "YES">
+            argument = "--ccapihost 192.168.59.121"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--ccapihost 192.168.59.121"
+            argument = "--dynamicpin --discriminator 3292"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
