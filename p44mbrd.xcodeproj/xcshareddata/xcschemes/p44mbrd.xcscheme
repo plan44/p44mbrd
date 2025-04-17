@@ -58,6 +58,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--p44apihost 192.168.11.175"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--ccapihost 192.168.59.121"
             isEnabled = "NO">
          </CommandLineArgument>

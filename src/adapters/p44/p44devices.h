@@ -100,7 +100,6 @@ public:
   /// @brief init device with information from bridge query results
   /// @note the device does not yet have a endpointID at this point and CANNOT ACCESS ATTRIBUTES yet
   /// @param aDeviceInfo the JSON object for the entire bridge-side device
-  /// @param aDeviceComponentInfo the JSON description object for the output or input that should be handled
   /// @param aInputType the name of the input type (sensor, binaryInput, button), or NULL if device is not an input device
   /// @param aInputId the name of the input ID within the input type, or NULL if device not an input device
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr);
@@ -395,7 +394,7 @@ private:
 /// @brief P44 composed device (no functionality of its own, just container with device info
 class P44_ComposedDevice final :
   public ComposedDevice, // the matter side device
-  public P44_DeviceImpl // the P44 side delegate implementation
+  public P44_ComposedImpl // the P44 side delegate implementation
 {
 public:
   P44_ComposedDevice() : ComposedDevice(DG(DeviceInfo)) {}; // this class itself implements all needed delegates

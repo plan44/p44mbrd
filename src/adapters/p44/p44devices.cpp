@@ -244,6 +244,9 @@ void P44_DeviceImpl::call(const string aMethod, JsonObjectPtr aParams, JSonMessa
 
 void P44_ComposedImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties)
 {
+  // composed device itself
+  inherited::handleBridgePushProperties(aChangedProperties);
+  // let subdevices look at it
   for (DevicesList::iterator pos = device().subDevices().begin(); pos!=device().subDevices().end(); ++pos) {
     P44_DeviceImpl::impl(*pos)->handleBridgePushProperties(aChangedProperties);
   }
