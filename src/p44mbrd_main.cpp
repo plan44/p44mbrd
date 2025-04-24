@@ -697,6 +697,7 @@ public:
           DevicePtr subDev = *pos;
           if (subDev->addAsDeviceEndpoint()) {
             POLOG(subDev, LOG_NOTICE, "added as part of composed device as additional dynamic endpoint while CHIP is already up");
+            aDevice->didGetInstalled();
             subDev->didBecomeOperational();
             // dump status
             POLOG(subDev, LOG_INFO, "initialized composed device as part of %s", aDevice->description().c_str());
