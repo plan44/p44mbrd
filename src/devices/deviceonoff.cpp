@@ -123,6 +123,7 @@ string DeviceOnOff::description()
 {
   string s = inherited::description();
   string_format_append(s, "\n- OnOff: %d", mOn);
+  string_format_append(s, "\n- lighting: %d", mLighting);
   return s;
 }
 
