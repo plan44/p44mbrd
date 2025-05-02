@@ -327,7 +327,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               }
               else {
                 // not something specific, only switched or dimmed output
-                OLOG(LOG_NOTICE, "found bridgeable generic device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                OLOG(LOG_NOTICE, "found bridgeable generic output device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
                 switch(outputfunction) {
                   case outputFunction_switch: // switch output
                     dev = new P44_OnOffPluginUnitDevice();
@@ -490,7 +490,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                         dev->setSemanticTags(Span<SemanticTag>(gOutDoorTags));
                         break;
                     }
-                    OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", name.c_str(), inputid.c_str(), dsuid.c_str());
+                    OLOG(LOG_NOTICE, "found bridgeable input '%s' in device '%s': %s", inputid.c_str(), name.c_str(), dsuid.c_str());
                     P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON, inputTypeNames[inputType], inputid.c_str());
                     devices.push_back(dev);
                     dev.reset();
@@ -524,13 +524,10 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           // add bridge-side representing device (singular or possibly composed) to UID map
           registerInitialDevice(mainDevice);
           // enable it for bridging on the other side
-          JsonObjectPtr params = JsonObject::newObj();
-          params->add("dSUID", JsonObject::newString(dsuid));
-          JsonObjectPtr props = JsonObject::newObj();
-          props->add("x-p44-bridged", JsonObject::newBool(true));
-          params->add("properties", props);
+          JsonObjectPtr p = JsonObject::newBool(true);
+          p = p->wrapAs("x-p44-bridged")->wrapAs("properties");
           // no callback, but will wait when bridgeapi is in standalone mode
-          api().call("setProperty", params, NoOP);
+          P44_DeviceImpl::impl(mainDevice)->call("setProperty", p, NoOP);
         }
       } // has dSUID
     } // if bridgeable

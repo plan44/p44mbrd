@@ -217,6 +217,10 @@ void P44_DeviceImpl::handleBridgePushProperties(JsonObjectPtr aChangedProperties
       // note: non-bridgeable status just makes device unreachable
       mBridgeable = o->boolValue();
       device().updateReachable(isReachable(), UpdateMode(UpdateFlags::matter));
+      // confirm new bridged status
+      JsonObjectPtr p = JsonObject::newBool(mBridgeable);
+      p = p->wrapAs("x-p44-bridged")->wrapAs("properties");
+      call("setProperty", p, NoOP);
     }
   }
 }
