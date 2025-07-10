@@ -968,8 +968,8 @@ void P44_ButtonImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   mPosition = 0;
   // configure switch
   SwitchDevice* dev = deviceP<SwitchDevice>();
-  // - number of positions
-  Switch::Attributes::NumberOfPositions::Set(endpointId(), (uint8_t)dev->mActivePositions.size());
+  // - number of positions (always one more than active ones, so never <2)
+  Switch::Attributes::NumberOfPositions::Set(endpointId(), (uint8_t)dev->mActivePositions.size()+1);
   // - fixed features for P44 buttons
   Switch::Attributes::FeatureMap::Set(endpointId(),
     to_underlying(Switch::Feature::kMomentarySwitch) |
