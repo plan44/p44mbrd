@@ -111,11 +111,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--loglevel 6"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--loglevel 7"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--chiploglevel 2"

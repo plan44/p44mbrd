@@ -224,10 +224,9 @@ bitmap TestGlobalBitmap : bitmap32 {
   kSecondBit = 0x2;
 }
 
-struct TestGlobalStruct {
-  char_string<128> name = 0;
-  nullable TestGlobalBitmap myBitmap = 1;
-  optional nullable TestGlobalEnum myEnum = 2;
+struct AtomicAttributeStatusStruct {
+  attrib_id attributeID = 0;
+  status statusCode = 1;
 }
 
 struct LocationDescriptorStruct {
@@ -236,9 +235,10 @@ struct LocationDescriptorStruct {
   nullable AreaTypeTag areaType = 2;
 }
 
-struct AtomicAttributeStatusStruct {
-  attrib_id attributeID = 0;
-  status statusCode = 1;
+struct TestGlobalStruct {
+  char_string<128> name = 0;
+  nullable TestGlobalBitmap myBitmap = 1;
+  optional nullable TestGlobalEnum myEnum = 2;
 }
 
 /** Attributes and commands for putting a device into Identification mode (e.g. flashing a light). */
@@ -742,183 +742,6 @@ cluster AccessControl = 31 {
 
   /** This command signals to the service associated with the device vendor that the fabric administrator would like a review of the current restrictions on the accessing fabric. */
   fabric command access(invoke: administer) ReviewFabricRestrictions(ReviewFabricRestrictionsRequest): ReviewFabricRestrictionsResponse = 0;
-}
-
-/** This cluster provides a standardized way for a Node (typically a Bridge, but could be any Node) to expose action information. */
-cluster Actions = 37 {
-  revision 1; // NOTE: Default/not specifically set
-
-  enum ActionErrorEnum : enum8 {
-    kUnknown = 0;
-    kInterrupted = 1;
-  }
-
-  enum ActionStateEnum : enum8 {
-    kInactive = 0;
-    kActive = 1;
-    kPaused = 2;
-    kDisabled = 3;
-  }
-
-  enum ActionTypeEnum : enum8 {
-    kOther = 0;
-    kScene = 1;
-    kSequence = 2;
-    kAutomation = 3;
-    kException = 4;
-    kNotification = 5;
-    kAlarm = 6;
-  }
-
-  enum EndpointListTypeEnum : enum8 {
-    kOther = 0;
-    kRoom = 1;
-    kZone = 2;
-  }
-
-  bitmap CommandBits : bitmap16 {
-    kInstantAction = 0x1;
-    kInstantActionWithTransition = 0x2;
-    kStartAction = 0x4;
-    kStartActionWithDuration = 0x8;
-    kStopAction = 0x10;
-    kPauseAction = 0x20;
-    kPauseActionWithDuration = 0x40;
-    kResumeAction = 0x80;
-    kEnableAction = 0x100;
-    kEnableActionWithDuration = 0x200;
-    kDisableAction = 0x400;
-    kDisableActionWithDuration = 0x800;
-  }
-
-  struct ActionStruct {
-    int16u actionID = 0;
-    char_string<32> name = 1;
-    ActionTypeEnum type = 2;
-    int16u endpointListID = 3;
-    CommandBits supportedCommands = 4;
-    ActionStateEnum state = 5;
-  }
-
-  struct EndpointListStruct {
-    int16u endpointListID = 0;
-    char_string<32> name = 1;
-    EndpointListTypeEnum type = 2;
-    endpoint_no endpoints[] = 3;
-  }
-
-  info event StateChanged = 0 {
-    int16u actionID = 0;
-    int32u invokeID = 1;
-    ActionStateEnum newState = 2;
-  }
-
-  info event ActionFailed = 1 {
-    int16u actionID = 0;
-    int32u invokeID = 1;
-    ActionStateEnum newState = 2;
-    ActionErrorEnum error = 3;
-  }
-
-  readonly attribute ActionStruct actionList[] = 0;
-  readonly attribute EndpointListStruct endpointLists[] = 1;
-  readonly attribute optional long_char_string<512> setupURL = 2;
-  readonly attribute command_id generatedCommandList[] = 65528;
-  readonly attribute command_id acceptedCommandList[] = 65529;
-  readonly attribute event_id eventList[] = 65530;
-  readonly attribute attrib_id attributeList[] = 65531;
-  readonly attribute bitmap32 featureMap = 65532;
-  readonly attribute int16u clusterRevision = 65533;
-
-  request struct InstantActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct InstantActionWithTransitionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-    int16u transitionTime = 2;
-  }
-
-  request struct StartActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct StartActionWithDurationRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-    int32u duration = 2;
-  }
-
-  request struct StopActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct PauseActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct PauseActionWithDurationRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-    int32u duration = 2;
-  }
-
-  request struct ResumeActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct EnableActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct EnableActionWithDurationRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-    int32u duration = 2;
-  }
-
-  request struct DisableActionRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-  }
-
-  request struct DisableActionWithDurationRequest {
-    int16u actionID = 0;
-    optional int32u invokeID = 1;
-    int32u duration = 2;
-  }
-
-  /** This command triggers an action (state change) on the involved endpoints. */
-  command InstantAction(InstantActionRequest): DefaultSuccess = 0;
-  /** This command triggers an action (state change) on the involved endpoints, with a specified time to transition from the current state to the new state. */
-  command InstantActionWithTransition(InstantActionWithTransitionRequest): DefaultSuccess = 1;
-  /** This command triggers the commencement of an action on the involved endpoints. */
-  command StartAction(StartActionRequest): DefaultSuccess = 2;
-  /** This command triggers the commencement of an action (with a duration) on the involved endpoints. */
-  command StartActionWithDuration(StartActionWithDurationRequest): DefaultSuccess = 3;
-  /** This command stops the ongoing action on the involved endpoints. */
-  command StopAction(StopActionRequest): DefaultSuccess = 4;
-  /** This command pauses an ongoing action. */
-  command PauseAction(PauseActionRequest): DefaultSuccess = 5;
-  /** This command pauses an ongoing action with a duration. */
-  command PauseActionWithDuration(PauseActionWithDurationRequest): DefaultSuccess = 6;
-  /** This command resumes a previously paused action. */
-  command ResumeAction(ResumeActionRequest): DefaultSuccess = 7;
-  /** This command enables a certain action or automation. */
-  command EnableAction(EnableActionRequest): DefaultSuccess = 8;
-  /** This command enables a certain action or automation with a duration. */
-  command EnableActionWithDuration(EnableActionWithDurationRequest): DefaultSuccess = 9;
-  /** This command disables a certain action or automation. */
-  command DisableAction(DisableActionRequest): DefaultSuccess = 10;
-  /** This command disables a certain action or automation with a duration. */
-  command DisableActionWithDuration(DisableActionWithDurationRequest): DefaultSuccess = 11;
 }
 
 /** This cluster provides attributes and events for determining basic information about Nodes, which supports both
@@ -2736,20 +2559,6 @@ endpoint 1 {
     callback attribute attributeList;
     callback attribute featureMap;
     callback attribute clusterRevision;
-  }
-
-  server cluster Actions {
-    callback attribute actionList;
-    callback attribute endpointLists;
-    callback attribute setupURL default = "https://example.com";
-    callback attribute generatedCommandList;
-    callback attribute acceptedCommandList;
-    callback attribute attributeList;
-    ram      attribute featureMap default = 0;
-    ram      attribute clusterRevision default = 1;
-
-    handle command InstantAction;
-    handle command InstantActionWithTransition;
   }
 }
 endpoint 2 {

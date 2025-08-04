@@ -82,6 +82,8 @@ public:
   /// usually during adapter's installInitialDevices()
   virtual ChipError installDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
 
+  #if P44MBRD_ENABLE_ACTIONS
+
   /// can be called to register an action
   /// @param aAction pointer to action object
   virtual void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) = 0;
@@ -89,6 +91,8 @@ public:
   /// can be called to register an endpoint list (for the actions cluster)
   /// @param aEndPointList pointer to endpoint list object
   virtual void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) = 0;
+
+  #endif // P44MBRD_ENABLE_ACTIONS
 
   /// cause all adapters to identify bridge
   virtual void bridgeGlobalIdentify(int aDurationS) = 0;
@@ -242,6 +246,8 @@ public:
   /// @return Ok or error when requested commission status cannot be established (or bridge is not running)
   ErrorPtr requestCommissioning(bool aCommissionable);
 
+  #if P44MBRD_ENABLE_ACTIONS
+
   /// can be called to register an action
   /// @param aAction pointer to action object
   void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode);
@@ -249,6 +255,8 @@ public:
   /// can be called to register an endpoint list (for the actions cluster)
   /// @param aEndPointList pointer to endpoint list object
   void addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode);
+
+  #endif // P44MBRD_ENABLE_ACTIONS
 
   /// @}
 

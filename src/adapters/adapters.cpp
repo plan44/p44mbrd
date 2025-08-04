@@ -100,7 +100,7 @@ void BridgeAdapter::bridgeAdditionalDevice(DevicePtr aDevice)
 
 void BridgeAdapter::removeDevice(DevicePtr aDevice)
 {
-  return mBridgeMainDelegateP->disableDevice(aDevice, *this);
+  mBridgeMainDelegateP->disableDevice(aDevice, *this);
 }
 
 
@@ -110,13 +110,17 @@ ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable)
 }
 
 
+#if P44MBRD_ENABLE_ACTIONS
+
 void BridgeAdapter::addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode)
 {
-  return mBridgeMainDelegateP->addOrReplaceAction(aAction, aUpdateMode, *this);
+  mBridgeMainDelegateP->addOrReplaceAction(aAction, aUpdateMode, *this);
 }
 
 
 void BridgeAdapter::addOrReplaceEndpointsList(EndpointListInfoPtr aEndPointList, UpdateMode aUpdateMode)
 {
-  return mBridgeMainDelegateP->addOrReplaceEndpointsList(aEndPointList, aUpdateMode, *this);
+  mBridgeMainDelegateP->addOrReplaceEndpointsList(aEndPointList, aUpdateMode, *this);
 }
+
+#endif // P44MBRD_ENABLE_ACTIONS

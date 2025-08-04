@@ -31,6 +31,11 @@
   #define CC_ADAPTERS 1
 #endif
 
+#ifndef P44MBRD_ENABLE_ACTIONS
+  #define P44MBRD_ENABLE_ACTIONS 0 // 2025-08-04: no actions for now, nobody makes use of them, just complicates testing
+#endif
+
+
 #include "p44utils_common.hpp"
 #include "matter_utils.h"
 #include "logger.hpp"

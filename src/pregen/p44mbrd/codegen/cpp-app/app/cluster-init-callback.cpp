@@ -13,9 +13,6 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case app::Clusters::AccessControl::Id:
         emberAfAccessControlClusterInitCallback(endpoint);
         break;
-    case app::Clusters::Actions::Id:
-        emberAfActionsClusterInitCallback(endpoint);
-        break;
     case app::Clusters::AdministratorCommissioning::Id:
         emberAfAdministratorCommissioningClusterInitCallback(endpoint);
         break;

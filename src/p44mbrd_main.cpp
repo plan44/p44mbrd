@@ -163,9 +163,11 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   int mUnstartedAdapters;
 
   // actions
+  #if P44MBRD_ENABLE_ACTIONS
   ActionsManager::EndPointListsMap mEndPointLists;
   ActionsManager::ActionsMap mActions;
   ActionsManager mActionsManager;
+  #endif // P44MBRD_ENABLE_ACTIONS
 
 public:
 
@@ -173,8 +175,10 @@ public:
     mChipAppInitialized(false),
     mNumDynamicEndPoints(0),
     mFirstFreeEndpointId(kInvalidEndpointId),
-    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver),
-    mActionsManager(mActions, mEndPointLists)
+    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
+    #if P44MBRD_ENABLE_ACTIONS
+    ,mActionsManager(mActions, mEndPointLists)
+    #endif
   {
   }
 
@@ -608,10 +612,12 @@ public:
   }
 
 
+  #if P44MBRD_ENABLE_ACTIONS
   ActionsManager& getActionsManager()
   {
     return mActionsManager;
   }
+  #endif // P44MBRD_ENABLE_ACTIONS
 
 
   // MARK: - BridgeMainDelegate
@@ -629,8 +635,10 @@ public:
       for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
         if ((*pos)->hasBridgeableDevices()) {
           if (!startnow) {
+            #if P44MBRD_ENABLE_ACTIONS
             // first bridge's setup will be used in actions (setupURL for example)
             mActionsManager.setBridgeAdapter(*pos);
+            #endif
           }
           startnow = true;
         }
@@ -750,6 +758,8 @@ public:
   }
 
 
+  #if P44MBRD_ENABLE_ACTIONS
+
   void addOrReplaceAction(ActionPtr aAction, UpdateMode aUpdateMode, BridgeAdapter& aAdapter) override
   {
     mActions[aAction->getActionId()] = aAction;
@@ -767,6 +777,7 @@ public:
     }
   }
 
+  #endif // P44MBRD_ENABLE_ACTIONS
 
 
   // MARK: - chip application delegate
@@ -1192,7 +1203,9 @@ void MatterActionsPluginServerInitCallback()
 {
   // register actions server attribute access class
   P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+  #if P44MBRD_ENABLE_ACTIONS
   chip::app::AttributeAccessInterfaceRegistry::Instance().Register(&app.getActionsManager());
+  #endif
 }
 
 
@@ -1218,6 +1231,7 @@ void MatterPostAttributeChangeCallback(
 }
 
 
+#if P44MBRD_ENABLE_ACTIONS
 
 bool emberAfActionsClusterInstantActionCallback(
   CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
@@ -1256,6 +1270,8 @@ bool emberAfActionsClusterInstantActionWithTransitionCallback(
   }
   return false; // not handled
 }
+
+#endif // P44MBRD_ENABLE_ACTIONS
 
 
 Status emberAfExternalAttributeReadCallback(

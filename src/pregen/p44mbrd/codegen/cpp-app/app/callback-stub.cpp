@@ -6,11 +6,6 @@ void __attribute__((weak)) emberAfAccessControlClusterInitCallback(EndpointId en
     // To prevent warning
     (void) endpoint;
 }
-void __attribute__((weak)) emberAfActionsClusterInitCallback(EndpointId endpoint)
-{
-    // To prevent warning
-    (void) endpoint;
-}
 void __attribute__((weak)) emberAfAdministratorCommissioningClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning

@@ -533,7 +533,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
     } // if bridgeable
   }
   return mainDevice;
-}
+} 
 
 
 void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr aJsonMsg)
@@ -597,6 +597,7 @@ void P44_BridgeImpl::updateAllZoneDependencies(UpdateMode aUpdateMode)
 void P44_BridgeImpl::updateZoneDependencies(DsZoneID aZoneID, UpdateMode aUpdateMode)
 {
   if (aUpdateMode.Has(UpdateFlags::matter) || aUpdateMode.Has(UpdateFlags::forced)) {
+    #if P44MBRD_ENABLE_ACTIONS
     ZoneMap::iterator zpos = mZoneMap.find(aZoneID);
     if (zpos!=mZoneMap.end()) {
       // create an endpoint list of devices in this zone
@@ -628,7 +629,8 @@ void P44_BridgeImpl::updateZoneDependencies(DsZoneID aZoneID, UpdateMode aUpdate
       // TODO: generate more different actions for different scenes
       // - generate actions for those groups we have devices for (light, shadow)
       // - need to find a way to generate IDs that do not collide with zone ids
-    }  
+    }
+    #endif // P44MBRD_ENABLE_ACTIONS
   }
 }
 

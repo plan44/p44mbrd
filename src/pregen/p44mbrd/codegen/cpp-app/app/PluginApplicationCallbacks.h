@@ -1,6 +1,5 @@
 #pragma once
 void MatterAccessControlPluginServerInitCallback();
-void MatterActionsPluginServerInitCallback();
 void MatterAdministratorCommissioningPluginServerInitCallback();
 void MatterBasicInformationPluginServerInitCallback();
 void MatterBooleanStatePluginServerInitCallback();
@@ -26,7 +25,6 @@ void MatterWindowCoveringPluginServerInitCallback();
 
 #define MATTER_PLUGINS_INIT \
     MatterAccessControlPluginServerInitCallback(); \
-    MatterActionsPluginServerInitCallback(); \
     MatterAdministratorCommissioningPluginServerInitCallback(); \
     MatterBasicInformationPluginServerInitCallback(); \
     MatterBooleanStatePluginServerInitCallback(); \
