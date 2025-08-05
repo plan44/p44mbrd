@@ -1006,8 +1006,8 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
           if (state->get("clickType", o, true)) {
             clicktype = (DsClickType)(o->int32Value());
           }
-          if (position!=mPosition || clicktype==ct_complete) {
-            // actual change of position
+          if (position!=mPosition || clicktype==ct_complete || clicktype==ct_hold_start) {
+            // actual change of position, complete or hold-start
             switch(clicktype) {
               case ct_tip_1x:
               case ct_tip_2x:
@@ -1050,6 +1050,7 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 mClicks = 0;
                 break;
               case ct_hold_start:
+                mClicks = 0; // when we hold, we do not have clicks
                 SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
                 break;
               case ct_hold_end:
