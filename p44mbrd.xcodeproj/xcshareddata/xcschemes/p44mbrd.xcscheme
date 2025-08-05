@@ -118,8 +118,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--chiploglevel 2"
+            argument = "--chiploglevel 3"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--chiploglevel 2"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--chiploglevel 0"
