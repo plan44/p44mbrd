@@ -96,20 +96,24 @@ protected:
 // MARK: - Devices NOT based on specific clusters, not BooleanState
 
 #include <app/clusters/occupancy-sensor-server/occupancy-hal.h>
+#include <app/clusters/occupancy-sensor-server/occupancy-sensor-server.h>
 
 class OccupancySensingDevice : public BinaryInputDevice
 {
   typedef BinaryInputDevice inherited;
 
-  HalOccupancySensorType mOccupancySensorType;
+  OccupancySensing::Instance mOccupancySensorInstance;
 
 public:
 
-  OccupancySensingDevice(HalOccupancySensorType aType, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
+  OccupancySensingDevice(BitMask<OccupancySensing::Feature> aFeatureMask, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate);
+  virtual  ~OccupancySensingDevice();
 
   virtual const char *deviceType() override { return "occupancy sensor"; }
 
-  HalOccupancySensorType getOccupancySensorType() { return mOccupancySensorType; }
+  HalOccupancySensorType getOccupancySensorType();
+
+  void initClusterInstance();
 
   /// update state in occupancy sensing cluster
   virtual void updateCurrentState(bool aState, bool aIsValid, UpdateMode aUpdateMode) override;

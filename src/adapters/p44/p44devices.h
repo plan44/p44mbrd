@@ -520,7 +520,7 @@ class P44_OccupancySensor final :
   public P44_BinaryInputImpl // the P44 side implementation
 {
 public:
-  P44_OccupancySensor(HalOccupancySensorType aType) : OccupancySensingDevice(aType, DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
+  P44_OccupancySensor(BitMask<OccupancySensing::Feature> aFeatures) : OccupancySensingDevice(aFeatures, DGP(Identify), DG(DeviceInfo)) {}; // this class itself implements all needed delegates
   DEVICE_ACCESSOR;
 };
 

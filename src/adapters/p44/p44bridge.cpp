@@ -398,7 +398,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                           case binInpType_motion:
                           case binInpType_motionInDarkness:
                             // assume PIR, which is essentially motion, but commonly used for presence
-                            dev = new P44_OccupancySensor(HAL_OCCUPANCY_SENSOR_TYPE_PIR);
+                            dev = new P44_OccupancySensor(BitMask<OccupancySensing::Feature>(OccupancySensing::Feature::kPassiveInfrared));
                             break;
                           case binInpType_windowHandle:
                             // DS Semantics for Window handle:

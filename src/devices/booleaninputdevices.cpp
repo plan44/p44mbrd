@@ -99,18 +99,49 @@ static const EmberAfDeviceType gOccupancySensingTypes[] = {
 };
 
 
-OccupancySensingDevice::OccupancySensingDevice(HalOccupancySensorType aType, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
+OccupancySensingDevice::OccupancySensingDevice(BitMask<OccupancySensing::Feature> aFeatureMask, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aIdentifyDelegateP, aDeviceInfoDelegate),
-  mOccupancySensorType(aType)
+  mOccupancySensorInstance(aFeatureMask)
 {
   // - declare device specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gOccupancySensingClusters));
+}
+
+OccupancySensingDevice::~OccupancySensingDevice()
+{
+  mOccupancySensorInstance.Shutdown();
 }
 
 
 bool OccupancySensingDevice::finalizeDeviceDeclaration()
 {
   return finalizeDeviceDeclarationWithTypes(Span<const EmberAfDeviceType>(gOccupancySensingTypes));
+}
+
+
+void emberAfOccupancySensingClusterInitCallback(EndpointId aEndpointId)
+{
+  auto dev = DeviceEndpoints::getDevice<OccupancySensingDevice>(aEndpointId);
+  if (dev) dev->initClusterInstance();
+}
+
+
+void OccupancySensingDevice::initClusterInstance()
+{
+  mOccupancySensorInstance.Init();
+}
+
+
+HalOccupancySensorType OccupancySensingDevice::getOccupancySensorType()
+{
+  if (
+      mOccupancySensorInstance.HasFeature(chip::app::Clusters::OccupancySensing::Feature::kPassiveInfrared) &&
+      mOccupancySensorInstance.HasFeature(chip::app::Clusters::OccupancySensing::Feature::kUltrasonic)
+  ) return HAL_OCCUPANCY_SENSOR_TYPE_PIR_AND_ULTRASONIC;
+  if (mOccupancySensorInstance.HasFeature(chip::app::Clusters::OccupancySensing::Feature::kPassiveInfrared)) return HAL_OCCUPANCY_SENSOR_TYPE_PIR;
+  if (mOccupancySensorInstance.HasFeature(chip::app::Clusters::OccupancySensing::Feature::kUltrasonic)) return HAL_OCCUPANCY_SENSOR_TYPE_ULTRASONIC;
+  if (mOccupancySensorInstance.HasFeature(chip::app::Clusters::OccupancySensing::Feature::kPhysicalContact)) return HAL_OCCUPANCY_SENSOR_TYPE_PHYSICAL;
+  return HAL_OCCUPANCY_SENSOR_TYPE_PIR; // default
 }
 
 
