@@ -33,6 +33,11 @@
 // This is a bridge, overrides CHIP_DEVICE_CONFIG_DEVICE_TYPE in CHIPDeviceConfig.h
 #define CHIP_DEVICE_CONFIG_DEVICE_TYPE 0x000e
 
+// this is the version relevant for OTA updates (and certification?)
+// TODO: probably update at some point (now just setting SDK defaults again)
+#define CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION 1
+#define CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING "1.0"
+
 
 // FIXME: luz temp debug, remove again to reduce FOOTPRINT
 // we want verbose error code display
