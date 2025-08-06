@@ -161,6 +161,7 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   typedef std::list<BridgeAdapter*> BridgeAdaptersList;
   BridgeAdaptersList mAdapters;
   int mUnstartedAdapters;
+  MLTicket mShutdownTicket;
 
   // actions
   #if P44MBRD_ENABLE_ACTIONS
@@ -1168,6 +1169,17 @@ public:
     }
   }
 
+
+  #define MAINLOOP_TERMINATION_DELAY (2*Second)
+
+  virtual void terminateFromSignal() P44_OVERRIDE
+  {
+    // try to shut down orderly
+    Server::GetInstance().GenerateShutDownEvent();
+    // but to make sure, exit mainloop after a delay
+    mShutdownTicket.executeOnce(boost::bind(&Application::terminateApp, this, EXIT_FAILURE), MAINLOOP_TERMINATION_DELAY);
+  }
+
 };
 
 
@@ -1202,8 +1214,8 @@ void bridgeGlobalIdentify(int aDurationS)
 void MatterActionsPluginServerInitCallback()
 {
   // register actions server attribute access class
-  P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
   #if P44MBRD_ENABLE_ACTIONS
+  P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
   chip::app::AttributeAccessInterfaceRegistry::Instance().Register(&app.getActionsManager());
   #endif
 }
