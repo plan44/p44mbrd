@@ -1006,8 +1006,16 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
           if (state->get("clickType", o, true)) {
             clicktype = (DsClickType)(o->int32Value());
           }
-          if (position!=mPosition || clicktype==ct_complete || clicktype==ct_hold_start) {
-            // actual change of position, complete or hold-start
+          bool positionChanged = position!=mPosition;
+          if (positionChanged) {
+            // update current position
+            Switch::Attributes::CurrentPosition::Set(endpointId(), position);
+            if (aUpdateMode.Has(UpdateFlags::matter)) {
+              dev->reportAttributeChange(Switch::Id, Switch::Attributes::CurrentPosition::Id);
+            }
+          }
+          if (positionChanged || clicktype==ct_complete || clicktype==ct_hold_start) {
+            // actual change of position, or special event while position not changing
             switch(clicktype) {
               case ct_tip_1x:
               case ct_tip_2x:
