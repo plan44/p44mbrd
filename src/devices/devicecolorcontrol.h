@@ -33,37 +33,43 @@ class ColorControlDelegate
 {
 public:
 
+  using UpdateMode = Device::UpdateMode;
+  using UpdateFlags = Device::UpdateFlags;
+
   virtual ~ColorControlDelegate() = default;
 
   /// Set new hue. Implies device changes to HSV color mode if it natively supports color modes
   /// @param aHue new hue (matter scale: 0..0xFE = 0..360 degree)
-  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
-  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
-  virtual void setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply) = 0;
+  /// @param aTTimeDSorRate transition time in tenths of a second, 0: immediately, for move: rate in units per sec
+  /// @param aUpdateMode determines way to apply new value, such as Update::noapply/relative/move
+  virtual void changeHue(uint8_t aHue, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) = 0;
 
   /// Set new saturation. Implies device changes to HSV color mode if it natively supports color modes
   /// @param aSaturation new saturation
-  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
-  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
-  virtual void setSaturation(uint8_t aSaturation, uint16_t aTransitionTimeDS, bool aApply) = 0;
+  /// @param aTTimeDSorRate transition time in tenths of a second, 0: immediately, for move: rate in units per sec
+  /// @param aUpdateMode determines way to apply new value, such as Update::noapply/relative/move
+  virtual void changeSaturation(uint8_t aSaturation, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) = 0;
 
   /// Set new CIE X. Implies device changes to CIE X/Y color mode if it natively supports color modes
   /// @param aX new CIE X color coordinate
-  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
-  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
-  virtual void setCieX(uint16_t aX, uint16_t aTransitionTimeDS, bool aApply) = 0;
+  /// @param aTTimeDSorRate transition time in tenths of a second, 0: immediately, for move: rate in units per sec
+  /// @param aUpdateMode determines way to apply new value, such as Update::noapply/relative/move
+  virtual void changeCieX(uint16_t aX, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) = 0;
 
   /// Set new CIE Y. Implies device changes to CIE X/Y color mode if it natively supports color modes
   /// @param aY new CIE Y color coordinate
-  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
-  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
-  virtual void setCieY(uint16_t aY, uint16_t aTransitionTimeDS, bool aApply) = 0;
+  /// @param aTTimeDSorRate transition time in tenths of a second, 0: immediately, for move: rate in units per sec
+  /// @param aUpdateMode determines way to apply new value, such as Update::noapply/relative/move
+  virtual void changeCieY(uint16_t aY, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) = 0;
 
   /// Set new color temperature. Implies device changes color temperatur mode if it natively supports color modes
   /// @param aColortemp new color temperature
-  /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately
-  /// @param aApply if not true, value will only be stored in the device, but not yet be applied to output
-  virtual void setColortemp(uint16_t aColortemp, uint16_t aTransitionTimeDS, bool aApply) = 0;
+  /// @param aTTimeDSorRate transition time in tenths of a second, 0: immediately, for move: rate in units per sec
+  /// @param aUpdateMode determines way to apply new value, such as Update::noapply/relative/move
+  virtual void changeColortemp(uint16_t aColortemp, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) = 0;
+
+  /// Stop all ongoing movements and transitions
+  virtual void stopMovements() = 0;
 
 };
 
@@ -108,12 +114,13 @@ public:
   uint16_t currentX() { return mX; };
   uint16_t currentY() { return mX; };
 
-  bool updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate);
   bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
-  bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  bool updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS, uint16_t aCTMin = 0, uint16_t aCTMax = 0);
   bool updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
   bool updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
+  void stopColorMovements();
 
   bool shouldExecuteColorChange(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride);
 
@@ -132,6 +139,16 @@ public:
 
 
 private:
+
+  ColorControlOptionsType tempOptions(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride);
+
+  static bool adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax);
+  template<typename T> static bool adaptParams(T aInpValue, T &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax) {
+    int v = (int)aAbsValue;
+    bool changed = adaptParamsImpl((int)aInpValue, v, aUpdateMode, aMin, aMax);
+    aAbsValue = (T)v;
+    return changed;
+  };
 
   /// called to have the final leaf class declare the correct device type list
   virtual bool finalizeDeviceDeclaration() override;

@@ -41,12 +41,12 @@ public:
   /// Set new output level for device
   /// @param aNewLevel new level to set [0..100]
   /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately, 0xFFFF: use hardware recommended default
-  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS) = 0;
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled) = 0;
 
   /// Set new output level for device
   /// @param aDirection >0: start dimming up, <0: start dimming down, 0: stop dimming
   /// @param aRate rate of change, 0xFF = use default
-  virtual void dim(int8_t aDirection, uint8_t aRate) = 0;
+  virtual void dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled) = 0;
 
   /// @return the time when the latest started transition will end, in Mainloop::now() time
   virtual MLMicroSeconds endOfLatestTransition() = 0;
@@ -93,7 +93,7 @@ public:
   virtual string description() override;
 
   uint8_t currentLevel() { return mLevel; };
-  bool updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode);
+  bool updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, bool aCtCoupling, UpdateMode aUpdateMode);
 
 
   /// @name LevelControlImplementationInterface
@@ -126,6 +126,7 @@ private:
   uint8_t mLevel;
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
+  LevelControlOptionsType tempOptions(LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
   bool shouldExecuteLevelChange(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
 };
 

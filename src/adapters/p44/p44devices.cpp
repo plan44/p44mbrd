@@ -390,7 +390,7 @@ void P44_OnOffImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr a
 
 // MARK: LevelControlDelegate implementation
 
-void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS)
+void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled)
 {
   if (aTransitionTimeDS==0xFFFF) {
     // means using default of the device, so we take the recommended transition time
@@ -403,6 +403,7 @@ void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS
   params->add("channel", JsonObject::newInt32(0)); // default channel
   params->add("value", JsonObject::newDouble(percent2value(aNewLevel)));
   params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10.0));
+  params->add("coupling", JsonObject::newBool(aWithCTCoupled));
   params->add("apply_now", JsonObject::newBool(true));
   notify("setOutputChannelValue", params);
   // calculate time when transition will be done
@@ -410,12 +411,13 @@ void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS
 }
 
 
-void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
+void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channel", JsonObject::newInt32(0)); // default channel
   params->add("mode", JsonObject::newInt32(aDirection));
   params->add("autostop", JsonObject::newBool(false));
+  params->add("coupling", JsonObject::newBool(aWithCTCoupled));
   // matter rate is 0..0xFE units per second, p44 rate is 0..mDefaultChannelMax units per millisecond
   if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*mDefaultChannelMax/MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
   notify("dimChannel", params);
@@ -426,7 +428,7 @@ void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate)
 // MARK: P44 internal implementation
 
 P44_LevelControlImpl::P44_LevelControlImpl() :
-  mRecommendedTransitionTimeDS(5), // FIXME: for now: just dS default of full range in 7 seconds
+  mRecommendedTransitionTimeDS(5), // default, will be overriden in updateBridgedInfo()
   mEndOfLatestTransition(Never)
 {
 }
@@ -482,63 +484,143 @@ void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
 
 // MARK: - P44_ColorControlImpl
 
+// MARK: implementation helpers
+
+int P44_ColorControlImpl::moveDirFromMode(UpdateMode aUpdateMode)
+{
+  if (aUpdateMode.Has(UpdateFlags::up)) return 1; // up
+  if (aUpdateMode.Has(UpdateFlags::down)) return -1; // down
+  return 0; // stop
+}
+
+static inline double p44_value(int aMatterValue, int aMatterMax, double aP44max)
+{
+  return (double)aMatterValue*aP44max/aMatterMax;
+}
+
+static inline double p44_rate(uint16_t aMatterRate, int aMatterMax, double aP44max)
+{
+  if (aMatterRate==0) return 0;
+  // - matter rate is 0..0xFE units of the base value per second
+  // - p44 rate is time in seconds to be spent for one unit of the channel value
+  // = p44_rate = p44_max/matter_max/matter_rate
+  return (double)aP44max/aMatterMax/aMatterRate;
+}
+
+static inline double p44_time(uint16_t aMatterTTime)
+{
+  return (double)aMatterTTime/10;
+}
+
+
 // MARK: ColorControlDelegate implementation
 
-void P44_ColorControlImpl::setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply)
+
+
+void P44_ColorControlImpl::changeHue(uint8_t aHue, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("hue"));
-  params->add("value", JsonObject::newDouble((double)aHue*360/0xFE));
-  params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
-  params->add("apply_now", JsonObject::newBool(aApply));
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFE, 360)));
+  }
+  else {
+    params->add("value", JsonObject::newDouble(p44_value(aHue, 0xFE, 360)));
+    params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
+    // hue is circular and can have a direction hint
+    const char* dirstr = nullptr;
+    if (aUpdateMode.Has(UpdateFlags::up)) dirstr = "up";
+    else if (aUpdateMode.Has(UpdateFlags::down)) dirstr = "down";
+    else if (aUpdateMode.Has(UpdateFlags::shortest)) dirstr = "shortest";
+    else if (aUpdateMode.Has(UpdateFlags::longest)) dirstr = "longest";
+    if (dirstr) {
+      params->add("direction", JsonObject::newString(dirstr));
+    }
+  }
+  params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
   notify("setOutputChannelValue", params);
-
 }
 
 
-void P44_ColorControlImpl::setSaturation(uint8_t aSaturation, uint16_t aTransitionTimeDS, bool aApply)
+void P44_ColorControlImpl::changeSaturation(uint8_t aSaturation, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("saturation"));
-  params->add("value", JsonObject::newDouble((double)aSaturation*100/0xFE));
-  params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
-  params->add("apply_now", JsonObject::newBool(aApply));
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFE, 100)));
+  }
+  else {
+    params->add("value", JsonObject::newDouble(p44_value(aSaturation, 0xFE, 100)));
+    params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
+  }
+  params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
   notify("setOutputChannelValue", params);
 
 }
 
 
-void P44_ColorControlImpl::setCieX(uint16_t aX, uint16_t aTransitionTimeDS, bool aApply)
+void P44_ColorControlImpl::changeCieX(uint16_t aX, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("x"));
   params->add("value", JsonObject::newDouble((double)aX/0xFFFE));
-  params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
-  params->add("apply_now", JsonObject::newBool(aApply));
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFFFE, 1)));
+  }
+  else {
+    params->add("value", JsonObject::newDouble(p44_value(aX, 0xFFFE, 1)));
+    params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
+  }
+  params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
   notify("setOutputChannelValue", params);
 }
 
 
-void P44_ColorControlImpl::setCieY(uint16_t aY, uint16_t aTransitionTimeDS, bool aApply)
+void P44_ColorControlImpl::changeCieY(uint16_t aY, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("y"));
-  params->add("value", JsonObject::newDouble((double)aY/0xFFFE));
-  params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
-  params->add("apply_now", JsonObject::newBool(aApply));
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFFFE, 1)));
+  }
+  else {
+    params->add("value", JsonObject::newDouble(p44_value(aY, 0xFFFE, 1)));
+    params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
+  }
+  params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
   notify("setOutputChannelValue", params);
 }
 
 
-void P44_ColorControlImpl::setColortemp(uint16_t aColortemp, uint16_t aTransitionTimeDS, bool aApply)
+void P44_ColorControlImpl::changeColortemp(uint16_t aColortemp, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("colortemp"));
-  params->add("value", JsonObject::newDouble(aColortemp)); // is in mireds
-  params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10));
-  params->add("apply_now", JsonObject::newBool(aApply));
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 1, 1)));
+  }
+  else {
+    params->add("value", JsonObject::newDouble(p44_value(aColortemp, 1, 1)));
+    params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
+  }
+  params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
   notify("setOutputChannelValue", params);
 }
+
+
+void P44_ColorControlImpl::stopMovements()
+{
+  JsonObjectPtr params = JsonObject::newObj();
+  params->add("transitions", JsonObject::newBool(true));
+  params->add("sceneactions", JsonObject::newBool(false));
+  notify("stopOutput", params);
+}
+
 
 
 // MARK: P44 internal implementation

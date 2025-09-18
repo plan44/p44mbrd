@@ -103,7 +103,7 @@ bool DeviceFanControl::updateLevel(double aLevelPercent, Device::UpdateMode aUpd
   PercentCurrent::Get(endpointId(), &previousLevel);
   if (currentLevel!=previousLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
-      mLevelControlDelegate.setLevel(currentLevel, 0);
+      mLevelControlDelegate.setLevel(currentLevel, 0, false);
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
       PercentCurrent::Set(endpointId(), currentLevel);

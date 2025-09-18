@@ -81,7 +81,7 @@ void DeviceLevelControl::changeOnOff_impl(bool aOn)
 }
 
 
-bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, UpdateMode aUpdateMode)
+bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, bool aCtCoupling, UpdateMode aUpdateMode)
 {
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
@@ -110,7 +110,8 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       mLevelControlDelegate.setLevel(
         (double)(level-minlevel)/(maxlevel-minlevel)*100, // bridge side is always 0..100%, mapped to minlevel..maxlevel
-        aTransitionTimeDs // in tenths of seconds, 0xFFFF for using hardware's default
+        aTransitionTimeDs, // in tenths of seconds, 0xFFFF for using hardware's default
+        aCtCoupling
       );
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
@@ -149,11 +150,22 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
   Attributes::MaxLevel::Get(endpointId(), &maxlevel);
-  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel), 0, 0, false, aUpdateMode);
+  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel), 0, 0, false, false, aUpdateMode);
 }
 
 
 // MARK: levelControl cluster command implementation callbacks
+
+
+DeviceLevelControl::LevelControlOptionsType DeviceLevelControl::tempOptions(LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride)
+{
+  LevelControlOptionsType opts;
+  Attributes::Options::Get(endpointId(), &opts); // persistent options
+  opts.Clear(aOptionMask); // clear those set in the mask
+  aOptionOverride.Clear(LevelControlOptionsType(~aOptionMask.Raw())); // clear those NOT set in the mask (must not have influence)
+  opts.Set(aOptionOverride); // now apply override to the masked bits in the output opts
+  return opts;
+}
 
 
 bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride)
@@ -176,9 +188,7 @@ bool DeviceLevelControl::shouldExecuteLevelChange(bool aWithOnOff, LevelControlO
     return true;
   }
   // now the options bit decides about executing or not
-  chip::BitMask<chip::app::Clusters::LevelControl::LevelControlOptions> opts;
-  Attributes::Options::Get(endpointId(), &opts);
-  return (opts.Raw() & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
+  return tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kExecuteIfOff);
 }
 
 
@@ -191,6 +201,7 @@ Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataM
     status = Status::InvalidCommand;
   }
   else if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
+    bool ctCoupling = tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kCoupleColorTempToLevel);
     // OnOff status and options do allow executing
     uint16_t transitionTime;
     if (aTransitionTime.IsNull()) {
@@ -201,7 +212,7 @@ Status DeviceLevelControl::moveToLevel(uint8_t aAmount, int8_t aDirection, DataM
       transitionTime = aTransitionTime.Value();
     }
     bool wasOn = isOn();
-    updateCurrentLevel(aAmount, aDirection, transitionTime, aWithOnOff, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    updateCurrentLevel(aAmount, aDirection, transitionTime, aWithOnOff, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
     // Support for global scene for last state before getting switched off
     // - The GlobalSceneControl attribute is defined in order to prevent a second off command storing the
     //   all-devices-off situation as a global scene, and to prevent a second on command destroying the current
@@ -284,6 +295,7 @@ Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t>
   else {
     rate = aRate;
   }
+  bool ctCoupling = tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kCoupleColorTempToLevel);
   if ((!rate.IsNull() && rate.Value()!=0) || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
       case MoveModeEnum::kUp:
@@ -291,10 +303,10 @@ Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t>
           // start dimming from off level into on levels -> set onoff
           updateOnOff(true, UpdateMode(UpdateFlags::matter));
         }
-        mLevelControlDelegate.dim(1, rate.Value());
+        mLevelControlDelegate.dim(1, rate.Value(), ctCoupling);
         break;
       case MoveModeEnum::kDown:
-        mLevelControlDelegate.dim(-1, rate.Value());
+        mLevelControlDelegate.dim(-1, rate.Value(), ctCoupling);
         break;
       default:
         status = Status::InvalidCommand;
@@ -333,7 +345,7 @@ Status DeviceLevelControl::stop(bool aWithOnOff, LevelControlOptionsType aOption
   Status status = Status::Success;
 
   if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
-    mLevelControlDelegate.dim(0,0); // stop dimming
+    mLevelControlDelegate.dim(0, 0, false); // stop dimming
   }
   return status;
 }
@@ -379,6 +391,7 @@ void DeviceLevelControl::effect(bool aTurnOn)
   }
   // turn on or off
   OLOG(LOG_INFO, "levelcontrol effect: turnOn=%d", aTurnOn);
+  bool ctCoupling = tempOptions(LevelControlOptionsType(), LevelControlOptionsType()).Has(OptionsBitmap::kCoupleColorTempToLevel);
   if (aTurnOn) {
     // get the default onLevel
     app::DataModel::Nullable<uint8_t> targetOnLevel;
@@ -390,10 +403,10 @@ void DeviceLevelControl::effect(bool aTurnOn)
       }
     }
     if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
-    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {
-    updateCurrentLevel(0, 0, transitionTime, true, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
 }
 

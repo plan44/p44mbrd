@@ -58,6 +58,10 @@ static EmberAfClusterSpec gColorLightClusters[] = { { ColorControl::Id, CLUSTER_
 
 using namespace ColorControl;
 
+using UpdateMode = Device::UpdateMode;
+using UpdateFlags = Device::UpdateFlags;
+
+
 DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate), // level control for lighting
   mColorControlDelegate(aColorControlDelegate),
@@ -116,7 +120,7 @@ void DeviceColorControl::didGetInstalled()
 }
 
 
-bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
   bool changed = aColorMode!=mColorMode;
   if (
@@ -125,23 +129,37 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
   ) {
     OLOG(LOG_INFO, "set color mode to 0x%02x (InternalColorMode) - updatemode=0x%x", (int)aColorMode, aUpdateMode.Raw());
     mColorMode = aColorMode;
+    bool changeApplied = true;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      const UpdateMode prepMode = UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply);
+      UpdateMode finalizeMode = prepMode;
+      if (aUpdateMode.Has(UpdateFlags::move)) {
+        // when start moving with a new color mode, we need to change the current mode
+        // by setting new mode's parameters silently and immediately first, but not apply it yet.
+        // Only after, we can start moving with a rate
+        aTTimeDSorRate = 0;
+        changeApplied = false;
+      }
+      else {
+        // not moving, we can apply right now
+        finalizeMode.Clear(UpdateFlags::noapply);
+      }
       switch (mColorMode) {
         case InternalColorMode::hs:
         case InternalColorMode::enhanced_hs: // TODO: separate when we actually have EnhancedHue
           FOCUSOLOG("changing colormode to HS");
-          updateCurrentHue(mHue, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
-          updateCurrentSaturation(mSaturation, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
+          updateCurrentHue(mHue, prepMode, aTTimeDSorRate);
+          updateCurrentSaturation(mSaturation, finalizeMode, aTTimeDSorRate);
           break;
         case InternalColorMode::xy:
           FOCUSOLOG("changing colormode to XY");
-          updateCurrentX(mX, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply), aTransitionTimeDS);
-          updateCurrentY(mY, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
+          updateCurrentX(mX, prepMode, aTTimeDSorRate);
+          updateCurrentY(mY, finalizeMode, aTTimeDSorRate);
           break;
         default:
         case InternalColorMode::ct:
           FOCUSOLOG("changing colormode to CT");
-          updateCurrentColortemp(mColorTemp, UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged), aTransitionTimeDS);
+          updateCurrentColortemp(mColorTemp, finalizeMode, aTTimeDSorRate);
           break;
       }
     }
@@ -150,26 +168,48 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
       reportAttributeChange(ColorControl::Id, ColorControl::Attributes::ColorMode::Id);
       reportAttributeChange(ColorControl::Id, ColorControl::Attributes::EnhancedColorMode::Id);
     }
-    return true;
+    return changeApplied;
   }
   return false;
 }
 
 
-
-
-
-bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax)
 {
-  bool changed = aHue!=mHue;
+  if (aUpdateMode.Has(UpdateFlags::move)) {
+    // movement command always means change (but aAbsValue remains unchanged)
+    return true;
+  }
+  bool changed = false;
+  int v = aAbsValue; // current value
+  if (aUpdateMode.Has(UpdateFlags::relative)) {
+    // relative
+    if (aUpdateMode.Has(UpdateFlags::down)) v -= aInpValue;
+    else v += aInpValue;
+  }
+  else {
+    // absolute
+    v = aInpValue;
+  }
+  // clip
+  if (v>aMax) v = aMax;
+  else if (v<aMin) v = aMin;
+  changed = v!=aAbsValue;
+  aAbsValue = v;
+  return changed;
+}
+
+
+bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
+{
+  bool changed = adaptParams(aHue, mHue, aUpdateMode, 0, 0xFE);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set hue to 0x%02x (matter-units) - updatemode=0x%x", aHue, aUpdateMode.Raw());
-    mHue = aHue;
+    OLOG(LOG_INFO, "set hue to 0x%02x (matter-units) with time/rate = %hu - updatemode=0x%x", aHue, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
-      // color mode has not changed, must separately update hue (otherwise, color mode change already sends H+S)
+    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTTimeDSorRate)) {
+      // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
-        mColorControlDelegate.setHue(mHue, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
+        mColorControlDelegate.changeHue(mHue, aTTimeDSorRate, aUpdateMode);
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
@@ -182,17 +222,16 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
 }
 
 
-bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = aSaturation!=mSaturation;
+  bool changed = adaptParams(aSaturation, mSaturation, aUpdateMode, 0, 0xFE);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set saturation to 0x%02x (matter-units) - updatemode=0x%x", aSaturation, aUpdateMode.Raw());
-    mSaturation = aSaturation;
+    OLOG(LOG_INFO, "set saturation to 0x%02x (matter-units) with time/rate = %hu - updatemode=0x%x", aSaturation, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTransitionTimeDS)) {
-      // color mode has not changed, must separately update saturation (otherwise, color mode change already sendt H+S)
+    if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTTimeDSorRate)) {
+      // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
-        mColorControlDelegate.setSaturation(mSaturation, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
+        mColorControlDelegate.changeSaturation(mSaturation, aTTimeDSorRate, aUpdateMode);
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
@@ -205,19 +244,16 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 }
 
 
-bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate, uint16_t aCTMin, uint16_t aCTMax)
 {
-  bool changed = aColortemp!=mColorTemp;
+  bool changed = adaptParams(aColortemp, mColorTemp, aUpdateMode, aCTMin>0 ? aCTMin : COLOR_TEMP_PHYSICAL_MIN, aCTMax>0 ? aCTMax : COLOR_TEMP_PHYSICAL_MAX);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set colortemp to 0x%04x (matter-units) - updatemode=0x%x", aColortemp, aUpdateMode.Raw());
-    mColorTemp = aColortemp;
-    if (mColorTemp<COLOR_TEMP_PHYSICAL_MIN) mColorTemp = COLOR_TEMP_PHYSICAL_MIN;
-    else if (mColorTemp>COLOR_TEMP_PHYSICAL_MAX) mColorTemp = COLOR_TEMP_PHYSICAL_MAX;
+    OLOG(LOG_INFO, "set colortemp to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aColortemp, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(InternalColorMode::ct, aUpdateMode, aTransitionTimeDS)) {
-      // color mode has not changed, must separately update colortemp (otherwise, color mode change already sends CT)
+    if (!updateCurrentColorMode(InternalColorMode::ct, aUpdateMode, aTTimeDSorRate)) {
+      // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
-        mColorControlDelegate.setColortemp(mColorTemp, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
+        mColorControlDelegate.changeColortemp(mColorTemp, aTTimeDSorRate, aUpdateMode);
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
@@ -230,17 +266,16 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 }
 
 
-bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = aX!=mX;
+  bool changed = adaptParams(aX, mX, aUpdateMode, 0, 0xFFFE);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set X to 0x%04x (matter-units) - updatemode=0x%x", aX, aUpdateMode.Raw());
-    mX = aX;
+    OLOG(LOG_INFO, "set X to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aX, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {
-      // color mode has not changed, must separately update X (otherwise, color mode change already sends X+Y)
+    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTTimeDSorRate)) {
+      // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
-        mColorControlDelegate.setCieX(mX, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
+        mColorControlDelegate.changeCieX(mX, aTTimeDSorRate, aUpdateMode);
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
@@ -253,17 +288,16 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
 }
 
 
-bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS)
+bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = aY!=mY;
+  bool changed = adaptParams(aY, mY, aUpdateMode, 0, 0xFFFE);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
-    OLOG(LOG_INFO, "set Y to 0x%04x (matter-units) - updatemode=0x%x", aY, aUpdateMode.Raw());
-    mY = aY;
+    OLOG(LOG_INFO, "set Y to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aY, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
-    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTransitionTimeDS)) {
-      // color mode has not changed, must separately update Y (otherwise, color mode change already sends X+Y)
+    if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTTimeDSorRate)) {
+      // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
-        mColorControlDelegate.setCieY(mY, aTransitionTimeDS, !aUpdateMode.Has(UpdateFlags::noapply));
+        mColorControlDelegate.changeCieY(mY, aTTimeDSorRate, aUpdateMode);
       }
     }
     if (changed && aUpdateMode.Has(UpdateFlags::matter)) {
@@ -275,7 +309,26 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
   return false; // no change
 }
 
+
+void DeviceColorControl::stopColorMovements()
+{
+  mColorControlDelegate.stopMovements();
+}
+
+
 // MARK: color control cluster command implementation callbacks
+
+
+DeviceColorControl::ColorControlOptionsType DeviceColorControl::tempOptions(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride)
+{
+  ColorControlOptionsType opts;
+  Attributes::Options::Get(endpointId(), &opts); // persistent options
+  opts.Clear(aOptionMask); // clear those set in the mask
+  aOptionOverride.Clear(ColorControlOptionsType(~aOptionMask.Raw())); // clear those NOT set in the mask (must not have influence)
+  opts.Set(aOptionOverride); // now apply override to the masked bits in the output opts
+  return opts;
+}
+
 
 bool DeviceColorControl::shouldExecuteColorChange(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride)
 {
@@ -293,32 +346,73 @@ bool DeviceColorControl::shouldExecuteColorChange(ColorControlOptionsType aOptio
     return true;
   }
   // now the options bit decides about executing or not
-  chip::BitMask<chip::app::Clusters::ColorControl::OptionsBitmap> opt;
-  ColorControl::Attributes::Options::Get(endpointId(), &opt);
-  return (opt.Raw() & (uint8_t)(~aOptionMask.Raw())) | (aOptionOverride.Raw() & aOptionMask.Raw());
+  return tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kExecuteIfOff);
+}
+
+
+static UpdateMode updateModeForCommand(UpdateMode aMoreFlags = UpdateMode())
+{
+  aMoreFlags.Set(UpdateFlags::bridged);
+  aMoreFlags.Set(UpdateFlags::matter);
+  return aMoreFlags;
+}
+
+static UpdateMode updateModeForStep(StepModeEnum aStepMode)
+{
+  UpdateMode u = updateModeForCommand();
+  u.Set(UpdateFlags::relative);
+  if (aStepMode==StepModeEnum::kDown) u.Set(UpdateFlags::down);
+  return u;
+}
+
+
+static UpdateMode updateModeForMove(MoveModeEnum aMoveMode)
+{
+  UpdateMode u = updateModeForCommand();
+  u.Set(UpdateFlags::move);
+  if (aMoveMode==MoveModeEnum::kUp) u.Set(UpdateFlags::up);
+  else if (aMoveMode==MoveModeEnum::kDown) u.Set(UpdateFlags::down);
+  // neither up or down is considered stop
+  return u;
+}
+
+
+static UpdateMode updateModeForCommandWithDirection(DirectionEnum aDirection)
+{
+  UpdateMode u = updateModeForCommand();
+  if (aDirection==DirectionEnum::kUp) u.Set(UpdateFlags::up);
+  else if (aDirection==DirectionEnum::kDown) u.Set(UpdateFlags::down);
+  else if (aDirection==DirectionEnum::kShortest) u.Set(UpdateFlags::shortest);
+  else if (aDirection==DirectionEnum::kLongest) u.Set(UpdateFlags::longest);
+  return u;
+}
+
+
+static UpdateMode updateModeForDirectionalXY(int16_t aRateOrStep, UpdateMode aMoreFlags)
+{
+  UpdateMode u = updateModeForCommand(aMoreFlags);
+  if (aRateOrStep>0) u.Set(UpdateFlags::up);
+  else if (aRateOrStep<0) u.Set(UpdateFlags::down);
+  // neither up or down is considered stop
+  return u;
 }
 
 
 #ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_HSV
 
+// MARK: hue
+
 bool emberAfColorControlClusterMoveHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                const Commands::MoveHue::DecodableType & commandData)
 {
-  // FIXME: implement
-  FOCUSLOG("=== Received MoveHue Command - NOT IMPLEMENTED YET");
-  return false;
-//  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
-//                                                         commandData.optionsMask, commandData.optionsOverride, false);
-}
-
-bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * commandObj,
-                                                      const app::ConcreteCommandPath & commandPath,
-                                                      const Commands::MoveSaturation::DecodableType & commandData)
-{
-  // FIXME: implement
-  FOCUSLOG("=== Received MoveSaturation Command - NOT IMPLEMENTED YET");
-  return false;
-//  return ColorControlServer::Instance().moveSaturationCommand(commandPath, commandData);
+  FOCUSLOG("=== Received MoveHue Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentHue(0, updateModeForMove(commandData.moveMode), commandData.rate);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
 
 
@@ -328,66 +422,29 @@ bool emberAfColorControlClusterMoveToHueCallback(app::CommandHandler * commandOb
   FOCUSLOG("=== Received MoveToHue Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-
-
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
+    dev->updateCurrentHue(commandData.hue, updateModeForCommandWithDirection(commandData.direction), commandData.transitionTime);
   }
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
 }
 
-bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * commandObj,
-                                                        const app::ConcreteCommandPath & commandPath,
-                                                        const Commands::MoveToSaturation::DecodableType & commandData)
-{
-  FOCUSLOG("=== Received MoveToSaturation Command");
-  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
-  if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time
-  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
-  }
-  commandObj->AddStatus(commandPath, Status::Success);
-  return true;
-}
-
-bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandler * commandObj,
-                                                              const app::ConcreteCommandPath & commandPath,
-                                                              const Commands::MoveToHueAndSaturation::DecodableType & commandData)
-{
-  FOCUSLOG("=== Received MoveToHueAndSaturation Command");
-  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
-  if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time
-  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentSaturation(commandData.saturation, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced), commandData.transitionTime);
-    dev->updateCurrentHue(commandData.hue, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced), commandData.transitionTime);
-  }
-  commandObj->AddStatus(commandPath, Status::Success);
-  return true;
-}
 
 bool emberAfColorControlClusterStepHueCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                const Commands::StepHue::DecodableType & commandData)
 {
-  // FIXME: implement
-  FOCUSLOG("=== Received StepHue Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
-//                                                         commandData.transitionTime, commandData.optionsMask,
-//                                                         commandData.optionsOverride, false);
+  FOCUSLOG("=== Received StepHue Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentHue(commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
 
-bool emberAfColorControlClusterStepSaturationCallback(app::CommandHandler * commandObj,
-                                                      const app::ConcreteCommandPath & commandPath,
-                                                      const Commands::StepSaturation::DecodableType & commandData)
-{
-  // FIXME: implement
-  FOCUSLOG("=== Received StepSaturation Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().stepSaturationCommand(commandPath, commandData);
-}
+
+#if ENHANCED_HUE
 
 bool emberAfColorControlClusterEnhancedMoveHueCallback(app::CommandHandler * commandObj,
                                                        const app::ConcreteCommandPath & commandPath,
@@ -396,9 +453,8 @@ bool emberAfColorControlClusterEnhancedMoveHueCallback(app::CommandHandler * com
   // FIXME: implement
   FOCUSLOG("=== Received EnhancedMoveHue Command - NOT IMPLEMENTED YET");
   return false;
-//  return ColorControlServer::Instance().moveHueCommand(commandPath.mEndpointId, commandData.moveMode, commandData.rate,
-//                                                         commandData.optionsMask, commandData.optionsOverride, true);
 }
+
 
 bool emberAfColorControlClusterEnhancedMoveToHueCallback(app::CommandHandler * commandObj,
                                                          const app::ConcreteCommandPath & commandPath,
@@ -407,22 +463,8 @@ bool emberAfColorControlClusterEnhancedMoveToHueCallback(app::CommandHandler * c
   // FIXME: implement
   FOCUSLOG("=== Received EnhancedMoveToHue Command - NOT IMPLEMENTED YET");
   return false;
-//    return ColorControlServer::Instance().moveToHueCommand(commandPath.mEndpointId, commandData.enhancedHue, commandData.direction,
-//                                                           commandData.transitionTime, commandData.optionsMask,
-//                                                           commandData.optionsOverride, true);
 }
 
-bool emberAfColorControlClusterEnhancedMoveToHueAndSaturationCallback(
-    app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-    const Commands::EnhancedMoveToHueAndSaturation::DecodableType & commandData)
-{
-  // FIXME: implement
-  FOCUSLOG("=== Received EnhancedMoveToHueAndSaturation Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().moveToHueAndSaturationCommand(commandPath.mEndpointId, commandData.enhancedHue,
-//                                                                        commandData.saturation, commandData.transitionTime,
-//                                                                        commandData.optionsMask, commandData.optionsOverride, true);
-}
 
 bool emberAfColorControlClusterEnhancedStepHueCallback(app::CommandHandler * commandObj,
                                                        const app::ConcreteCommandPath & commandPath,
@@ -431,91 +473,192 @@ bool emberAfColorControlClusterEnhancedStepHueCallback(app::CommandHandler * com
   // FIXME: implement
   FOCUSLOG("=== Received EnhancedStepHue Command - NOT IMPLEMENTED YET");
   return false;
-//    return ColorControlServer::Instance().stepHueCommand(commandPath.mEndpointId, commandData.stepMode, commandData.stepSize,
-//                                                         commandData.transitionTime, commandData.optionsMask,
-//                                                         commandData.optionsOverride, true);
 }
 
-bool emberAfColorControlClusterColorLoopSetCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                                    const Commands::ColorLoopSet::DecodableType & commandData)
+#endif // ENHANCED_HUE
+
+
+// MARK: saturation
+
+bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                      const Commands::MoveSaturation::DecodableType & commandData)
 {
-  FOCUSLOG("=== Received ColorLoopSet Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().colorLoopCommand(commandPath, commandData);
-}
-
-#endif // MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_HSV
-
-#ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_XY
-
-bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
-                                                   const Commands::MoveToColor::DecodableType & commandData)
-{
+  FOCUSLOG("=== Received MoveSaturation Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentX(commandData.colorX, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::noapply, Device::UpdateFlags::forced), commandData.transitionTime);
-    dev->updateCurrentY(commandData.colorY, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced), commandData.transitionTime);
+    dev->updateCurrentSaturation(0, updateModeForMove(commandData.moveMode), commandData.rate);
   }
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
 }
 
+
+bool emberAfColorControlClusterMoveToSaturationCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                        const Commands::MoveToSaturation::DecodableType & commandData)
+{
+  FOCUSLOG("=== Received MoveToSaturation Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentSaturation(commandData.saturation, updateModeForCommand(), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
+}
+
+
+bool emberAfColorControlClusterStepSaturationCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                      const Commands::StepSaturation::DecodableType & commandData)
+{
+  FOCUSLOG("=== Received StepSaturation Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentSaturation(commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
+}
+
+
+// MARK: hue+saturation together
+
+bool emberAfColorControlClusterMoveToHueAndSaturationCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                              const Commands::MoveToHueAndSaturation::DecodableType & commandData)
+{
+  FOCUSLOG("=== Received MoveToHueAndSaturation Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentSaturation(commandData.saturation, updateModeForCommand(UpdateMode(UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
+    dev->updateCurrentHue(commandData.hue, updateModeForCommand(UpdateMode(UpdateFlags::forced)), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
+}
+
+
+#if ENHANCED_HUE
+
+bool emberAfColorControlClusterEnhancedMoveToHueAndSaturationCallback(
+    app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+    const Commands::EnhancedMoveToHueAndSaturation::DecodableType & commandData)
+{
+  // FIXME: implement
+  FOCUSLOG("=== Received EnhancedMoveToHueAndSaturation Command - NOT IMPLEMENTED YET");
+  return false;
+}
+
+#endif // ENHANCED_HUE
+
+
+// MARK: color loop
+
+bool emberAfColorControlClusterColorLoopSetCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                    const Commands::ColorLoopSet::DecodableType & commandData)
+{
+  // TODO: maybe implement (is optional feature)
+  FOCUSLOG("=== Received ColorLoopSet Command - NOT SUPPORTED");
+  return false;
+}
+
+#endif // MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_HSV
+
+
+#ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_XY
+
+// MARK: X/Y color
+
+bool emberAfColorControlClusterMoveToColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
+                                                   const Commands::MoveToColor::DecodableType & commandData)
+{
+  FOCUSLOG("=== Received MoveToColor Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentX(commandData.colorX, updateModeForCommand(UpdateMode(UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
+    dev->updateCurrentY(commandData.colorY, updateModeForCommand(UpdateMode(UpdateFlags::forced)), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
+}
+
+
 bool emberAfColorControlClusterMoveColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                  const Commands::MoveColor::DecodableType & commandData)
 {
-  // FIXME: implement
-  FOCUSLOG("=== Received MoveColor Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().moveColorCommand(commandPath, commandData);
+  FOCUSLOG("=== Received MoveColor Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentX(0, updateModeForDirectionalXY(commandData.rateX, UpdateMode(UpdateFlags::move, UpdateFlags::forced, UpdateFlags::noapply)), abs(commandData.rateX));
+    dev->updateCurrentY(0, updateModeForDirectionalXY(commandData.rateY, UpdateMode(UpdateFlags::move, UpdateFlags::forced)), abs(commandData.rateY));
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
+
 
 bool emberAfColorControlClusterStepColorCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                  const Commands::StepColor::DecodableType & commandData)
 {
-  // FIXME: implement
-  FOCUSLOG("=== Received StepColor Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().stepColorCommand(commandPath, commandData);
+  FOCUSLOG("=== Received StepColor Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentX(0, updateModeForDirectionalXY(commandData.stepX, UpdateMode(UpdateFlags::relative, UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
+    dev->updateCurrentY(0, updateModeForDirectionalXY(commandData.stepY, UpdateMode(UpdateFlags::relative, UpdateFlags::forced)), commandData.transitionTime);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
 
 #endif // MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_XY
 
+
 #ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_TEMP
 
-bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandler * commandObj,
-                                                              const app::ConcreteCommandPath & commandPath,
+bool emberAfColorControlClusterMoveToColorTemperatureCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                               const Commands::MoveToColorTemperature::DecodableType & commandData)
 {
   FOCUSLOG("=== Received MoveToColorTemperature Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
-  // FIXME: completely basic implementation, no transition time
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentColortemp(commandData.colorTemperatureMireds, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter), commandData.transitionTime);
+    dev->updateCurrentColortemp(commandData.colorTemperatureMireds, updateModeForCommand(), commandData.transitionTime);
   }
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
 }
 
-bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler * commandObj,
-                                                            const app::ConcreteCommandPath & commandPath,
+bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                             const Commands::MoveColorTemperature::DecodableType & commandData)
 {
-  // FIXME: implement
-  FOCUSLOG("=== Received MoveColorTemperature Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().moveColorTempCommand(commandPath, commandData);
+  FOCUSLOG("=== Received MoveColorTemperature Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentColortemp(0, updateModeForMove(commandData.moveMode), commandData.rate);
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
 
-bool emberAfColorControlClusterStepColorTemperatureCallback(app::CommandHandler * commandObj,
-                                                            const app::ConcreteCommandPath & commandPath,
+bool emberAfColorControlClusterStepColorTemperatureCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                             const Commands::StepColorTemperature::DecodableType & commandData)
 {
-  FOCUSLOG("=== Received StepColorTemperature Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().stepColorTempCommand(commandPath, commandData);
+  FOCUSLOG("=== Received StepColorTemperature Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->updateCurrentColortemp(
+      commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime,
+      commandData.colorTemperatureMinimumMireds, commandData.colorTemperatureMaximumMireds
+    );
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
 
 void emberAfPluginLevelControlCoupledColorTempChangeCallback(EndpointId endpoint)
@@ -531,12 +674,16 @@ void emberAfPluginLevelControlCoupledColorTempChangeCallback(EndpointId endpoint
 bool emberAfColorControlClusterStopMoveStepCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                                     const Commands::StopMoveStep::DecodableType & commandData)
 {
-  // FIXME: implement as soon as we have move commands!!
-  FOCUSLOG("=== Received StopMoveStep Command - NOT IMPLEMENTED YET");
-  return false;
-//    return ColorControlServer::Instance().stopMoveStepCommand(commandPath.mEndpointId, commandData.optionsMask,
-//                                                              commandData.optionsOverride);
+  FOCUSLOG("=== Received StopMoveStep Command");
+  auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (!dev) return false;
+  if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
+    dev->stopColorMovements();
+  }
+  commandObj->AddStatus(commandPath, Status::Success);
+  return true;
 }
+
 
 void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
 {
@@ -545,6 +692,7 @@ void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
   app::Clusters::Scenes::ScenesServer::Instance().RegisterSceneHandler(endpoint, ColorControlServer::GetSceneHandler());
   #endif // MATTER_DM_PLUGIN_SCENES
 }
+
 
 #ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_TEMP
 /**
@@ -840,13 +988,13 @@ public:
             case Attributes::CurrentX::Id:
                 if (dev->hasFeature(ColorControl::Feature::kXy)) {
                   if (decodePair.attributeValue) {
-                    dev->updateCurrentX(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                    dev->updateCurrentX(static_cast<uint16_t>(decodePair.attributeValue), UpdateMode(UpdateFlags::noapply), 0);
                   }
                 }
                 break;
             case Attributes::CurrentY::Id:
                 if (dev->hasFeature(ColorControl::Feature::kXy)) {
-                  dev->updateCurrentY(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                  dev->updateCurrentY(static_cast<uint16_t>(decodePair.attributeValue), UpdateMode(UpdateFlags::noapply), 0);
                 }
                 break;
             case Attributes::EnhancedCurrentHue::Id:
@@ -857,12 +1005,12 @@ public:
                 break;
             case Attributes::CurrentHue::Id:
                 if (dev->hasFeature(ColorControl::Feature::kHueAndSaturation)) {
-                  dev->updateCurrentHue(static_cast<uint8_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                  dev->updateCurrentHue(static_cast<uint8_t>(decodePair.attributeValue), UpdateMode(UpdateFlags::noapply), 0);
                 }
                 break;
             case Attributes::CurrentSaturation::Id:
                 if (dev->hasFeature(ColorControl::Feature::kHueAndSaturation)) {
-                  dev->updateCurrentSaturation(static_cast<uint8_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                  dev->updateCurrentSaturation(static_cast<uint8_t>(decodePair.attributeValue), UpdateMode(UpdateFlags::noapply), 0);
                 }
                 break;
             case Attributes::ColorLoopActive::Id:
@@ -885,7 +1033,7 @@ public:
                 break;
             case Attributes::ColorTemperatureMireds::Id:
                 if (dev->hasFeature(ColorControl::Feature::kColorTemperature)) {
-                  dev->updateCurrentColortemp(static_cast<uint16_t>(decodePair.attributeValue), Device::UpdateMode(Device::UpdateFlags::noapply), 0);
+                  dev->updateCurrentColortemp(static_cast<uint16_t>(decodePair.attributeValue), UpdateMode(UpdateFlags::noapply), 0);
                 }
                 break;
             case Attributes::EnhancedColorMode::Id:
@@ -912,7 +1060,7 @@ public:
         // apply (forced to make sure all components are updated to the bridge)
         dev->updateCurrentColorMode(
           targetColorMode,
-          Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter, Device::UpdateFlags::forced),
+          UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::forced),
           transitionTime10th
         );
 

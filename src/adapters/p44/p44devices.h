@@ -211,8 +211,8 @@ protected:
 
   /// @name LevelControlDelegate
   /// @{
-  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS) override;
-  virtual void dim(int8_t aDirection, uint8_t aRate) override;
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled) override;
+  virtual void dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled) override;
   virtual MLMicroSeconds endOfLatestTransition() override { return mEndOfLatestTransition; };
   /// @}
 
@@ -231,11 +231,12 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
 
   /// @name ColorControlDelegate
   /// @{
-  virtual void setHue(uint8_t aHue, uint16_t aTransitionTimeDS, bool aApply) override;
-  virtual void setSaturation(uint8_t aSaturation, uint16_t aTransitionTimeDS, bool aApply) override;
-  virtual void setCieX(uint16_t aX, uint16_t aTransitionTimeDS, bool aApply) override;
-  virtual void setCieY(uint16_t aY, uint16_t aTransitionTimeDS, bool aApply) override;
-  virtual void setColortemp(uint16_t aColortemp, uint16_t aTransitionTimeDS, bool aApply) override;
+  virtual void changeHue(uint8_t aHue, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) override;
+  virtual void changeSaturation(uint8_t aSaturation, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) override;
+  virtual void changeCieX(uint16_t aX, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) override;
+  virtual void changeCieY(uint16_t aY, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) override;
+  virtual void changeColortemp(uint16_t aColortemp, uint16_t aTTimeDSorRate, UpdateMode aUpdateMode) override;
+  virtual void stopMovements() override;
   /// @}
 
   /// @name IdentifyDelegate
@@ -245,7 +246,8 @@ class P44_ColorControlImpl : public P44_LevelControlImpl, public ColorControlDel
 
   virtual void initBridgedInfo(JsonObjectPtr aDeviceInfo, const char* aInputType = nullptr, const char* aInputId = nullptr) override;
   virtual void parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr aChannelStates, UpdateMode aUpdateMode) override;
-
+  
+  static int moveDirFromMode(UpdateMode aUpdateMode);
 public:
   P44_ColorControlImpl();
 
