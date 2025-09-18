@@ -33,9 +33,6 @@ class ColorControlDelegate
 {
 public:
 
-  using UpdateMode = Device::UpdateMode;
-  using UpdateFlags = Device::UpdateFlags;
-
   virtual ~ColorControlDelegate() = default;
 
   /// Set new hue. Implies device changes to HSV color mode if it natively supports color modes

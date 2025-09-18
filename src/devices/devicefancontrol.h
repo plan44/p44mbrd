@@ -70,12 +70,12 @@ public:
   /// @name LevelControlImplementationInterface
   /// @{
   virtual void setDefaultOnLevel(double aLevelPercent) override;
-  virtual bool updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode) override;
+  virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) override;
   /// @}
 
   /// @name callbacks for FanControlExtrasDelegate implementations
   /// @{
-  bool updateAuto(bool aAuto, double aLevel, Device::UpdateMode aUpdateMode);
+  bool updateAuto(bool aAuto, double aLevel, UpdateMode aUpdateMode);
   /// @}
 
   /// @name handlers for attribute processing

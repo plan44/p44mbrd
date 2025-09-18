@@ -78,6 +78,27 @@ public:
 };
 
 
+/// @brief update mode flags
+/// These control the propagation of changes towards matter and the bridged devices, and some
+/// internal semantics.
+enum class UpdateFlags : uint16_t
+{
+  bridged = 0x01, ///< update state in bridge (send change notification/call)
+  matter = 0x02, ///< update state in matter (report attribute as changed)
+  noderive = 0x10, ///< do not derive anything from this change (in particular: not the color mode!)
+  chained = 0x20, ///< this update was triggered by another update (prevent recursion)
+  noapply = 0x40, ///< do not apply to hardware right now when updating bridge (i.e. color components)
+  forced = 0x80, ///< perform updates even when cached state has not changed
+  relative = 0x100, ///< internal flag to specify relative value changes
+  move = 0x200, ///< internal flag to specify movement rather than value setting
+  up = 0x400, ///< (numerically) up movement or stepping
+  down = 0x800, ///< (numericall) down movement or stepping
+  longest = 0x1000, ///< longest movement path (e.g. hue)
+  shortest = 0x2000, ///< shoprtest movement path (e.g. hue)
+};
+typedef BitFlags<UpdateFlags> UpdateMode; ///< update mode consisting of zero or more UpdateFlags
+
+
 // @brief delegate for obtaining device information
 class DeviceInfoDelegate
 {
@@ -195,25 +216,6 @@ public:
   /// These can be called while the device is active to propagate changes according to UpdateMode
   /// @{
 
-  /// @brief update mode flags
-  /// These control the propagation of changes towards matter and the bridged devices, and some
-  /// internal semantics.
-  enum class UpdateFlags : uint16_t
-  {
-    bridged = 0x01, ///< update state in bridge (send change notification/call)
-    matter = 0x02, ///< update state in matter (report attribute as changed)
-    noderive = 0x10, ///< do not derive anything from this change (in particular: not the color mode!)
-    chained = 0x20, ///< this update was triggered by another update (prevent recursion)
-    noapply = 0x40, ///< do not apply to hardware right now when updating bridge (i.e. color components)
-    forced = 0x80, ///< perform updates even when cached state has not changed
-    relative = 0x100, ///< internal flag to specify relative value changes
-    move = 0x200, ///< internal flag to specify movement rather than value setting
-    up = 0x400, ///< (numerically) up movement or stepping
-    down = 0x800, ///< (numericall) down movement or stepping
-    longest = 0x1000, ///< longest movement path (e.g. hue)
-    shortest = 0x2000, ///< shoprtest movement path (e.g. hue)
-  };
-  using UpdateMode = BitFlags<UpdateFlags>; ///< update mode consisting of zero or more UpdateFlags
 
   /// @brief update the reachable status.
   /// Device adapters should call this when detecting reachability changes

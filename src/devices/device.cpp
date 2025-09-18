@@ -470,7 +470,7 @@ bool emberAfIdentifyClusterIdentifyCallback(
   }
   auto dev = DeviceEndpoints::getDevice<IdentifiableDevice>(commandPath.mEndpointId);
   if (!dev) return false;
-  dev->updateIdentifyTime(commandData.identifyTime, Device::UpdateMode(Device::UpdateFlags::bridged, Device::UpdateFlags::matter));
+  dev->updateIdentifyTime(commandData.identifyTime, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
 }

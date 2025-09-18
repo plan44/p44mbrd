@@ -96,7 +96,7 @@ void DeviceFanControl::setDefaultOnLevel(double aLevelPercent)
 }
 
 
-bool DeviceFanControl::updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode)
+bool DeviceFanControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMode)
 {
   Percent currentLevel = static_cast<uint8_t>(aLevelPercent);
   Percent previousLevel;
@@ -116,7 +116,7 @@ bool DeviceFanControl::updateLevel(double aLevelPercent, Device::UpdateMode aUpd
 
 // MARK: internals
 
-bool DeviceFanControl::updateAuto(bool aAuto, double aLevel, Device::UpdateMode aUpdateMode)
+bool DeviceFanControl::updateAuto(bool aAuto, double aLevel, UpdateMode aUpdateMode)
 {
   FanModeEnum fanMode;
   FanMode::Get(endpointId(), &fanMode);

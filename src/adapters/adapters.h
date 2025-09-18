@@ -49,9 +49,6 @@ protected:
 
 public:
 
-  using UpdateMode = Device::UpdateMode;
-  using UpdateFlags = Device::UpdateFlags;
-
   /// must be called after BridgeAdapter::startup(), when adapter has started up and
   virtual void adapterStartupComplete(ErrorPtr aError, BridgeAdapter &aAdapter) = 0;
 
@@ -121,9 +118,6 @@ private:
   BridgeMainDelegate* mBridgeMainDelegateP = nullptr;
 
 public:
-
-  using UpdateMode = Device::UpdateMode;
-  using UpdateFlags = Device::UpdateFlags;
 
   /// @name entry points **for the main application only**, to operate the adapter
   /// @{
@@ -269,8 +263,6 @@ public:
 class DeviceAdapter
 {
 public:
-  using UpdateMode = Device::UpdateMode;
-  using UpdateFlags = Device::UpdateFlags;
 
   virtual ~DeviceAdapter() = default;
 

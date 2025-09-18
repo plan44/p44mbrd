@@ -58,10 +58,6 @@ static EmberAfClusterSpec gColorLightClusters[] = { { ColorControl::Id, CLUSTER_
 
 using namespace ColorControl;
 
-using UpdateMode = Device::UpdateMode;
-using UpdateFlags = Device::UpdateFlags;
-
-
 DeviceColorControl::DeviceColorControl(bool aCTOnly, ColorControlDelegate& aColorControlDelegate, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(true, aLevelControlDelegate, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate), // level control for lighting
   mColorControlDelegate(aColorControlDelegate),

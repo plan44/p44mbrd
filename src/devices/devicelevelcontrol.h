@@ -67,7 +67,7 @@ public:
   virtual void setDefaultOnLevel(double aLevelPercent) = 0;
 
   /// @brief update the current level (when bridged device reports it)
-  virtual bool updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode) = 0;
+  virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) = 0;
 };
 
 
@@ -99,7 +99,7 @@ public:
   /// @name LevelControlImplementationInterface
   /// @{
   virtual void setDefaultOnLevel(double aLevelPercent) override;
-  virtual bool updateLevel(double aLevelPercent, Device::UpdateMode aUpdateMode) override;
+  virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) override;
   /// @}
 
   /// @name handlers for external attribute implementation
