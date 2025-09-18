@@ -1294,6 +1294,7 @@
 		ED7F9A292904328F00A7CB48 /* Protocols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Protocols.cpp; sourceTree = "<group>"; };
 		ED7F9A2B290433FB00A7CB48 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioningDriver.h; sourceTree = "<group>"; };
+		ED877B952E7CA21400B9E84C /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		ED91CC722D84996100F68DF2 /* AccessBuildConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessBuildConfig.h; sourceTree = "<group>"; };
 		ED91CC742D849B2500F68DF2 /* AccessRestrictionProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessRestrictionProvider.h; sourceTree = "<group>"; };
 		ED91CC752D849B2500F68DF2 /* AccessRestrictionProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AccessRestrictionProvider.cpp; sourceTree = "<group>"; };
@@ -3430,6 +3431,7 @@
 		ED690B65286DC80800069215 /* connectedhomeip */ = {
 			isa = PBXGroup;
 			children = (
+				ED877B952E7CA21400B9E84C /* .gitmodules */,
 				ED36DE2C286DDDB700CA28EC /* config */,
 				ED36D75C286DCAF700CA28EC /* examples */,
 				ED36D7A5286DCC5B00CA28EC /* src */,
