@@ -383,6 +383,7 @@ public:
 
   void startChip()
   {
+    OLOG(LOG_NOTICE, "starting chip, max %d dynamic endpoints", CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
     ErrorPtr err;
     if (mChipAppInitialized) {
       err = TextError::err("trying to call chipAppInit() a second time");
@@ -454,7 +455,7 @@ public:
       LogErrorOnFailure(chiperr);
     }
     else // not found in legacy store
-    #endif
+    #endif // MIGRATE_DYNAMIC_ENDPOINT_IDX_KVS
     {
       // lookup previously used endpointId
       chiperr = kvs.Get(key.c_str(), &endpointId);
@@ -510,6 +511,7 @@ public:
       dev->SetDynamicEndpointIdx(mNumDynamicEndPoints);
       mDevices[mNumDynamicEndPoints] = dev.get();
       mNumDynamicEndPoints++;
+      OLOG(LOG_INFO, "%d of max %d dynamic endpoints now in use", mNumDynamicEndPoints, CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT);
       // also set parent endpoint id
       dev->SetParentEndpointId(aParentEndpointId);
     }
