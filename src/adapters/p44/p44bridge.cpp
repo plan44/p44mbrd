@@ -279,70 +279,78 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
           // no or unknown bridging hint - derive bridged device type(s) automatically
           // First: check output
           if (outputdesc && !preventOutput) {
-            if (outputdesc->get("function", o)) {
-              int outputfunction = (int)o->int32Value();
-              // output device
-              if (behaviourtype=="light" && groups && groups->get("1")) { // group_yellow_light
-                // this is a light device
-                OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                switch(outputfunction) {
-                  default:
-                  case outputFunction_switch: // switch output
-                    dev = new P44_OnOffLightDevice();
-                    break;
-                  case outputFunction_dimmer: // effective value dimmer - single channel 0..100
-                    dev = new P44_DimmableLightDevice();
-                    break;
-                  case outputFunction_ctdimmer: // dimmer with color temperature - channels 1 and 4
-                  case outputFunction_colordimmer: // full color dimmer - channels 1..6
-                    dev = new P44_ColorLightDevice(outputfunction==outputFunction_ctdimmer /* ctOnly */);
-                    break;
-                }
-              }
-              else if (behaviourtype=="shadow" && groups && groups->get("2")) {
-                // this is a shadow device
-                OLOG(LOG_NOTICE, "found bridgeable shadow device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                dev = new P44_WindowCoveringDevice();
-              }
-              else if (behaviourtype=="ventilation") {
-                // actual ventilation device
-                OLOG(LOG_NOTICE, "found bridgeable ventilation behaviour device '%s': %s", name.c_str(), dsuid.c_str());
-                // TODO: actually enable when P44_FullFeatureFanDevice exists
-                /*
-                if (hasModelFeature(aDeviceJSON, "fcu")) {
-                  // ventilation device with extra features (louver, auto mode etc)
-                  dev = new P44_FullFeatureFanDevice();
-                }
-                else
-                */
-                {
-                  // simple ventilation device
-                  dev = new P44_SimpleFanDevice();
-                }
-              }
-              else if (groups && groups->get("10")) {
-                // generic output in the ventilation group -> also model as fan control device
-                OLOG(LOG_NOTICE, "found bridgeable standard output in ventilation group device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                dev = new P44_SimpleFanDevice();
-              }
-              else {
-                // not something specific, only switched or dimmed output
-                OLOG(LOG_NOTICE, "found bridgeable generic output device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
-                switch(outputfunction) {
-                  case outputFunction_switch: // switch output
-                    dev = new P44_OnOffPluginUnitDevice();
-                    break;
-                  default:
-                  case outputFunction_dimmer: // effective value dimmer - single channel 0..100
-                    dev = new P44_DimmablePluginUnitDevice();
-                    break;
-                }
+            if (outputdesc->get("x-p44-wantsBridging", o)) {
+              preventOutput = !o->boolValue();
+              if (preventOutput) {
+                OLOG(LOG_INFO, "output of device '%s': %s - does not want to be bridged -> skip it", name.c_str(), dsuid.c_str());
               }
             }
-            if (dev) {
-              P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON);
-              devices.push_back(dev);
-              dev.reset();
+            if (!preventOutput) {
+              if (outputdesc->get("function", o)) {
+                int outputfunction = (int)o->int32Value();
+                // output device
+                if (behaviourtype=="light" && groups && groups->get("1")) { // group_yellow_light
+                  // this is a light device
+                  OLOG(LOG_NOTICE, "found bridgeable light device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  switch(outputfunction) {
+                    default:
+                    case outputFunction_switch: // switch output
+                      dev = new P44_OnOffLightDevice();
+                      break;
+                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
+                      dev = new P44_DimmableLightDevice();
+                      break;
+                    case outputFunction_ctdimmer: // dimmer with color temperature - channels 1 and 4
+                    case outputFunction_colordimmer: // full color dimmer - channels 1..6
+                      dev = new P44_ColorLightDevice(outputfunction==outputFunction_ctdimmer /* ctOnly */);
+                      break;
+                  }
+                }
+                else if (behaviourtype=="shadow" && groups && groups->get("2")) {
+                  // this is a shadow device
+                  OLOG(LOG_NOTICE, "found bridgeable shadow device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  dev = new P44_WindowCoveringDevice();
+                }
+                else if (behaviourtype=="ventilation") {
+                  // actual ventilation device
+                  OLOG(LOG_NOTICE, "found bridgeable ventilation behaviour device '%s': %s", name.c_str(), dsuid.c_str());
+                  // TODO: actually enable when P44_FullFeatureFanDevice exists
+                  /*
+                   if (hasModelFeature(aDeviceJSON, "fcu")) {
+                   // ventilation device with extra features (louver, auto mode etc)
+                   dev = new P44_FullFeatureFanDevice();
+                   }
+                   else
+                   */
+                  {
+                    // simple ventilation device
+                    dev = new P44_SimpleFanDevice();
+                  }
+                }
+                else if (groups && groups->get("10")) {
+                  // generic output in the ventilation group -> also model as fan control device
+                  OLOG(LOG_NOTICE, "found bridgeable standard output in ventilation group device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  dev = new P44_SimpleFanDevice();
+                }
+                else {
+                  // not something specific, only switched or dimmed output
+                  OLOG(LOG_NOTICE, "found bridgeable generic output device '%s': %s, outputfunction=%d", name.c_str(), dsuid.c_str(), outputfunction);
+                  switch(outputfunction) {
+                    case outputFunction_switch: // switch output
+                      dev = new P44_OnOffPluginUnitDevice();
+                      break;
+                    default:
+                    case outputFunction_dimmer: // effective value dimmer - single channel 0..100
+                      dev = new P44_DimmablePluginUnitDevice();
+                      break;
+                  }
+                }
+              }
+              if (dev) {
+                P44_DeviceImpl::impl(dev)->initBridgedInfo(aDeviceJSON);
+                devices.push_back(dev);
+                dev.reset();
+              }
             }
           }
           // Second: check inputs
@@ -358,6 +366,13 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
                 inputdescs->resetKeyIteration();
                 bool moreInputs = false; // default to one input per device
                 while (inputdescs->nextKeyValue(inputid, inputdesc)) {
+                  if (inputdesc->get("x-p44-wantsBridging", o)) {
+                    if (!o->boolValue()) {
+                      // explicitly does not want bridiging -> skip
+                      OLOG(LOG_INFO, "input '%s' in device '%s': %s - does not want to be bridged -> skip it", inputid.c_str(), name.c_str(), dsuid.c_str());
+                      continue;
+                    }
+                  }
                   VdcUsageHint usage = usage_undefined;
                   switch (inputType) {
                     case sensor: {
@@ -499,7 +514,7 @@ DevicePtr P44_BridgeImpl::bridgedDeviceFromJSON(JsonObjectPtr aDeviceJSON)
               }
             } // for all input types
           }
-        }
+        } // auto-derive device type
         // Now we have a list of matter devices that are contained in this single briged device
         if (!devices.empty()) {
           // at least one
