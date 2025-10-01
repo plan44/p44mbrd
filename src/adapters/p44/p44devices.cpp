@@ -890,6 +890,11 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
         }
       }
     }
+    else {
+      // lift channel value unknown
+      WindowCovering::Attributes::TargetPositionLiftPercent100ths::SetNull(endpointId());
+      WindowCovering::LiftPositionSet(endpointId(), WindowCovering::NPercent100ths());
+    }
   }
   if (aChannelStates->get("shadeOpeningAngleOutside", o)) {
     // Tilt channel
@@ -910,6 +915,11 @@ void P44_WindowCoveringImpl::parseOutputState(JsonObjectPtr aOutputState, JsonOb
           WindowCovering::TiltPositionSet(endpointId(), WindowCovering::NPercent100ths(targetvalue));
         }
       }
+    }
+    else {
+      // tilt channel value unknown
+      WindowCovering::Attributes::TargetPositionTiltPercent100ths::SetNull(endpointId());
+      WindowCovering::TiltPositionSet(endpointId(), WindowCovering::NPercent100ths());
     }
   }
 }
