@@ -1133,8 +1133,8 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 }
                 break;
               case ct_complete:
-                if (position==0) {
-                  // Note: when we have multipress support, even single clicks need the OnMultiPressComplete event!
+                if (position==0 && mClicks>0) {
+                  // Note: when we have multipress support, even single clicks (but not holds!) need the OnMultiPressComplete event!
                   SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
                 }
                 mClicks = 0;
