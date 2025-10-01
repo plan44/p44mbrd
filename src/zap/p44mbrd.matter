@@ -2708,6 +2708,8 @@ endpoint 2 {
   server cluster WindowCovering {
     ram      attribute type default = 0x00;
     ram      attribute configStatus default = 0x03;
+    ram      attribute currentPositionLiftPercentage;
+    ram      attribute currentPositionTiltPercentage;
     ram      attribute operationalStatus default = 0x00;
     ram      attribute targetPositionLiftPercent100ths;
     ram      attribute targetPositionTiltPercent100ths;
