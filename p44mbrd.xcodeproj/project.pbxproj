@@ -31,7 +31,6 @@
 		ED24BDE128A68AE20025CC14 /* jsoncomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDD928A68AE20025CC14 /* jsoncomm.cpp */; };
 		ED24BDE228A68AE20025CC14 /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDDD28A68AE20025CC14 /* application.cpp */; };
 		ED24BDE828A812E00025CC14 /* p44bridgeapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDE728A812E00025CC14 /* p44bridgeapi.cpp */; };
-		ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */; };
 		ED24BDF528AF8F670025CC14 /* bridged-device-basic-information-server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED24BDF428AF8F670025CC14 /* bridged-device-basic-information-server.cpp */; };
 		ED2B994A2A85166B007AD119 /* factorydataprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2B99482A85166B007AD119 /* factorydataprovider.cpp */; };
 		ED2B994B2A852BC2007AD119 /* p44deviceattestationprovider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDCA044F2A82681E00225B0A /* p44deviceattestationprovider.cpp */; };
@@ -512,16 +511,7 @@
 		ED36D77E286DCB8A00CA28EC /* ToCertificateString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ToCertificateString.h; sourceTree = "<group>"; };
 		ED36D77F286DCB8A00CA28EC /* ToCertificateString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ToCertificateString.cpp; sourceTree = "<group>"; };
 		ED36D780286DCB8A00CA28EC /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
-		ED36D790286DCC4000CA28EC /* CommissionerMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CommissionerMain.cpp; sourceTree = "<group>"; };
-		ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CommissionableInit.cpp; sourceTree = "<group>"; };
-		ED36D793286DCC4000CA28EC /* CommissionerMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommissionerMain.h; sourceTree = "<group>"; };
-		ED36D794286DCC4000CA28EC /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		ED36D795286DCC4000CA28EC /* LinuxCommissionableDataProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinuxCommissionableDataProvider.h; sourceTree = "<group>"; };
-		ED36D796286DCC4000CA28EC /* Options.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Options.h; sourceTree = "<group>"; };
-		ED36D797286DCC4000CA28EC /* CommissionableInit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommissionableInit.h; sourceTree = "<group>"; };
-		ED36D799286DCC4000CA28EC /* CommonRpc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonRpc.h; sourceTree = "<group>"; };
-		ED36D79A286DCC4000CA28EC /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
-		ED36D79B286DCC4000CA28EC /* Options.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Options.cpp; sourceTree = "<group>"; };
 		ED36D79C286DCC4000CA28EC /* LinuxCommissionableDataProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LinuxCommissionableDataProvider.cpp; sourceTree = "<group>"; };
 		ED36D7A8286DCCBB00CA28EC /* AccessControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessControl.h; sourceTree = "<group>"; };
 		ED36D7A9286DCCBB00CA28EC /* AccessControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AccessControl.cpp; sourceTree = "<group>"; };
@@ -1832,17 +1822,8 @@
 		ED36D78E286DCBF900CA28EC /* linux */ = {
 			isa = PBXGroup;
 			children = (
-				ED36D79A286DCC4000CA28EC /* AppMain.cpp */,
-				ED36D794286DCC4000CA28EC /* AppMain.h */,
-				ED36D792286DCC4000CA28EC /* CommissionableInit.cpp */,
-				ED36D797286DCC4000CA28EC /* CommissionableInit.h */,
-				ED36D790286DCC4000CA28EC /* CommissionerMain.cpp */,
-				ED36D793286DCC4000CA28EC /* CommissionerMain.h */,
-				ED36D799286DCC4000CA28EC /* CommonRpc.h */,
 				ED36D79C286DCC4000CA28EC /* LinuxCommissionableDataProvider.cpp */,
 				ED36D795286DCC4000CA28EC /* LinuxCommissionableDataProvider.h */,
-				ED36D79B286DCC4000CA28EC /* Options.cpp */,
-				ED36D796286DCC4000CA28EC /* Options.h */,
 			);
 			path = linux;
 			sourceTree = "<group>";
@@ -3934,7 +3915,6 @@
 				ED36D90B286DCF5100CA28EC /* Dnssd.cpp in Sources */,
 				ED36DCFC286DD8A000CA28EC /* PASESession.cpp in Sources */,
 				ED36D867286DCDED00CA28EC /* InvokeResponseMessage.cpp in Sources */,
-				ED24BDED28A8FE840025CC14 /* CommissionableInit.cpp in Sources */,
 				ED0B92DB2949DDFF00FA3B04 /* Logging.mm in Sources */,
 				ED36D863286DCDED00CA28EC /* CommandPathIB.cpp in Sources */,
 				ED24BDDE28A68AE20025CC14 /* mainloop.cpp in Sources */,

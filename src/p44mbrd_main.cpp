@@ -138,8 +138,8 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
 
   // CHIP "globals"
   bool mChipAppInitialized;
-  LinuxCommissionableDataProvider mCommissionableDataProvider; // TODO: maybe replace it with our own
-  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // TODO: FIXME: we need our own!
+  LinuxCommissionableDataProvider mCommissionableDataProvider; // Purpose: Not much more than a data holding object, filled at InitCommissionableDataProvider() from app-level data. TODO: maybe replace it with our own
+  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // Purpose: per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars. TODO: FIXME: we need our own!
   P44DeviceInstanceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
   P44DeviceAttestationProvider mP44mbrdDeviceAttestationProvider; ///< our own attestation provider
 

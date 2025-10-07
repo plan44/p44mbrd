@@ -168,14 +168,16 @@ group("linux") {
 source_set("example_app_code") {
   defines = []
   sources = [
-#     "${chip_root}/examples/platform/linux/AppMain.cpp",
-#     "${chip_root}/examples/platform/linux/AppMain.h",
-    "${chip_root}/examples/platform/linux/CommissionableInit.cpp",
-    "${chip_root}/examples/platform/linux/CommissionableInit.h",
+#    "${chip_root}/examples/platform/linux/AppMain.cpp",
+#    "${chip_root}/examples/platform/linux/AppMain.h",
+#    # Contains only InitCommissionableDataProvider() and InitConfigurationManager(), WHICH WE HAVE RE-IMPLEMENTED in p44mbrd_main.cpp
+#    "${chip_root}/examples/platform/linux/CommissionableInit.cpp",
+#    "${chip_root}/examples/platform/linux/CommissionableInit.h",
 #    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.cpp",
 #    "${chip_root}/examples/platform/linux/CommissioneeShellCommands.h",
-    "${chip_root}/examples/platform/linux/CommissionerMain.cpp",
-    "${chip_root}/examples/platform/linux/CommissionerMain.h",
+#    "${chip_root}/examples/platform/linux/CommissionerMain.cpp",
+#    "${chip_root}/examples/platform/linux/CommissionerMain.h",
+    # LinuxCommissionableDataProvider is not much more than a data holding object, filled at InitCommissionableDataProvider() from app-level data
     "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.cpp",
     "${chip_root}/examples/platform/linux/LinuxCommissionableDataProvider.h",
 #    "${chip_root}/examples/platform/linux/NamedPipeCommands.cpp",
@@ -186,6 +188,7 @@ source_set("example_app_code") {
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.h",
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.cpp",
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.h",
+    # DeviceInfoProviderImpl provides per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars
     "${chip_root}/examples/providers/DeviceInfoProviderImpl.cpp",
     "${chip_root}/examples/providers/DeviceInfoProviderImpl.h",
   ]
