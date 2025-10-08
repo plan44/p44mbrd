@@ -77,8 +77,13 @@ executable("p44mbrd") {
     "chip_glue/p44deviceattestationprovider.h",
     "chip_glue/p44deviceinstanceinfoprovider.cpp",
     "chip_glue/p44deviceinstanceinfoprovider.h",
+# we do not have the clusters that would need this for now, so omit
+#    "chip_glue/p44deviceinfoprovider.cpp",
+#    "chip_glue/p44deviceinfoprovider.h",
     "chip_glue/chip_error.cpp",
     "chip_glue/chip_error.h",
+    "chip_overrides/PosixConfig.cpp",
+    "chip_overrides/PosixConfig.h",
     "p44mbrd_main.cpp",
     "p44mbrd_main.h",
     "matter_common.h",
@@ -148,6 +153,7 @@ config("p44mbrd_config_extra") {
     "-Wno-noexcept-type",
   ]
   include_dirs = [
+    "chip_overrides",
   ]
   libs = [
     # for libev based event handling
@@ -188,9 +194,9 @@ source_set("example_app_code") {
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponse.h",
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.cpp",
 #    "${chip_root}/examples/platform/linux/testing/CustomCSRResponseOperationalKeyStore.h",
-    # DeviceInfoProviderImpl provides per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars
-    "${chip_root}/examples/providers/DeviceInfoProviderImpl.cpp",
-    "${chip_root}/examples/providers/DeviceInfoProviderImpl.h",
+#    # DeviceInfoProviderImpl provides per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars
+#    "${chip_root}/examples/providers/DeviceInfoProviderImpl.cpp",
+#    "${chip_root}/examples/providers/DeviceInfoProviderImpl.h",
   ]
 
   deps = [

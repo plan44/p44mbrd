@@ -24,7 +24,7 @@ chip_project_config_include_dirs = [ "//zap/include" ]
 chip_project_config_include_dirs += [ "${chip_root}/config/standalone" ]
 
 # p44mbrd version
-p44_application_version = "1.4.0.5"
+p44_application_version = "1.4.0.9"
 
 # p44mbrd specifics extra config
 default_configs_extra = [ "//:p44mbrd_config_extra" ]
@@ -58,6 +58,9 @@ chip_system_config_use_libev = true
 
 # we need libev, not dispatch (even on macos)
 chip_system_config_use_dispatch = false
+
+# we want our own version of posix config
+chip_custom_posix_config = true
 
 # we want posix locking
 chip_system_config_locking = "posix"

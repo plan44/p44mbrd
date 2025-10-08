@@ -147,7 +147,7 @@ gn gen \
     --fail-on-unused-args \
     --export-compile-commands \
     --root=$CHIPAPP_ROOT \
-    "--args=target_os=\"openwrt\" ${EXTRA_GN_ARGS} openwrt_sdk_root=\"$BUILDROOT\" openwrt_sdk_sysroot=\"$SYSROOT\" openwrt_toolchain_prefix=\"$TOOLCHAIN_PREFIX\" target_cpu=\"$TARGET_CPU\" chip_device_platform=\"linux\" chip_enable_openthread=false chip_enable_wifi=false" \
+    "--args=target_os=\"openwrt\" ${EXTRA_GN_ARGS} openwrt_sdk_root=\"$BUILDROOT\" openwrt_sdk_sysroot=\"$SYSROOT\" openwrt_toolchain_prefix=\"$TOOLCHAIN_PREFIX\" target_cpu=\"$TARGET_CPU\" chip_device_platform=\"linux\" chip_enable_openthread=false chip_enable_wifi=false chip_custom_posix_config=true" \
     $OUT_DIR
 if [[ $? != 0 ]]; then
   echo "# gn FAILED"

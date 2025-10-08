@@ -66,7 +66,7 @@
 #include "chip_glue/chip_error.h"
 #include "chip_glue/p44deviceinstanceinfoprovider.h" // information about vendor, name, serial, URL etc.
 // FIXME: implement
-//#include "chip_glue/p44deviceinfoprovider.h" // infos like Fixed and User Tags,
+#include "chip_glue/p44deviceinfoprovider.h"
 #include "chip_glue/p44deviceattestationprovider.h"
 
 #include "actions.h"
@@ -115,7 +115,6 @@ using namespace chip::app::Clusters;
 #include <platform/TestOnlyCommissionableDataProvider.h>
 #include <app/server/OnboardingCodesUtil.h>
 #include <system/SystemLayerImpl.h>
-#include <providers/DeviceInfoProviderImpl.h>
 
 #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
 #include <tracing/TraceDecoder.h>
@@ -1031,15 +1030,6 @@ public:
     // Init the configuration manager
     err = InitConfigurationManager(reinterpret_cast<ConfigurationManagerImpl &>(ConfigurationMgr()), onBoardingPayload);
     if (Error::notOK(err)) return err;
-
-// FIXME: we don't need to re-fetch this info here?? Should all be contained in onBoardingPayload already
-//    if (LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.HasValue()) {
-//        rendezvousFlags = LinuxDeviceOptions::GetInstance().payload.rendezvousInformation.Value();
-//    }
-//
-//    err = GetPayloadContents(LinuxDeviceOptions::GetInstance().payload, rendezvousFlags);
-//    SuccessOrExit(err);
-
 
     // Set our own device info provider (before initializing server, which wants to see it installed)
     SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);

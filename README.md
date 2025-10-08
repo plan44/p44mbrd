@@ -78,7 +78,7 @@ From within openwrt buildroot:
 ```bash
 # add the matter-openwrt feed
 echo "src-git --force matter https://github.com/project-chip/matter-openwrt.git" >>feeds.conf
- 
+
 # add the plan44 openwrt feed
 echo "src-git plan44 https://github.com/plan44/plan44-feed.git;main" >>feeds.conf
 
@@ -156,7 +156,7 @@ gn gen \
     --fail-on-unused-args \
     --export-compile-commands \
     --root=${CHIPAPP_ROOT}/src \
-    "--args=chip_enable_openthread=false chip_enable_wifi=false" \
+    "--args=chip_enable_openthread=false chip_enable_wifi=false chip_custom_posix_config=true" \
     ${OUT_DIR}
 ninja -C ${OUT_DIR} ${CHIPAPP_NAME}
 ```
