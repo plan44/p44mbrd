@@ -146,7 +146,6 @@
 		ED36DA96286DD16200CA28EC /* LastKnownGoodTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA94286DD16200CA28EC /* LastKnownGoodTime.cpp */; };
 		ED36DAA0286DD17F00CA28EC /* ExampleDACs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA9B286DD17F00CA28EC /* ExampleDACs.cpp */; };
 		ED36DAA1286DD17F00CA28EC /* ExamplePAI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA9C286DD17F00CA28EC /* ExamplePAI.cpp */; };
-		ED36DAA2286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DA9D286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp */; };
 		ED36DAA9286DD1CC00CA28EC /* CHIPAttCert_test_vectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAA7286DD1CC00CA28EC /* CHIPAttCert_test_vectors.cpp */; };
 		ED36DAB3286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAAC286DD20600CA28EC /* CHIPCryptoPALOpenSSL.cpp */; };
 		ED36DAB4286DD20600CA28EC /* CHIPCryptoPAL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DAAE286DD20600CA28EC /* CHIPCryptoPAL.cpp */; };
@@ -3847,7 +3846,6 @@
 				EDD0DAF52D3AC4DF00E4362C /* ResolverProxy.cpp in Sources */,
 				ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */,
 				ED36D86B286DCDED00CA28EC /* AttributeDataIBs.cpp in Sources */,
-				ED36DAA2286DD17F00CA28EC /* DeviceAttestationCredsExample.cpp in Sources */,
 				EDB388F029E6EF8E00BDAED4 /* TLVWriter.cpp in Sources */,
 				ED36D8E6286DCF0B00CA28EC /* ReadHandler.cpp in Sources */,
 				EDC58B592A65B0F000F48DEF /* devicelevelcontrol.cpp in Sources */,

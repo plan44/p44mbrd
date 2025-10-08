@@ -897,6 +897,8 @@ public:
   }
 
 
+  /*
+  // FIXME: remove, we do NOT need this, configuration manager is now connected to factoryDataProvider!
   ErrorPtr InitConfigurationManager(ConfigurationManagerImpl& aConfigManager, chip::PayloadContents& aOnBoardingPayload)
   {
     ErrorPtr err;
@@ -913,6 +915,7 @@ public:
     }
     return err;
   }
+  */
 
 
   ErrorPtr chipAppInit()
@@ -1018,6 +1021,9 @@ public:
     // IMPORTANT: pass the p44utils mainloop to the system layer!
     static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetLibEvLoop(MainLoop::currentMainLoop().libevLoop());
 
+    // Set our own device info provider (before initializing server or config manager, which need to have it installed)
+    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
+
     // chip stack init
     err = P44ChipError::err(DeviceLayer::PlatformMgr().InitChipStack());
     if (Error::notOK(err)) return err;
@@ -1027,12 +1033,12 @@ public:
     if (Error::notOK(err)) return err;
     DeviceLayer::SetCommissionableDataProvider(&mCommissionableDataProvider);
 
+    /*
+    // FIXME: remove, we do NOT need this, configuration manager is now connected to factoryDataProvider!
     // Init the configuration manager
     err = InitConfigurationManager(reinterpret_cast<ConfigurationManagerImpl &>(ConfigurationMgr()), onBoardingPayload);
     if (Error::notOK(err)) return err;
-
-    // Set our own device info provider (before initializing server, which wants to see it installed)
-    SetDeviceInstanceInfoProvider(&mP44dbrDeviceInstanceInfoProvider);
+    */
 
     // Show device config
     ConfigurationMgr().LogDeviceConfig();
@@ -1080,9 +1086,7 @@ public:
 
     // MARK: basically reduced ChipLinuxAppMainLoop() from here, without actually starting the mainloop
 
-
-    DeviceAttestationCredentialsProvider *dacProvider = Examples::GetExampleDACProvider();
-    SetDeviceAttestationCredentialsProvider(dacProvider);
+    SetDeviceAttestationCredentialsProvider(&mP44mbrdDeviceAttestationProvider);
 
     #if CERT_DEBUG
     #warning "allow actual certs"
