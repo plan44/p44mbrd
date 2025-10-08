@@ -130,6 +130,9 @@ using namespace p44;
 #define P44_DEFAULT_BRIDGE_SERVICE "4444"
 #define CC_DEFAULT_BRIDGE_SERVICE "18163" // RPC 18=R, 16=P, 3=C
 
+#ifndef P44MBRD_LABELS_CALS_LOCALES_SUPPORT
+  #define P44MBRD_LABELS_CALS_LOCALES_SUPPORT 0 // no support for now
+#endif
 
 /// Main program application object
 class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
@@ -139,9 +142,11 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   // CHIP "globals"
   bool mChipAppInitialized;
   LinuxCommissionableDataProvider mCommissionableDataProvider; // Purpose: Not much more than a data holding object, filled at InitCommissionableDataProvider() from app-level data. TODO: maybe replace it with our own
-  chip::DeviceLayer::DeviceInfoProviderImpl mExampleDeviceInfoProvider; // Purpose: per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars. TODO: FIXME: we need our own!
   P44DeviceInstanceInfoProvider mP44dbrDeviceInstanceInfoProvider; ///< our own device **instance** info provider
   P44DeviceAttestationProvider mP44mbrdDeviceAttestationProvider; ///< our own attestation provider
+  #if P44MBRD_LABELS_CALS_LOCALES_SUPPORT
+  P44DeviceInfoProvider mP44dbrDeviceInfoProvider; // Purpose: per-endpoint storage of Fixed/User Labels, Supported Locales&Calendars.
+  #endif
 
   // Bridged devices info
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
@@ -958,14 +963,14 @@ public:
       onBoardingPayload.vendorID = CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID;
       OLOG(LOG_WARNING, "No VendorID in factorydata: using development default VID=0x%04X", onBoardingPayload.vendorID);
     }
-    #endif
+    #endif // CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID
     mP44dbrDeviceInstanceInfoProvider.GetProductId(onBoardingPayload.productID);
     #ifdef CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
     if (onBoardingPayload.productID==0) {
       onBoardingPayload.productID = CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID;
       OLOG(LOG_WARNING, "No ProductId in factorydata: using development default PID=0x%04X", onBoardingPayload.productID);
     }
-    #endif
+    #endif // CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID
     onBoardingPayload.version = factoryData->getUInt8("PAYLOADVERSION"); // defaults to 0
     onBoardingPayload.commissioningFlow = (CommissioningFlow)factoryData->getUInt8("COMMISSIONINGFLOW"); // defaults to 0 = CommissioningFlow::kStandard
     onBoardingPayload.discriminator.SetLongValue(factoryData->getUInt16("DISCRIMINATOR") & ((1<<12)-1)); // defaults to 0, 12 bits max
@@ -1009,7 +1014,7 @@ public:
       err = P44ChipError::err(DeviceLayer::PersistedStorage::KeyValueStoreMgrImpl().Init(tempPath("chip_kvs").c_str()));
     }
     if (Error::notOK(err)) return err;
-    #endif
+    #endif // CHIP_CONFIG_KVS_PATH
 
     // IMPORTANT: pass the p44utils mainloop to the system layer!
     static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetLibEvLoop(MainLoop::currentMainLoop().libevLoop());
@@ -1133,14 +1138,18 @@ public:
       VerifyOrDie(Inet::InterfaceId::InterfaceNameToId(ifname, serverInitParams.interfaceId) == CHIP_NO_ERROR);
     }
 
+    #if P44MBRD_LABELS_CALS_LOCALES_SUPPORT
     // We need to set DeviceInfoProvider before Server::Init to setup the storage of DeviceInfoProvider properly.
-    DeviceLayer::SetDeviceInfoProvider(&mExampleDeviceInfoProvider);
+    DeviceLayer::SetDeviceInfoProvider(&mP44dbrDeviceInfoProvider);
+    #endif
 
     // Init ZCL Data Model and CHIP App Server
     Server::GetInstance().Init(serverInitParams);
 
-    // prepare the storage delegate
-    mExampleDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
+    #if P44MBRD_LABELS_CALS_LOCALES_SUPPORT
+    // prepare the storage delegate for storing the user labels
+    mP44dbrDeviceInfoProvider.SetStorageDelegate(&chip::Server::GetInstance().GetPersistentStorage());
+    #endif
 
     #ifdef __APPLE__
     // we need the dispatch queue for DnsSD, even if the mainloop runs on libev
