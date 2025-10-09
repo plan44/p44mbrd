@@ -210,7 +210,6 @@
 		ED36DC65286DD6A400CA28EC /* ExchangeMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC58286DD6A300CA28EC /* ExchangeMgr.cpp */; };
 		ED36DC66286DD6A400CA28EC /* ReliableMessageProtocolConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC59286DD6A300CA28EC /* ReliableMessageProtocolConfig.cpp */; };
 		ED36DC67286DD6A400CA28EC /* ReliableMessageContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC5F286DD6A300CA28EC /* ReliableMessageContext.cpp */; };
-		ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC75286DD7F000CA28EC /* KeyValueStoreManagerImpl.mm */; };
 		ED36DCA1286DD7F200CA28EC /* PlatformManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC7F286DD7F100CA28EC /* PlatformManagerImpl.cpp */; };
 		ED36DCA5286DD7F200CA28EC /* DiagnosticDataProviderImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC89286DD7F100CA28EC /* DiagnosticDataProviderImpl.cpp */; };
 		ED36DCA6286DD7F200CA28EC /* ConnectivityManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED36DC8A286DD7F100CA28EC /* ConnectivityManagerImpl.cpp */; };
@@ -323,6 +322,10 @@
 		ED7F9A272904312300A7CB48 /* DnssdHostNameRegistrar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A252904312300A7CB48 /* DnssdHostNameRegistrar.cpp */; };
 		ED7F9A2A2904328F00A7CB48 /* Protocols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7F9A292904328F00A7CB48 /* Protocols.cpp */; };
 		ED7F9A2C290433FB00A7CB48 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED7F9A2B290433FB00A7CB48 /* Network.framework */; };
+		ED7FBF482E9803BC006FA799 /* CHIPLinuxStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7FBF432E9803BC006FA799 /* CHIPLinuxStorage.cpp */; };
+		ED7FBF492E9803BC006FA799 /* CHIPLinuxStorageIni.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7FBF452E9803BC006FA799 /* CHIPLinuxStorageIni.cpp */; };
+		ED7FBF4A2E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7FBF472E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp */; };
+		ED7FBF4D2E980DC7006FA799 /* IniEscaping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED7FBF4C2E980DC7006FA799 /* IniEscaping.cpp */; };
 		ED91CC762D849B2500F68DF2 /* AccessRestrictionProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC752D849B2500F68DF2 /* AccessRestrictionProvider.cpp */; };
 		ED91CC862D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC7C2D849BA000F68DF2 /* AttributePathExpandIterator-Checked.cpp */; };
 		ED91CC872D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED91CC7E2D849BA000F68DF2 /* AttributePathExpandIterator-DataModel.cpp */; };
@@ -1280,6 +1283,14 @@
 		ED7F9A292904328F00A7CB48 /* Protocols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Protocols.cpp; sourceTree = "<group>"; };
 		ED7F9A2B290433FB00A7CB48 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		ED7F9A2D2905610700A7CB48 /* NetworkCommissioningDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkCommissioningDriver.h; sourceTree = "<group>"; };
+		ED7FBF422E9803BC006FA799 /* CHIPLinuxStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPLinuxStorage.h; sourceTree = "<group>"; };
+		ED7FBF432E9803BC006FA799 /* CHIPLinuxStorage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPLinuxStorage.cpp; sourceTree = "<group>"; };
+		ED7FBF442E9803BC006FA799 /* CHIPLinuxStorageIni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPLinuxStorageIni.h; sourceTree = "<group>"; };
+		ED7FBF452E9803BC006FA799 /* CHIPLinuxStorageIni.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPLinuxStorageIni.cpp; sourceTree = "<group>"; };
+		ED7FBF462E9803BC006FA799 /* P44KeyValueStoreManagerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = P44KeyValueStoreManagerImpl.h; sourceTree = "<group>"; };
+		ED7FBF472E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = P44KeyValueStoreManagerImpl.cpp; sourceTree = "<group>"; };
+		ED7FBF4B2E980DC7006FA799 /* IniEscaping.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IniEscaping.h; sourceTree = "<group>"; };
+		ED7FBF4C2E980DC7006FA799 /* IniEscaping.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IniEscaping.cpp; sourceTree = "<group>"; };
 		ED877B952E7CA21400B9E84C /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		ED91CC722D84996100F68DF2 /* AccessBuildConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessBuildConfig.h; sourceTree = "<group>"; };
 		ED91CC742D849B2500F68DF2 /* AccessRestrictionProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccessRestrictionProvider.h; sourceTree = "<group>"; };
@@ -2636,6 +2647,8 @@
 				ED36DBCE286DD57900CA28EC /* FixedBufferAllocator.cpp */,
 				ED36DBF9286DD57B00CA28EC /* Fold.h */,
 				ED36DBCD286DD57900CA28EC /* FunctionTraits.h */,
+				ED7FBF4B2E980DC7006FA799 /* IniEscaping.h */,
+				ED7FBF4C2E980DC7006FA799 /* IniEscaping.cpp */,
 				ED36DBBF286DD57900CA28EC /* IntrusiveList.h */,
 				ED36DBD8286DD57A00CA28EC /* Iterators.h */,
 				ED36DBDB286DD57A00CA28EC /* LifetimePersistedCounter.h */,
@@ -3430,6 +3443,12 @@
 		ED75A0032E96923700323391 /* chip_overrides */ = {
 			isa = PBXGroup;
 			children = (
+				ED7FBF422E9803BC006FA799 /* CHIPLinuxStorage.h */,
+				ED7FBF432E9803BC006FA799 /* CHIPLinuxStorage.cpp */,
+				ED7FBF442E9803BC006FA799 /* CHIPLinuxStorageIni.h */,
+				ED7FBF452E9803BC006FA799 /* CHIPLinuxStorageIni.cpp */,
+				ED7FBF462E9803BC006FA799 /* P44KeyValueStoreManagerImpl.h */,
+				ED7FBF472E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp */,
 				ED75A0012E96923700323391 /* PosixConfig.h */,
 				ED75A0022E96923700323391 /* PosixConfig.cpp */,
 			);
@@ -3846,6 +3865,9 @@
 				EDD0DAF52D3AC4DF00E4362C /* ResolverProxy.cpp in Sources */,
 				ED36D7F3286DCDA300CA28EC /* software-diagnostics-server.cpp in Sources */,
 				ED36D86B286DCDED00CA28EC /* AttributeDataIBs.cpp in Sources */,
+				ED7FBF482E9803BC006FA799 /* CHIPLinuxStorage.cpp in Sources */,
+				ED7FBF492E9803BC006FA799 /* CHIPLinuxStorageIni.cpp in Sources */,
+				ED7FBF4A2E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp in Sources */,
 				EDB388F029E6EF8E00BDAED4 /* TLVWriter.cpp in Sources */,
 				ED36D8E6286DCF0B00CA28EC /* ReadHandler.cpp in Sources */,
 				EDC58B592A65B0F000F48DEF /* devicelevelcontrol.cpp in Sources */,
@@ -4035,7 +4057,6 @@
 				ED36DAD2286DD27200CA28EC /* IPAddress.cpp in Sources */,
 				ED36D90E286DCF5100CA28EC /* DefaultAclStorage.cpp in Sources */,
 				ED91CC762D849B2500F68DF2 /* AccessRestrictionProvider.cpp in Sources */,
-				ED36DC9D286DD7F200CA28EC /* KeyValueStoreManagerImpl.mm in Sources */,
 				ED072F672A69BBD6007BBF71 /* window-covering-server.cpp in Sources */,
 				ED072C072A67EFEF007BBF71 /* jsonrpccomm.cpp in Sources */,
 				ED36DC04286DD57B00CA28EC /* ThreadOperationalDataset.cpp in Sources */,
@@ -4212,6 +4233,7 @@
 				ED3B0CD12CEE2C2700C80694 /* CommandResponseSender.cpp in Sources */,
 				EDB388EE29E6EF8E00BDAED4 /* TLVDebug.cpp in Sources */,
 				ED36DA95286DD16200CA28EC /* PersistentStorageOpCertStore.cpp in Sources */,
+				ED7FBF4D2E980DC7006FA799 /* IniEscaping.cpp in Sources */,
 				EDB388F129E6EF8E00BDAED4 /* TLVCircularBuffer.cpp in Sources */,
 				ED36DAE6286DD29600CA28EC /* AddressResolve.cpp in Sources */,
 				ED36DBA9286DD48C00CA28EC /* Config.cpp in Sources */,
@@ -4389,6 +4411,7 @@
 					"JSON_USE_EXCEPTION=0",
 					"JSON_USE_NULLREF=0",
 					"CHIP_CUSTOM_POSIX_CONFIG=1",
+					"EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER=\\\"chip_overrides/P44KeyValueStoreManagerImpl.h\\\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4459,6 +4482,7 @@
 					"JSON_USE_EXCEPTION=0",
 					"JSON_USE_NULLREF=0",
 					"CHIP_CUSTOM_POSIX_CONFIG=1",
+					"EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER=\\\"chip_overrides/P44KeyValueStoreManagerImpl.h\\\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

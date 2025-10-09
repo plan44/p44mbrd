@@ -59,8 +59,9 @@ chip_system_config_use_libev = true
 # we need libev, not dispatch (even on macos)
 chip_system_config_use_dispatch = false
 
-# we want our own version of posix config
+# we want our own version of posix config and kvs
 chip_custom_posix_config = true
+chip_custom_key_value_storage = true
 
 # we want posix locking
 chip_system_config_locking = "posix"

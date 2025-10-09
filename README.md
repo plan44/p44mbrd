@@ -156,7 +156,7 @@ gn gen \
     --fail-on-unused-args \
     --export-compile-commands \
     --root=${CHIPAPP_ROOT}/src \
-    "--args=chip_enable_openthread=false chip_enable_wifi=false chip_custom_posix_config=true" \
+    "--args=chip_enable_openthread=false chip_enable_wifi=false chip_custom_key_value_storage=true chip_custom_posix_config=true" \
     ${OUT_DIR}
 ninja -C ${OUT_DIR} ${CHIPAPP_NAME}
 ```
