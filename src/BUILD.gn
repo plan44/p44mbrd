@@ -88,8 +88,8 @@ executable("p44mbrd") {
     "chip_overrides/CHIPLinuxStorage.cpp",
     "chip_overrides/CHIPLinuxStorageIni.h",
     "chip_overrides/CHIPLinuxStorageIni.cpp",
-    "chip_overrides/KeyValueStoreManagerImpl.h",
-    "chip_overrides/KeyValueStoreManagerImpl.cpp",
+    "chip_overrides/P44KeyValueStoreManagerImpl.h",
+    "chip_overrides/P44KeyValueStoreManagerImpl.cpp",
     "p44mbrd_main.cpp",
     "p44mbrd_main.h",
     "matter_common.h",
@@ -136,9 +136,11 @@ config("p44mbrd_config_extra") {
     # we may or may not want extensive attribute access logging
     "DEBUG_ATTR_ACCESS=$p44_debug_attr_access",
     # depending on build platform, we want different number of dynamic endpoints
-    "CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT=$p44_dynamic_endpoint_count"
+    "CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT=$p44_dynamic_endpoint_count",
     # we have our own storage
-    "EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER=\"chip_overrides/P44KeyValueStoreManagerImpl.h\"",
+    # FIXME: there seems no way to get the absolute source root path without gn labels "like //" in it, so this is dependent on
+    #   building two levels deeper from source root, like: out/openwrt
+    "EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER=\"$root_build_dir/../../src/chip_overrides/P44KeyValueStoreManagerImpl.h\"",
   ]
   cflags = [
     # ev_loop shadows struct constructor in libev@openwrt22.03
