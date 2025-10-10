@@ -199,12 +199,9 @@ CHIP_ERROR PosixConfig::ReadFactoryValueBin(const char* key, uint8_t* buf, size_
 
 CHIP_ERROR PosixConfig::Init()
 {
-  // This is NOP when KeyValueStore is already initialized, which it SHOULD be at this point
-  // to avoid using CHIP_CONFIG_KVS_PATH!
-  return PersistedStorage::KeyValueStoreMgrImpl().Init(CHIP_CONFIG_KVS_PATH);
+  // Nothing to do, we just rely on KVS being ready when it is accessed. If not, we'll get errors then
+  return CHIP_NO_ERROR;
 }
-
-
 
 
 CHIP_ERROR PosixConfig::ReadConfigValueBin(Key key, uint8_t * buf, size_t bufSize, size_t & outLen)
@@ -214,7 +211,8 @@ CHIP_ERROR PosixConfig::ReadConfigValueBin(Key key, uint8_t * buf, size_t bufSiz
     return ReadFactoryValueBin(key.Name, buf, bufSize, outLen);
   }
   // read from KVS
-  CHIP_ERROR err = PersistedStorage::KeyValueStoreMgr().Get(key.Name, buf, bufSize, &outLen);
+  string kvs_key = string_format("%s::%s", key.Namespace, key.Name);
+  CHIP_ERROR err = PersistedStorage::KeyValueStoreMgr().Get(kvs_key.c_str(), buf, bufSize, &outLen);
   if (err == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) {
     err = CHIP_DEVICE_ERROR_CONFIG_NOT_FOUND;
   }
@@ -225,15 +223,20 @@ CHIP_ERROR PosixConfig::ReadConfigValueBin(Key key, uint8_t * buf, size_t bufSiz
 CHIP_ERROR PosixConfig::WriteConfigValueBin(Key key, const uint8_t * data, size_t dataLen)
 {
   if (key.Namespace==kConfigNamespace_ChipFactory) {
-    return CHIP_ERROR_PERSISTED_STORAGE_FAILED; // factory data cannot be written
+    // factory data, cannot be written
+    return CHIP_ERROR_PERSISTED_STORAGE_FAILED;
   }
-  return PersistedStorage::KeyValueStoreMgr().Put(key.Name, data, dataLen);
+  // write to KVS
+  string kvs_key = string_format("%s::%s", key.Namespace, key.Name);
+  return PersistedStorage::KeyValueStoreMgr().Put(kvs_key.c_str(), data, dataLen);
 }
+
 
 CHIP_ERROR PosixConfig::ClearConfigValue(Key key)
 {
   return PersistedStorage::KeyValueStoreMgr().Delete(key.Name);
 }
+
 
 bool PosixConfig::ConfigValueExists(Key key)
 {
@@ -245,13 +248,13 @@ bool PosixConfig::ConfigValueExists(Key key)
   return false;
 }
 
+
 CHIP_ERROR PosixConfig::EnsureNamespace(const char * ns)
 {
-  CHIP_ERROR err = CHIP_ERROR_PERSISTED_STORAGE_FAILED;
-  SuccessOrExit(err);
-exit:
-  return err;
+  // all namespaces are there by default
+  return CHIP_NO_ERROR;
 }
+
 
 CHIP_ERROR PosixConfig::ClearNamespace(const char * ns)
 {
@@ -261,7 +264,18 @@ exit:
   return err;
 }
 
+
 CHIP_ERROR PosixConfig::FactoryResetConfig()
+{
+  CHIP_ERROR err = CHIP_ERROR_PERSISTED_STORAGE_FAILED;
+  SuccessOrExit(err);
+
+exit:
+  return err;
+}
+
+
+CHIP_ERROR PosixConfig::FactoryResetCounters()
 {
   CHIP_ERROR err = CHIP_ERROR_PERSISTED_STORAGE_FAILED;
   SuccessOrExit(err);
