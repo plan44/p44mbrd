@@ -60,8 +60,16 @@ chip_system_config_use_libev = true
 chip_system_config_use_dispatch = false
 
 # we want our own version of posix config and kvs
+# - use our own posix config
 chip_custom_posix_config = true
+# - use our own KVS
 chip_custom_key_value_storage = true
+# - IMPORTANT: prevent using the transitional GenericDeviceInstanceInfoProvider, which would simply
+#   override the one we explicitly set before!
+chip_use_transitional_device_instance_info_provider = false
+# TODO: once we also get rid of examples/platform/linux/LinuxCommissionableDataProvider:
+#chip_use_transitional_commissionable_data_provider = false
+
 
 # we want posix locking
 chip_system_config_locking = "posix"
