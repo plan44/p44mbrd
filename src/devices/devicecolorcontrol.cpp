@@ -170,7 +170,7 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
 }
 
 
-bool DeviceColorControl::adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax)
+bool DeviceColorControl::adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax, bool aWrap)
 {
   if (aUpdateMode.Has(UpdateFlags::move)) {
     // movement command always means change (but aAbsValue remains unchanged)
@@ -187,9 +187,16 @@ bool DeviceColorControl::adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMo
     // absolute
     v = aInpValue;
   }
-  // clip
-  if (v>aMax) v = aMax;
-  else if (v<aMin) v = aMin;
+  // clip or wrap
+  if (aWrap) {
+    int dist = aMax-aMin;
+    while (v>aMax) v -= dist;
+    while (v<aMin) v += dist;
+  }
+  else {
+    if (v>aMax) v = aMax;
+    else if (v<aMin) v = aMin;
+  }
   changed = v!=aAbsValue;
   aAbsValue = v;
   return changed;
@@ -198,7 +205,7 @@ bool DeviceColorControl::adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMo
 
 bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aHue, mHue, aUpdateMode, 0, 0xFE);
+  bool changed = adaptParams(aHue, mHue, aUpdateMode, 0, 0xFE, true); // wraparound when relative
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set hue to 0x%02x (matter-units) with time/rate = %hu - updatemode=0x%x", aHue, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
@@ -220,7 +227,7 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
 
 bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aSaturation, mSaturation, aUpdateMode, 0, 0xFE);
+  bool changed = adaptParams(aSaturation, mSaturation, aUpdateMode, 0, 0xFE, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set saturation to 0x%02x (matter-units) with time/rate = %hu - updatemode=0x%x", aSaturation, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
@@ -242,7 +249,7 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
 
 bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate, uint16_t aCTMin, uint16_t aCTMax)
 {
-  bool changed = adaptParams(aColortemp, mColorTemp, aUpdateMode, aCTMin>0 ? aCTMin : COLOR_TEMP_PHYSICAL_MIN, aCTMax>0 ? aCTMax : COLOR_TEMP_PHYSICAL_MAX);
+  bool changed = adaptParams(aColortemp, mColorTemp, aUpdateMode, aCTMin>0 ? aCTMin : COLOR_TEMP_PHYSICAL_MIN, aCTMax>0 ? aCTMax : COLOR_TEMP_PHYSICAL_MAX, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set colortemp to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aColortemp, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
@@ -264,7 +271,7 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 
 bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aX, mX, aUpdateMode, 0, 0xFFFE);
+  bool changed = adaptParams(aX, mX, aUpdateMode, 0, 0xFFFE, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set X to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aX, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
@@ -286,7 +293,7 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
 
 bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aY, mY, aUpdateMode, 0, 0xFFFE);
+  bool changed = adaptParams(aY, mY, aUpdateMode, 0, 0xFFFE, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set Y to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aY, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes

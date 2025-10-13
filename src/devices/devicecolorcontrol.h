@@ -139,10 +139,10 @@ private:
 
   ColorControlOptionsType tempOptions(ColorControlOptionsType aOptionMask, ColorControlOptionsType aOptionOverride);
 
-  static bool adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax);
-  template<typename T> static bool adaptParams(T aInpValue, T &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax) {
+  static bool adaptParamsImpl(int aInpValue, int &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax, bool aWrap);
+  template<typename T> static bool adaptParams(T aInpValue, T &aAbsValue, UpdateMode aUpdateMode, int aMin, int aMax, bool aWrap) {
     int v = (int)aAbsValue;
-    bool changed = adaptParamsImpl((int)aInpValue, v, aUpdateMode, aMin, aMax);
+    bool changed = adaptParamsImpl((int)aInpValue, v, aUpdateMode, aMin, aMax, aWrap);
     aAbsValue = (T)v;
     return changed;
   };
