@@ -23,6 +23,7 @@
 
 #include "p44deviceinstanceinfoprovider.h"
 
+using namespace chip::app::Clusters::BasicInformation;
 
 void P44DeviceInstanceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr aFactoryDataProvider)
 {
@@ -45,6 +46,13 @@ void P44DeviceInstanceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr a
   if (ds.empty()) mManuYear = 0;
   else if (sscanf(ds.c_str(), "%4hu%2hhu%2hhu", &mManuYear, &mManuMonth, &mManuDay) < 3)
     mManuYear = mManuMonth = mManuDay = 0;
+  // optional attributes
+  bool exists;
+  uint8_t b;
+  b = aFactoryDataProvider->getUInt8("PRODUCTFINISH", &exists);
+  mProductFinish = exists ? static_cast<ProductFinishEnum>(b) : ProductFinishEnum::kUnknownEnumValue;
+  b = aFactoryDataProvider->getUInt8("PRIMARYCOLOR", &exists);
+  mPrimaryColor = exists ? static_cast<ColorEnum>(b) : ColorEnum::kUnknownEnumValue;
 }
 
 
@@ -152,6 +160,22 @@ CHIP_ERROR P44DeviceInstanceInfoProvider::GetRotatingDeviceIdUniqueId(MutableByt
   ReturnErrorCodeIf(mUID.size() > uniqueIdSpan.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
   memcpy(uniqueIdSpan.data(), mUID.c_str(), mUID.size());
   uniqueIdSpan.reduce_size(mUID.size());
+  return CHIP_NO_ERROR;
+}
+
+
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductFinish(ProductFinishEnum * finish)
+{
+  ReturnErrorCodeIf(mProductFinish==ProductFinishEnum::kUnknownEnumValue, CHIP_ERROR_NOT_IMPLEMENTED);
+  *finish = mProductFinish;
+  return CHIP_NO_ERROR;
+}
+
+
+CHIP_ERROR P44DeviceInstanceInfoProvider::GetProductPrimaryColor(ColorEnum * primaryColor)
+{
+  ReturnErrorCodeIf(mPrimaryColor==ColorEnum::kUnknownEnumValue, CHIP_ERROR_NOT_IMPLEMENTED);
+  *primaryColor = mPrimaryColor;
   return CHIP_NO_ERROR;
 }
 

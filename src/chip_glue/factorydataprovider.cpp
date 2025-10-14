@@ -26,22 +26,23 @@
 
 #include "application.hpp"
 
-uint16_t FactoryDataProvider::getUInt16(const char* aKey)
+uint16_t FactoryDataProvider::getUInt16(const char* aKey, bool* aExistsP)
 {
-  return static_cast<uint16_t>(getUInt32(aKey));
+  return static_cast<uint16_t>(getUInt32(aKey, aExistsP));
 }
 
 
-uint8_t FactoryDataProvider::getUInt8(const char* aKey)
+uint8_t FactoryDataProvider::getUInt8(const char* aKey, bool* aExistsP)
 {
-  return static_cast<uint8_t>(getUInt32(aKey));
+  return static_cast<uint8_t>(getUInt32(aKey, aExistsP));
 }
 
 
 bool FactoryDataProvider::getOptionalString(const char* aKey, string& aString)
 {
-  string s = getString(aKey);
-  if (s.empty()) return false;
+  bool exists;
+  string s = getString(aKey, &exists);
+  if (!exists) return false;
   aString=s;
   return true;
 }
@@ -89,33 +90,38 @@ bool FileBasedFactoryDataProvider::getItem(const char* aKey, string &aItem)
 
 
 
-uint32_t FileBasedFactoryDataProvider::getUInt32(const char* aKey)
+uint32_t FileBasedFactoryDataProvider::getUInt32(const char* aKey, bool* aExistsP)
 {
   string s;
   if (getItem(aKey, s)) {
+    if (aExistsP) *aExistsP = true;
     if (strncmp(s.c_str(), "0x", 2)==0) {
-      return (uint32_t)strtoll(s.c_str(), NULL, 0);
+      return (uint32_t)strtoll(s.c_str(), NULL, 0); // auto-detect (hex) base
     }
     else {
-      return (uint32_t)strtoll(s.c_str(), NULL, 10);
+      return (uint32_t)strtoll(s.c_str(), NULL, 10); // if not hex, always decimal (and NEVER octal!)
     }
   }
+  if (aExistsP) *aExistsP = false;
   return 0;
 }
 
 
-string FileBasedFactoryDataProvider::getString(const char* aKey)
+string FileBasedFactoryDataProvider::getString(const char* aKey, bool* aExistsP)
 {
   string s;
-  getItem(aKey, s);
+  bool exists = getItem(aKey, s);
+  if (aExistsP) *aExistsP = exists;
   return s;
 }
 
 
-string FileBasedFactoryDataProvider::getBytes(const char* aKey)
+string FileBasedFactoryDataProvider::getBytes(const char* aKey, bool* aExistsP)
 {
   string s;
-  getItem(aKey, s);
+  bool exists = getItem(aKey, s);
+  if (aExistsP) *aExistsP = exists;
+  if (!exists) return "";
   return p44::hexToBinaryString(s.c_str(), true);
 }
 

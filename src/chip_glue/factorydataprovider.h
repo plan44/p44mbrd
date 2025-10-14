@@ -37,25 +37,25 @@ public:
   /// @brief get unsigned integer data (such as PID, VID etc.) item from the provider
   /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, 0 if aKey does not exist
-  virtual uint32_t getUInt32(const char* aKey) = 0;
+  virtual uint32_t getUInt32(const char* aKey, bool* aExistsP = nullptr) = 0;
 
   /// @return contents of aKey casted to uint16, 0 if aKey does not exist
-  uint16_t getUInt16(const char* aKey);
+  uint16_t getUInt16(const char* aKey, bool* aExistsP = nullptr);
 
   /// @return contents of aKey casted to uint8, 0 if aKey does not exist
-  uint8_t getUInt8(const char* aKey);
+  uint8_t getUInt8(const char* aKey, bool* aExistsP = nullptr);
 
   /// @brief get string data item from the provider
   /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, empty string if aKey does not exist
-  virtual string getString(const char* aKey) = 0;
+  virtual string getString(const char* aKey, bool* aExistsP = nullptr) = 0;
 
   bool getOptionalString(const char* aKey, string& aString);
 
   /// @brief get binary data string item from the provider
   /// @param aKey the key for the item, case insensitive
   /// @return contents of aKey, empty string if aKey does not exist
-  virtual string getBytes(const char* aKey) = 0;
+  virtual string getBytes(const char* aKey, bool* aExistsP = nullptr) = 0;
 
 };
 typedef boost::intrusive_ptr<FactoryDataProvider> FactoryDataProviderPtr;
@@ -78,9 +78,9 @@ public:
   /// @param aResourcePrefix the prefix used with Application::resourcePath()
   FileBasedFactoryDataProvider(const string aFactoryDataResourcePaths, const string aResourcePrefix = "");
 
-  virtual uint32_t getUInt32(const char* aKey) override;
-  virtual string getString(const char* aKey) override;
-  virtual string getBytes(const char* aKey) override;
+  virtual uint32_t getUInt32(const char* aKey, bool* aExistsP = nullptr) override;
+  virtual string getString(const char* aKey, bool* aExistsP = nullptr) override;
+  virtual string getBytes(const char* aKey, bool* aExistsP = nullptr) override;
 
 private:
 

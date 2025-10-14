@@ -46,6 +46,8 @@ class P44DeviceInstanceInfoProvider : public DeviceLayer::DeviceInstanceInfoProv
   uint16_t mManuYear; ///< manufacturing year
   uint8_t mManuMonth; ///< manufacturing month
   uint8_t mManuDay; ///< manufacturing day
+  app::Clusters::BasicInformation::ProductFinishEnum mProductFinish; ///< finish
+  app::Clusters::BasicInformation::ColorEnum mPrimaryColor; ///< primary color
 
 public:
 
@@ -67,6 +69,10 @@ public:
   virtual CHIP_ERROR GetManufacturingDate(uint16_t & year, uint8_t & month, uint8_t & day) override; // Optional: when the node was manufactured, ISO8601 date in the first 8 chars
 
   virtual CHIP_ERROR GetRotatingDeviceIdUniqueId(MutableByteSpan & uniqueIdSpan) override;
+
+  virtual CHIP_ERROR GetProductFinish(app::Clusters::BasicInformation::ProductFinishEnum * finish) override;
+  virtual CHIP_ERROR GetProductPrimaryColor(app::Clusters::BasicInformation::ColorEnum * primaryColor) override;
+
 
   /// @name user facing product information possibly obtained via bridge interfaces
   /// @{
