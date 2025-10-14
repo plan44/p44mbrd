@@ -164,6 +164,7 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   // implementation adapters
   typedef std::list<BridgeAdapter*> BridgeAdaptersList;
   BridgeAdaptersList mAdapters;
+  BridgeAdapter* mMainAdapter; // the one we take the device info from
   int mUnstartedAdapters;
   MLTicket mShutdownTicket;
 
@@ -180,7 +181,8 @@ public:
     mChipAppInitialized(false),
     mNumDynamicEndPoints(0),
     mFirstFreeEndpointId(kInvalidEndpointId),
-    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver)
+    mEthernetNetworkCommissioningInstance(0, &mEthernetDriver),
+    mMainAdapter(nullptr)
     #if P44MBRD_ENABLE_ACTIONS
     ,mActionsManager(mActions, mEndPointLists)
     #endif
@@ -936,18 +938,17 @@ public:
     mP44dbrDeviceInstanceInfoProvider.loadFromFactoryData(factoryData);
     // TODO: maybe remove this, when all info comes from factory data
     // augment factory data with information from adapter(s)
-    bool infoset = false;
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
       // for now: assume we'll have only one adapter running for real application,
       // which will determine the matter bridge's identification.
       // With multiple adapters, the first instantiated will determine the device instance info
-      if (!infoset) {
-        infoset = true;
+      if (mMainAdapter==nullptr) {
+        mMainAdapter = *pos; // remember
         // Override if those are not yet set from factory data
-        if (mP44dbrDeviceInstanceInfoProvider.mProductName.empty()) mP44dbrDeviceInstanceInfoProvider.mProductName = (*pos)->model();
-        if (mP44dbrDeviceInstanceInfoProvider.mProductLabel.empty()) mP44dbrDeviceInstanceInfoProvider.mProductLabel = (*pos)->label();
-        if (mP44dbrDeviceInstanceInfoProvider.mUID.empty()) mP44dbrDeviceInstanceInfoProvider.mUID = (*pos)->UID();
-        if (mP44dbrDeviceInstanceInfoProvider.mSerial.empty()) mP44dbrDeviceInstanceInfoProvider.mSerial = (*pos)->serial();
+        if (mP44dbrDeviceInstanceInfoProvider.mProductName.empty()) mP44dbrDeviceInstanceInfoProvider.mProductName = mMainAdapter->model();
+        //if (mP44dbrDeviceInstanceInfoProvider.mProductLabel.empty()) mP44dbrDeviceInstanceInfoProvider.mProductLabel = mMainAdapter->model(); // ProductLabel is NOT the user-assigned name (but just a more user-friendly product name)
+        if (mP44dbrDeviceInstanceInfoProvider.mUID.empty()) mP44dbrDeviceInstanceInfoProvider.mUID = mMainAdapter->UID();
+        if (mP44dbrDeviceInstanceInfoProvider.mSerial.empty()) mP44dbrDeviceInstanceInfoProvider.mSerial = mMainAdapter->serial();
       }
     }
 
@@ -1152,6 +1153,11 @@ public:
 
     // done, ready to run
     mChipAppInitialized = true;
+    // set the node label
+    // set the root node label
+    string nl = mMainAdapter->nodelabel().c_str();
+    abbreviate(nl, 32, end_ellipsis); // FIXME: no constant for max nodelabel size available?
+    app::Clusters::BasicInformation::Attributes::NodeLabel::Set(kRootEndpointId, CharSpan::fromCharString(nl.c_str()));
     // let adapters know
     updateRunningStatus(true);
     return err;

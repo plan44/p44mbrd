@@ -38,8 +38,8 @@ void P44DeviceInstanceInfoProvider::loadFromFactoryData(FactoryDataProviderPtr a
   mPartNumber = aFactoryDataProvider->getString("PARTNUMBER");
   mProductURL = aFactoryDataProvider->getString("PRODUCTURL");
   // these may be overridded by data from bridge API:
-  mProductName = aFactoryDataProvider->getString("PRODUCTNAME");
-  mProductLabel = aFactoryDataProvider->getString("PRODUCTLABEL");
+  mProductName = aFactoryDataProvider->getString("PRODUCTNAME"); // actual technical product name
+  mProductLabel = aFactoryDataProvider->getString("PRODUCTLABEL"); // possibly more user-friendly product name
   mSerial = aFactoryDataProvider->getString("SERIALNO");
   mUID = aFactoryDataProvider->getString("UID");
   string ds = aFactoryDataProvider->getString("MANUFACTURINGDATE"); // ISO8601 first 8 digits YYYYMMDD
