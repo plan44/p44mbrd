@@ -258,6 +258,7 @@ bool emberAfLevelControlClusterStepCallback(
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (commandData.stepSize==0) return false; // cannot step, InvalidCommand
   commandObj->AddStatus(commandPath, dev->moveToLevel(
     commandData.stepSize,
     commandData.stepMode==StepModeEnum::kUp ? 1 : -1,
@@ -291,10 +292,15 @@ Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t>
   if (aRate.IsNull()) {
     // use default rate
     Attributes::DefaultMoveRate::Get(endpointId(), rate);
+    if (rate.IsNull()) {
+      // no specified rate, and no default: move as fast as "possible"
+      rate = MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL; // full scale in one second
+    }
   }
   else {
     rate = aRate;
   }
+  if (rate.Value()==0) return Status::InvalidCommand;
   bool ctCoupling = tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kCoupleColorTempToLevel);
   if ((!rate.IsNull() && rate.Value()!=0) || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
