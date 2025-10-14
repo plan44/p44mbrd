@@ -92,7 +92,7 @@ public:
 
   virtual string description() override;
 
-  uint8_t currentLevel() { return mLevel; };
+  uint8_t currentLevel() { return mCurrentLevel; };
   bool updateCurrentLevel(uint8_t aAmount, int8_t aDirection, uint16_t aTransitionTimeDs, bool aWithOnOff, bool aCtCoupling, UpdateMode aUpdateMode);
 
 
@@ -113,7 +113,7 @@ public:
   Status moveToLevel(uint8_t aAmount, int8_t aDirection, DataModel::Nullable<uint16_t> aTransitionTimeDs, bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
   Status move(LevelControl::MoveModeEnum aMode, DataModel::Nullable<uint8_t> aRate, bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
   Status stop(bool aWithOnOff, LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);
-  void effect(bool aNewValue);
+  void onOffEffect(bool aNewValue);
   /// @}
 
 protected:
@@ -122,9 +122,10 @@ protected:
 
 private:
 
+  uint8_t mEffectiveLevel; ///< the actually applied level
+
   // attributes
-  uint8_t mLevel;
-  uint8_t mLevelBeforeOff;
+  uint8_t mCurrentLevel; ///< the level as reported by currentLevel attribute
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
   LevelControlOptionsType tempOptions(LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);

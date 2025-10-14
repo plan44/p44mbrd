@@ -245,10 +245,7 @@ void CC_LevelControlImpl::handle_state_changed(JsonObjectPtr aParams)
 
   if (aParams->get("state", o)) {
     if (o->get("value", vo)) {
-      double value = vo->doubleValue();
-      UpdateMode updatemode = UpdateMode(UpdateFlags::matter);
-      if (value==0) updatemode.Set(UpdateFlags::onoff); // imply on-off initiated when level from bridge is zero
-      deviceP<LevelControlImplementationInterface>()->updateLevel(value, updatemode);
+      deviceP<LevelControlImplementationInterface>()->updateLevel(vo->doubleValue(), UpdateMode(UpdateFlags::matter));
     }
   }
 }

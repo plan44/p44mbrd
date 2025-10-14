@@ -46,8 +46,8 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
   inherited(aLighting, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
   // external attribute defaults
-  mLevel(0),
-  mLevelBeforeOff(0) // never captured
+  mCurrentLevel(0),
+  mEffectiveLevel(0)
 {
   // - declare specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gLevelControlClusters));
@@ -57,7 +57,8 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
 string DeviceLevelControl::description()
 {
   string s = inherited::description();
-  string_format_append(s, "\n- currentLevel: %d", mLevel);
+  string_format_append(s, "\n- currentLevel: %d", mCurrentLevel);
+  string_format_append(s, "\n- effectiveLevel: %d", mEffectiveLevel);
   return s;
 }
 
@@ -90,28 +91,35 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
 
   // handle relative movement
   int level = aAmount;
-  if (aDirection!=0) level = (int)mLevel + (aDirection>0 ? aAmount : -aAmount);
+  if (aDirection!=0) level = (int)mCurrentLevel + (aDirection>0 ? aAmount : -aAmount);
   if (level>maxlevel) level = maxlevel;
   if (level<minlevel) level = minlevel;
   // now move to given or calculated level
-  if (level!=mLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+  bool changed = false;
+  if (level!=mCurrentLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+    changed = true;
     OLOG(LOG_INFO, "setting level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
-    uint8_t previousLevel = mLevel;
-    if ((previousLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
+    if ((mEffectiveLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
       // level is minimum and becomes non-minimum: also set OnOff when enabled (and not initiated by onoff)
-      if (aWithOnOff && !aUpdateMode.Has(UpdateFlags::onoff)) updateOnOff(true, aUpdateMode);
+      if (aWithOnOff) updateOnOff(true, aUpdateMode);
+      mCurrentLevel = static_cast<uint8_t>(level);
     }
     else if (level<=minlevel) {
-      // level is not minimum and should become minimum: prevent or clear OnOff
-      if (aUpdateMode.Has(UpdateFlags::onoff)) {
-        // level change to off-level initiated by onoff (and onoff already
-        mLevelBeforeOff = mLevel; // remember
-      }
-      else if (aWithOnOff) updateOnOff(false, aUpdateMode);
-      else if (previousLevel==minlevel) return false; // already at minimum: no change
+      // new level is minimum and currentLevel is not: turning off
+      if (aWithOnOff) updateOnOff(false, aUpdateMode);
+      else if (mEffectiveLevel==minlevel) return false; // already at minimum: no change
       else level = minlevel; // set to minimum, but not to off
+      // special case ONLY when turning off AND initiated by onoff: do NOT change the currentLevel
+      if (!aUpdateMode.Has(UpdateFlags::onoff)) mCurrentLevel = static_cast<uint8_t>(level);
     }
-    mLevel = static_cast<uint8_t>(level);
+    else {
+      // level change without turning on or off
+      mCurrentLevel = static_cast<uint8_t>(level);
+    }
+  }
+  if (level!=mEffectiveLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+    changed = true;
+    mEffectiveLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       mLevelControlDelegate.setLevel(
         (double)(level-minlevel)/(maxlevel-minlevel)*100, // bridge side is always 0..100%, mapped to minlevel..maxlevel
@@ -123,9 +131,8 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
       FOCUSOLOG("reporting currentLevel attribute change to matter");
       reportAttributeChange(LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
     }
-    return true; // changed or forced
   }
-  return false; // no change
+  return changed; // set if effectively or internal cache changed
 }
 
 
@@ -155,7 +162,12 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
   Attributes::MaxLevel::Get(endpointId(), &maxlevel);
-  return updateCurrentLevel(static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel), 0, 0, false, false, aUpdateMode);
+  uint8_t bridgedlevel = static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel);
+  // only changes of effective level are relevant
+  if (bridgedlevel==mEffectiveLevel) return false; // NOP
+  // effective level has changed -> must force an update, including onoff, even if current level is the same
+  aUpdateMode.Set(UpdateFlags::forced);
+  return updateCurrentLevel(bridgedlevel, 0, 0, true, false, aUpdateMode);
 }
 
 
@@ -388,7 +400,9 @@ bool emberAfLevelControlClusterStopWithOnOffCallback(
 
 // MARK: levelControl cluster general callbacks
 
-void DeviceLevelControl::effect(bool aTurnOn)
+// called by on-off to actually perform the on-off effect on the levelcontrol level
+// Note: the on-off state is already set to the new state at this point
+void DeviceLevelControl::onOffEffect(bool aTurnOn)
 {
   Status status = Status::Success;
 
@@ -403,21 +417,34 @@ void DeviceLevelControl::effect(bool aTurnOn)
   // turn on or off
   OLOG(LOG_INFO, "levelcontrol effect: turnOn=%d", aTurnOn);
   bool ctCoupling = tempOptions(LevelControlOptionsType(), LevelControlOptionsType()).Has(OptionsBitmap::kCoupleColorTempToLevel);
+  // get the default onLevel
+  app::DataModel::Nullable<uint8_t> targetOnLevel;
+  if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
+    Attributes::OnLevel::Get(endpointId(), targetOnLevel);
+  }
+  // now act
   if (aTurnOn) {
-    // get the default onLevel
-    app::DataModel::Nullable<uint8_t> targetOnLevel;
-    if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
-      status = Attributes::OnLevel::Get(endpointId(), targetOnLevel);
-      if (status!=Status::Success || targetOnLevel.IsNull()) {
-        // no OnLevel value, use currentlevel
-        if (mLevelBeforeOff>0) targetOnLevel.SetNonNull(mLevelBeforeOff);
-      }
-    }
-    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
-    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
+    // As per LevelControl Specs for ON case:
+    // Temporarily store CurrentLevel.
+    // - not needed because we do not change the level in the next step
+    // Set CurrentLevel to the minimum level allowed for the device.
+    // - not needed because actually bridged devices are always at min level when off
+    // Change CurrentLevel to OnLevel, or to the stored level if OnLevel is not defined, over the time period OnOffTransitionTime.
+    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(mCurrentLevel);
+    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, false, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
   }
   else {
-    updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
+    // As per LevelControl Specs for OFF case:
+    // Temporarily store CurrentLevel.
+    uint8_t prevLevel = mCurrentLevel;
+    // Change CurrentLevel to the minimum level allowed for the device over the time period OnOffTransitionTime.
+    // - updateCurrentLevel will clip to min/max range, so we can set to 0
+    updateCurrentLevel(0, 0, transitionTime, false, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
+    // If OnLevel is not defined, set the CurrentLevel to the stored level.
+    if (targetOnLevel.IsNull()) {
+      // update level WITHOUT touching onoff
+      updateCurrentLevel(prevLevel, 0, 0, false, ctCoupling, UpdateMode(UpdateFlags::matter, UpdateFlags::onoff));
+    }
   }
 }
 
@@ -426,7 +453,7 @@ void emberAfOnOffClusterLevelControlEffectCallback(EndpointId endpoint, bool new
 {
   auto dev = DeviceEndpoints::getDevice<DeviceLevelControl>(endpoint);
   if (!dev) return;
-  dev->effect(newValue);
+  dev->onOffEffect(newValue);
 }
 
 

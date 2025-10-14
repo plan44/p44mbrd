@@ -475,9 +475,7 @@ void P44_LevelControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
     if (o->get("value", vo, true)) {
       // bridge side is mDefaultChannelMin..mDefaultChannelMax, mapped to levelcontrol minLevel()..maxLevel()
       // Note: updating on/off attribute is handled automatically when needed (and OnOff is present at all)
-      double value = vo->doubleValue();
-      if (value==0) aUpdateMode.Set(UpdateFlags::onoff); // imply on-off initiated when level from bridge is zero
-      deviceP<LevelControlImplementationInterface>()->updateLevel(value2percent(value), aUpdateMode);
+      deviceP<LevelControlImplementationInterface>()->updateLevel(value2percent(vo->doubleValue()), aUpdateMode);
     }
   }
 }
