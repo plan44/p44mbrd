@@ -45,7 +45,7 @@ class P44_BridgeImpl : public BridgeAdapter, public P44LoggingObj
 
   /// identification of this bridge
   string mUID;
-  string mLabel;
+  string mRootNodeLabel;
   string mModel;
   string mSerial;
   string mSetupURL;
@@ -88,7 +88,7 @@ public:
   virtual string UID() override { return mUID; };
 
   /// @return user-specified name of this bridge (or the device it bridges)
-  virtual string label() override { return mLabel; }
+  virtual string nodelabel() override { return mRootNodeLabel; }
 
   /// @return model name/number of this bridge (or the device it bridges)
   virtual string model() override { return mModel; }

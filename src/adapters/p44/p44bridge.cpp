@@ -562,7 +562,7 @@ void P44_BridgeImpl::bridgeApiCollectQueryHandler(ErrorPtr aError, JsonObjectPtr
       mUID = o->stringValue();
     }
     if (result->get("name", o)) {
-      mLabel = o->stringValue();
+      mRootNodeLabel = o->stringValue();
     }
     if (result->get("model", o)) {
       mModel = o->stringValue();

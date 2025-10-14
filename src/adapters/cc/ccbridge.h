@@ -76,7 +76,7 @@ public:
   virtual string UID() override { return mUID; };
 
   /// @return user-specified name of this bridge (or the device it bridges)
-  virtual string label() override { return mLabel; }
+  virtual string nodelabel() override { return mLabel; }
 
   /// @return model name/number of this bridge (or the device it bridges)
   virtual string model() override { return mModel; }

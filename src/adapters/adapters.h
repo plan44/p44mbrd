@@ -147,7 +147,7 @@ public:
   virtual string UID() = 0;
 
   /// @return user-specified name of this bridge (or the device it bridges)
-  virtual string label() = 0;
+  virtual string nodelabel() = 0;
 
   /// @return model name/number of this bridge (or the device it bridges)
   virtual string model() = 0;
