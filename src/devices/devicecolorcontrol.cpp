@@ -446,6 +446,7 @@ bool emberAfColorControlClusterStepHueCallback(app::CommandHandler * commandObj,
   FOCUSLOG("=== Received StepHue Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (commandData.stepSize==0) return false; // cannot step, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentHue(commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime);
   }
@@ -525,6 +526,7 @@ bool emberAfColorControlClusterStepSaturationCallback(app::CommandHandler * comm
   FOCUSLOG("=== Received StepSaturation Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (commandData.stepSize==0) return false; // cannot step, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentSaturation(commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime);
   }
@@ -618,6 +620,7 @@ bool emberAfColorControlClusterStepColorCallback(app::CommandHandler * commandOb
   FOCUSLOG("=== Received StepColor Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (commandData.stepX==0 && commandData.stepY==0) return false; // cannot step, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentX(0, updateModeForDirectionalXY(commandData.stepX, UpdateMode(UpdateFlags::relative, UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
     dev->updateCurrentY(0, updateModeForDirectionalXY(commandData.stepY, UpdateMode(UpdateFlags::relative, UpdateFlags::forced)), commandData.transitionTime);
@@ -664,6 +667,7 @@ bool emberAfColorControlClusterStepColorTemperatureCallback(app::CommandHandler 
   FOCUSLOG("=== Received StepColorTemperature Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (commandData.stepSize==0) return false; // cannot step, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentColortemp(
       commandData.stepSize, updateModeForStep(commandData.stepMode), commandData.transitionTime,
