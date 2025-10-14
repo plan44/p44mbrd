@@ -400,6 +400,12 @@ static UpdateMode updateModeForDirectionalXY(int16_t aRateOrStep, UpdateMode aMo
   return u;
 }
 
+static bool moveCheck(MoveModeEnum aMoveMode, uint16_t aRate)
+{
+  return aMoveMode==MoveModeEnum::kStop || aRate>0;
+}
+
+
 
 #ifdef MATTER_DM_PLUGIN_COLOR_CONTROL_SERVER_HSV
 
@@ -411,6 +417,7 @@ bool emberAfColorControlClusterMoveHueCallback(app::CommandHandler * commandObj,
   FOCUSLOG("=== Received MoveHue Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (!moveCheck(commandData.moveMode, commandData.rate)) return false; // cannot move, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentHue(0, updateModeForMove(commandData.moveMode), commandData.rate);
   }
@@ -489,6 +496,7 @@ bool emberAfColorControlClusterMoveSaturationCallback(app::CommandHandler * comm
   FOCUSLOG("=== Received MoveSaturation Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (!moveCheck(commandData.moveMode, commandData.rate)) return false; // cannot move, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentSaturation(0, updateModeForMove(commandData.moveMode), commandData.rate);
   }
@@ -593,6 +601,7 @@ bool emberAfColorControlClusterMoveColorCallback(app::CommandHandler * commandOb
 {
   FOCUSLOG("=== Received MoveColor Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
+  if (commandData.rateX==0 && commandData.rateY==0) return false; // cannot move, InvalidCommand
   if (!dev) return false;
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentX(0, updateModeForDirectionalXY(commandData.rateX, UpdateMode(UpdateFlags::move, UpdateFlags::forced, UpdateFlags::noapply)), abs(commandData.rateX));
@@ -641,6 +650,7 @@ bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler 
   FOCUSLOG("=== Received MoveColorTemperature Command");
   auto dev = DeviceEndpoints::getDevice<DeviceColorControl>(commandPath.mEndpointId);
   if (!dev) return false;
+  if (!moveCheck(commandData.moveMode, commandData.rate)) return false; // cannot move, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
     dev->updateCurrentColortemp(0, updateModeForMove(commandData.moveMode), commandData.rate);
   }
