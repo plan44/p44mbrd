@@ -124,6 +124,7 @@ private:
 
   // attributes
   uint8_t mLevel;
+  uint8_t mLevelBeforeOff;
 
   uint16_t remainingTimeDS(); ///< return remaining execution (i.e. transition) time of current command
   LevelControlOptionsType tempOptions(LevelControlOptionsType aOptionMask, LevelControlOptionsType aOptionOverride);

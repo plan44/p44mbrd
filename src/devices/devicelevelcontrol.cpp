@@ -46,7 +46,8 @@ DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLe
   inherited(aLighting, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
   // external attribute defaults
-  mLevel(0)
+  mLevel(0),
+  mLevelBeforeOff(0) // never captured
 {
   // - declare specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gLevelControlClusters));
@@ -97,12 +98,16 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     OLOG(LOG_INFO, "setting level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     uint8_t previousLevel = mLevel;
     if ((previousLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
-      // level is minimum and becomes non-minimum: also set OnOff when enabled
-      if (aWithOnOff) updateOnOff(true, aUpdateMode);
+      // level is minimum and becomes non-minimum: also set OnOff when enabled (and not initiated by onoff)
+      if (aWithOnOff && !aUpdateMode.Has(UpdateFlags::onoff)) updateOnOff(true, aUpdateMode);
     }
     else if (level<=minlevel) {
       // level is not minimum and should become minimum: prevent or clear OnOff
-      if (aWithOnOff) updateOnOff(false, aUpdateMode);
+      if (aUpdateMode.Has(UpdateFlags::onoff)) {
+        // level change to off-level initiated by onoff (and onoff already
+        mLevelBeforeOff = mLevel; // remember
+      }
+      else if (aWithOnOff) updateOnOff(false, aUpdateMode);
       else if (previousLevel==minlevel) return false; // already at minimum: no change
       else level = minlevel; // set to minimum, but not to off
     }
@@ -405,14 +410,14 @@ void DeviceLevelControl::effect(bool aTurnOn)
       status = Attributes::OnLevel::Get(endpointId(), targetOnLevel);
       if (status!=Status::Success || targetOnLevel.IsNull()) {
         // no OnLevel value, use currentlevel
-        targetOnLevel.SetNonNull(currentLevel());
+        if (mLevelBeforeOff>0) targetOnLevel.SetNonNull(mLevelBeforeOff);
       }
     }
     if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(static_cast<uint8_t>(MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL));
-    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
   }
   else {
-    updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
+    updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
   }
 }
 

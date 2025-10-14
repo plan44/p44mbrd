@@ -95,6 +95,7 @@ enum class UpdateFlags : uint16_t
   down = 0x800, ///< (numericall) down movement or stepping
   longest = 0x1000, ///< longest movement path (e.g. hue)
   shortest = 0x2000, ///< shoprtest movement path (e.g. hue)
+  onoff = 0x4000, ///< initiated from OnOff (but possibly executed in levelControl)
 };
 typedef BitFlags<UpdateFlags> UpdateMode; ///< update mode consisting of zero or more UpdateFlags
 
