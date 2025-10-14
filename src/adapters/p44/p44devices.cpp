@@ -503,8 +503,8 @@ static inline double p44_rate(uint16_t aMatterRate, int aMatterMax, double aP44m
   if (aMatterRate==0) return 0;
   // - matter rate is 0..0xFE units of the base value per second
   // - p44 rate is time in seconds to be spent for one unit of the channel value
-  // = p44_rate = p44_max/matter_max/matter_rate
-  return (double)aP44max/aMatterMax/aMatterRate;
+  // = p44_rate = matter_max/p44_max/matter_rate
+  return (double)aMatterMax/aP44max/aMatterRate;
 }
 
 static inline double p44_time(uint16_t aMatterTTime)
