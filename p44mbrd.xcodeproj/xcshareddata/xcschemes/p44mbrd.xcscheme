@@ -70,6 +70,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--setuppin 20202021 --discriminator 3839"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--payloadversion 0 --vendor-id 0xFFF1 --product-id 0x8002 --setuppin 20202021 --discriminator 3840"
             isEnabled = "NO">
          </CommandLineArgument>
