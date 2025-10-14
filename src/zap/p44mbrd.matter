@@ -2628,9 +2628,9 @@ endpoint 2 {
     ram      attribute maxLevel default = 0xFE;
     ram      attribute options default = 0x00;
     ram      attribute onOffTransitionTime default = 5;
-    ram      attribute onLevel default = 0xFE;
+    ram      attribute onLevel;
     ram      attribute defaultMoveRate;
-    ram      attribute startUpCurrentLevel default = 0xFE;
+    ram      attribute startUpCurrentLevel;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute eventList;
