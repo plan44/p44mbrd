@@ -45,9 +45,9 @@ using namespace LevelControl;
 DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aLighting, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
+  mEffectiveLevel(0),
   // external attribute defaults
-  mCurrentLevel(0),
-  mEffectiveLevel(0)
+  mCurrentLevel(0)
 {
   // - declare specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gLevelControlClusters));
