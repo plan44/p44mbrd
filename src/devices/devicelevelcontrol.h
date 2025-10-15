@@ -41,7 +41,9 @@ public:
   /// Set new output level for device
   /// @param aNewLevel new level to set [0..100]
   /// @param aTransitionTimeDS transition time in tenths of a second, 0: immediately, 0xFFFF: use hardware recommended default
-  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled) = 0;
+  /// @param aWithCTCoupled true if coupled with color temperature
+  /// @param aIsOn true if matter side considers the device still powered on (even if aNewLevel is 0)
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled, bool aIsOn) = 0;
 
   /// Set new output level for device
   /// @param aDirection >0: start dimming up, <0: start dimming down, 0: stop dimming

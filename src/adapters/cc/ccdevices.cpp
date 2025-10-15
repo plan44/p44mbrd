@@ -198,7 +198,7 @@ void CC_OnOffImpl::handle_state_changed(JsonObjectPtr aParams)
 
 // MARK: LevelControlDelegate implementation
 
-void CC_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled)
+void CC_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled, bool aIsOn)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add ("group_id", JsonObject::newInt32 (get_item_id ()));

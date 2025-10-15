@@ -111,8 +111,6 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     else if (level<=minlevel) {
       // new level is minimum and currentLevel is not: turning off
       if (aWithOnOff) turnedOff = updateOnOff(false, aUpdateMode);
-      else if (mEffectiveLevel==minlevel) return false; // already at minimum: no change
-      else level = minlevel; // set to minimum, but not to off
     }
     // update currentlevel only if NOT turning off via onOff
     if (!(turnedOff && aUpdateMode.Has(UpdateFlags::onoff))) {
@@ -126,10 +124,12 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     changed = true;
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       mEffectiveLevel = static_cast<uint8_t>(level); // Note: must ONLY be updated when actually sent to bridged device, otherwise it is not "effective"!
+      double newLvl = (double)(level-minlevel)/(maxlevel-minlevel)*100;
       mLevelControlDelegate.setLevel(
-        (double)(level-minlevel)/(maxlevel-minlevel)*100, // bridge side is always 0..100%, mapped to minlevel..maxlevel
+        newLvl, // bridge side is always 0..100%, mapped to minlevel..maxlevel
         aTransitionTimeDs, // in tenths of seconds, 0xFFFF for using hardware's default
-        aCtCoupling
+        aCtCoupling,
+        isOn()
       );
     }
     if (aUpdateMode.Has(UpdateFlags::matter)) {
@@ -459,12 +459,12 @@ void DeviceLevelControl::onOffEffect(bool aTurnOn)
   else {
     // As per LevelControl Specs for OFF case:
     //  Temporarily store CurrentLevel.
-    uint8_t prevLevel = mCurrentLevel;
+    //  - not needed because we do not change the level in the next step
     //  Change CurrentLevel to the minimum level allowed for the device over the time period OnOffTransitionTime.
     //  - updateCurrentLevel will clip to min/max range, so we can set to 0
     UpdateMode updatemode = UpdateMode(UpdateFlags::bridged, UpdateFlags::matter);
     if (targetOnLevel.IsNull()) updatemode.Set(UpdateFlags::onoff); // use special onoff-originating semantics, keeps currentLevel set
-    updateCurrentLevel(0, 0, transitionTime, false, ctCoupling, updatemode);
+    updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, updatemode);
     //  If OnLevel is not defined, set the CurrentLevel to the stored level.
     //  - the stored level has not changed when onLevel attribute is null
   }

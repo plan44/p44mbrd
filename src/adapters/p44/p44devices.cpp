@@ -390,7 +390,7 @@ void P44_OnOffImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObjectPtr a
 
 // MARK: LevelControlDelegate implementation
 
-void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled)
+void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled, bool aIsOn)
 {
   if (aTransitionTimeDS==0xFFFF) {
     // means using default of the device, so we take the recommended transition time
@@ -404,6 +404,7 @@ void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS
   params->add("value", JsonObject::newDouble(percent2value(aNewLevel)));
   params->add("transitionTime", JsonObject::newDouble((double)aTransitionTimeDS/10.0));
   params->add("coupling", JsonObject::newBool(aWithCTCoupled));
+  if (aNewLevel==0 && aIsOn) params->add("onoff", JsonObject::newBool(false)); // prevent full off, just go to minimum
   params->add("apply_now", JsonObject::newBool(true));
   notify("setOutputChannelValue", params);
   // calculate time when transition will be done

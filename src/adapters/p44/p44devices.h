@@ -211,7 +211,7 @@ protected:
 
   /// @name LevelControlDelegate
   /// @{
-  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled) override;
+  virtual void setLevel(double aNewLevel, uint16_t aTransitionTimeDS, bool aWithCTCoupled, bool aIsOn) override;
   virtual void dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled) override;
   virtual MLMicroSeconds endOfLatestTransition() override { return mEndOfLatestTransition; };
   /// @}
