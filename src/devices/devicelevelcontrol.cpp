@@ -102,6 +102,7 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   bool changed = false;
   if (level!=mCurrentLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     changed = true;
+    bool turnedOff = false;
     OLOG(LOG_INFO, "setting current level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     if ((mEffectiveLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
       // level is minimum and becomes non-minimum: also set OnOff when enabled (and not initiated by onoff)
@@ -109,11 +110,14 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     }
     else if (level<=minlevel) {
       // new level is minimum and currentLevel is not: turning off
-      if (aWithOnOff) updateOnOff(false, aUpdateMode);
+      if (aWithOnOff) turnedOff = updateOnOff(false, aUpdateMode);
       else if (mEffectiveLevel==minlevel) return false; // already at minimum: no change
       else level = minlevel; // set to minimum, but not to off
     }
-    mCurrentLevel = static_cast<uint8_t>(level);
+    // update currentlevel only if NOT turning off via onOff
+    if (!(turnedOff && aUpdateMode.Has(UpdateFlags::onoff))) {
+      mCurrentLevel = static_cast<uint8_t>(level);
+    }
   }
   if (level!=mEffectiveLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     if (!changed) {
@@ -171,7 +175,8 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
   if (bridgedlevel==mEffectiveLevel) return false; // NOP
   // effective level has changed -> must force an update, including onoff, even if current level is the same
   aUpdateMode.Set(UpdateFlags::forced);
-  bool changed = updateCurrentLevel(bridgedlevel, 0, 0, true, false, aUpdateMode);
+  aUpdateMode.Set(UpdateFlags::onoff); // act as if changed via onOff
+  bool changed = updateCurrentLevel(bridgedlevel, 0, 0, true, false, aUpdateMode); // actually perform onoff when needed
   // when it comes from the bridge, it is effective (but updateCurrentLevel only updates when it goes to the bridge)
   mEffectiveLevel = bridgedlevel;
   return changed;
@@ -429,29 +434,39 @@ void DeviceLevelControl::onOffEffect(bool aTurnOn)
   if (emberAfContainsAttribute(endpointId(), LevelControl::Id, Attributes::OnLevel::Id)) {
     Attributes::OnLevel::Get(endpointId(), targetOnLevel);
   }
+  // As per LevelControl Specs:
+  //  The OnLevel attribute determines whether commands of the On/Off cluster have a permanent
+  //  effect on the CurrentLevel attribute or not. If this attribute is defined (i.e., implemented and not
+  //  equal to null) they do have a permanent effect, otherwise they do not. There is always a temporary
+  //  effect, due to fading up / down.
   // now act
   if (aTurnOn) {
     // As per LevelControl Specs for ON case:
-    // Temporarily store CurrentLevel.
-    // - not needed because we do not change the level in the next step
-    // Set CurrentLevel to the minimum level allowed for the device.
-    // - not needed because actually bridged devices are always at min level when off
-    // Change CurrentLevel to OnLevel, or to the stored level if OnLevel is not defined, over the time period OnOffTransitionTime.
-    if (targetOnLevel.IsNull()) targetOnLevel.SetNonNull(mCurrentLevel);
-    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, false, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
+    //  Temporarily store CurrentLevel.
+    //  - not needed because we do not change the level in the next step
+    //  Set CurrentLevel to the minimum level allowed for the device.
+    //  - not needed because actually bridged devices are always at min level when off
+    //  Change CurrentLevel to OnLevel, or to the stored level if OnLevel is not defined, over the time period OnOffTransitionTime.
+    if (targetOnLevel.IsNull()) {
+      // - use currentlevel, but safeguard that is not minlevel (which would prevent any visible switch on)
+      uint8_t minlevel;
+      Attributes::MinLevel::Get(endpointId(), &minlevel);
+      targetOnLevel.SetNonNull(mCurrentLevel>minlevel ? mCurrentLevel : MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+    }
+    //  - update WITHOUT onoff semantics to a level representing on
+    updateCurrentLevel(targetOnLevel.Value(), 0, transitionTime, false, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter));
   }
   else {
     // As per LevelControl Specs for OFF case:
-    // Temporarily store CurrentLevel.
+    //  Temporarily store CurrentLevel.
     uint8_t prevLevel = mCurrentLevel;
-    // Change CurrentLevel to the minimum level allowed for the device over the time period OnOffTransitionTime.
-    // - updateCurrentLevel will clip to min/max range, so we can set to 0
-    updateCurrentLevel(0, 0, transitionTime, false, ctCoupling, UpdateMode(UpdateFlags::bridged, UpdateFlags::matter, UpdateFlags::onoff));
-    // If OnLevel is not defined, set the CurrentLevel to the stored level.
-    if (targetOnLevel.IsNull()) {
-      // update level WITHOUT touching onoff
-      updateCurrentLevel(prevLevel, 0, 0, false, ctCoupling, UpdateMode(UpdateFlags::matter, UpdateFlags::onoff));
-    }
+    //  Change CurrentLevel to the minimum level allowed for the device over the time period OnOffTransitionTime.
+    //  - updateCurrentLevel will clip to min/max range, so we can set to 0
+    UpdateMode updatemode = UpdateMode(UpdateFlags::bridged, UpdateFlags::matter);
+    if (targetOnLevel.IsNull()) updatemode.Set(UpdateFlags::onoff); // use special onoff-originating semantics, keeps currentLevel set
+    updateCurrentLevel(0, 0, transitionTime, false, ctCoupling, updatemode);
+    //  If OnLevel is not defined, set the CurrentLevel to the stored level.
+    //  - the stored level has not changed when onLevel attribute is null
   }
 }
 
