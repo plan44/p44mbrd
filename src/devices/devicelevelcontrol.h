@@ -48,7 +48,7 @@ public:
   /// Set new output level for device
   /// @param aDirection >0: start dimming up, <0: start dimming down, 0: stop dimming
   /// @param aRate rate of change, 0xFF = use default
-  virtual void dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled) = 0;
+  virtual void dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled, bool aIsOn) = 0;
 
   /// @return the time when the latest started transition will end, in Mainloop::now() time
   virtual MLMicroSeconds endOfLatestTransition() = 0;

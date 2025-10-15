@@ -209,7 +209,7 @@ void CC_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS,
   CC_BridgeImpl::adapter().api().sendRequest("deviced.group_send_command", params, boost::bind(&CC_LevelControlImpl::levelControlResponse, this, _1, _2, _3));
 }
 
-void CC_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled)
+void CC_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled, bool aIsOn)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add ("group_id", JsonObject::newInt32 (get_item_id ()));

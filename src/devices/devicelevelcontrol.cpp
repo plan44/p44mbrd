@@ -331,17 +331,19 @@ Status DeviceLevelControl::move(MoveModeEnum aMode, DataModel::Nullable<uint8_t>
   }
   if (rate.Value()==0) return Status::InvalidCommand;
   bool ctCoupling = tempOptions(aOptionMask, aOptionOverride).Has(OptionsBitmap::kCoupleColorTempToLevel);
-  if ((!rate.IsNull() && rate.Value()!=0) || shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
+  if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
     switch (aMode) {
       case MoveModeEnum::kUp:
-        if (currentLevel()==0) {
-          // start dimming from off level into on levels -> set onoff
-          updateOnOff(true, UpdateMode(UpdateFlags::matter));
+        // dimming up must turn on -> set onoff
+        if (updateOnOff(true, UpdateMode(UpdateFlags::matter))) {
+          // actually turned on, means that we were off before, make sure we
+          // reset currentLevel that might be set > min from previous onoff-initiated off (when on-level is null)
+          updateCurrentLevel(0, 0, 0, false, false, UpdateMode(UpdateFlags::matter));
         }
-        mLevelControlDelegate.dim(1, rate.Value(), ctCoupling);
+        mLevelControlDelegate.dim(1, rate.Value(), ctCoupling, isOn());
         break;
       case MoveModeEnum::kDown:
-        mLevelControlDelegate.dim(-1, rate.Value(), ctCoupling);
+        mLevelControlDelegate.dim(-1, rate.Value(), ctCoupling, isOn());
         break;
       default:
         status = Status::InvalidCommand;
@@ -380,7 +382,7 @@ Status DeviceLevelControl::stop(bool aWithOnOff, LevelControlOptionsType aOption
   Status status = Status::Success;
 
   if (shouldExecuteLevelChange(aWithOnOff, aOptionMask, aOptionOverride)) {
-    mLevelControlDelegate.dim(0, 0, false); // stop dimming
+    mLevelControlDelegate.dim(0, 0, false, isOn()); // stop dimming
   }
   return status;
 }

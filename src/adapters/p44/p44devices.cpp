@@ -412,13 +412,14 @@ void P44_LevelControlImpl::setLevel(double aNewLevel, uint16_t aTransitionTimeDS
 }
 
 
-void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled)
+void P44_LevelControlImpl::dim(int8_t aDirection, uint8_t aRate, bool aWithCTCoupled, bool aIsOn)
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channel", JsonObject::newInt32(0)); // default channel
   params->add("mode", JsonObject::newInt32(aDirection));
-  params->add("autostop", JsonObject::newBool(false));
+  params->add("autoStop", JsonObject::newBool(false));
   params->add("coupling", JsonObject::newBool(aWithCTCoupled));
+  if (aIsOn && aDirection>0) params->add("force", JsonObject::newBool(true)); // if matter thinks we're on, force dimming up even from zero
   // matter rate is 0..0xFE units per second, p44 rate is 0..mDefaultChannelMax units per millisecond
   if (aDirection!=0 && aRate!=0xFF) params->add("dimPerMS", JsonObject::newDouble((double)aRate*mDefaultChannelMax/MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/1000));
   notify("dimChannel", params);
