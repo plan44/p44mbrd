@@ -64,7 +64,7 @@ public:
 
   /// @brief set the default on level
   /// @note this should be called at device setup, before the device goes operational
-  virtual void setDefaultOnLevel(double aLevelPercent) = 0;
+  virtual void setInitialOnLevel(double aLevelPercent) = 0;
 
   /// @brief update the current level (when bridged device reports it)
   virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) = 0;
@@ -98,7 +98,7 @@ public:
 
   /// @name LevelControlImplementationInterface
   /// @{
-  virtual void setDefaultOnLevel(double aLevelPercent) override;
+  virtual void setInitialOnLevel(double aLevelPercent) override;
   virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) override;
   /// @}
 

@@ -67,10 +67,14 @@ void DeviceLevelControl::didGetInstalled()
 {
   Attributes::FeatureMap::Set(endpointId(), to_underlying(LevelControl::Feature::kOnOff));
   Attributes::OnOffTransitionTime::Set(endpointId(), 5); // default is 0.5 Seconds for transitions (approx dS default)
-  Attributes::OnLevel::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
   Attributes::DefaultMoveRate::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7); // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
-  Attributes::MinLevel::Set(endpointId(), mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : MATTER_DM_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL);
+  uint8_t minlevel = mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : MATTER_DM_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL;
+  Attributes::MinLevel::Set(endpointId(), minlevel);
   Attributes::MaxLevel::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL);
+  // we assume switched off
+  mEffectiveLevel = minlevel;
+  // when we are not switched on
+  if (!isOn()) mCurrentLevel = MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL;
   // call base class last
   inherited::didGetInstalled();
 }
@@ -98,29 +102,26 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   bool changed = false;
   if (level!=mCurrentLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     changed = true;
-    OLOG(LOG_INFO, "setting level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
+    OLOG(LOG_INFO, "setting current level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     if ((mEffectiveLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
       // level is minimum and becomes non-minimum: also set OnOff when enabled (and not initiated by onoff)
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
-      mCurrentLevel = static_cast<uint8_t>(level);
     }
     else if (level<=minlevel) {
       // new level is minimum and currentLevel is not: turning off
       if (aWithOnOff) updateOnOff(false, aUpdateMode);
       else if (mEffectiveLevel==minlevel) return false; // already at minimum: no change
       else level = minlevel; // set to minimum, but not to off
-      // special case ONLY when turning off AND initiated by onoff: do NOT change the currentLevel
-      if (!aUpdateMode.Has(UpdateFlags::onoff)) mCurrentLevel = static_cast<uint8_t>(level);
     }
-    else {
-      // level change without turning on or off
-      mCurrentLevel = static_cast<uint8_t>(level);
-    }
+    mCurrentLevel = static_cast<uint8_t>(level);
   }
   if (level!=mEffectiveLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+    if (!changed) {
+      OLOG(LOG_INFO, "only changing effective level to %d (currentLevel unchanged)", level);
+    }
     changed = true;
-    mEffectiveLevel = static_cast<uint8_t>(level);
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
+      mEffectiveLevel = static_cast<uint8_t>(level); // Note: must ONLY be updated when actually sent to bridged device, otherwise it is not "effective"!
       mLevelControlDelegate.setLevel(
         (double)(level-minlevel)/(maxlevel-minlevel)*100, // bridge side is always 0..100%, mapped to minlevel..maxlevel
         aTransitionTimeDs, // in tenths of seconds, 0xFFFF for using hardware's default
@@ -148,12 +149,15 @@ uint16_t DeviceLevelControl::remainingTimeDS()
 
 // MARK: callbacks for LevelControlDelegate implementations
 
-void DeviceLevelControl::setDefaultOnLevel(double aLevelPercent)
+void DeviceLevelControl::setInitialOnLevel(double aLevelPercent)
 {
   uint8_t minlevel, maxlevel;
   Attributes::MinLevel::Get(endpointId(), &minlevel);
   Attributes::MaxLevel::Get(endpointId(), &maxlevel);
-  LevelControl::Attributes::OnLevel::Set(endpointId(), static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel));
+  if (!isOn()) {
+    // this is the level we should switch to on first onOff turning on unless there is a OnLevel configured by then
+    mCurrentLevel = static_cast<uint8_t>(aLevelPercent/100*(maxlevel-minlevel)+minlevel);
+  }
 }
 
 
@@ -167,7 +171,10 @@ bool DeviceLevelControl::updateLevel(double aLevelPercent, UpdateMode aUpdateMod
   if (bridgedlevel==mEffectiveLevel) return false; // NOP
   // effective level has changed -> must force an update, including onoff, even if current level is the same
   aUpdateMode.Set(UpdateFlags::forced);
-  return updateCurrentLevel(bridgedlevel, 0, 0, true, false, aUpdateMode);
+  bool changed = updateCurrentLevel(bridgedlevel, 0, 0, true, false, aUpdateMode);
+  // when it comes from the bridge, it is effective (but updateCurrentLevel only updates when it goes to the bridge)
+  mEffectiveLevel = bridgedlevel;
+  return changed;
 }
 
 

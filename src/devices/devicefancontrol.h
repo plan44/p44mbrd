@@ -69,7 +69,7 @@ public:
 
   /// @name LevelControlImplementationInterface
   /// @{
-  virtual void setDefaultOnLevel(double aLevelPercent) override;
+  virtual void setInitialOnLevel(double aLevelPercent) override;
   virtual bool updateLevel(double aLevelPercent, UpdateMode aUpdateMode) override;
   /// @}
 

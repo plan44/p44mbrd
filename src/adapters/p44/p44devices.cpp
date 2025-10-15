@@ -454,7 +454,7 @@ void P44_LevelControlImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
       if (o2->get("channels", o2)) {
         if (o2->get(mDefaultChannelId.c_str(), o2)) {
           if (o2->get("value", o2)) {
-            deviceP<LevelControlImplementationInterface>()->setDefaultOnLevel(value2percent(o2->doubleValue()));
+            deviceP<LevelControlImplementationInterface>()->setInitialOnLevel(value2percent(o2->doubleValue()));
           }
         }
       }

@@ -90,7 +90,7 @@ void DeviceFanControl::didGetInstalled()
 
 // MARK: LevelControlImplementationInterface
 
-void DeviceFanControl::setDefaultOnLevel(double aLevelPercent)
+void DeviceFanControl::setInitialOnLevel(double aLevelPercent)
 {
   /* NOP, not needed in FanControl */
 }
