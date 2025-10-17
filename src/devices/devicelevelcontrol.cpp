@@ -45,9 +45,9 @@ using namespace LevelControl;
 DeviceLevelControl::DeviceLevelControl(bool aLighting, LevelControlDelegate& aLevelControlDelegate, OnOffDelegate& aOnOffDelegate, IdentifyDelegate* aIdentifyDelegateP, DeviceInfoDelegate& aDeviceInfoDelegate) :
   inherited(aLighting, aOnOffDelegate, aIdentifyDelegateP, aDeviceInfoDelegate),
   mLevelControlDelegate(aLevelControlDelegate),
-  mEffectiveLevel(0),
   // external attribute defaults
-  mCurrentLevel(0)
+  mCurrentLevel(0),
+  mEffectiveLevel(0)
 {
   // - declare specific clusters
   useClusterTemplates(Span<EmberAfClusterSpec>(gLevelControlClusters));
@@ -100,12 +100,13 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
   if (level<minlevel) level = minlevel;
   // now move to given or calculated level
   bool changed = false;
+  // internal level
   if (level!=mCurrentLevel || aUpdateMode.Has(UpdateFlags::forced)) {
     changed = true;
     bool turnedOff = false;
     OLOG(LOG_INFO, "setting current level to %d (clipping to %d..%d) in %d00mS - %supdatemode=0x%x", aAmount, minlevel, maxlevel, aTransitionTimeDs, aWithOnOff ? "WITH OnOff, " : "", aUpdateMode.Raw());
     if ((mEffectiveLevel<=minlevel || aUpdateMode.Has(UpdateFlags::forced)) && level>minlevel) {
-      // level is minimum and becomes non-minimum: also set OnOff when enabled (and not initiated by onoff)
+      // level is minimum and becomes non-minimum: also set OnOff when enabled
       if (aWithOnOff) updateOnOff(true, aUpdateMode);
     }
     else if (level<=minlevel) {
@@ -115,9 +116,17 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
     // update currentlevel only if NOT turning off via onOff
     if (!(turnedOff && aUpdateMode.Has(UpdateFlags::onoff))) {
       mCurrentLevel = static_cast<uint8_t>(level);
+      if (aUpdateMode.Has(UpdateFlags::matter)) {
+        FOCUSOLOG("reporting currentLevel attribute change to matter");
+        reportAttributeChange(LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
+      }
     }
   }
-  if (level!=mEffectiveLevel || aUpdateMode.Has(UpdateFlags::forced)) {
+  // actual physical level
+  if (
+    (isOn() || (level<=minlevel) || aWithOnOff) && // is allowed to change
+    (level!=mEffectiveLevel || aUpdateMode.Has(UpdateFlags::forced)) // actually needs a change
+  ) {
     if (!changed) {
       OLOG(LOG_INFO, "only changing effective level to %d (currentLevel unchanged)", level);
     }
@@ -131,10 +140,6 @@ bool DeviceLevelControl::updateCurrentLevel(uint8_t aAmount, int8_t aDirection, 
         aCtCoupling,
         isOn()
       );
-    }
-    if (aUpdateMode.Has(UpdateFlags::matter)) {
-      FOCUSOLOG("reporting currentLevel attribute change to matter");
-      reportAttributeChange(LevelControl::Id, LevelControl::Attributes::CurrentLevel::Id);
     }
   }
   return changed; // set if effectively or internal cache changed
