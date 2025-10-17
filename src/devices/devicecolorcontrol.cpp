@@ -671,7 +671,7 @@ bool emberAfColorControlClusterMoveColorTemperatureCallback(app::CommandHandler 
   if (!dev) return false;
   if (!moveCheck(commandData.moveMode, commandData.rate)) return false; // cannot move, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentColortemp(0, updateModeForMove(commandData.moveMode), commandData.rate);
+    dev->updateCurrentColortemp(0, updateModeForMove(commandData.moveMode), commandData.rate, commandData.colorTemperatureMinimumMireds, commandData.colorTemperatureMaximumMireds);
   }
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
