@@ -567,7 +567,6 @@ void P44_ColorControlImpl::changeCieX(uint16_t aX, uint16_t aTTimeDSorRate, Upda
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("x"));
-  params->add("value", JsonObject::newDouble((double)aX/0xFFFE));
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
     params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFFFE, 1)));
