@@ -638,8 +638,8 @@ bool emberAfColorControlClusterStepColorCallback(app::CommandHandler * commandOb
   if (!dev) return false;
   if (commandData.stepX==0 && commandData.stepY==0) return false; // cannot step, InvalidCommand
   if (dev->shouldExecuteColorChange(commandData.optionsMask, commandData.optionsOverride)) {
-    dev->updateCurrentX(0, updateModeForDirectionalXY(commandData.stepX, UpdateMode(UpdateFlags::relative, UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
-    dev->updateCurrentY(0, updateModeForDirectionalXY(commandData.stepY, UpdateMode(UpdateFlags::relative, UpdateFlags::forced)), commandData.transitionTime);
+    dev->updateCurrentX(abs(commandData.stepX), updateModeForDirectionalXY(commandData.stepX, UpdateMode(UpdateFlags::relative, UpdateFlags::forced, UpdateFlags::noapply)), commandData.transitionTime);
+    dev->updateCurrentY(abs(commandData.stepY), updateModeForDirectionalXY(commandData.stepY, UpdateMode(UpdateFlags::relative, UpdateFlags::forced)), commandData.transitionTime);
   }
   commandObj->AddStatus(commandPath, Status::Success);
   return true;
