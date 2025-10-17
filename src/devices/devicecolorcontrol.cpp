@@ -129,10 +129,11 @@ bool DeviceColorControl::updateCurrentColorMode(InternalColorMode aColorMode, Up
     if (aUpdateMode.Has(UpdateFlags::bridged)) {
       const UpdateMode prepMode = UpdateMode(UpdateFlags::chained, UpdateFlags::forced, UpdateFlags::bridged, UpdateFlags::noapply);
       UpdateMode finalizeMode = prepMode;
-      if (aUpdateMode.Has(UpdateFlags::move)) {
-        // when start moving with a new color mode, we need to change the current mode
-        // by setting new mode's parameters silently and immediately first, but not apply it yet.
-        // Only after, we can start moving with a rate
+      if (aUpdateMode.Has(UpdateFlags::move) || aUpdateMode.Has(UpdateFlags::noapply)) {
+        // when start moving with a new color mode, or when this change is one of multiple changes (noapply),
+        // we need to change the current mode by setting new mode's parameters silently and immediately first,
+        // but not apply it yet. Only after, we can start moving with a rate or adding the other params
+        // of the change and THEN apply
         aTTimeDSorRate = 0;
         changeApplied = false;
       }
@@ -212,6 +213,8 @@ bool DeviceColorControl::updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, 
     if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTTimeDSorRate)) {
       // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        // Note: we do not need to check isOn() here, as color change does NOT imply brightness
+        //   so cannot affect on/off state. It's up to the adapter to decide if/when to propagate
         mColorControlDelegate.changeHue(mHue, aTTimeDSorRate, aUpdateMode);
       }
     }
@@ -234,6 +237,8 @@ bool DeviceColorControl::updateCurrentSaturation(uint8_t aSaturation, UpdateMode
     if (!updateCurrentColorMode(InternalColorMode::hs, aUpdateMode, aTTimeDSorRate)) {
       // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends H+S)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        // Note: we do not need to check isOn() here, as color change does NOT imply brightness
+        //   so cannot affect on/off state. It's up to the adapter to decide if/when to propagate
         mColorControlDelegate.changeSaturation(mSaturation, aTTimeDSorRate, aUpdateMode);
       }
     }
@@ -256,6 +261,8 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
     if (!updateCurrentColorMode(InternalColorMode::ct, aUpdateMode, aTTimeDSorRate)) {
       // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends CT)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        // Note: we do not need to check isOn() here, as color change does NOT imply brightness
+        //   so cannot affect on/off state. It's up to the adapter to decide if/when to propagate
         mColorControlDelegate.changeColortemp(mColorTemp, aTTimeDSorRate, aUpdateMode);
       }
     }
@@ -278,6 +285,8 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
     if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTTimeDSorRate)) {
       // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        // Note: we do not need to check isOn() here, as color change does NOT imply brightness
+        //   so cannot affect on/off state. It's up to the adapter to decide if/when to propagate
         mColorControlDelegate.changeCieX(mX, aTTimeDSorRate, aUpdateMode);
       }
     }
@@ -300,6 +309,8 @@ bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uin
     if (!updateCurrentColorMode(InternalColorMode::xy, aUpdateMode, aTTimeDSorRate)) {
       // color mode change has not yet applied the new value, must separately update (otherwise, color mode change already sends X+Y)
       if (aUpdateMode.Has(UpdateFlags::bridged)) {
+        // Note: we do not need to check isOn() here, as color change does NOT imply brightness
+        //   so cannot affect on/off state. It's up to the adapter to decide if/when to propagate
         mColorControlDelegate.changeCieY(mY, aTTimeDSorRate, aUpdateMode);
       }
     }
