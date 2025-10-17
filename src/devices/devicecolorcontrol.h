@@ -109,7 +109,7 @@ public:
   uint8_t currentSaturation() { return mSaturation; };
   uint16_t currentColortemp() { return mColorTemp; };
   uint16_t currentX() { return mX; };
-  uint16_t currentY() { return mX; };
+  uint16_t currentY() { return mY; };
 
   bool updateCurrentColorMode(InternalColorMode aColorMode, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate);
   bool updateCurrentHue(uint8_t aHue, UpdateMode aUpdateMode, uint16_t aTransitionTimeDS);
