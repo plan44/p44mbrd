@@ -278,7 +278,8 @@ bool DeviceColorControl::updateCurrentColortemp(uint16_t aColortemp, UpdateMode 
 
 bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aX, mX, aUpdateMode, 0, 0xFFFE, false);
+  // the given matter-max 0xFEFF is NOT the full Cie 0..1 range, but clipped below 1.0 (0.996 max, realistic X = 0.0...0.74)
+  bool changed = adaptParams(aX, mX, aUpdateMode, 0, 0xFEFF, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set X to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aX, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes
@@ -302,7 +303,8 @@ bool DeviceColorControl::updateCurrentX(uint16_t aX, UpdateMode aUpdateMode, uin
 
 bool DeviceColorControl::updateCurrentY(uint16_t aY, UpdateMode aUpdateMode, uint16_t aTTimeDSorRate)
 {
-  bool changed = adaptParams(aY, mY, aUpdateMode, 0, 0xFFFE, false);
+  // the given matter-max 0xFEFF is NOT the full Cie 0..1 range, but clipped below 1.0 (0.996 max, realistic Y = 0.0...0.84)
+  bool changed = adaptParams(aY, mY, aUpdateMode, 0, 0xFEFF, false);
   if (changed || aUpdateMode.Has(UpdateFlags::forced)) {
     OLOG(LOG_INFO, "set Y to 0x%04x (matter-units) with time/rate = %hu - updatemode=0x%x", aY, aTTimeDSorRate, aUpdateMode.Raw());
     aUpdateMode.Clear(UpdateFlags::forced); // do not force color mode changes

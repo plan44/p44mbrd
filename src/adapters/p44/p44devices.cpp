@@ -523,6 +523,7 @@ void P44_ColorControlImpl::changeHue(uint8_t aHue, uint16_t aTTimeDSorRate, Upda
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("hue"));
+  // scaling: hue is 0..360 mapped to 0..0xFE
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
     params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFE, 360)));
@@ -549,6 +550,7 @@ void P44_ColorControlImpl::changeSaturation(uint8_t aSaturation, uint16_t aTTime
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("saturation"));
+  // scaling: saturation is 0..100 mapped to 0..0xFE
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
     params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFE, 100)));
@@ -567,12 +569,13 @@ void P44_ColorControlImpl::changeCieX(uint16_t aX, uint16_t aTTimeDSorRate, Upda
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("x"));
+  // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
-    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFFFE, 1)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0x10000, 1)));
   }
   else {
-    params->add("value", JsonObject::newDouble(p44_value(aX, 0xFFFE, 1)));
+    params->add("value", JsonObject::newDouble(p44_value(aX, 0x10000, 1)));
     params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
   }
   params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
@@ -584,12 +587,13 @@ void P44_ColorControlImpl::changeCieY(uint16_t aY, uint16_t aTTimeDSorRate, Upda
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("y"));
+  // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
-    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0xFFFE, 1)));
+    params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 0x10000, 1)));
   }
   else {
-    params->add("value", JsonObject::newDouble(p44_value(aY, 0xFFFE, 1)));
+    params->add("value", JsonObject::newDouble(p44_value(aY, 0x10000, 1)));
     params->add("transitionTime", JsonObject::newDouble(p44_time(aTTimeDSorRate)));
   }
   params->add("apply_now", JsonObject::newBool(!aUpdateMode.Has(UpdateFlags::noapply)));
@@ -601,6 +605,7 @@ void P44_ColorControlImpl::changeColortemp(uint16_t aColortemp, uint16_t aTTimeD
 {
   JsonObjectPtr params = JsonObject::newObj();
   params->add("channelId", JsonObject::newString("colortemp"));
+  // scaling: colortemp is in mired, mapped 1:1
   if (aUpdateMode.Has(UpdateFlags::move)) {
     params->add("move", JsonObject::newInt32(moveDirFromMode(aUpdateMode)));
     params->add("rate", JsonObject::newDouble(p44_rate(aTTimeDSorRate, 1, 1)));
@@ -677,7 +682,9 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        deviceP<DeviceColorControl>()->updateCurrentX(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        uint32_t val = vo->doubleValue()*0x10000;
+        if (val>0xFEFF) val = 0xFEFF;
+        deviceP<DeviceColorControl>()->updateCurrentX(static_cast<uint16_t>(val), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
     if (aChannelStates->get("y", o)) {
@@ -685,7 +692,9 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        deviceP<DeviceColorControl>()->updateCurrentY(static_cast<uint16_t>(vo->doubleValue()*0xFFFF), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
+        uint32_t val = vo->doubleValue()*0x10000;
+        if (val>0xFEFF) val = 0xFEFF;
+        deviceP<DeviceColorControl>()->updateCurrentY(static_cast<uint16_t>(val), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
     }
   }
