@@ -2748,7 +2748,6 @@ endpoint 2 {
   server cluster ColorControl {
     callback attribute currentHue default = 0x00;
     callback attribute currentSaturation default = 0x00;
-    ram      attribute remainingTime default = 0x0000;
     callback attribute currentX default = 0x616B;
     callback attribute currentY default = 0x607D;
     callback attribute colorTemperatureMireds default = 0x00FA;

@@ -4835,22 +4835,6 @@
               "reportableChange": 0
             },
             {
-              "name": "RemainingTime",
-              "code": 2,
-              "mfgCode": null,
-              "side": "server",
-              "type": "int16u",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0000",
-              "reportable": 1,
-              "minInterval": 1,
-              "maxInterval": 65534,
-              "reportableChange": 0
-            },
-            {
               "name": "CurrentX",
               "code": 3,
               "mfgCode": null,
