@@ -124,6 +124,7 @@ protected:
 
 private:
 
+  // internal
   uint8_t mEffectiveLevel; ///< the actually applied level
 
   // attributes
