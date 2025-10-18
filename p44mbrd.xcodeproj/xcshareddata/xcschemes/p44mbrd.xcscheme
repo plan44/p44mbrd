@@ -83,7 +83,15 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--factorydata ./factory_data_0xFFF1_0x8002.txt"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--factorydata ./factory_data_0xFFF1_0x8002.txt:_/factorydata_debug.txt"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--factorydata ./factory_data_becker.txt"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--resourcepath ${PROJECT_DIR}"
@@ -115,11 +123,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--loglevel 6"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--loglevel 7"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--chiploglevel 3"

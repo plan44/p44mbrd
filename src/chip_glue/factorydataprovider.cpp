@@ -78,6 +78,12 @@ FileBasedFactoryDataProvider::FileBasedFactoryDataProvider(const string aFactory
       if (!key.empty()) mDataItems[key] = data; // store last item
     }
   }
+  if (LOGENABLED(LOG_DEBUG)) {
+    LOG(LOG_DEBUG, "\nAccumulated factory data after reading: %s\n", aFactoryDataResourcePaths.c_str());
+    for (DataMap::iterator pos = mDataItems.begin(); pos!=mDataItems.end(); ++pos) {
+      LOG(LOG_DEBUG, "%s=%s", pos->first.c_str(), pos->second.c_str());
+    }
+  }
 }
 
 bool FileBasedFactoryDataProvider::getItem(const char* aKey, string &aItem)
