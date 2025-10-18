@@ -682,7 +682,7 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: X is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        uint32_t val = vo->doubleValue()*0x10000;
+        uint32_t val = (uint32_t)(vo->doubleValue()*0x10000);
         if (val>0xFEFF) val = 0xFEFF;
         deviceP<DeviceColorControl>()->updateCurrentX(static_cast<uint16_t>(val), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
@@ -692,7 +692,7 @@ void P44_ColorControlImpl::parseOutputState(JsonObjectPtr aOutputState, JsonObje
       if (o->get("value", vo, true)) {
         // update only cache if not actually in hs mode
         // scaling: Y is 0..1 mapped to 0..0x10000, with effective range 0..0xFEFF (0..0.9961)
-        uint32_t val = vo->doubleValue()*0x10000;
+        uint32_t val = (uint32_t)(vo->doubleValue()*0x10000);
         if (val>0xFEFF) val = 0xFEFF;
         deviceP<DeviceColorControl>()->updateCurrentY(static_cast<uint16_t>(val), relevant && colorMode==InternalColorMode::xy ? aUpdateMode : UpdateMode(UpdateFlags::noderive), 0);
       }
