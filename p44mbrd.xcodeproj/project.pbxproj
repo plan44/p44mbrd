@@ -463,7 +463,7 @@
 		ED24BDC328A6709E0025CC14 /* device_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = device_impl.h; sourceTree = "<group>"; };
 		ED24BDC928A670DB0025CC14 /* BUILD.gn */ = {isa = PBXFileReference; lastKnownFileType = text; path = BUILD.gn; sourceTree = "<group>"; };
 		ED24BDCB28A670DB0025CC14 /* CHIPProjectAppConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPProjectAppConfig.h; sourceTree = "<group>"; };
-		ED24BDCC28A670DB0025CC14 /* p44mbrd.zap */ = {isa = PBXFileReference; lastKnownFileType = text; path = p44mbrd.zap; sourceTree = "<group>"; };
+		ED24BDCC28A670DB0025CC14 /* p44mbrd.zap */ = {isa = PBXFileReference; explicitFileType = text.json; path = p44mbrd.zap; sourceTree = "<group>"; };
 		ED24BDD128A673130025CC14 /* p44deviceinstanceinfoprovider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44deviceinstanceinfoprovider.cpp; sourceTree = "<group>"; };
 		ED24BDD228A673130025CC14 /* p44deviceinstanceinfoprovider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p44deviceinstanceinfoprovider.h; sourceTree = "<group>"; };
 		ED24BDD428A68AE10025CC14 /* jsoncomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsoncomm.hpp; sourceTree = "<group>"; };

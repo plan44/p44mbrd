@@ -24,7 +24,7 @@ chip_project_config_include_dirs = [ "//zap/include" ]
 chip_project_config_include_dirs += [ "${chip_root}/config/standalone" ]
 
 # p44mbrd version
-p44_application_version = "1.4.0.10"
+p44_application_version = "1.4.0.11"
 
 # p44mbrd specifics extra config
 default_configs_extra = [ "//:p44mbrd_config_extra" ]
@@ -70,6 +70,8 @@ chip_use_transitional_device_instance_info_provider = false
 # TODO: once we also get rid of examples/platform/linux/LinuxCommissionableDataProvider:
 #chip_use_transitional_commissionable_data_provider = false
 
+# we want the modern data model interface ONLY, not modern/ember "check"ed as is default for linux
+chip_use_data_model_interface = "enabled"
 
 # we want posix locking
 chip_system_config_locking = "posix"
