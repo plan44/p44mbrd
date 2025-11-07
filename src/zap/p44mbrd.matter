@@ -2735,7 +2735,7 @@ endpoint 2 {
   server cluster FanControl {
     ram      attribute fanMode default = 0;
     ram      attribute fanModeSequence default = 2;
-    ram      attribute percentSetting;
+    ram      attribute percentSetting default = 0;
     ram      attribute percentCurrent default = 0;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;

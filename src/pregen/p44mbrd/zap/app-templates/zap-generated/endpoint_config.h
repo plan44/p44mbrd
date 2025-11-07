@@ -64,7 +64,7 @@
 \
       /* Endpoint: 2, Cluster: Fan Control (server) */ \
       { (uint16_t)0x0, (uint16_t)0x0, (uint16_t)0x6 }, /* FanMode */ \
-      { (uint16_t)0xFF, (uint16_t)0x0, (uint16_t)0x64 }, /* PercentSetting */ \
+      { (uint16_t)0x0, (uint16_t)0x0, (uint16_t)0x64 }, /* PercentSetting */ \
 \
     /* Endpoint: 2, Cluster: Color Control (server) */ \
     { \
