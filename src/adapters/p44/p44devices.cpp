@@ -1068,6 +1068,7 @@ void P44_ButtonImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
   // now button specifics
   mClicks = 0;
   mPosition = 0;
+  mLastActivePosition = 0;
   // configure switch
   SwitchDevice* dev = deviceP<SwitchDevice>();
   // - number of positions (always one more than active ones, so never <2)
@@ -1153,23 +1154,27 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 }
                 break;
               case ct_complete:
-                if (position==0 && mClicks>0) {
-                  // Note: when we have multipress support, even single clicks (but not holds!) need the OnMultiPressComplete event!
-                  SwitchServer::Instance().OnMultiPressComplete(endpointId(), mPosition, mClicks); // report previous position
+                if (position==0 && mClicks>0 && mLastActivePosition>0) {
+                  // Note: when we have multipress support, even single clicks (and release of longer press during multiclick) need the OnMultiPressComplete event!
+                  SwitchServer::Instance().OnMultiPressComplete(endpointId(), mLastActivePosition, mClicks); // report previously active position
                 }
                 mClicks = 0;
+                mLastActivePosition = 0;
                 break;
               case ct_hold_start:
+                if (mClicks>0) goto multi; // long press within multiclick must not be reported as longpress
                 mClicks = 0; // when we hold, we do not have clicks
                 SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
                 break;
               case ct_hold_end:
+                if (mClicks>0) goto multi; // long press within multiclick must not be reported as longpress
                 SwitchServer::Instance().OnLongRelease(endpointId(), mPosition); // report previous position
                 break;
               default:
                 break;
             }
             mPosition = position;
+            if (position!=0) mLastActivePosition = position; // remember for OnMultiPressComplete
           }
         }
         // only evaluate ONE button state (should be only one)

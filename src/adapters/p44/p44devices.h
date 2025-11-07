@@ -375,6 +375,7 @@ class P44_ButtonImpl : public P44_InputImpl
 
   uint8_t mClicks;
   uint8_t mPosition;
+  uint8_t mLastActivePosition;
 
 public:
 
