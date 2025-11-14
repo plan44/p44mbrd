@@ -65,7 +65,11 @@ string DeviceLevelControl::description()
 
 void DeviceLevelControl::didGetInstalled()
 {
-  Attributes::FeatureMap::Set(endpointId(), to_underlying(LevelControl::Feature::kOnOff));
+  Attributes::FeatureMap::Set(
+    endpointId(),
+    to_underlying(LevelControl::Feature::kOnOff) | // we always have OnOff, too
+    (mLighting ? to_underlying(LevelControl::Feature::kLighting) : 0) // and we might have lighting
+  );
   Attributes::OnOffTransitionTime::Set(endpointId(), 5); // default is 0.5 Seconds for transitions (approx dS default)
   Attributes::DefaultMoveRate::Set(endpointId(), MATTER_DM_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL/7); // default "recommendation" is 0.5 Seconds for transitions (approx dS default)
   uint8_t minlevel = mLighting ? LEVEL_CONTROL_LIGHTING_MIN_LEVEL : MATTER_DM_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL;
