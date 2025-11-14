@@ -668,22 +668,6 @@
               "reportableChange": 0
             },
             {
-              "name": "LocalConfigDisabled",
-              "code": 16,
-              "mfgCode": null,
-              "side": "server",
-              "type": "boolean",
-              "included": 1,
-              "storageOption": "NVM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "0",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
               "name": "Reachable",
               "code": 17,
               "mfgCode": null,
