@@ -32,6 +32,16 @@
   #define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 200
 #endif
 
+// overrides CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC in CHIPConfig.
+// Note:
+// - this define is only used to be multiplied by 4 to determine CHIP_CONFIG_MAX_GROUPS_PER_FABRIC
+// - this does not really make sense in a bridge with variable number of group clusters (one per EP with an output),
+//   but we think 20 (=4*5) group endpoints per fabric could make sense
+#ifndef CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC
+  #define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 5 // default is 1
+#endif
+
+
 // This is a bridge, overrides CHIP_DEVICE_CONFIG_DEVICE_TYPE in CHIPDeviceConfig.h
 #define CHIP_DEVICE_CONFIG_DEVICE_TYPE 0x000e
 
