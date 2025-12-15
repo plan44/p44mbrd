@@ -151,6 +151,7 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   Device * mDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
   EndpointId mNumDynamicEndPoints;
   EndpointId mFirstFreeEndpointId;
+  uint32_t mUniqueIdSeed;
 
   // Network commissioning
   #if CHIP_DEVICE_LAYER_TARGET_LINUX
@@ -409,6 +410,14 @@ public:
       OLOG(LOG_NOTICE, "Fabric table is empty - starting up commissionable")
       updateCommissionableStatus(true);
     }
+    // get the uniqueID seed
+    chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
+    CHIP_ERROR chiperr = kvs.Get(kP44mbrNamespace "uniqueidseed", &mUniqueIdSeed);
+    if (chiperr!=CHIP_NO_ERROR) {
+      // none defined so far, generate one randomly (poor man's random, but good enough for this)
+      mUniqueIdSeed = (uint32_t)random();
+      kvs.Put(kP44mbrNamespace "uniqueidseed", mUniqueIdSeed);
+    }
     // install the devices we have
     installInitiallyBridgedDevices();
     // stack is now operational
@@ -618,6 +627,11 @@ public:
       dev = mDevices[aDynamicEndpointIndex];
     }
     return dev;
+  }
+
+  uint32_t uniqueIdSeed()
+  {
+    return mUniqueIdSeed;
   }
 
 
@@ -1191,7 +1205,7 @@ public:
     mShutdownTicket.executeOnce(boost::bind(&Application::terminateApp, this, EXIT_FAILURE), MAINLOOP_TERMINATION_DELAY);
   }
 
-};
+}; // P44mbrd
 
 
 // MARK: device lookup utilities
@@ -1217,6 +1231,12 @@ void bridgeGlobalIdentify(int aDurationS)
   app.bridgeGlobalIdentify(aDurationS);
 }
 
+
+uint32_t uniqueIdSeed()
+{
+  P44mbrd& app = static_cast<P44mbrd&>(*p44::Application::sharedApplication());
+  return app.uniqueIdSeed();
+}
 
 
 // MARK: - global CHIP callbacks

@@ -30,6 +30,18 @@
 
 #include "device_impl.h" // include as first file!
 
+#ifdef __APPLE__
+// OpenSSL is deprecated since 10.7 and not available in OSX 10.10 and later any more: using CommonCrypto instead
+#include <CommonCrypto/CommonDigest.h>
+#define SHA_DIGEST_LENGTH CC_SHA1_DIGEST_LENGTH
+#define SHA_CTX CC_SHA1_CTX
+#define SHA1_Init CC_SHA1_Init
+#define SHA1_Update CC_SHA1_Update
+#define SHA1_Final CC_SHA1_Final
+#else
+#include <openssl/sha.h>
+#endif
+
 
 using namespace Clusters;
 
@@ -282,8 +294,22 @@ Status Device::handleReadAttribute(ClusterId clusterId, chip::AttributeId attrib
     }
     // UniqueID
     if (attributeId == BridgedDeviceBasicInformation::Attributes::UniqueID::Id) {
-      string uniqueID = mDeviceInfoDelegate.endpointUID();
-      FOCUSOLOG("reading UniqueID (max: %hd bytes): %s", maxReadLength-1, uniqueID.c_str());
+      string endpointUID = mDeviceInfoDelegate.endpointUID();
+      string seed = string_format("%x", uniqueIdSeed());
+      FOCUSOLOG("creating UniqueID based on endpointUID: %s", endpointUID.c_str());
+      // according to 1.4 specs, the uniqueID needs to change when the device is "factory reset"
+      // also, the uniqueID must not exceed maxReadLength-1
+      // So, we create a SHA1 of the global seed plus the endpointUID
+      uint8_t sha1[SHA_DIGEST_LENGTH]; // buffer for calculating SHA1
+      SHA_CTX sha_context;
+      SHA1_Init(&sha_context);
+      SHA1_Update(&sha_context, seed.c_str(), (unsigned int)seed.size()); // seed
+      SHA1_Update(&sha_context, endpointUID.c_str(), (unsigned int)endpointUID.size());
+      SHA1_Final(sha1, &sha_context);
+      size_t hashbytes = (maxReadLength-1)/2; // use as many bytes such that hex representation does not exceed available length
+      if (hashbytes>SHA_DIGEST_LENGTH) hashbytes = SHA_DIGEST_LENGTH; // but not more than sha result actually has
+      string uniqueID = dataToHexString(sha1, hashbytes); // first 16 bytes of SHA = 32 chars -> fits in ZAP defined max
+      FOCUSOLOG(" hash presented as UniqueID: %s", uniqueID.c_str());
       MutableByteSpan zclNameSpan(buffer, maxReadLength);
       MakeZclCharString(zclNameSpan, uniqueID.substr(0,maxReadLength-1).c_str());
       return Status::Success; // do not return MakeZclCharString failures

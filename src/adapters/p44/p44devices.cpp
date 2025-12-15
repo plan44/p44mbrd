@@ -137,7 +137,7 @@ void P44_DeviceImpl::updateBridgedInfo(JsonObjectPtr aDeviceInfo)
     updateZoneInfo(aDeviceInfo, UpdateMode());
     // get some more info, store in Attributes
     if (aDeviceInfo->get("displayId", o)) {
-      SET_ATTR_STRING(BridgedDeviceBasicInformation, SerialNumber, endpointId(), o->stringValue());
+      SET_ATTR_STRING_M(BridgedDeviceBasicInformation, SerialNumber, endpointId(), o->stringValue()); // abbreviate in the middle
     }
     else {
       // use UID as serial number, MUST NOT BE >32 chars

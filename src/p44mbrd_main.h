@@ -33,3 +33,6 @@
 
 /// cause all adapters to identify bridge
 void bridgeGlobalIdentify(int aDurationS);
+
+/// the seed to base bridged device's uniqueID on
+uint32_t uniqueIdSeed();
