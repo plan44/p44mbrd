@@ -1104,11 +1104,13 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
       if (states->get(pos->second.c_str(), state)) {
         JsonObjectPtr o;
         if (state->get("value", o, true)) {
+          uint8_t clicktypeClicks = 0;
           uint8_t position = static_cast<uint8_t>(o->boolValue() ? pos->first : 0); // active position or idle
           DsClickType clicktype = ct_none;
           if (state->get("clickType", o, true)) {
             clicktype = (DsClickType)(o->int32Value());
           }
+          DLOG(LOG_INFO, "position=%d (previous=%d), clicktype=%d, clicks=%d", position, mPosition, clicktype, mClicks);
           bool positionChanged = position!=mPosition;
           if (positionChanged) {
             // update current position
@@ -1125,13 +1127,25 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
               case ct_tip_3x:
               case ct_tip_4x:
                 // update tips (count as clicks)
-                mClicks = (uint8_t)(clicktype-ct_tip_1x+1);
-                goto multi;
+                clicktypeClicks = (uint8_t)(clicktype-ct_tip_1x+1);
+                goto multiCatchUp;
               case ct_click_1x:
               case ct_click_2x:
               case ct_click_3x:
                 // update clicks
-                mClicks = (uint8_t)(clicktype-ct_click_1x+1);
+                clicktypeClicks = (uint8_t)(clicktype-ct_click_1x+1);
+              multiCatchUp:
+                // depending on bridge capabilities, we might only get the final click number and need to synthesize the clicks in between
+                while (clicktypeClicks>mClicks) {
+                  DLOG(LOG_INFO, "clicks from clicktype=%d, currently reported clicks=%d -> simulate a click", clicktypeClicks, mClicks);
+                  SwitchServer::Instance().OnShortRelease(endpointId(), position); // fake release
+                  SwitchServer::Instance().OnInitialPress(endpointId(), position); // always report new position
+                  mClicks++; // update count
+                  if (mClicks>1) {
+                    // actual progress beyond single click
+                    SwitchServer::Instance().OnMultiPressOngoing(endpointId(), position, mClicks); // report new position
+                  }
+                }
               multi:
                 if (position==0) {
                   // any tip or click detection also implies short release
@@ -1144,8 +1158,9 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                   SwitchServer::Instance().OnShortRelease(endpointId(), mPosition); // report previous position
                 }
                 else {
-                  // pressed
-                  SwitchServer::Instance().OnInitialPress(endpointId(), position); // report new position
+                  // pressed: must always issue an "initial" press (unless we had ActionSwitch (AS) feature - we don't)
+                  //   so "initial" is a bit misleading terminology for non-AS multi-clicks
+                  SwitchServer::Instance().OnInitialPress(endpointId(), position); // always report new position
                   mClicks++; // preliminary counting, will be overridden by (but should be equal to) regular click/tip count
                   if (mClicks>1) {
                     // actual progress beyond single click
@@ -1162,12 +1177,12 @@ void P44_ButtonImpl::parseButtonState(JsonObjectPtr aProperties, UpdateMode aUpd
                 mLastActivePosition = 0;
                 break;
               case ct_hold_start:
-                if (mClicks>0) goto multi; // long press within multiclick must not be reported as longpress
+                if (mClicks>1) goto multi; // long press within multiclick must not be reported as longpress
                 mClicks = 0; // when we hold, we do not have clicks
                 SwitchServer::Instance().OnLongPress(endpointId(), position); // report new position
                 break;
               case ct_hold_end:
-                if (mClicks>0) goto multi; // long press within multiclick must not be reported as longpress
+                if (mClicks>1) goto multi; // long press within multiclick must not be reported as longpress
                 SwitchServer::Instance().OnLongRelease(endpointId(), mPosition); // report previous position
                 break;
               default:
