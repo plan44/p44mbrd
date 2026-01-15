@@ -46,9 +46,6 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
 {
     size_t read_size;
 
-    // Copy data into value buffer
-    VerifyOrReturnError(value != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
-
     // On linux read first without a buffer which returns the size, and then
     // use a local buffer to read the entire object, which allows partial and
     // offset reads.
@@ -57,6 +54,22 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
     {
         return CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND;
     }
+
+    // there is a value for this key
+    if (value_size==0) {
+        // giving no buffer space always means it is too small
+        // but we might use this to query the value length, so return it in read_bytes_size
+        if (read_bytes_size != nullptr) {
+            *read_bytes_size = read_size;
+        }
+        return CHIP_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    // we have a value size, so buffer must exist
+    if (value==nullptr) {
+        return CHIP_ERROR_INVALID_ARGUMENT;
+    }
+
     if ((err != CHIP_NO_ERROR) && (err != CHIP_ERROR_BUFFER_TOO_SMALL))
     {
         return err;

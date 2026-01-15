@@ -1288,7 +1288,7 @@
 		ED7FBF442E9803BC006FA799 /* CHIPLinuxStorageIni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CHIPLinuxStorageIni.h; sourceTree = "<group>"; };
 		ED7FBF452E9803BC006FA799 /* CHIPLinuxStorageIni.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CHIPLinuxStorageIni.cpp; sourceTree = "<group>"; };
 		ED7FBF462E9803BC006FA799 /* P44KeyValueStoreManagerImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = P44KeyValueStoreManagerImpl.h; sourceTree = "<group>"; };
-		ED7FBF472E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = P44KeyValueStoreManagerImpl.cpp; sourceTree = "<group>"; };
+		ED7FBF472E9803BC006FA799 /* P44KeyValueStoreManagerImpl.cpp */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = P44KeyValueStoreManagerImpl.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		ED7FBF4B2E980DC7006FA799 /* IniEscaping.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IniEscaping.h; sourceTree = "<group>"; };
 		ED7FBF4C2E980DC7006FA799 /* IniEscaping.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IniEscaping.cpp; sourceTree = "<group>"; };
 		ED877B952E7CA21400B9E84C /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };

@@ -166,17 +166,22 @@ CHIP_ERROR PosixConfig::ReadFactoryValueBin(const char* key, uint8_t* buf, size_
   assert(dap);
   DeviceInstanceInfoProvider* dip = DeviceLayer::GetDeviceInstanceInfoProvider();
   assert(dip);
-  if (uequals(key, kConfigKey_SerialNum.Name)) return dip->GetSerialNumber((char*)buf, bufSize);
+  if (uequals(key, kConfigKey_SerialNum.Name)) {
+    return dip->GetSerialNumber((char*)buf, bufSize);
+  }
   if (uequals(key, kConfigKey_HardwareVersion.Name)) {
-    if (bufSize<2) return CHIP_ERROR_BUFFER_TOO_SMALL;
+    outLen = 2;
+    if (bufSize<outLen) return CHIP_ERROR_BUFFER_TOO_SMALL;
     return dip->GetHardwareVersion(*((uint16_t*)buf));
   }
   if (uequals(key, kConfigKey_VendorId.Name)) {
-    if (bufSize<2) return CHIP_ERROR_BUFFER_TOO_SMALL;
+    outLen = 2;
+    if (bufSize<outLen) return CHIP_ERROR_BUFFER_TOO_SMALL;
     return dip->GetVendorId(*((uint16_t*)buf));
   }
   if (uequals(key, kConfigKey_ProductId.Name)) {
-    if (bufSize<2) return CHIP_ERROR_BUFFER_TOO_SMALL;
+    outLen = 2;
+    if (bufSize<outLen) return CHIP_ERROR_BUFFER_TOO_SMALL;
     return dip->GetProductId(*((uint16_t*)buf));
   }
 
@@ -204,6 +209,11 @@ CHIP_ERROR PosixConfig::Init()
 }
 
 
+/// @param key the namespace/key to read
+/// @param buf buffer to read into, set to nullptr (and bufSize==0) to just obtain value size
+/// @param bufSize size of buffer to read into, set to 0 (and buf==nullptr) to just obtain value size
+/// @param outLen actual value size (in both actual read and obtain size cases)
+/// @return ok if value could be read or size could be obtained, error otherwise
 CHIP_ERROR PosixConfig::ReadConfigValueBin(Key key, uint8_t * buf, size_t bufSize, size_t & outLen)
 {
   if (key.Namespace==kConfigNamespace_ChipFactory) {
