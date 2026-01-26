@@ -24,7 +24,7 @@ chip_project_config_include_dirs = [ "//zap/include" ]
 chip_project_config_include_dirs += [ "${chip_root}/config/standalone" ]
 
 # p44mbrd version
-p44_application_version = "1.4.0.15"
+p44_application_version = "1.4.0.16"
 
 # p44mbrd specifics extra config
 default_configs_extra = [ "//:p44mbrd_config_extra" ]

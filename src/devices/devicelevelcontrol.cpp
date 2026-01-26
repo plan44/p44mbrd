@@ -478,6 +478,13 @@ void DeviceLevelControl::onOffEffect(bool aTurnOn)
     updateCurrentLevel(0, 0, transitionTime, true, ctCoupling, updatemode);
     //  If OnLevel is not defined, set the CurrentLevel to the stored level.
     //  - the stored level has not changed when onLevel attribute is null
+    //  Note: as OnOffServer::setOnOffValue does not reset onTime when it delegates to LevelControl, we need to do it here
+    //    (emberAfOnOffClusterLevelControlEffectCallback states:
+    //    "The implementation assumes that theclient will handle any effect on the On/Off Cluster."
+    //    This seems to include resetting onTime, altough IMHO that does definitely not belong into LevelControl scope
+    if (mLighting) {
+      OnOff::Attributes::OnTime::Set(endpointId(), 0); // Reset onTime
+    }
   }
 }
 
