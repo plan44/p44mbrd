@@ -58,6 +58,7 @@ bool BridgeAdapter::hasBridgeableDevices()
 
 void BridgeAdapter::cleanup()
 {
+  mDeviceUIDMap.clear();
 }
 
 

@@ -47,9 +47,18 @@ using namespace Clusters;
 
 // MARK: - bridged device common declarations
 
-static EmberAfClusterSpec gAllDevicesCommonClusters[] = {
-  { Descriptor::Id, CLUSTER_MASK_SERVER }
+static AttributeId gTagsAttributes[] = {
+  Descriptor::Attributes::TagList::Id,
+  chip::kInvalidAttributeId // terminator
 };
+
+static EmberAfFeatureExclusions gNoTagsExclusions = {
+  .excludedAttributes = gTagsAttributes
+};
+
+static EmberAfClusterSpec gAllDevicesCommonWithTagsClusters[] = { { Descriptor::Id, CLUSTER_MASK_SERVER } };
+static EmberAfClusterSpec gAllDevicesCommonNoTagsClusters[] = { { Descriptor::Id, CLUSTER_MASK_SERVER, &gNoTagsExclusions } };
+
 
 // MARK: - Device
 
@@ -67,8 +76,6 @@ Device::Device(DeviceInfoDelegate& aDeviceInfoDelegate) :
   // - internal
   mClusterDataVersionsP = nullptr; // we'll need
   mParentEndpointId = kInvalidEndpointId;
-  // - declare common device clusters
-  useClusterTemplates(Span<EmberAfClusterSpec>(gAllDevicesCommonClusters));
 }
 
 
@@ -121,6 +128,8 @@ void Device::useClusterTemplates(const Span<EmberAfClusterSpec>& aTemplateCluste
 
 bool Device::finalizeDeviceDeclarationWithTypes(const Span<const EmberAfDeviceType>& aDeviceTypeList)
 {
+  // late declaration of descriptor, as we now can decide about TagList presence
+  useClusterTemplates(Span<EmberAfClusterSpec>(mTagList.empty() ? gAllDevicesCommonNoTagsClusters : gAllDevicesCommonWithTagsClusters));
   // now finally populate the endpoint definition
   size_t numtmpl = 0;
   size_t numdts = aDeviceTypeList.size();

@@ -35,7 +35,37 @@ using namespace Clusters;
 // MARK: - OnOff Device specific declarations
 
 
-static EmberAfClusterSpec gOnOffDeviceClusters[] = {
+static AttributeId gLightOnlyAttributes[] = {
+  OnOff::Attributes::GlobalSceneControl::Id,
+  OnOff::Attributes::OnTime::Id,
+  OnOff::Attributes::OffWaitTime::Id,
+  OnOff::Attributes::StartUpOnOff::Id,
+  chip::kInvalidAttributeId // terminator
+};
+
+static CommandId gLightOnlyCommands[] = {
+  OnOff::Commands::OffWithEffect::Id,
+  OnOff::Commands::OnWithRecallGlobalScene::Id,
+  OnOff::Commands::OnWithTimedOff::Id,
+  chip::kInvalidAttributeId // terminator
+};
+
+
+static EmberAfFeatureExclusions gNonLightExclusions = {
+  .excludedAttributes = gLightOnlyAttributes,
+  .excludedAcceptedCommands = gLightOnlyCommands
+};
+
+static EmberAfClusterSpec gOnOffBasicDeviceClusters[] = {
+  { OnOff::Id, CLUSTER_MASK_SERVER, &gNonLightExclusions },
+  { Groups::Id, CLUSTER_MASK_SERVER }
+#ifdef MATTER_DM_PLUGIN_SCENES
+  , { Scenes::Id, CLUSTER_MASK_SERVER }
+#endif
+};
+
+
+static EmberAfClusterSpec gOnOffLightDeviceClusters[] = {
   { OnOff::Id, CLUSTER_MASK_SERVER },
   { Groups::Id, CLUSTER_MASK_SERVER }
 #ifdef MATTER_DM_PLUGIN_SCENES
@@ -53,7 +83,7 @@ DeviceOnOff::DeviceOnOff(bool aLighting, OnOffDelegate& aOnOffDelegate, Identify
   mOn(false)
 {
   // - declare onoff device specific clusters
-  useClusterTemplates(Span<EmberAfClusterSpec>(gOnOffDeviceClusters));
+  useClusterTemplates(Span<EmberAfClusterSpec>(aLighting ? gOnOffLightDeviceClusters : gOnOffBasicDeviceClusters));
 }
 
 
