@@ -112,7 +112,8 @@ public:
   /// @brief update commissionable status
   /// @param aIsCommissionable true when matter side is commissionable (which may
   ///    cause adapter implementation to show or hide commissioning info its UI)
-  virtual void reportCommissionable(bool aIsCommissionable) override;
+  /// @param aCurrentFabricCount the number of fabrics we are commissioned into already at this time
+  virtual void reportCommissionable(bool aIsCommissionable, int aCurrentFabricCount) override;
 
   /// @brief update commissioning info
   /// @param aQRCodeData string data that must go into QR Code presented to the user who wants to commission the bridge into a fabric

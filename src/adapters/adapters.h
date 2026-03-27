@@ -70,10 +70,15 @@ public:
   /// @param aDevice device to re-enable
   virtual void reEnableDevice(DevicePtr aDevice, BridgeAdapter& aAdapter) = 0;
 
+
+  /// @brief can be called to request status update (via adapter methods)
+  virtual void updateStatus() = 0;
+
   /// can be called to make the bridge device open or close a commissioning window
   /// @param aCommissionable requested commissionable status
+  /// @param aSecondsTimeout timout for how long to keep window open
   /// @return ok or error if requested commissionable status cannot be established
-  virtual ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) = 0;
+  virtual ErrorPtr makeCommissionable(bool aCommissionable, int aSecondsTimeout, BridgeAdapter& aAdapter) = 0;
 
   /// can be called by adapters to install a device before the stack gets active,
   /// usually during adapter's installInitialDevices()
@@ -175,7 +180,8 @@ public:
   /// @brief is called by matter side to report current commissionable status
   /// @param aIsCommissionable true when matter side is commissionable (which may
   ///    cause adapter implementation to show or hide QR code and/or setup code in its UI)
-  virtual void reportCommissionable(bool aIsCommissionable) = 0;
+  /// @param aCurrentFabricCount the number of fabrics we are commissioned into already at this time
+  virtual void reportCommissionable(bool aIsCommissionable, int aCurrentFabricCount) = 0;
 
   /// @brief is called when matter stack is up and running or shut down
   /// @param aRunning true when matter bridge is running
@@ -235,10 +241,14 @@ public:
 
   /// @brief can be called to request opening or closing the commissioning window
   /// @param aCommissionable requested commissionable status
+  /// @param aSecondsTimeout timout for how long to keep window open
   /// @note reportCommissionable() will be called to report when commissioning window status
   ///   actually has changed.
   /// @return Ok or error when requested commission status cannot be established (or bridge is not running)
-  ErrorPtr requestCommissioning(bool aCommissionable);
+  ErrorPtr requestCommissioning(bool aCommissionable, int aSecondsTimeout);
+
+  /// @brief can be called to request status via callbacks defined above
+  void requestStatusUpdate();
 
   #if P44MBRD_ENABLE_ACTIONS
 

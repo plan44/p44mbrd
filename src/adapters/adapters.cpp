@@ -105,9 +105,15 @@ void BridgeAdapter::removeDevice(DevicePtr aDevice)
 }
 
 
-ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable)
+void BridgeAdapter::requestStatusUpdate()
 {
-  return mBridgeMainDelegateP->makeCommissionable(aCommissionable, *this);
+  mBridgeMainDelegateP->updateStatus();
+}
+
+
+ErrorPtr BridgeAdapter::requestCommissioning(bool aCommissionable, int aSecondsTimeout)
+{
+  return mBridgeMainDelegateP->makeCommissionable(aCommissionable, aSecondsTimeout, *this);
 }
 
 

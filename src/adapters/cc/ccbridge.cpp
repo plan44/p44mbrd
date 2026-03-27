@@ -60,9 +60,9 @@ void CC_BridgeImpl::startup()
 }
 
 
-void CC_BridgeImpl::reportCommissionable(bool aIsCommissionable)
+void CC_BridgeImpl::reportCommissionable(bool aIsCommissionable, int aCurrentFabricCount)
 {
-  // TODO: maybe inform the gateway about commissionable status
+  // TODO: maybe inform the gateway about commissionable status and the number of fabrics already commissioned
   IsCommissionable = aIsCommissionable;
 
   JsonObjectPtr result = JsonObject::newObj();
@@ -457,7 +457,7 @@ void CC_BridgeImpl::jsonRpcRequestHandler(const char *aMethod, const JsonObjectP
           o->isType (json_type_boolean))
         {
           bool commissionable = o->boolValue ();
-          requestCommissioning (commissionable);
+          requestCommissioning (commissionable, CHIP_DEVICE_CONFIG_DISCOVERY_TIMEOUT_SECS);
           mJsonRpcAPI.sendResult(aJsonRpcId, JsonObject::objFromText ("{\"success\": 1}"));
         }
       else

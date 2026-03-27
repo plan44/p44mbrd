@@ -52,9 +52,10 @@ void P44_BridgeImpl::startup()
 }
 
 
-void P44_BridgeImpl::reportCommissionable(bool aIsCommissionable)
+void P44_BridgeImpl::reportCommissionable(bool aIsCommissionable, int aCurrentFabricCount)
 {
   api().setProperty("root", "x-p44-bridge.commissionable", JsonObject::newBool(aIsCommissionable));
+  api().setProperty("root", "x-p44-bridge.fabriccount", JsonObject::newInt32(aCurrentFabricCount));
 }
 
 
@@ -810,9 +811,16 @@ void P44_BridgeImpl::handleGlobalNotification(const string notification, JsonObj
 {
   JsonObjectPtr o;
   if (notification=="commissioning") {
-    if ((o = aJsonMsg->get("enable"))) {
-      requestCommissioning(o->boolValue());
+    int timeoutSeconds = CHIP_DEVICE_CONFIG_DISCOVERY_TIMEOUT_SECS;
+    if ((o = aJsonMsg->get("timeout"))) {
+      timeoutSeconds = o->int32Value();
     }
+    if ((o = aJsonMsg->get("enable"))) {
+      requestCommissioning(o->boolValue(), timeoutSeconds);
+    }
+  }
+  if (notification=="status") {
+    requestStatusUpdate();
   }
   else if (notification=="terminate") {
     int exitcode = EXIT_SUCCESS;

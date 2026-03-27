@@ -162,6 +162,10 @@ class P44mbrd : public CmdLineApp, public AppDelegate, public BridgeMainDelegate
   #endif // CHIP_DEVICE_LAYER_TARGET_DARWIN
   chip::app::Clusters::NetworkCommissioning::Instance mEthernetNetworkCommissioningInstance;
 
+  // setup codes
+  string mQrCodeStr;
+  string mMmanualParingCode;
+
   // implementation adapters
   typedef std::list<BridgeAdapter*> BridgeAdaptersList;
   BridgeAdaptersList mAdapters;
@@ -300,11 +304,11 @@ public:
   }
 
 
-  void updateCommissionableStatus(bool aIsCommissionable)
+  void updateCommissionableStatus(bool aIsCommissionable, int aCurrentFabricCount)
   {
     OLOG(LOG_NOTICE, "Commissioning Window changes to %scommissionable)", aIsCommissionable ? "OPEN (" : "CLOSED (not ");
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-      (*pos)->reportCommissionable(aIsCommissionable);
+      (*pos)->reportCommissionable(aIsCommissionable, aCurrentFabricCount);
     }
   }
 
@@ -322,16 +326,17 @@ public:
   {
     using csta = chip::app::Clusters::AdministratorCommissioning::CommissioningWindowStatusEnum;
     csta commissioningstatus =
-    Server::GetInstance().GetCommissioningWindowManager().CommissioningWindowManager::CommissioningWindowStatusForCluster();
+      Server::GetInstance().GetCommissioningWindowManager().CommissioningWindowManager::CommissioningWindowStatusForCluster();
+    int numfabrics = Server::GetInstance().GetFabricTable().FabricCount();
     bool commissionable = commissioningstatus != csta::kWindowNotOpen;
-    updateCommissionableStatus(commissionable);
+    updateCommissionableStatus(commissionable, numfabrics);
   }
 
 
-  void updateCommissioningInfo(const string aQRCodeData, const string aManualPairingCode)
+  void updateCommissioningInfo()
   {
     for (BridgeAdaptersList::iterator pos = mAdapters.begin(); pos!=mAdapters.end(); ++pos) {
-      (*pos)->updateCommissioningInfo(aQRCodeData, aManualPairingCode);
+      (*pos)->updateCommissioningInfo(mQrCodeStr, mMmanualParingCode);
     }
   }
 
@@ -344,7 +349,7 @@ public:
   }
 
 
-  void makeCommissionable(bool aIsCommissionable)
+  void makeCommissionable(bool aIsCommissionable, int aSecondsTimeout)
   {
     if (aIsCommissionable) {
       // Open the basic commissioning window (BCM, Basic commissioning method, like for factory-reset device)
@@ -356,7 +361,12 @@ public:
       //   who then can use it to let *another* administrator (app) to commission the device(s) as well
       //   (hence: *multi* admin).
       //   So, ECM does not need any bridge UI support.
-      Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow();
+      System::Clock::Seconds32 timeout = System::Clock::Seconds32(aSecondsTimeout);
+      System::Clock::Seconds32 minSeconds = Server::GetInstance().GetCommissioningWindowManager().MinCommissioningTimeout();
+      System::Clock::Seconds32 maxSeconds = Server::GetInstance().GetCommissioningWindowManager().MaxCommissioningTimeout();
+      if (timeout<minSeconds) { log(LOG_WARNING, "Commissioning window timeout (%d) too low, must be >=%d -> adjusted", timeout.count(), minSeconds.count()); timeout = minSeconds; }
+      if (timeout>maxSeconds) { log(LOG_WARNING, "Commissioning window timeout (%d) too high, must be <=%d -> adjusted", timeout.count(), minSeconds.count()); timeout = maxSeconds; }
+      Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow(timeout);
     }
     else {
       Server::GetInstance().GetCommissioningWindowManager().CloseCommissioningWindow();
@@ -408,7 +418,7 @@ public:
     if (Server::GetInstance().GetFabricTable().FabricCount() == 0) {
       // with no fabrics, we are commissionable from start
       OLOG(LOG_NOTICE, "Fabric table is empty - starting up commissionable")
-      updateCommissionableStatus(true);
+      updateCommissionableStatus(true, 0);
     }
     // get the uniqueID seed
     chip::DeviceLayer::PersistedStorage::KeyValueStoreManager &kvs = chip::DeviceLayer::PersistedStorage::KeyValueStoreMgr();
@@ -773,11 +783,24 @@ public:
   }
 
 
-  ErrorPtr makeCommissionable(bool aCommissionable, BridgeAdapter& aAdapter) override
+  ErrorPtr makeCommissionable(bool aCommissionable, int aSecondsTimeout, BridgeAdapter& aAdapter) override
   {
     if (!isRunning()) return TextError::err("bridge not running, cannot make it commissionable");
-    makeCommissionable(aCommissionable);
+    makeCommissionable(aCommissionable, aSecondsTimeout);
     return ErrorPtr();
+  }
+
+
+  void updateStatus() override
+  {
+    if (!isRunning()) {
+      updateRunningStatus(false);
+    }
+    else {
+      updateRunningStatus(true);
+      updateCommissioningInfo();
+      updateCommissionableStatus();
+    }
   }
 
 
@@ -820,13 +843,13 @@ public:
    */
   void OnCommissioningWindowOpened() override
   {
-    updateCommissionableStatus(true);
+    updateCommissionableStatus(true, Server::GetInstance().GetFabricTable().FabricCount());
   }
 
 
   void OnCommissioningWindowClosed() override
   {
-    updateCommissionableStatus(false);
+    updateCommissionableStatus(false, Server::GetInstance().GetFabricTable().FabricCount());
   }
 
 
@@ -1067,12 +1090,11 @@ public:
     chip::MutableCharSpan qrCode(payloadBuffer);
     chip::MutableCharSpan manualPairingCode(payloadBuffer);
     if (GetQRCode(qrCode, onBoardingPayload) == CHIP_NO_ERROR) {
-      string qrCodeStr = qrCode.data();
-      string manualParingCodeStr;
+      mQrCodeStr = qrCode.data();
       if (GetManualPairingCode(manualPairingCode, onBoardingPayload) == CHIP_NO_ERROR) {
-        manualParingCodeStr = manualPairingCode.data();
+        mMmanualParingCode = manualPairingCode.data();
       }
-      updateCommissioningInfo(qrCodeStr, manualParingCodeStr);
+      updateCommissioningInfo();
     }
 
     // init the network commissioning instance (which is needed by the Network Commissioning Cluster)
