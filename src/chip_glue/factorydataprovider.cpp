@@ -76,6 +76,7 @@ FileBasedFactoryDataProvider::FileBasedFactoryDataProvider(const string aFactory
         keyAndValue(line, key, data, '=');
       }
       if (!key.empty()) mDataItems[key] = data; // store last item
+      fclose(f);
     }
   }
   if (DBGLOGENABLED(LOG_DEBUG)) {
