@@ -333,22 +333,31 @@ bool ChipLinuxStorage::HasValue(const char * key)
     return retval;
 }
 
-CHIP_ERROR ChipLinuxStorage::Commit()
+CHIP_ERROR ChipLinuxStorage::Commit(bool * didCommit)
 {
     CHIP_ERROR retval = CHIP_NO_ERROR;
 
+    if (didCommit != nullptr)
+    {
+        *didCommit = false;
+    }
+
+    mLock.lock();
+
     if (mDirty && !mConfigPath.empty())
     {
-        mLock.lock();
-
         retval = ChipLinuxStorageIni::CommitConfig(mConfigPath);
+        if (retval == CHIP_NO_ERROR)
+        {
+            mDirty = false;
+            if (didCommit != nullptr)
+            {
+                *didCommit = true;
+            }
+        }
+    }
 
-        mLock.unlock();
-    }
-    else
-    {
-        retval = CHIP_ERROR_WRITE_FAILED;
-    }
+    mLock.unlock();
 
     return retval;
 }

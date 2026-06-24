@@ -24,10 +24,12 @@
 #include <platform/KeyValueStoreManager.h>
 
 #include <algorithm>
+#include <inttypes.h>
 #include <string.h>
 
 #include <lib/support/CodeUtils.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <system/SystemClock.h>
 
 #ifndef EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER
   #error "This custom implementation of KeyValueStoreManagerImpl.cpp" cannot be used without EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER
@@ -40,6 +42,72 @@ namespace DeviceLayer {
 namespace PersistedStorage {
 
 KeyValueStoreManagerImpl KeyValueStoreManagerImpl::sInstance;
+
+namespace {
+
+#ifndef P44_KVS_LAZY_FLUSH_INTERVAL_MS
+#define P44_KVS_LAZY_FLUSH_INTERVAL_MS (24ULL * 60 * 60 * 1000)
+#endif
+
+constexpr uint64_t kLazyKvsFlushIntervalMs = P44_KVS_LAZY_FLUSH_INTERVAL_MS;
+
+bool IsSessionResumptionLinkKey(const char * key)
+{
+    VerifyOrReturnValue(key != nullptr, false);
+
+    // Fabric-scoped CASE resumption state: f/<fabric-index>/s/<node-id>
+    if (strncmp(key, "f/", 2) != 0)
+    {
+        return false;
+    }
+
+    const char * fabricSeparator = strchr(key + 2, '/');
+    return fabricSeparator != nullptr && strncmp(fabricSeparator, "/s/", 3) == 0;
+}
+
+bool ShouldCommitImmediately(const char * key)
+{
+    VerifyOrReturnValue(key != nullptr, true);
+
+    // Subscription resumption records are cache-like and can churn during unstable controller sessions.
+    if (strncmp(key, "g/su/", 5) == 0)
+    {
+        return false;
+    }
+
+    // CASE session resumption records are also cache-like; a lost update only causes full CASE next time.
+    if (strcmp(key, "g/sri") == 0 || strncmp(key, "g/s/", 4) == 0 || IsSessionResumptionLinkKey(key))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace
+
+CHIP_ERROR KeyValueStoreManagerImpl::Init(const char * file)
+{
+    CHIP_ERROR err = mStorage.Init(file);
+    if (err == CHIP_NO_ERROR)
+    {
+        mLastKvsFlushTimeMs = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
+    }
+    return err;
+}
+
+bool KeyValueStoreManagerImpl::ShouldFlushLazyKey()
+{
+    const uint64_t nowMs = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
+
+    if (mLastKvsFlushTimeMs == 0)
+    {
+        mLastKvsFlushTimeMs = nowMs;
+        return false;
+    }
+
+    return nowMs - mLastKvsFlushTimeMs >= kLazyKvsFlushIntervalMs;
+}
 
 CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t value_size, size_t * read_bytes_size,
                                           size_t offset_bytes)
@@ -94,6 +162,24 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
     return (value_size < total_size_to_read) ? CHIP_ERROR_BUFFER_TOO_SMALL : CHIP_NO_ERROR;
 }
 
+
+CHIP_ERROR KeyValueStoreManagerImpl::Flush()
+{
+    const uint64_t startMs = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
+    bool didCommit        = false;
+    CHIP_ERROR err        = mStorage.Commit(&didCommit);
+    const uint64_t endMs  = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
+
+    if (err == CHIP_NO_ERROR && didCommit)
+    {
+        mLastKvsFlushTimeMs = endMs;
+        ChipLogProgress(DeviceLayer, "Flushed KVS entries to file in %" PRIu64 " ms", endMs - startMs);
+    }
+
+    return err;
+}
+
+
 CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, size_t value_size)
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
@@ -101,9 +187,11 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     err = mStorage.WriteValueBin(key, reinterpret_cast<const uint8_t *>(value), value_size);
     SuccessOrExit(err);
 
-    // Commit the value to the persistent store.
-    err = mStorage.Commit();
-    SuccessOrExit(err);
+    if (ShouldCommitImmediately(key) || ShouldFlushLazyKey())
+    {
+        err = Flush();
+        SuccessOrExit(err);
+    }
 
 exit:
     return err;
@@ -120,9 +208,11 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
     }
     SuccessOrExit(err);
 
-    // Commit the value to the persistent store.
-    err = mStorage.Commit();
-    SuccessOrExit(err);
+    if (ShouldCommitImmediately(key) || ShouldFlushLazyKey())
+    {
+        err = Flush();
+        SuccessOrExit(err);
+    }
 
 exit:
     return err;

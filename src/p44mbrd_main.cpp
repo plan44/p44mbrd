@@ -24,6 +24,7 @@
 
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/CHIPDeviceLayer.h>
+#include <platform/KeyValueStoreManager.h>
 #include <platform/PlatformManager.h>
 
 #include <app-common/zap-generated/ids/Attributes.h>
@@ -1208,6 +1209,10 @@ public:
       // shut down
       Server::GetInstance().Shutdown();
       DeviceLayer::PlatformMgr().Shutdown();
+      CHIP_ERROR err = PersistedStorage::KeyValueStoreMgrImpl().Flush();
+      if (err != CHIP_NO_ERROR) {
+        ChipLogError(DeviceLayer, "Failed to flush Matter KVS during shutdown: %" CHIP_ERROR_FORMAT, err.Format());
+      }
       #if CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
       chip::trace::DeInitTrace();
       #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED

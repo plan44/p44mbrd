@@ -29,6 +29,8 @@
   #include "CHIPLinuxStorage.h" // local override
 #endif
 
+#include <stdint.h>
+
 namespace chip {
 namespace DeviceLayer {
 namespace PersistedStorage {
@@ -40,14 +42,18 @@ public:
      * @brief
      * Initalize the KVS, must be called before using.
      */
-    CHIP_ERROR Init(const char * file) { return mStorage.Init(file); }
+    CHIP_ERROR Init(const char * file);
 
     CHIP_ERROR _Get(const char * key, void * value, size_t value_size, size_t * read_bytes_size = nullptr, size_t offset = 0);
     CHIP_ERROR _Delete(const char * key);
     CHIP_ERROR _Put(const char * key, const void * value, size_t value_size);
+    CHIP_ERROR Flush();
 
 private:
+    bool ShouldFlushLazyKey();
+
     DeviceLayer::Internal::ChipLinuxStorage mStorage;
+    uint64_t mLastKvsFlushTimeMs = 0;
 
     // ===== Members for internal use by the following friends.
     friend KeyValueStoreManager & KeyValueStoreMgr();

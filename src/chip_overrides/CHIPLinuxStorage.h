@@ -88,7 +88,7 @@ public:
     CHIP_ERROR WriteValueBin(const char * key, const uint8_t * data, size_t dataLen);
     CHIP_ERROR ClearValue(const char * key);
     CHIP_ERROR ClearAll();
-    CHIP_ERROR Commit();
+    CHIP_ERROR Commit(bool * didCommit = nullptr);
     bool HasValue(const char * key);
 
 private:
