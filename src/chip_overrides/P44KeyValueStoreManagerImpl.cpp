@@ -29,6 +29,7 @@
 
 #include <lib/support/CodeUtils.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <platform/CHIPDeviceLayer.h>
 #include <system/SystemClock.h>
 
 #ifndef EXTERNAL_KEYVALUESTOREMANAGERIMPL_HEADER
@@ -45,11 +46,26 @@ KeyValueStoreManagerImpl KeyValueStoreManagerImpl::sInstance;
 
 namespace {
 
-#ifndef P44_KVS_LAZY_FLUSH_INTERVAL_MS
-#define P44_KVS_LAZY_FLUSH_INTERVAL_MS (24ULL * 60 * 60 * 1000)
+#ifndef P44_KVS_DURABLE_RECOMMENDED_FLUSH_DELAY_MS
+#define P44_KVS_DURABLE_RECOMMENDED_FLUSH_DELAY_MS (5ULL * 1000)
 #endif
 
-constexpr uint64_t kLazyKvsFlushIntervalMs = P44_KVS_LAZY_FLUSH_INTERVAL_MS;
+#ifndef P44_KVS_DURABLE_LATEST_FLUSH_DELAY_MS
+#define P44_KVS_DURABLE_LATEST_FLUSH_DELAY_MS (30ULL * 1000)
+#endif
+
+#ifndef P44_KVS_CACHE_RECOMMENDED_FLUSH_DELAY_MS
+#define P44_KVS_CACHE_RECOMMENDED_FLUSH_DELAY_MS (3ULL * 60 * 60 * 1000)
+#endif
+
+#ifndef P44_KVS_CACHE_LATEST_FLUSH_DELAY_MS
+#define P44_KVS_CACHE_LATEST_FLUSH_DELAY_MS (24ULL * 60 * 60 * 1000)
+#endif
+
+constexpr uint64_t kDurableRecommendedFlushDelayMs = P44_KVS_DURABLE_RECOMMENDED_FLUSH_DELAY_MS;
+constexpr uint64_t kDurableLatestFlushDelayMs      = P44_KVS_DURABLE_LATEST_FLUSH_DELAY_MS;
+constexpr uint64_t kCacheRecommendedFlushDelayMs   = P44_KVS_CACHE_RECOMMENDED_FLUSH_DELAY_MS;
+constexpr uint64_t kCacheLatestFlushDelayMs        = P44_KVS_CACHE_LATEST_FLUSH_DELAY_MS;
 
 bool IsSessionResumptionLinkKey(const char * key)
 {
@@ -65,23 +81,23 @@ bool IsSessionResumptionLinkKey(const char * key)
     return fabricSeparator != nullptr && strncmp(fabricSeparator, "/s/", 3) == 0;
 }
 
-bool ShouldCommitImmediately(const char * key)
+bool IsCacheLikeKey(const char * key)
 {
-    VerifyOrReturnValue(key != nullptr, true);
+    VerifyOrReturnValue(key != nullptr, false);
 
     // Subscription resumption records are cache-like and can churn during unstable controller sessions.
     if (strncmp(key, "g/su/", 5) == 0)
     {
-        return false;
+        return true;
     }
 
     // CASE session resumption records are also cache-like; a lost update only causes full CASE next time.
     if (strcmp(key, "g/sri") == 0 || strncmp(key, "g/s/", 4) == 0 || IsSessionResumptionLinkKey(key))
     {
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 } // namespace
@@ -96,17 +112,77 @@ CHIP_ERROR KeyValueStoreManagerImpl::Init(const char * file)
     return err;
 }
 
-bool KeyValueStoreManagerImpl::ShouldFlushLazyKey()
+KeyValueStoreManagerImpl::CommitDelay KeyValueStoreManagerImpl::CommitDelaysFor(const char * key)
 {
-    const uint64_t nowMs = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
-
-    if (mLastKvsFlushTimeMs == 0)
+    if (IsCacheLikeKey(key))
     {
-        mLastKvsFlushTimeMs = nowMs;
-        return false;
+        return CommitDelay{ kCacheRecommendedFlushDelayMs, kCacheLatestFlushDelayMs };
     }
 
-    return nowMs - mLastKvsFlushTimeMs >= kLazyKvsFlushIntervalMs;
+    return CommitDelay{ kDurableRecommendedFlushDelayMs, kDurableLatestFlushDelayMs };
+}
+
+void KeyValueStoreManagerImpl::DeferredFlushTimerHandler(System::Layer * /* systemLayer */, void * appState)
+{
+    VerifyOrReturn(appState != nullptr);
+    static_cast<KeyValueStoreManagerImpl *>(appState)->HandleDeferredFlushTimer();
+}
+
+void KeyValueStoreManagerImpl::HandleDeferredFlushTimer()
+{
+    mFlushTimerArmed = false;
+
+    CHIP_ERROR err = Flush();
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(DeviceLayer, "Deferred KVS flush failed: %" CHIP_ERROR_FORMAT, err.Format());
+    }
+}
+
+void KeyValueStoreManagerImpl::ResetDeferredFlushState()
+{
+    mRecommendedFlushDeadlineMs = 0;
+    mLatestFlushDeadlineMs      = 0;
+    mFlushTimerArmed            = false;
+}
+
+CHIP_ERROR KeyValueStoreManagerImpl::ScheduleDeferredFlush(const char * key)
+{
+    const uint64_t nowMs = static_cast<uint64_t>(System::SystemClock().GetMonotonicMilliseconds64().count());
+    const CommitDelay delay = CommitDelaysFor(key);
+    const uint64_t recommendedDeadlineMs = nowMs + delay.recommendedAfterMs;
+    const uint64_t latestDeadlineMs      = nowMs + delay.latestAfterMs;
+
+    mRecommendedFlushDeadlineMs = recommendedDeadlineMs;
+    if (!mFlushTimerArmed || mLatestFlushDeadlineMs == 0 || latestDeadlineMs < mLatestFlushDeadlineMs)
+    {
+        mLatestFlushDeadlineMs = latestDeadlineMs;
+    }
+
+    uint64_t nextDeadlineMs = std::min(mRecommendedFlushDeadlineMs, mLatestFlushDeadlineMs);
+    uint64_t timerDelayMs   = (nextDeadlineMs > nowMs) ? (nextDeadlineMs - nowMs) : 0;
+    timerDelayMs            = std::min<uint64_t>(timerDelayMs, UINT32_MAX);
+
+    System::Layer & systemLayer = DeviceLayer::SystemLayer();
+    if (!systemLayer.IsInitialized())
+    {
+        return CHIP_ERROR_INCORRECT_STATE;
+    }
+
+    if (mFlushTimerArmed)
+    {
+        systemLayer.CancelTimer(DeferredFlushTimerHandler, this);
+        mFlushTimerArmed = false;
+    }
+
+    CHIP_ERROR err = systemLayer.StartTimer(System::Clock::Milliseconds32(static_cast<uint32_t>(timerDelayMs)),
+                                            DeferredFlushTimerHandler, this);
+    if (err == CHIP_NO_ERROR)
+    {
+        mFlushTimerArmed = true;
+    }
+
+    return err;
 }
 
 CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t value_size, size_t * read_bytes_size,
@@ -172,7 +248,12 @@ CHIP_ERROR KeyValueStoreManagerImpl::Flush()
 
     if (err == CHIP_NO_ERROR && didCommit)
     {
+        if (mFlushTimerArmed && DeviceLayer::SystemLayer().IsInitialized())
+        {
+            DeviceLayer::SystemLayer().CancelTimer(DeferredFlushTimerHandler, this);
+        }
         mLastKvsFlushTimeMs = endMs;
+        ResetDeferredFlushState();
         ChipLogProgress(DeviceLayer, "Flushed KVS entries to file in %" PRIu64 " ms", endMs - startMs);
     }
 
@@ -187,10 +268,15 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     err = mStorage.WriteValueBin(key, reinterpret_cast<const uint8_t *>(value), value_size);
     SuccessOrExit(err);
 
-    if (ShouldCommitImmediately(key) || ShouldFlushLazyKey())
+    if (mStorage.IsDirty())
     {
-        err = Flush();
-        SuccessOrExit(err);
+        err = ScheduleDeferredFlush(key);
+        if (err != CHIP_NO_ERROR)
+        {
+            ChipLogDetail(DeviceLayer, "Deferred KVS flush scheduling failed for key '%s': %" CHIP_ERROR_FORMAT, key,
+                          err.Format());
+            err = CHIP_NO_ERROR;
+        }
     }
 
 exit:
@@ -208,10 +294,15 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
     }
     SuccessOrExit(err);
 
-    if (ShouldCommitImmediately(key) || ShouldFlushLazyKey())
+    if (mStorage.IsDirty())
     {
-        err = Flush();
-        SuccessOrExit(err);
+        err = ScheduleDeferredFlush(key);
+        if (err != CHIP_NO_ERROR)
+        {
+            ChipLogDetail(DeviceLayer, "Deferred KVS flush scheduling failed for deleted key '%s': %" CHIP_ERROR_FORMAT, key,
+                          err.Format());
+            err = CHIP_NO_ERROR;
+        }
     }
 
 exit:

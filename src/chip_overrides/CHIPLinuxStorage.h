@@ -89,6 +89,7 @@ public:
     CHIP_ERROR ClearValue(const char * key);
     CHIP_ERROR ClearAll();
     CHIP_ERROR Commit(bool * didCommit = nullptr);
+    bool IsDirty();
     bool HasValue(const char * key);
 
 private:

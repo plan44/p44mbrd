@@ -32,6 +32,9 @@
 #include <stdint.h>
 
 namespace chip {
+namespace System {
+class Layer;
+}
 namespace DeviceLayer {
 namespace PersistedStorage {
 
@@ -50,10 +53,24 @@ public:
     CHIP_ERROR Flush();
 
 private:
-    bool ShouldFlushLazyKey();
+    struct CommitDelay
+    {
+        uint64_t recommendedAfterMs;
+        uint64_t latestAfterMs;
+    };
+
+    static void DeferredFlushTimerHandler(System::Layer * systemLayer, void * appState);
+
+    CommitDelay CommitDelaysFor(const char * key);
+    CHIP_ERROR ScheduleDeferredFlush(const char * key);
+    void HandleDeferredFlushTimer();
+    void ResetDeferredFlushState();
 
     DeviceLayer::Internal::ChipLinuxStorage mStorage;
     uint64_t mLastKvsFlushTimeMs = 0;
+    uint64_t mRecommendedFlushDeadlineMs = 0;
+    uint64_t mLatestFlushDeadlineMs = 0;
+    bool mFlushTimerArmed = false;
 
     // ===== Members for internal use by the following friends.
     friend KeyValueStoreManager & KeyValueStoreMgr();

@@ -50,7 +50,7 @@ public:
     bool HasValue(const char * key);
 
 protected:
-    CHIP_ERROR AddEntry(const char * key, const char * value);
+    CHIP_ERROR AddEntry(const char * key, const char * value, bool * changed = nullptr);
     CHIP_ERROR RemoveEntry(const char * key);
     CHIP_ERROR RemoveAll();
 

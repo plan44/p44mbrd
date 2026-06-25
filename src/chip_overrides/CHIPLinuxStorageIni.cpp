@@ -342,15 +342,28 @@ bool ChipLinuxStorageIni::HasValue(const char * key)
     return it != section.end();
 }
 
-CHIP_ERROR ChipLinuxStorageIni::AddEntry(const char * key, const char * value)
+CHIP_ERROR ChipLinuxStorageIni::AddEntry(const char * key, const char * value, bool * changed)
 {
     CHIP_ERROR retval = CHIP_NO_ERROR;
+    if (changed != nullptr)
+    {
+        *changed = false;
+    }
 
     if ((key != nullptr) && (value != nullptr))
     {
         std::string escapedKey                       = EscapeKey(key);
         std::map<std::string, std::string> & section = mConfigStore.sections["DEFAULT"];
-        section[escapedKey]                          = std::string(value);
+        std::string newValue                         = std::string(value);
+        auto it                                      = section.find(escapedKey);
+        if (it == section.end() || it->second != newValue)
+        {
+            section[escapedKey] = newValue;
+            if (changed != nullptr)
+            {
+                *changed = true;
+            }
+        }
     }
     else
     {

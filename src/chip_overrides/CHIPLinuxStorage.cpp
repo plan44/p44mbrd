@@ -220,12 +220,15 @@ CHIP_ERROR ChipLinuxStorage::WriteValue(const char * key, uint64_t val)
 CHIP_ERROR ChipLinuxStorage::WriteValueStr(const char * key, const char * val)
 {
     CHIP_ERROR retval = CHIP_NO_ERROR;
+    bool changed      = false;
 
     mLock.lock();
 
-    retval = ChipLinuxStorageIni::AddEntry(key, val);
-
-    mDirty = true;
+    retval = ChipLinuxStorageIni::AddEntry(key, val, &changed);
+    if (retval == CHIP_NO_ERROR && changed)
+    {
+        mDirty = true;
+    }
 
     mLock.unlock();
 
@@ -269,7 +272,7 @@ CHIP_ERROR ChipLinuxStorage::WriteValueBin(const char * key, const uint8_t * dat
     // Store it
     if (retval == CHIP_NO_ERROR)
     {
-        WriteValueStr(key, encodedData.Get());
+        retval = WriteValueStr(key, encodedData.Get());
     }
 
     return retval;
@@ -331,6 +334,19 @@ bool ChipLinuxStorage::HasValue(const char * key)
     mLock.unlock();
 
     return retval;
+}
+
+bool ChipLinuxStorage::IsDirty()
+{
+    bool dirty;
+
+    mLock.lock();
+
+    dirty = mDirty;
+
+    mLock.unlock();
+
+    return dirty;
 }
 
 CHIP_ERROR ChipLinuxStorage::Commit(bool * didCommit)
